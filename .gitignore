@@ -1,0 +1,17 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Node / Scratch files
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.scratch/
