@@ -76,6 +76,113 @@ const SUBJECT_COLORS = [
   { border: '#3b82f6', bg: 'rgba(59, 130, 246, 0.12)', text: '#60a5fa' }
 ];
 
+// Grade Schemes parsed from official Course Syllabi (HK261 / HK262 / HK263)
+const GRADE_SCHEMES = [
+  {
+    id: 'co3117',
+    name: 'Học máy',
+    englishName: 'Machine Learning',
+    code: 'CO3117',
+    credits: 3,
+    lecturers: 'Lê Thành Sách, Trương Vĩnh Lân, Nguyễn Đức Dũng, Lê Hồng Trang, Võ Thanh Hùng, Nguyễn An Khương',
+    department: 'Khoa Khoa học & Kỹ thuật Máy tính (CSE)',
+    items: [
+      { name: 'Thi cuối kỳ (Final Exam)', weight: 60, type: 'Tự luận (Constructed response)', duration: '90 phút', color: '#6366f1', note: 'Từ chương 6 đến chương 10' },
+      { name: 'Kiểm tra giữa kỳ (Midterm Exam)', weight: 30, type: 'Tự luận (Constructed response)', duration: '60 phút', color: '#ec4899', note: 'Đến hết chương 5' },
+      { name: 'Bài tập lớn (Group Assignment)', weight: 10, type: 'Project nhóm thực hành', duration: '45 tiết', color: '#10b981', note: 'Triển khai mô hình bài toán thực tế' }
+    ],
+    notes: 'Quy định AI: Chỉ cho phép dùng hỗ trợ tìm kiếm tài liệu, gợi ý ngữ pháp. Nghiêm cấm nộp sản phẩm hoàn toàn do AI tạo ra. Báo cáo phải trích dẫn công cụ AI.'
+  },
+  {
+    id: 'im1025',
+    name: 'Quản lý Dự án cho Kỹ sư',
+    englishName: 'Project Management for Engineers',
+    code: 'IM1025',
+    credits: 3,
+    lecturers: 'Huỳnh Thị Phương Lan, Nguyễn Thùy Trang, Nguyễn Thị Đức Nguyên, Nguyễn Bắc Nguyên, Đường Võ Hùng, Lê Phước Luông',
+    department: 'Khoa Quản Lý Công Nghiệp (SIM)',
+    items: [
+      { name: 'Thi cuối kỳ (Final Exam)', weight: 40, type: 'Trắc nghiệm chấm máy (MCQ)', duration: '70 phút', color: '#6366f1', note: 'Bắt buộc tham gia >= 80% số giờ học để đủ điều kiện thi' },
+      { name: 'Kiểm tra giữa kỳ (Midterm Exam)', weight: 30, type: 'Trắc nghiệm chấm máy (MCQ)', duration: '50 phút', color: '#f59e0b', note: 'Đánh giá kiến thức nửa đầu học kỳ' },
+      { name: 'Bài tập cá nhân (Individual)', weight: 15, type: 'Bài tập về nhà & Báo cáo phản tư', duration: '--', color: '#06b6d4', note: 'Đánh giá nhận thức & bài học kinh nghiệm' },
+      { name: 'Bài tập nhóm (Group Assignment)', weight: 15, type: 'Báo cáo dự án & Thuyết trình nhóm', duration: '--', color: '#10b981', note: 'Phối hợp làm việc nhóm' }
+    ],
+    notes: 'Nộp bài trễ trên LMS không có lý do chính đáng bị trừ 2 điểm cho mỗi ngày trễ. Tham dự tối thiểu 80% số giờ học là điều kiện bắt buộc để được dự thi và xét đạt.'
+  },
+  {
+    id: 'im1019',
+    name: 'Tiếp thị Căn bản',
+    englishName: 'Principle of Marketing',
+    code: 'IM1019',
+    credits: 3,
+    lecturers: 'Bùi Huy Hải Bích, Phạm Ngọc Trâm Anh, Mai Thị Mỹ Quyên, Nguyễn Văn Tuấn, Dương Thị Ngọc Liên, Lê Nguyễn Hậu',
+    department: 'Khoa Quản Lý Công Nghiệp (SIM)',
+    items: [
+      { name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Trắc nghiệm (MCQ)', duration: '60 phút', color: '#6366f1', note: 'Thi tập trung theo lịch chung' },
+      { name: 'Bài tập lớn (Group Project)', weight: 30, type: 'Dự án nhóm & Thuyết trình', duration: 'Nhóm 6-7 SV', color: '#ec4899', note: 'Vắng thuyết trình BTL bị 0 điểm BTL' },
+      { name: 'Đánh giá thường xuyên (Formative)', weight: 20, type: 'Bài tập trên lớp / Online / Chuyên cần', duration: '--', color: '#10b981', note: 'Vắng bài tập nào bị 0 điểm bài đó' }
+    ],
+    notes: 'Sinh viên làm việc nhóm 6-7 người. Vắng bài tập nào tính 0 điểm bài đó. Vắng buổi thuyết trình BTL bị 0 điểm BTL. Sử dụng AI phải tuân thủ liêm chính học thuật.'
+  },
+  {
+    id: 'co3061',
+    name: 'Nhập môn Trí tuệ Nhân tạo',
+    englishName: 'Introduction to Artificial Intelligence',
+    code: 'CO3061',
+    credits: 3,
+    lecturers: 'Bộ môn Khoa học Máy tính',
+    department: 'Khoa Khoa học và Kỹ thuật Máy tính (CSE)',
+    items: [
+      { name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Tự luận / Trắc nghiệm', duration: '90 phút', color: '#6366f1', note: 'Đánh giá toàn diện các chủ đề AI' },
+      { name: 'Kiểm tra giữa kỳ (Midterm Exam)', weight: 30, type: 'Tự luận / Trắc nghiệm', duration: '60 phút', color: '#f59e0b', note: 'Thuật toán tìm kiếm, ràng buộc, Logic' },
+      { name: 'Bài tập lớn / Thực hành', weight: 20, type: 'Project lập trình AI theo nhóm', duration: 'Hạn: 30/11', color: '#10b981', note: 'Cài đặt thuật toán & nộp báo cáo' }
+    ],
+    notes: 'Deadline nộp Bài tập lớn vào Thứ 2 (30/11/2026). Tuần 44 có các tiết bổ sung vào buổi tối.'
+  },
+  {
+    id: 'sp1035',
+    name: 'Tư tưởng Hồ Chí Minh',
+    englishName: 'Ho Chi Minh Ideology',
+    code: 'SP1035',
+    credits: 2,
+    lecturers: 'Bộ môn Lý luận Chính trị',
+    department: 'Khoa Khoa học Ứng dụng',
+    items: [
+      { name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Trắc nghiệm / Tự luận', duration: '60 phút', color: '#6366f1', note: 'Thi tập trung cuối kỳ' },
+      { name: 'Đánh giá quá trình (Quá trình & GK)', weight: 50, type: 'Chuyên cần, Thảo luận & Kiểm tra trắc nghiệm', duration: '--', color: '#ec4899', note: 'Bài tập trên hệ thống BKEL' }
+    ],
+    notes: 'Tuần 47 là tuần học cuối môn. Sinh viên cần tham gia đầy đủ các buổi học và làm bài tập trên hệ thống BKEL.'
+  },
+  {
+    id: 'sp1039',
+    name: 'Pháp luật Việt Nam Đại cương',
+    englishName: 'General Vietnamese Law',
+    code: 'SP1039',
+    credits: 2,
+    lecturers: 'Bộ môn Khoa học Xã hội',
+    department: 'Khoa Khoa học Ứng dụng',
+    items: [
+      { name: 'Thi cuối kỳ (Final Exam)', weight: 70, type: 'Trắc nghiệm', duration: '60 phút', color: '#6366f1', note: 'Thi tập trung cuối kỳ' },
+      { name: 'Đánh giá quá trình (Giữa kỳ + Thảo luận)', weight: 30, type: 'Trắc nghiệm online / Bài tập lớp', duration: '--', color: '#f59e0b', note: 'Kiểm tra trên hệ thống BKEL' }
+    ],
+    notes: 'Tuần 47 là tuần học cuối môn.'
+  },
+  {
+    id: 'jp1007',
+    name: 'Tiếng Nhật 7',
+    englishName: 'Japanese 7',
+    code: 'JP1007',
+    credits: 4,
+    lecturers: 'Giảng viên Bộ môn Ngoại ngữ',
+    department: 'Văn phòng Đào tạo Quốc tế (OISP)',
+    items: [
+      { name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Nghe, Đọc, Viết & Phỏng vấn Kaiwa', duration: '90 phút', color: '#6366f1', note: 'Đánh giá toàn diện 4 kỹ năng' },
+      { name: 'Đánh giá quá trình (Quá trình & GK)', weight: 50, type: 'Kiểm tra từ vựng, Ngữ pháp, Kaiwa, Chuyên cần', duration: '--', color: '#10b981', note: 'Kiểm tra định kỳ theo từng tuần học' }
+    ],
+    notes: 'Lịch học 4 buổi sáng liên tục mỗi tuần (Thứ 3 đến Thứ 6). Yêu cầu chuẩn bị bài trước khi đến lớp.'
+  }
+];
+
 // App State
 const state = {
   currentWeekFile: 'schedules/tuan-35.md',
@@ -83,7 +190,8 @@ const state = {
   parsedSchedule: null,
   activeFilterSubject: null,
   searchQuery: '',
-  activeView: 'grid', // 'grid', 'today', 'raw'
+  gradesSearchQuery: '',
+  activeView: 'grid', // 'grid', 'today', 'grades', 'raw'
   weeksList: [
     { id: 'tuan-35', title: 'Tuần 35', filename: 'schedules/tuan-35.md' },
     { id: 'tuan-36', title: 'Tuần 36', filename: 'schedules/tuan-36.md' }
@@ -100,16 +208,21 @@ const elements = {
   
   viewGridBtn: document.getElementById('view-grid-btn'),
   viewTodayBtn: document.getElementById('view-today-btn'),
+  viewGradesBtn: document.getElementById('view-grades-btn'),
   viewRawBtn: document.getElementById('view-raw-btn'),
   
   gridViewContainer: document.getElementById('grid-view-container'),
   todayViewContainer: document.getElementById('today-view-container'),
+  gradesViewContainer: document.getElementById('grades-view-container'),
   rawViewContainer: document.getElementById('raw-view-container'),
   
   scheduleGrid: document.getElementById('schedule-grid'),
   todayTimelineList: document.getElementById('today-timeline-list'),
   todayTitleBadge: document.getElementById('today-title-badge'),
   todaySummaryText: document.getElementById('today-summary-text'),
+  
+  gradesGrid: document.getElementById('grades-grid'),
+  gradesSearchInput: document.getElementById('grades-search-input'),
   
   scheduleTitle: document.getElementById('schedule-title'),
   scheduleSubtitle: document.getElementById('schedule-subtitle'),
@@ -442,9 +555,14 @@ function renderGridView(days, currentDayOfWeek) {
             <div class="class-subject-name" style="color: ${color.text || 'inherit'};">${escapeHtml(c.subject)}</div>
             <div class="class-room-row">
               <span class="class-room"><i class="fa-solid fa-door-open"></i> ${escapeHtml(c.room)}</span>
-              <button class="btn-copy-info" title="Sao chép thông tin tiết học" onclick="copyClassInfo('${escapeHtml(c.subject)}', '${escapeHtml(c.timeRange)}', '${escapeHtml(c.room)}')">
-                <i class="fa-regular fa-copy"></i>
-              </button>
+              <div class="class-actions-group">
+                <button class="btn-view-subject-grade" title="Xem tỉ lệ điểm môn ${escapeHtml(c.subject)}" onclick="viewSubjectGrade('${escapeHtml(c.subject)}')">
+                  <i class="fa-solid fa-chart-pie"></i>
+                </button>
+                <button class="btn-copy-info" title="Sao chép thông tin tiết học" onclick="copyClassInfo('${escapeHtml(c.subject)}', '${escapeHtml(c.timeRange)}', '${escapeHtml(c.room)}')">
+                  <i class="fa-regular fa-copy"></i>
+                </button>
+              </div>
             </div>
           </div>
         `;
@@ -505,10 +623,171 @@ function renderTodayView(days, currentDayOfWeek) {
       <h3 style="color: ${color.text || 'inherit'}; font-size: 1.15rem; font-weight: 700;">${escapeHtml(c.subject)}</h3>
       <div class="class-room-row">
         <span class="class-room" style="font-size: 0.95rem;"><i class="fa-solid fa-location-dot"></i> Phòng: ${escapeHtml(c.room)}</span>
+        <button class="btn-view-subject-grade" title="Xem tỉ lệ điểm môn ${escapeHtml(c.subject)}" onclick="viewSubjectGrade('${escapeHtml(c.subject)}')">
+          <i class="fa-solid fa-chart-pie"></i>
+        </button>
       </div>
     `;
     elements.todayTimelineList.appendChild(item);
   });
+}
+
+/**
+ * Generates an Interactive SVG Donut / Pie Chart from grade items
+ * @param {Array} items 
+ * @param {number} totalWeight 
+ */
+function generateDonutChartSvg(items, totalWeight = 100) {
+  const radius = 46;
+  const circumference = 2 * Math.PI * radius; // ~289.0265
+  let cumulative = 0;
+
+  const slices = items.map(item => {
+    const strokeDash = (item.weight / totalWeight) * circumference;
+    const strokeOffset = -(cumulative / totalWeight) * circumference;
+    cumulative += item.weight;
+
+    return `
+      <circle class="donut-slice" 
+        cx="70" cy="70" r="${radius}" 
+        stroke="${item.color}" 
+        stroke-dasharray="${strokeDash} ${circumference}" 
+        stroke-dashoffset="${strokeOffset}"
+        title="${escapeHtml(item.name)}: ${item.weight}%"
+      />
+    `;
+  }).join('');
+
+  return `
+    <div class="donut-chart-wrapper">
+      <svg class="donut-svg" viewBox="0 0 140 140">
+        <circle cx="70" cy="70" r="${radius}" fill="none" stroke="var(--border-color)" stroke-width="20" opacity="0.3" />
+        ${slices}
+      </svg>
+      <div class="donut-center-info">
+        <span class="donut-center-val">100%</span>
+        <span class="donut-center-label">Tổng điểm</span>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Render Grade Breakdown & Pie Charts View
+ * @param {string} filterQuery 
+ */
+function renderGradesView(filterQuery = '') {
+  if (!elements.gradesGrid) return;
+  elements.gradesGrid.innerHTML = '';
+
+  const q = filterQuery.toLowerCase().trim();
+  const filteredSchemes = GRADE_SCHEMES.filter(s => 
+    !q || 
+    s.name.toLowerCase().includes(q) ||
+    s.englishName.toLowerCase().includes(q) ||
+    s.code.toLowerCase().includes(q) ||
+    s.department.toLowerCase().includes(q) ||
+    s.lecturers.toLowerCase().includes(q)
+  );
+
+  if (filteredSchemes.length === 0) {
+    elements.gradesGrid.innerHTML = `
+      <div class="day-off-card" style="grid-column: 1 / -1; padding: 3rem 1rem;">
+        <div class="day-off-icon" style="font-size: 3rem;"><i class="fa-solid fa-magnifying-glass"></i></div>
+        <h3>Không tìm thấy môn học</h3>
+        <p>Thử tìm kiếm với từ khóa khác như "Học máy", "Quản lý", "CO3117", "IM1025"...</p>
+      </div>
+    `;
+    return;
+  }
+
+  filteredSchemes.forEach(scheme => {
+    const card = document.createElement('div');
+    card.className = 'grade-card';
+    card.id = `grade-card-${scheme.code.toLowerCase()}`;
+
+    const chartSvg = generateDonutChartSvg(scheme.items);
+
+    const breakdownHtml = scheme.items.map(item => `
+      <div class="breakdown-item" style="border-left-color: ${item.color};">
+        <div class="breakdown-row">
+          <span class="breakdown-name">
+            <span class="breakdown-color-dot" style="background-color: ${item.color};"></span>
+            ${escapeHtml(item.name)}
+          </span>
+          <span class="breakdown-weight" style="color: ${item.color};">${item.weight}%</span>
+        </div>
+        <div class="breakdown-detail">
+          <span class="breakdown-type"><i class="fa-regular fa-file-lines"></i> ${escapeHtml(item.type)}</span>
+          ${item.duration && item.duration !== '--' ? `<span><i class="fa-regular fa-clock"></i> ${escapeHtml(item.duration)}</span>` : ''}
+        </div>
+        <div class="breakdown-bar">
+          <div class="breakdown-bar-fill" style="width: ${item.weight}%; background-color: ${item.color};"></div>
+        </div>
+      </div>
+    `).join('');
+
+    card.innerHTML = `
+      <div class="grade-card-header">
+        <div class="grade-title-group">
+          <h3 class="grade-subject-title">
+            <i class="fa-solid fa-book-bookmark" style="color: var(--accent-primary); font-size: 0.95rem;"></i>
+            ${escapeHtml(scheme.name)}
+          </h3>
+          <span class="grade-subject-en">${escapeHtml(scheme.englishName)}</span>
+          <span class="grade-department"><i class="fa-solid fa-building-columns"></i> ${escapeHtml(scheme.department)}</span>
+        </div>
+        <div class="grade-badges">
+          <span class="badge-code">${escapeHtml(scheme.code)}</span>
+          <span class="badge-credits">${scheme.credits} Tín chỉ</span>
+        </div>
+      </div>
+
+      <div class="grade-card-body">
+        ${chartSvg}
+        <div class="grade-breakdown-list">
+          ${breakdownHtml}
+        </div>
+      </div>
+
+      ${scheme.notes ? `
+        <div class="grade-card-footer">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>${escapeHtml(scheme.notes)}</span>
+        </div>
+      ` : ''}
+    `;
+
+    elements.gradesGrid.appendChild(card);
+  });
+}
+
+/**
+ * Navigate to Grades view and focus on specific subject
+ * @param {string} subjectName 
+ */
+window.viewSubjectGrade = function(subjectName) {
+  switchView('grades');
+  if (elements.gradesSearchInput) {
+    elements.gradesSearchInput.value = subjectName;
+    renderGradesView(subjectName);
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+/**
+ * Helper to parse basic inline markdown (bold, italic, links) safely
+ */
+function renderMarkdownInline(text) {
+  if (!text) return '';
+  let safe = escapeHtml(text);
+  // [text](url) -> <a href="url" target="_blank" rel="noopener noreferrer">text</a>
+  safe = safe.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: var(--primary-light); text-decoration: underline;">$1</a>');
+  // **bold** -> <strong>bold</strong>
+  safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--text-primary); font-weight: 700;">$1</strong>');
+  // *italic* -> <em>italic</em>
+  safe = safe.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  return safe;
 }
 
 /**
@@ -523,7 +802,7 @@ function renderNotesView(notes) {
   elements.notesSection.style.display = 'block';
   elements.notesBody.innerHTML = `
     <ul>
-      ${notes.map(n => `<li>${escapeHtml(n)}</li>`).join('')}
+      ${notes.map(n => `<li>${renderMarkdownInline(n)}</li>`).join('')}
     </ul>
   `;
 }
@@ -668,11 +947,17 @@ function switchView(viewName) {
   state.activeView = viewName;
   elements.viewGridBtn.classList.toggle('active', viewName === 'grid');
   elements.viewTodayBtn.classList.toggle('active', viewName === 'today');
+  elements.viewGradesBtn.classList.toggle('active', viewName === 'grades');
   elements.viewRawBtn.classList.toggle('active', viewName === 'raw');
 
   elements.gridViewContainer.classList.toggle('active', viewName === 'grid');
   elements.todayViewContainer.classList.toggle('active', viewName === 'today');
+  elements.gradesViewContainer.classList.toggle('active', viewName === 'grades');
   elements.rawViewContainer.classList.toggle('active', viewName === 'raw');
+
+  if (viewName === 'grades') {
+    renderGradesView(state.gradesSearchQuery);
+  }
 }
 
 /* ==========================================================================
@@ -716,6 +1001,7 @@ function setupEventListeners() {
   // View Switchers
   elements.viewGridBtn.addEventListener('click', () => switchView('grid'));
   elements.viewTodayBtn.addEventListener('click', () => switchView('today'));
+  elements.viewGradesBtn.addEventListener('click', () => switchView('grades'));
   elements.viewRawBtn.addEventListener('click', () => switchView('raw'));
 
   // Search Box
@@ -731,6 +1017,14 @@ function setupEventListeners() {
     elements.clearSearchBtn.classList.add('hidden');
     renderSchedule();
   });
+
+  // Grades Search Box
+  if (elements.gradesSearchInput) {
+    elements.gradesSearchInput.addEventListener('input', (e) => {
+      state.gradesSearchQuery = e.target.value.trim();
+      renderGradesView(state.gradesSearchQuery);
+    });
+  }
 
   // Print Button
   elements.printScheduleBtn.addEventListener('click', () => {
@@ -777,6 +1071,9 @@ async function init() {
 
   // Setup Event Listeners
   setupEventListeners();
+
+  // Initial render of Grades View
+  renderGradesView();
 
   // Load available weeks and load initial week
   await loadWeeksIndex();

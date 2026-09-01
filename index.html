@@ -62,6 +62,9 @@
           <button id="view-today-btn" class="btn-toggle" title="Xem ngày Hôm nay">
             <i class="fa-solid fa-calendar-day"></i> <span class="btn-text">Hôm nay</span>
           </button>
+          <button id="view-grades-btn" class="btn-toggle" title="Xem Tỉ lệ điểm thành phần các môn">
+            <i class="fa-solid fa-chart-pie"></i> <span class="btn-text">Tỉ lệ điểm</span>
+          </button>
           <button id="view-raw-btn" class="btn-toggle" title="Xem Markdown gốc">
             <i class="fa-brands fa-markdown"></i> <span class="btn-text">Markdown</span>
           </button>
@@ -149,7 +152,26 @@
         </div>
       </section>
 
-      <!-- VIEW 3: Raw Markdown View & Live Editor -->
+      <!-- VIEW 3: Grade Breakdown Pie Charts View -->
+      <section id="grades-view-container" class="view-panel">
+        <div class="grades-header-card">
+          <div class="grades-header-info">
+            <div class="badge-grades"><i class="fa-solid fa-pie-chart"></i> Đề Cương Học Phần Chuẩn</div>
+            <h2 class="grades-main-title">Tỉ Lệ Điểm Thành Phần Các Môn Học</h2>
+            <p class="grades-subtitle">Biểu đồ tròn trực quan hóa trọng số đánh giá, kiểm tra giữa kỳ, bài tập lớn, thi cuối kỳ và quy chế môn học</p>
+          </div>
+          <div class="grades-filter-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="grades-search-input" placeholder="Lọc môn học theo tên, mã môn..." autocomplete="off">
+          </div>
+        </div>
+
+        <div class="grades-grid" id="grades-grid">
+          <!-- Grade pie chart cards rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- VIEW 4: Raw Markdown View & Live Editor -->
       <section id="raw-view-container" class="view-panel">
         <div class="raw-markdown-card">
           <div class="raw-card-header">

@@ -20,3 +20,7 @@
 
 ## Thứ 7 & Chủ Nhật
 - Nghỉ.
+
+## Lưu ý nhỏ:
+- **DEADLINE NỘP BÀI TẬP LỚN**: Hạn chót nộp Bài tập lớn là **Thứ 2, ngày 30/11/2026**. Nhớ kiểm tra kỹ báo cáo và nộp đúng hạn!
+- Môn Nhập môn Trí tuệ Nhân tạo: Buổi học Thứ 3 tuần này là tuần học cuối cùng của môn.

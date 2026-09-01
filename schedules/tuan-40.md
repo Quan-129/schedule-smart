@@ -22,3 +22,6 @@
 
 ## Thứ 7 & Chủ Nhật
 - Nghỉ.
+
+## Lưu ý nhỏ:
+- **Sinh hoạt sinh viên cuối khóa (SA0009)**: Diễn ra vào **Thứ 7, ngày 03/10/2026** tại CS1 (HT A5, HT B4, GĐ 110 B6) theo các ca đã đăng ký (Tiết 2-3: 07:00-08:50, Tiết 5-6: 10:00-11:50, Tiết 8-9: 13:00-14:50, Tiết 11-12: 16:00-17:50).
