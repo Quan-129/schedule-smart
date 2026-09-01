@@ -36,17 +36,8 @@ const DEFAULT_WEEK_35_MD = `# Lịch học Tuần 35
 
 const DEFAULT_WEEK_36_MD = `# Lịch học Tuần 36
 
-## Thứ 2
-- 10:00 - 11:50 (Tiết 5 - 6): Quản lý Dự án cho Kỹ sư | Phòng: B1-212 (CS1)
-- 14:00 - 15:50 (Tiết 9 - 10): Tư tưởng Hồ Chí Minh | Phòng: B4-505 (CS1)
-
-## Thứ 3
-- 09:00 - 11:50 (Tiết 4 - 6): Tiếng Nhật 7 | Phòng: B9-202 (CS1)
-- 13:00 - 14:50 (Tiết 8 - 9): Nhập môn Trí tuệ Nhân tạo | Phòng: B4-301 (CS1)
-
-## Thứ 4
-- 07:00 - 08:50 (Tiết 2 - 3): Pháp luật Việt Nam Đại cương | Phòng: C4-402 (CS1)
-- 09:00 - 11:50 (Tiết 4 - 6): Tiếng Nhật 7 | Phòng: B9-202 (CS1)
+## Thứ 2, Thứ 3 & Thứ 4
+- Nghỉ (Lịch trống hoàn toàn, khả năng cao là nghỉ Lễ Quốc khánh 2/9).
 
 ## Thứ 5
 - 07:00 - 08:50 (Tiết 2 - 3): Tiếp thị Căn bản | Phòng: B4-303 (CS1)
@@ -57,11 +48,11 @@ const DEFAULT_WEEK_36_MD = `# Lịch học Tuần 36
 - 09:00 - 11:50 (Tiết 4 - 6): Tiếng Nhật 7 | Phòng: B9-202 (CS1)
 
 ## Thứ 7 & Chủ Nhật
-- Nghỉ cuối tuần.
+- Nghỉ.
 
 ## Lưu ý nhỏ:
-- Báo cáo tiến độ Đồ án Chuyên ngành tuần 2.
-- Chuẩn bị bài thuyết trình Tiếp thị Căn bản.`;
+- Tuần này bạn được nghỉ từ Thứ 2 đến hết Thứ 4, lịch học trên trường chỉ tập trung vào buổi sáng Thứ 5 và Thứ 6.
+- Môn Đồ án Chuyên ngành vẫn tiếp tục tiến độ, bạn nhớ tự sắp xếp thời gian làm việc nhé.`;
 
 // Pre-defined color palettes for subjects
 const SUBJECT_COLORS = [
@@ -87,9 +78,9 @@ const GRADE_SCHEMES = [
     lecturers: 'Lê Thành Sách, Trương Vĩnh Lân, Nguyễn Đức Dũng, Lê Hồng Trang, Võ Thanh Hùng, Nguyễn An Khương',
     department: 'Khoa Khoa học & Kỹ thuật Máy tính (CSE)',
     items: [
-      { name: 'Thi cuối kỳ (Final Exam)', weight: 60, type: 'Tự luận (Constructed response)', duration: '90 phút', color: '#6366f1', note: 'Từ chương 6 đến chương 10' },
-      { name: 'Kiểm tra giữa kỳ (Midterm Exam)', weight: 30, type: 'Tự luận (Constructed response)', duration: '60 phút', color: '#ec4899', note: 'Đến hết chương 5' },
-      { name: 'Bài tập lớn (Group Assignment)', weight: 10, type: 'Project nhóm thực hành', duration: '45 tiết', color: '#10b981', note: 'Triển khai mô hình bài toán thực tế' }
+      { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 60, type: 'Tự luận (Constructed response)', duration: '90 phút', color: '#6366f1', note: 'Từ chương 6 đến chương 10' },
+      { id: 'item-gk', name: 'Kiểm tra giữa kỳ (Midterm Exam)', weight: 30, type: 'Tự luận (Constructed response)', duration: '60 phút', color: '#ec4899', note: 'Đến hết chương 5' },
+      { id: 'item-btl', name: 'Bài tập lớn (Group Assignment)', weight: 10, type: 'Project nhóm thực hành', duration: '45 tiết', color: '#10b981', note: 'Triển khai mô hình bài toán thực tế' }
     ],
     notes: 'Quy định AI: Chỉ cho phép dùng hỗ trợ tìm kiếm tài liệu, gợi ý ngữ pháp. Nghiêm cấm nộp sản phẩm hoàn toàn do AI tạo ra. Báo cáo phải trích dẫn công cụ AI.'
   },
@@ -102,10 +93,10 @@ const GRADE_SCHEMES = [
     lecturers: 'Huỳnh Thị Phương Lan, Nguyễn Thùy Trang, Nguyễn Thị Đức Nguyên, Nguyễn Bắc Nguyên, Đường Võ Hùng, Lê Phước Luông',
     department: 'Khoa Quản Lý Công Nghiệp (SIM)',
     items: [
-      { name: 'Thi cuối kỳ (Final Exam)', weight: 40, type: 'Trắc nghiệm chấm máy (MCQ)', duration: '70 phút', color: '#6366f1', note: 'Bắt buộc tham gia >= 80% số giờ học để đủ điều kiện thi' },
-      { name: 'Kiểm tra giữa kỳ (Midterm Exam)', weight: 30, type: 'Trắc nghiệm chấm máy (MCQ)', duration: '50 phút', color: '#f59e0b', note: 'Đánh giá kiến thức nửa đầu học kỳ' },
-      { name: 'Bài tập cá nhân (Individual)', weight: 15, type: 'Bài tập về nhà & Báo cáo phản tư', duration: '--', color: '#06b6d4', note: 'Đánh giá nhận thức & bài học kinh nghiệm' },
-      { name: 'Bài tập nhóm (Group Assignment)', weight: 15, type: 'Báo cáo dự án & Thuyết trình nhóm', duration: '--', color: '#10b981', note: 'Phối hợp làm việc nhóm' }
+      { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 40, type: 'Trắc nghiệm chấm máy (MCQ)', duration: '70 phút', color: '#6366f1', note: 'Bắt buộc tham gia >= 80% số giờ học để đủ điều kiện thi' },
+      { id: 'item-gk', name: 'Kiểm tra giữa kỳ (Midterm Exam)', weight: 30, type: 'Trắc nghiệm chấm máy (MCQ)', duration: '50 phút', color: '#f59e0b', note: 'Đánh giá kiến thức nửa đầu học kỳ' },
+      { id: 'item-cn', name: 'Bài tập cá nhân (Individual)', weight: 15, type: 'Bài tập về nhà & Báo cáo phản tư', duration: '--', color: '#06b6d4', note: 'Đánh giá nhận thức & bài học kinh nghiệm' },
+      { id: 'item-nhom', name: 'Bài tập nhóm (Group Assignment)', weight: 15, type: 'Báo cáo dự án & Thuyết trình nhóm', duration: '--', color: '#10b981', note: 'Phối hợp làm việc nhóm' }
     ],
     notes: 'Nộp bài trễ trên LMS không có lý do chính đáng bị trừ 2 điểm cho mỗi ngày trễ. Tham dự tối thiểu 80% số giờ học là điều kiện bắt buộc để được dự thi và xét đạt.'
   },
@@ -118,9 +109,9 @@ const GRADE_SCHEMES = [
     lecturers: 'Bùi Huy Hải Bích, Phạm Ngọc Trâm Anh, Mai Thị Mỹ Quyên, Nguyễn Văn Tuấn, Dương Thị Ngọc Liên, Lê Nguyễn Hậu',
     department: 'Khoa Quản Lý Công Nghiệp (SIM)',
     items: [
-      { name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Trắc nghiệm (MCQ)', duration: '60 phút', color: '#6366f1', note: 'Thi tập trung theo lịch chung' },
-      { name: 'Bài tập lớn (Group Project)', weight: 30, type: 'Dự án nhóm & Thuyết trình', duration: 'Nhóm 6-7 SV', color: '#ec4899', note: 'Vắng thuyết trình BTL bị 0 điểm BTL' },
-      { name: 'Đánh giá thường xuyên (Formative)', weight: 20, type: 'Bài tập trên lớp / Online / Chuyên cần', duration: '--', color: '#10b981', note: 'Vắng bài tập nào bị 0 điểm bài đó' }
+      { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Trắc nghiệm (MCQ)', duration: '60 phút', color: '#6366f1', note: 'Thi tập trung theo lịch chung' },
+      { id: 'item-btl', name: 'Bài tập lớn (Group Project)', weight: 30, type: 'Dự án nhóm & Thuyết trình', duration: 'Nhóm 6-7 SV', color: '#ec4899', note: 'Vắng thuyết trình BTL bị 0 điểm BTL' },
+      { id: 'item-tx', name: 'Đánh giá thường xuyên (Formative)', weight: 20, type: 'Bài tập trên lớp / Online / Chuyên cần', duration: '--', color: '#10b981', note: 'Vắng bài tập nào bị 0 điểm bài đó' }
     ],
     notes: 'Sinh viên làm việc nhóm 6-7 người. Vắng bài tập nào tính 0 điểm bài đó. Vắng buổi thuyết trình BTL bị 0 điểm BTL. Sử dụng AI phải tuân thủ liêm chính học thuật.'
   },
@@ -133,9 +124,9 @@ const GRADE_SCHEMES = [
     lecturers: 'Bộ môn Khoa học Máy tính',
     department: 'Khoa Khoa học và Kỹ thuật Máy tính (CSE)',
     items: [
-      { name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Tự luận / Trắc nghiệm', duration: '90 phút', color: '#6366f1', note: 'Đánh giá toàn diện các chủ đề AI' },
-      { name: 'Kiểm tra giữa kỳ (Midterm Exam)', weight: 30, type: 'Tự luận / Trắc nghiệm', duration: '60 phút', color: '#f59e0b', note: 'Thuật toán tìm kiếm, ràng buộc, Logic' },
-      { name: 'Bài tập lớn / Thực hành', weight: 20, type: 'Project lập trình AI theo nhóm', duration: 'Hạn: 30/11', color: '#10b981', note: 'Cài đặt thuật toán & nộp báo cáo' }
+      { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Tự luận / Trắc nghiệm', duration: '90 phút', color: '#6366f1', note: 'Đánh giá toàn diện các chủ đề AI' },
+      { id: 'item-gk', name: 'Kiểm tra giữa kỳ (Midterm Exam)', weight: 30, type: 'Tự luận / Trắc nghiệm', duration: '60 phút', color: '#f59e0b', note: 'Thuật toán tìm kiếm, ràng buộc, Logic' },
+      { id: 'item-btl', name: 'Bài tập lớn / Thực hành', weight: 20, type: 'Project lập trình AI theo nhóm', duration: 'Hạn: 30/11', color: '#10b981', note: 'Cài đặt thuật toán & nộp báo cáo' }
     ],
     notes: 'Deadline nộp Bài tập lớn vào Thứ 2 (30/11/2026). Tuần 44 có các tiết bổ sung vào buổi tối.'
   },
@@ -148,8 +139,8 @@ const GRADE_SCHEMES = [
     lecturers: 'Bộ môn Lý luận Chính trị',
     department: 'Khoa Khoa học Ứng dụng',
     items: [
-      { name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Trắc nghiệm / Tự luận', duration: '60 phút', color: '#6366f1', note: 'Thi tập trung cuối kỳ' },
-      { name: 'Đánh giá quá trình (Quá trình & GK)', weight: 50, type: 'Chuyên cần, Thảo luận & Kiểm tra trắc nghiệm', duration: '--', color: '#ec4899', note: 'Bài tập trên hệ thống BKEL' }
+      { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Trắc nghiệm / Tự luận', duration: '60 phút', color: '#6366f1', note: 'Thi tập trung cuối kỳ' },
+      { id: 'item-qt', name: 'Đánh giá quá trình (Quá trình & GK)', weight: 50, type: 'Chuyên cần, Thảo luận & Kiểm tra trắc nghiệm', duration: '--', color: '#ec4899', note: 'Bài tập trên hệ thống BKEL' }
     ],
     notes: 'Tuần 47 là tuần học cuối môn. Sinh viên cần tham gia đầy đủ các buổi học và làm bài tập trên hệ thống BKEL.'
   },
@@ -162,8 +153,8 @@ const GRADE_SCHEMES = [
     lecturers: 'Bộ môn Khoa học Xã hội',
     department: 'Khoa Khoa học Ứng dụng',
     items: [
-      { name: 'Thi cuối kỳ (Final Exam)', weight: 70, type: 'Trắc nghiệm', duration: '60 phút', color: '#6366f1', note: 'Thi tập trung cuối kỳ' },
-      { name: 'Đánh giá quá trình (Giữa kỳ + Thảo luận)', weight: 30, type: 'Trắc nghiệm online / Bài tập lớp', duration: '--', color: '#f59e0b', note: 'Kiểm tra trên hệ thống BKEL' }
+      { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 70, type: 'Trắc nghiệm', duration: '60 phút', color: '#6366f1', note: 'Thi tập trung cuối kỳ' },
+      { id: 'item-qt', name: 'Đánh giá quá trình (Giữa kỳ + Thảo luận)', weight: 30, type: 'Trắc nghiệm online / Bài tập lớp', duration: '--', color: '#f59e0b', note: 'Kiểm tra trên hệ thống BKEL' }
     ],
     notes: 'Tuần 47 là tuần học cuối môn.'
   },
@@ -176,8 +167,8 @@ const GRADE_SCHEMES = [
     lecturers: 'Giảng viên Bộ môn Ngoại ngữ',
     department: 'Văn phòng Đào tạo Quốc tế (OISP)',
     items: [
-      { name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Nghe, Đọc, Viết & Phỏng vấn Kaiwa', duration: '90 phút', color: '#6366f1', note: 'Đánh giá toàn diện 4 kỹ năng' },
-      { name: 'Đánh giá quá trình (Quá trình & GK)', weight: 50, type: 'Kiểm tra từ vựng, Ngữ pháp, Kaiwa, Chuyên cần', duration: '--', color: '#10b981', note: 'Kiểm tra định kỳ theo từng tuần học' }
+      { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Nghe, Đọc, Viết & Phỏng vấn Kaiwa', duration: '90 phút', color: '#6366f1', note: 'Đánh giá toàn diện 4 kỹ năng' },
+      { id: 'item-qt', name: 'Đánh giá quá trình (Quá trình & GK)', weight: 50, type: 'Kiểm tra từ vựng, Ngữ pháp, Kaiwa, Chuyên cần', duration: '--', color: '#10b981', note: 'Kiểm tra định kỳ theo từng tuần học' }
     ],
     notes: 'Lịch học 4 buổi sáng liên tục mỗi tuần (Thứ 3 đến Thứ 6). Yêu cầu chuẩn bị bài trước khi đến lớp.'
   }
@@ -635,14 +626,15 @@ function renderTodayView(days, currentDayOfWeek) {
 /**
  * Generates an Interactive SVG Donut / Pie Chart from grade items
  * @param {Array} items 
+ * @param {string} schemeCode
  * @param {number} totalWeight 
  */
-function generateDonutChartSvg(items, totalWeight = 100) {
+function generateDonutChartSvg(items, schemeCode, totalWeight = 100) {
   const radius = 46;
   const circumference = 2 * Math.PI * radius; // ~289.0265
   let cumulative = 0;
 
-  const slices = items.map(item => {
+  const slices = items.map((item, idx) => {
     const strokeDash = (item.weight / totalWeight) * circumference;
     const strokeOffset = -(cumulative / totalWeight) * circumference;
     cumulative += item.weight;
@@ -653,24 +645,42 @@ function generateDonutChartSvg(items, totalWeight = 100) {
         stroke="${item.color}" 
         stroke-dasharray="${strokeDash} ${circumference}" 
         stroke-dashoffset="${strokeOffset}"
+        data-scheme="${schemeCode}"
+        data-weight="${item.weight}%"
+        data-name="${escapeHtml(item.name)}"
         title="${escapeHtml(item.name)}: ${item.weight}%"
+        onclick="highlightGradeSlice('${schemeCode}', '${idx}', '${escapeHtml(item.name)}', '${item.weight}%')"
       />
     `;
   }).join('');
 
   return `
-    <div class="donut-chart-wrapper">
+    <div class="donut-chart-wrapper" id="donut-wrapper-${schemeCode}">
       <svg class="donut-svg" viewBox="0 0 140 140">
         <circle cx="70" cy="70" r="${radius}" fill="none" stroke="var(--border-color)" stroke-width="20" opacity="0.3" />
         ${slices}
       </svg>
-      <div class="donut-center-info">
+      <div class="donut-center-info" id="donut-center-${schemeCode}">
         <span class="donut-center-val">100%</span>
         <span class="donut-center-label">Tổng điểm</span>
       </div>
     </div>
   `;
 }
+
+/**
+ * Highlights a slice when clicked on the Donut Chart
+ */
+window.highlightGradeSlice = function(schemeCode, itemIdx, itemName, itemWeight) {
+  const centerElem = document.getElementById(`donut-center-${schemeCode}`);
+  if (centerElem) {
+    centerElem.innerHTML = `
+      <span class="donut-center-val" style="font-size: 0.95rem; color: var(--accent-primary);">${itemWeight}</span>
+      <span class="donut-center-label" style="font-size: 0.58rem; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${itemName}</span>
+    `;
+  }
+  showToast(`${itemName}: ${itemWeight}`);
+};
 
 /**
  * Render Grade Breakdown & Pie Charts View
@@ -706,10 +716,10 @@ function renderGradesView(filterQuery = '') {
     card.className = 'grade-card';
     card.id = `grade-card-${scheme.code.toLowerCase()}`;
 
-    const chartSvg = generateDonutChartSvg(scheme.items);
+    const chartSvg = generateDonutChartSvg(scheme.items, scheme.code.toLowerCase());
 
-    const breakdownHtml = scheme.items.map(item => `
-      <div class="breakdown-item" style="border-left-color: ${item.color};">
+    const breakdownHtml = scheme.items.map((item, idx) => `
+      <div class="breakdown-item" style="border-left-color: ${item.color}; cursor: pointer;" onclick="highlightGradeSlice('${scheme.code.toLowerCase()}', '${idx}', '${escapeHtml(item.name)}', '${item.weight}%')">
         <div class="breakdown-row">
           <span class="breakdown-name">
             <span class="breakdown-color-dot" style="background-color: ${item.color};"></span>
@@ -772,7 +782,26 @@ window.viewSubjectGrade = function(subjectName) {
     elements.gradesSearchInput.value = subjectName;
     renderGradesView(subjectName);
   }
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  
+  // Try to find matching card and scroll to it with subtle glow effect
+  setTimeout(() => {
+    const matchingScheme = GRADE_SCHEMES.find(s => 
+      s.name.toLowerCase().includes(subjectName.toLowerCase()) || 
+      subjectName.toLowerCase().includes(s.name.toLowerCase())
+    );
+    if (matchingScheme) {
+      const cardElem = document.getElementById(`grade-card-${matchingScheme.code.toLowerCase()}`);
+      if (cardElem) {
+        cardElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        cardElem.style.borderColor = 'var(--accent-primary)';
+        cardElem.style.boxShadow = '0 0 20px rgba(99, 102, 241, 0.4)';
+        setTimeout(() => {
+          cardElem.style.borderColor = '';
+          cardElem.style.boxShadow = '';
+        }, 2500);
+      }
+    }
+  }, 100);
 };
 
 /**
