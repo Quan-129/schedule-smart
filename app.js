@@ -1,6 +1,6 @@
 /**
  * ==========================================================================
- * LỊCH HỌC MARKDOWN HUB - JAVASCRIPT LOGIC & PARSER
+ * LỊCH HỌC MARKDOWN HUB & CHIẾC CẶP THÔNG MINH - JAVASCRIPT LOGIC
  * ==========================================================================
  */
 
@@ -174,6 +174,189 @@ const GRADE_SCHEMES = [
   }
 ];
 
+// Default pre-populated documents in the Smart Backpack (linked with official courses & drives)
+const DEFAULT_BACKPACK_ITEMS = [
+  // CO3117 - Học máy
+  {
+    id: 'default-ml-1',
+    subjectCode: 'CO3117',
+    category: 'slides',
+    name: 'De_cuong_chi_tiet_Hoc_May_CO3117.pdf',
+    type: 'pdf',
+    size: '1.2 MB',
+    updatedAt: '2026-08-25',
+    driveUrl: 'https://drive.google.com/',
+    isOffline: false,
+    description: 'Đề cương học phần chi tiết Học máy HK261'
+  },
+  {
+    id: 'default-ml-2',
+    subjectCode: 'CO3117',
+    category: 'slides',
+    name: 'Slide_Chuong_1_Tong_Quan_Hoc_May.pdf',
+    type: 'pdf',
+    size: '4.8 MB',
+    updatedAt: '2026-08-28',
+    driveUrl: 'https://drive.google.com/',
+    isOffline: false,
+    description: 'Bài giảng Chương 1: Giới thiệu Học máy & Quy trình ML'
+  },
+  {
+    id: 'default-ml-3',
+    subjectCode: 'CO3117',
+    category: 'btl',
+    name: 'Huong_dan_BTL_Hoc_May_Nhom.pdf',
+    type: 'pdf',
+    size: '850 KB',
+    updatedAt: '2026-09-01',
+    driveUrl: 'https://drive.google.com/',
+    isOffline: false,
+    description: 'Yêu cầu đề tài Bài tập lớn nhóm (10% điểm)'
+  },
+
+  // IM1025 - Quản lý Dự án cho Kỹ sư
+  {
+    id: 'default-pm-1',
+    subjectCode: 'IM1025',
+    category: 'slides',
+    name: 'De_cuong_chi_tiet_QLDA_IM1025.pdf',
+    type: 'pdf',
+    size: '980 KB',
+    updatedAt: '2026-08-20',
+    driveUrl: 'https://drive.google.com/',
+    isOffline: false,
+    description: 'Đề cương học phần Quản lý Dự án cho Kỹ sư'
+  },
+  {
+    id: 'default-pm-2',
+    subjectCode: 'IM1025',
+    category: 'btl',
+    name: 'LINK ĐĂNG KÝ NHÓM (Hạn 15-09-2026)',
+    type: 'link',
+    size: 'Google Forms',
+    updatedAt: '2026-09-01',
+    driveUrl: 'https://docs.google.com/forms/',
+    isOffline: false,
+    description: 'Hạn chót Thứ 3 Tuần 38 (15/09/2026)'
+  },
+  {
+    id: 'default-pm-3',
+    subjectCode: 'IM1025',
+    category: 'btl',
+    name: 'LINK NỘP BÀI TẬP LỚN (Hạn 30-11-2026)',
+    type: 'link',
+    size: 'BKEL LMS',
+    updatedAt: '2026-09-01',
+    driveUrl: 'https://e-learning.hcmut.edu.vn/',
+    isOffline: false,
+    description: 'Hạn nộp báo cáo dự án BTL (Thứ 2 Tuần 49)'
+  },
+  {
+    id: 'default-pm-4',
+    subjectCode: 'IM1025',
+    category: 'other',
+    name: 'Folder Google Drive Chung - QLDA',
+    type: 'drive',
+    size: 'Google Drive',
+    updatedAt: '2026-09-01',
+    driveUrl: 'https://drive.google.com/',
+    isOffline: false,
+    description: 'Thư mục tài liệu, biểu mẫu WBS, Gantt Chart'
+  },
+
+  // IM1019 - Tiếp thị Căn bản
+  {
+    id: 'default-mkt-1',
+    subjectCode: 'IM1019',
+    category: 'slides',
+    name: 'De_cuong_chi_tiet_Tiep_Thi_Can_Ban.pdf',
+    type: 'pdf',
+    size: '1.1 MB',
+    updatedAt: '2026-08-22',
+    driveUrl: 'https://drive.google.com/',
+    isOffline: false,
+    description: 'Đề cương môn Tiếp thị căn bản'
+  },
+  {
+    id: 'default-mkt-2',
+    subjectCode: 'IM1019',
+    category: 'slides',
+    name: 'Slide_Marketing_Ch1_Tong_Quan.pptx',
+    type: 'pptx',
+    size: '7.5 MB',
+    updatedAt: '2026-08-29',
+    driveUrl: 'https://drive.google.com/',
+    isOffline: false,
+    description: 'Slide bài giảng Chương 1'
+  },
+  {
+    id: 'default-mkt-3',
+    subjectCode: 'IM1019',
+    category: 'btl',
+    name: 'Rubric_Danh_gia_Thuyet_trinh_BTL_Marketing.pdf',
+    type: 'pdf',
+    size: '620 KB',
+    updatedAt: '2026-09-01',
+    driveUrl: 'https://drive.google.com/',
+    isOffline: false,
+    description: 'Tiêu chí chấm điểm thuyết trình nhóm 6-7 sinh viên'
+  },
+
+  // CO3061 - Nhập môn Trí tuệ Nhân tạo
+  {
+    id: 'default-ai-1',
+    subjectCode: 'CO3061',
+    category: 'slides',
+    name: 'Slide_AI_Search_Algorithms.pdf',
+    type: 'pdf',
+    size: '5.2 MB',
+    updatedAt: '2026-08-30',
+    driveUrl: 'https://drive.google.com/',
+    isOffline: false,
+    description: 'Thuật toán tìm kiếm A*, BFS, DFS, CSP'
+  },
+  {
+    id: 'default-ai-2',
+    subjectCode: 'CO3061',
+    category: 'exams',
+    name: 'Kho_De_thi_giua_ky_AI_cac_nam.zip',
+    type: 'zip',
+    size: '14.8 MB',
+    updatedAt: '2026-09-01',
+    driveUrl: 'https://drive.google.com/',
+    isOffline: false,
+    description: 'Tổng hợp đề thi GK và bài giải tham khảo'
+  },
+
+  // SP1035 - Tư tưởng Hồ Chí Minh
+  {
+    id: 'default-hcm-1',
+    subjectCode: 'SP1035',
+    category: 'slides',
+    name: 'Tai_lieu_Hoc_Tap_BKEL_Tu_Tuong_HCM.pdf',
+    type: 'pdf',
+    size: '3.4 MB',
+    updatedAt: '2026-08-20',
+    driveUrl: 'https://drive.google.com/',
+    isOffline: false,
+    description: 'Tài liệu hướng dẫn thảo luận và ôn tập trắc nghiệm'
+  },
+
+  // JP1007 - Tiếng Nhật 7
+  {
+    id: 'default-jp-1',
+    subjectCode: 'JP1007',
+    category: 'slides',
+    name: 'Tu_vung_Kaiwa_Ngu_phap_Tuan_35_36.pdf',
+    type: 'pdf',
+    size: '2.1 MB',
+    updatedAt: '2026-08-26',
+    driveUrl: 'https://drive.google.com/',
+    isOffline: false,
+    description: 'Tài liệu chuẩn bị bài trước giờ học (4 buổi sáng/tuần)'
+  }
+];
+
 // App State
 const state = {
   currentWeekFile: 'schedules/tuan-35.md',
@@ -182,12 +365,15 @@ const state = {
   activeFilterSubject: null,
   searchQuery: '',
   gradesSearchQuery: '',
-  activeView: 'grid', // 'grid', 'today', 'grades', 'raw'
+  backpackSearchQuery: '',
+  backpackFilterSubject: null,
+  activeView: 'grid', // 'grid', 'today', 'grades', 'backpack', 'raw'
   weeksList: [
     { id: 'tuan-35', title: 'Tuần 35', filename: 'schedules/tuan-35.md' },
     { id: 'tuan-36', title: 'Tuần 36', filename: 'schedules/tuan-36.md' }
   ],
-  subjectColorMap: new Map()
+  subjectColorMap: new Map(),
+  backpackFiles: []
 };
 
 // DOM Elements
@@ -200,11 +386,13 @@ const elements = {
   viewGridBtn: document.getElementById('view-grid-btn'),
   viewTodayBtn: document.getElementById('view-today-btn'),
   viewGradesBtn: document.getElementById('view-grades-btn'),
+  viewBackpackBtn: document.getElementById('view-backpack-btn'),
   viewRawBtn: document.getElementById('view-raw-btn'),
   
   gridViewContainer: document.getElementById('grid-view-container'),
   todayViewContainer: document.getElementById('today-view-container'),
   gradesViewContainer: document.getElementById('grades-view-container'),
+  backpackViewContainer: document.getElementById('backpack-view-container'),
   rawViewContainer: document.getElementById('raw-view-container'),
   
   scheduleGrid: document.getElementById('schedule-grid'),
@@ -214,6 +402,38 @@ const elements = {
   
   gradesGrid: document.getElementById('grades-grid'),
   gradesSearchInput: document.getElementById('grades-search-input'),
+  
+  // Backpack Elements
+  backpackExplorer: document.getElementById('backpack-explorer'),
+  backpackSubjectTags: document.getElementById('backpack-subject-tags'),
+  backpackBreadcrumbs: document.getElementById('backpack-breadcrumbs'),
+  backpackDropzone: document.getElementById('backpack-dropzone'),
+  backpackFileInput: document.getElementById('backpack-file-input'),
+  bpUploadBtn: document.getElementById('bp-upload-btn'),
+  bpAddLinkBtn: document.getElementById('bp-add-link-btn'),
+  backpackSearchInput: document.getElementById('backpack-search-input'),
+  bpClearSearchBtn: document.getElementById('bp-clear-search-btn'),
+  bpStorageText: document.getElementById('bp-storage-text'),
+  bpFilesCount: document.getElementById('bp-files-count'),
+  
+  // Modals
+  filePreviewModal: document.getElementById('file-preview-modal'),
+  previewFileName: document.getElementById('preview-file-name'),
+  previewFileSub: document.getElementById('preview-file-sub'),
+  previewFileIcon: document.getElementById('preview-file-icon'),
+  previewModalBody: document.getElementById('preview-modal-body'),
+  previewOpenExtBtn: document.getElementById('preview-open-ext-btn'),
+  previewDownloadBtn: document.getElementById('preview-download-btn'),
+  previewCloseBtn: document.getElementById('preview-close-btn'),
+  
+  addLinkModal: document.getElementById('add-link-modal'),
+  addLinkForm: document.getElementById('add-link-form'),
+  linkSubjectSelect: document.getElementById('link-subject-select'),
+  linkCategorySelect: document.getElementById('link-category-select'),
+  linkNameInput: document.getElementById('link-name-input'),
+  linkUrlInput: document.getElementById('link-url-input'),
+  addLinkCloseBtn: document.getElementById('add-link-close-btn'),
+  addLinkCancelBtn: document.getElementById('add-link-cancel-btn'),
   
   scheduleTitle: document.getElementById('schedule-title'),
   scheduleSubtitle: document.getElementById('schedule-subtitle'),
@@ -238,6 +458,88 @@ const elements = {
   applyRawBtn: document.getElementById('apply-raw-btn'),
   toastContainer: document.getElementById('toast-container')
 };
+
+/* ==========================================================================
+   INDEXED-DB OFFLINE STORAGE ENGINE
+   ========================================================================== */
+
+const DB_NAME = 'SmartBackpackDB';
+const DB_VERSION = 1;
+const STORE_NAME = 'backpack_files';
+
+function openBackpackDB() {
+  return new Promise((resolve, reject) => {
+    if (!window.indexedDB) {
+      console.warn('Trình duyệt không hỗ trợ IndexedDB.');
+      return resolve(null);
+    }
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        store.createIndex('subjectCode', 'subjectCode', { unique: false });
+        store.createIndex('updatedAt', 'updatedAt', { unique: false });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => {
+      console.error('Không thể mở IndexedDB:', request.error);
+      resolve(null);
+    };
+  });
+}
+
+async function saveFileToIndexedDB(fileObj) {
+  const db = await openBackpackDB();
+  if (!db) return false;
+  return new Promise((resolve) => {
+    try {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      store.put(fileObj);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    } catch (err) {
+      console.error('Lỗi lưu IndexedDB:', err);
+      resolve(false);
+    }
+  });
+}
+
+async function getAllFilesFromIndexedDB() {
+  const db = await openBackpackDB();
+  if (!db) return [];
+  return new Promise((resolve) => {
+    try {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => resolve([]);
+    } catch (err) {
+      console.error('Lỗi đọc IndexedDB:', err);
+      resolve([]);
+    }
+  });
+}
+
+async function deleteFileFromIndexedDB(id) {
+  const db = await openBackpackDB();
+  if (!db) return false;
+  return new Promise((resolve) => {
+    try {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      store.delete(id);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    } catch (err) {
+      console.error('Lỗi xóa IndexedDB:', err);
+      resolve(false);
+    }
+  });
+}
 
 /* ==========================================================================
    MARKDOWN PARSER
@@ -310,7 +612,6 @@ function parseScheduleMarkdown(markdownText) {
 
     // 5. Parse Class Items within a Day
     if (currentDay) {
-      // Check if it's day off ("Nghỉ." or "Nghỉ cuối tuần.")
       if (/^(?:[-*]\s*)?Nghỉ/i.test(rawLine)) {
         currentDay.isDayOff = true;
         currentDay.dayOffText = rawLine.replace(/^[-*]\s*/, '').trim();
@@ -324,7 +625,6 @@ function parseScheduleMarkdown(markdownText) {
         const subject = classMatch[3].trim();
         const room = classMatch[4] ? classMatch[4].trim() : 'Chưa xếp phòng';
 
-        // Extract start and end time for sorting and comparison
         const [startTime, endTime] = timeRange.split('-').map(t => t.trim());
 
         currentDay.classes.push({
@@ -336,7 +636,6 @@ function parseScheduleMarkdown(markdownText) {
           room
         });
       } else {
-        // Fallback for non-standard lines
         const cleanText = rawLine.replace(/^[-*]\s*/, '').trim();
         if (cleanText) {
           currentDay.rawNotes.push(cleanText);
@@ -348,9 +647,6 @@ function parseScheduleMarkdown(markdownText) {
   return result;
 }
 
-/**
- * Converts Vietnamese day string to standard JS Day of week index (0 = Sun, 1 = Mon, ..., 6 = Sat)
- */
 function getDayNumber(dayName) {
   const normalized = dayName.toLowerCase();
   if (normalized.includes('thứ 2')) return 1;
@@ -363,9 +659,6 @@ function getDayNumber(dayName) {
   return -1;
 }
 
-/**
- * Deterministically assigns a unique color palette to each subject
- */
 function getSubjectColor(subjectName) {
   const normalized = subjectName.trim();
   if (!state.subjectColorMap.has(normalized)) {
@@ -379,9 +672,6 @@ function getSubjectColor(subjectName) {
    UI RENDERING FUNCTIONS
    ========================================================================== */
 
-/**
- * Main render function
- */
 function renderSchedule() {
   if (!state.parsedSchedule) return;
 
@@ -394,7 +684,6 @@ function renderSchedule() {
   elements.scheduleSubtitle.textContent = `Hiển thị dữ liệu từ ${state.currentWeekFile}`;
   elements.rawFileName.textContent = state.currentWeekFile;
 
-  // Calculate statistics and append dates
   let totalClasses = 0;
   const uniqueSubjects = new Set();
   
@@ -430,29 +719,16 @@ function renderSchedule() {
   elements.statTotalClasses.textContent = `${totalClasses} buổi học`;
   elements.statTotalSubjects.textContent = `${uniqueSubjects.size} môn học`;
 
-  // Render Filter Subject Tags
   renderSubjectFilters(Array.from(uniqueSubjects));
-
-  // Render Grid View
   renderGridView(days, currentDayOfWeek);
-
-  // Render Today View
   renderTodayView(days, currentDayOfWeek);
-
-  // Render Notes
   renderNotesView(notes);
-
-  // Determine and render next class
   updateNextClassBadge(days, currentDayOfWeek);
 }
 
-/**
- * Render subject filter buttons
- */
 function renderSubjectFilters(subjects) {
   elements.subjectFilterTags.innerHTML = '';
   
-  // "All" tag
   const allBtn = document.createElement('button');
   allBtn.className = `tag-btn ${!state.activeFilterSubject ? 'active' : ''}`;
   allBtn.innerHTML = `Tất cả môn (${subjects.length})`;
@@ -462,7 +738,6 @@ function renderSubjectFilters(subjects) {
   });
   elements.subjectFilterTags.appendChild(allBtn);
 
-  // Individual Subject Tags
   subjects.forEach(subject => {
     const color = getSubjectColor(subject);
     const btn = document.createElement('button');
@@ -476,14 +751,10 @@ function renderSubjectFilters(subjects) {
   });
 }
 
-/**
- * Render Weekly Grid View
- */
 function renderGridView(days, currentDayOfWeek) {
   elements.scheduleGrid.innerHTML = '';
 
   days.forEach(day => {
-    // Filter classes if search or tag active
     let filteredClasses = day.classes;
 
     if (state.activeFilterSubject) {
@@ -492,9 +763,7 @@ function renderGridView(days, currentDayOfWeek) {
 
     if (state.searchQuery) {
       const q = state.searchQuery.toLowerCase();
-      
       const normalizedDayName = day.name.toLowerCase();
-      // Hỗ trợ tìm kiếm theo cả dạng "25/08" và "25-08"
       const dayMatches = normalizedDayName.includes(q) || normalizedDayName.replace(/\//g, '-').includes(q);
       
       if (!dayMatches) {
@@ -507,7 +776,6 @@ function renderGridView(days, currentDayOfWeek) {
       }
     }
 
-    // Check if this card represents today
     const isToday = (day.dayOfWeekNumber === currentDayOfWeek) || 
       (day.name.includes('Thứ 7 & Chủ Nhật') && (currentDayOfWeek === 6 || currentDayOfWeek === 0));
 
@@ -550,6 +818,9 @@ function renderGridView(days, currentDayOfWeek) {
                 <button class="btn-view-subject-grade" title="Xem tỉ lệ điểm môn ${escapeHtml(c.subject)}" onclick="viewSubjectGrade('${escapeHtml(c.subject)}')">
                   <i class="fa-solid fa-chart-pie"></i>
                 </button>
+                <button class="btn-view-subject-backpack" title="Mở Chiếc cặp tài liệu môn ${escapeHtml(c.subject)}" onclick="viewSubjectBackpack('${escapeHtml(c.subject)}')">
+                  <i class="fa-solid fa-briefcase"></i>
+                </button>
                 <button class="btn-copy-info" title="Sao chép thông tin tiết học" onclick="copyClassInfo('${escapeHtml(c.subject)}', '${escapeHtml(c.timeRange)}', '${escapeHtml(c.room)}')">
                   <i class="fa-regular fa-copy"></i>
                 </button>
@@ -575,9 +846,6 @@ function renderGridView(days, currentDayOfWeek) {
   });
 }
 
-/**
- * Render Today Focus View
- */
 function renderTodayView(days, currentDayOfWeek) {
   elements.todayTimelineList.innerHTML = '';
   
@@ -614,24 +882,27 @@ function renderTodayView(days, currentDayOfWeek) {
       <h3 style="color: ${color.text || 'inherit'}; font-size: 1.15rem; font-weight: 700;">${escapeHtml(c.subject)}</h3>
       <div class="class-room-row">
         <span class="class-room" style="font-size: 0.95rem;"><i class="fa-solid fa-location-dot"></i> Phòng: ${escapeHtml(c.room)}</span>
-        <button class="btn-view-subject-grade" title="Xem tỉ lệ điểm môn ${escapeHtml(c.subject)}" onclick="viewSubjectGrade('${escapeHtml(c.subject)}')">
-          <i class="fa-solid fa-chart-pie"></i>
-        </button>
+        <div class="class-actions-group">
+          <button class="btn-view-subject-grade" title="Xem tỉ lệ điểm môn ${escapeHtml(c.subject)}" onclick="viewSubjectGrade('${escapeHtml(c.subject)}')">
+            <i class="fa-solid fa-chart-pie"></i>
+          </button>
+          <button class="btn-view-subject-backpack" title="Mở Chiếc cặp tài liệu môn ${escapeHtml(c.subject)}" onclick="viewSubjectBackpack('${escapeHtml(c.subject)}')">
+            <i class="fa-solid fa-briefcase"></i>
+          </button>
+        </div>
       </div>
     `;
     elements.todayTimelineList.appendChild(item);
   });
 }
 
-/**
- * Generates an Interactive SVG Donut / Pie Chart from grade items
- * @param {Array} items 
- * @param {string} schemeCode
- * @param {number} totalWeight 
- */
+/* ==========================================================================
+   GRADE SCHEMES & DONUT PIE CHARTS
+   ========================================================================== */
+
 function generateDonutChartSvg(items, schemeCode, totalWeight = 100) {
   const radius = 46;
-  const circumference = 2 * Math.PI * radius; // ~289.0265
+  const circumference = 2 * Math.PI * radius;
   let cumulative = 0;
 
   const slices = items.map((item, idx) => {
@@ -668,9 +939,6 @@ function generateDonutChartSvg(items, schemeCode, totalWeight = 100) {
   `;
 }
 
-/**
- * Highlights a slice when clicked on the Donut Chart
- */
 window.highlightGradeSlice = function(schemeCode, itemIdx, itemName, itemWeight) {
   const centerElem = document.getElementById(`donut-center-${schemeCode}`);
   if (centerElem) {
@@ -682,10 +950,6 @@ window.highlightGradeSlice = function(schemeCode, itemIdx, itemName, itemWeight)
   showToast(`${itemName}: ${itemWeight}`);
 };
 
-/**
- * Render Grade Breakdown & Pie Charts View
- * @param {string} filterQuery 
- */
 function renderGradesView(filterQuery = '') {
   if (!elements.gradesGrid) return;
   elements.gradesGrid.innerHTML = '';
@@ -772,10 +1036,6 @@ function renderGradesView(filterQuery = '') {
   });
 }
 
-/**
- * Navigate to Grades view and focus on specific subject
- * @param {string} subjectName 
- */
 window.viewSubjectGrade = function(subjectName) {
   switchView('grades');
   if (elements.gradesSearchInput) {
@@ -783,7 +1043,6 @@ window.viewSubjectGrade = function(subjectName) {
     renderGradesView(subjectName);
   }
   
-  // Try to find matching card and scroll to it with subtle glow effect
   setTimeout(() => {
     const matchingScheme = GRADE_SCHEMES.find(s => 
       s.name.toLowerCase().includes(subjectName.toLowerCase()) || 
@@ -804,24 +1063,474 @@ window.viewSubjectGrade = function(subjectName) {
   }, 100);
 };
 
+/* ==========================================================================
+   SMART BACKPACK (CHIẾC CẶP THÔNG MINH) LOGIC & RENDERING
+   ========================================================================== */
+
 /**
- * Helper to parse basic inline markdown (bold, italic, links) safely
+ * Get category metadata
  */
+function getCategoryInfo(cat) {
+  switch (cat) {
+    case 'slides':
+      return { label: 'Slide & Bài giảng', icon: 'fa-solid fa-file-powerpoint' };
+    case 'btl':
+      return { label: 'Bài tập lớn & Dự án', icon: 'fa-solid fa-users-rectangle' };
+    case 'exams':
+      return { label: 'Đề thi & Ôn tập', icon: 'fa-solid fa-pen-ruler' };
+    default:
+      return { label: 'Tài liệu khác & Drive', icon: 'fa-brands fa-google-drive' };
+  }
+}
+
+/**
+ * Get icon class and color for file type
+ */
+function getFileIcon(type, name = '') {
+  const t = (type || '').toLowerCase();
+  const ext = name.split('.').pop().toLowerCase();
+  
+  if (t === 'pdf' || ext === 'pdf') return { icon: 'fa-solid fa-file-pdf', cls: 'pdf' };
+  if (t === 'pptx' || t === 'ppt' || ext === 'pptx' || ext === 'ppt') return { icon: 'fa-solid fa-file-powerpoint', cls: 'pptx' };
+  if (t === 'docx' || t === 'doc' || ext === 'docx' || ext === 'doc') return { icon: 'fa-solid fa-file-word', cls: 'docx' };
+  if (t === 'xlsx' || t === 'xls' || ext === 'xlsx' || ext === 'xls') return { icon: 'fa-solid fa-file-excel', cls: 'xlsx' };
+  if (t === 'zip' || t === 'rar' || ext === 'zip' || ext === 'rar') return { icon: 'fa-solid fa-file-zipper', cls: 'zip' };
+  if (t === 'drive') return { icon: 'fa-brands fa-google-drive', cls: 'drive' };
+  if (t === 'link') return { icon: 'fa-solid fa-arrow-up-right-from-square', cls: 'link' };
+  if (['png', 'jpg', 'jpeg', 'webp', 'svg'].includes(ext)) return { icon: 'fa-solid fa-file-image', cls: 'img' };
+  
+  return { icon: 'fa-regular fa-file-lines', cls: 'other' };
+}
+
+/**
+ * Calculates offline storage used in MB
+ */
+async function updateBackpackStorageStats() {
+  const customFiles = state.backpackFiles.filter(f => f.isOffline && f.fileBlob);
+  let totalBytes = 0;
+  customFiles.forEach(f => {
+    if (f.fileBlob && f.fileBlob.size) {
+      totalBytes += f.fileBlob.size;
+    }
+  });
+
+  const mb = (totalBytes / (1024 * 1024)).toFixed(1);
+  if (elements.bpStorageText) {
+    elements.bpStorageText.textContent = `Offline: ${mb} MB (${customFiles.length} file)`;
+  }
+  if (elements.bpFilesCount) {
+    elements.bpFilesCount.textContent = `${state.backpackFiles.length} tài liệu`;
+  }
+}
+
+/**
+ * Renders subject filter pills and options
+ */
+function renderBackpackFilters() {
+  if (!elements.backpackSubjectTags) return;
+  elements.backpackSubjectTags.innerHTML = '';
+
+  // "Tất cả" tag
+  const allBtn = document.createElement('button');
+  allBtn.className = `tag-btn ${!state.backpackFilterSubject ? 'active' : ''}`;
+  allBtn.innerHTML = `Tất cả môn (${GRADE_SCHEMES.length})`;
+  allBtn.addEventListener('click', () => {
+    state.backpackFilterSubject = null;
+    renderBackpackView();
+  });
+  elements.backpackSubjectTags.appendChild(allBtn);
+
+  // Populate Select in Add Link Modal
+  if (elements.linkSubjectSelect) {
+    elements.linkSubjectSelect.innerHTML = '';
+  }
+
+  GRADE_SCHEMES.forEach(scheme => {
+    const color = getSubjectColor(scheme.name);
+    const btn = document.createElement('button');
+    btn.className = `tag-btn ${state.backpackFilterSubject === scheme.code ? 'active' : ''}`;
+    btn.innerHTML = `<span class="tag-color-indicator" style="background-color: ${color.border}"></span> ${scheme.name} (${scheme.code})`;
+    btn.addEventListener('click', () => {
+      state.backpackFilterSubject = state.backpackFilterSubject === scheme.code ? null : scheme.code;
+      renderBackpackView();
+    });
+    elements.backpackSubjectTags.appendChild(btn);
+
+    if (elements.linkSubjectSelect) {
+      const opt = document.createElement('option');
+      opt.value = scheme.code;
+      opt.textContent = `${scheme.code} - ${scheme.name}`;
+      elements.linkSubjectSelect.appendChild(opt);
+    }
+  });
+}
+
+/**
+ * Main render function for Smart Backpack
+ */
+function renderBackpackView() {
+  if (!elements.backpackExplorer) return;
+  elements.backpackExplorer.innerHTML = '';
+
+  renderBackpackFilters();
+  updateBackpackStorageStats();
+
+  const q = (state.backpackSearchQuery || '').toLowerCase().trim();
+  const todayDayIndex = (new Date()).getDay();
+
+  // Filter schemes
+  let schemes = GRADE_SCHEMES.filter(s => {
+    if (state.backpackFilterSubject && s.code !== state.backpackFilterSubject) {
+      return false;
+    }
+    return true;
+  });
+
+  // Highlight or sort subjects that have classes today to the top!
+  schemes.sort((a, b) => {
+    const aHasClass = state.parsedSchedule?.days?.some(d => 
+      d.dayOfWeekNumber === todayDayIndex && d.classes.some(c => c.subject.includes(a.name) || a.name.includes(c.subject))
+    );
+    const bHasClass = state.parsedSchedule?.days?.some(d => 
+      d.dayOfWeekNumber === todayDayIndex && d.classes.some(c => c.subject.includes(b.name) || b.name.includes(c.subject))
+    );
+    if (aHasClass && !bHasClass) return -1;
+    if (!aHasClass && bHasClass) return 1;
+    return 0;
+  });
+
+  // Update Breadcrumbs
+  if (elements.backpackBreadcrumbs) {
+    if (state.backpackFilterSubject) {
+      const currentScheme = GRADE_SCHEMES.find(s => s.code === state.backpackFilterSubject);
+      elements.backpackBreadcrumbs.innerHTML = `
+        <span class="crumb" onclick="clearBackpackFilter()"><i class="fa-solid fa-house"></i> Chiếc cặp</span>
+        <span class="separator"><i class="fa-solid fa-chevron-right"></i></span>
+        <span class="crumb active"><i class="fa-solid fa-folder-open"></i> ${escapeHtml(currentScheme ? currentScheme.name : state.backpackFilterSubject)}</span>
+      `;
+    } else {
+      elements.backpackBreadcrumbs.innerHTML = `<span class="crumb active"><i class="fa-solid fa-house"></i> Tất cả môn học (${schemes.length} ngăn cặp)</span>`;
+    }
+  }
+
+  let totalRenderedSubjects = 0;
+
+  schemes.forEach(scheme => {
+    // Get all files for this subject
+    const subjectFiles = state.backpackFiles.filter(f => f.subjectCode === scheme.code);
+    
+    // Apply search query filter if present
+    const matchingFiles = subjectFiles.filter(f => 
+      !q || 
+      f.name.toLowerCase().includes(q) || 
+      (f.description && f.description.toLowerCase().includes(q)) ||
+      scheme.name.toLowerCase().includes(q) ||
+      scheme.code.toLowerCase().includes(q)
+    );
+
+    if (q && matchingFiles.length === 0) {
+      return;
+    }
+
+    totalRenderedSubjects++;
+    const color = getSubjectColor(scheme.name);
+
+    const section = document.createElement('div');
+    section.className = 'bp-subject-section';
+    section.id = `bp-subject-${scheme.code.toLowerCase()}`;
+
+    // Categories: slides, btl, exams, other
+    const categories = ['slides', 'btl', 'exams', 'other'];
+
+    const categoriesHtml = categories.map(catKey => {
+      const catInfo = getCategoryInfo(catKey);
+      const catFiles = matchingFiles.filter(f => f.category === catKey);
+
+      let filesListHtml = '';
+      if (catFiles.length === 0) {
+        filesListHtml = `<div class="bp-empty-cat"><i class="fa-regular fa-folder"></i> Chưa có tệp nào</div>`;
+      } else {
+        filesListHtml = catFiles.map(file => {
+          const fileIconInfo = getFileIcon(file.type, file.name);
+          return `
+            <div class="bp-file-item" id="file-${file.id}">
+              <div class="bp-file-info">
+                <i class="${fileIconInfo.icon} bp-file-icon ${fileIconInfo.cls}"></i>
+                <div class="bp-file-text">
+                  <span class="bp-file-name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</span>
+                  <div class="bp-file-meta">
+                    <span>${file.size || 'Tệp'}</span>
+                    ${file.isOffline ? `<span class="bp-offline-tag"><i class="fa-solid fa-circle-check"></i> Offline</span>` : ''}
+                    ${file.description ? `<span>• ${escapeHtml(file.description)}</span>` : ''}
+                  </div>
+                </div>
+              </div>
+              <div class="bp-file-actions">
+                <button class="btn-file-action" title="Xem trước tài liệu" onclick="previewFile('${file.id}')">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
+                ${file.driveUrl ? `
+                  <a href="${escapeHtml(file.driveUrl)}" target="_blank" rel="noopener noreferrer" class="btn-file-action" title="Mở trên Google Drive">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  </a>
+                ` : ''}
+                ${file.fileBlob ? `
+                  <button class="btn-file-action" title="Tải xuống máy" onclick="downloadOfflineFile('${file.id}')">
+                    <i class="fa-solid fa-download"></i>
+                  </button>
+                ` : ''}
+                ${file.isCustom ? `
+                  <button class="btn-file-action delete" title="Xóa tài liệu này" onclick="deleteCustomBackpackFile('${file.id}')">
+                    <i class="fa-regular fa-trash-can"></i>
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      return `
+        <div class="bp-category-card">
+          <div class="bp-cat-header">
+            <span><i class="${catInfo.icon}"></i> ${catInfo.label}</span>
+            <span class="bp-cat-badge">${catFiles.length}</span>
+          </div>
+          <div class="bp-file-list">
+            ${filesListHtml}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    section.innerHTML = `
+      <div class="bp-subject-header">
+        <div class="bp-subject-title-group">
+          <div class="bp-subject-icon" style="background-color: ${color.bg}; color: ${color.border}">
+            <i class="fa-solid fa-book-bookmark"></i>
+          </div>
+          <div>
+            <span class="bp-subject-name">${escapeHtml(scheme.name)}</span>
+            <span class="bp-subject-code">${escapeHtml(scheme.code)}</span>
+          </div>
+        </div>
+        <div>
+          <button class="btn-action-small" onclick="quickUploadForSubject('${scheme.code}')" title="Thêm tài liệu cho môn này">
+            <i class="fa-solid fa-plus"></i> Thêm tệp môn này
+          </button>
+        </div>
+      </div>
+      <div class="bp-categories-grid">
+        ${categoriesHtml}
+      </div>
+    `;
+
+    elements.backpackExplorer.appendChild(section);
+  });
+
+  if (totalRenderedSubjects === 0) {
+    elements.backpackExplorer.innerHTML = `
+      <div class="day-off-card" style="padding: 3.5rem 1rem;">
+        <div class="day-off-icon" style="font-size: 3rem;"><i class="fa-solid fa-magnifying-glass"></i></div>
+        <h3>Không tìm thấy tài liệu phù hợp</h3>
+        <p>Thử tìm kiếm với tên tài liệu khác hoặc chọn "Tất cả môn".</p>
+      </div>
+    `;
+  }
+}
+
+window.clearBackpackFilter = function() {
+  state.backpackFilterSubject = null;
+  renderBackpackView();
+};
+
+window.quickUploadForSubject = function(subjectCode) {
+  if (elements.linkSubjectSelect) {
+    elements.linkSubjectSelect.value = subjectCode;
+  }
+  elements.backpackFileInput.setAttribute('data-target-subject', subjectCode);
+  elements.backpackFileInput.click();
+};
+
+/**
+ * Navigate to Backpack View from Timetable item
+ */
+window.viewSubjectBackpack = function(subjectName) {
+  switchView('backpack');
+  
+  // Find matching scheme
+  const matched = GRADE_SCHEMES.find(s => 
+    s.name.toLowerCase().includes(subjectName.toLowerCase()) ||
+    subjectName.toLowerCase().includes(s.name.toLowerCase())
+  );
+
+  if (matched) {
+    state.backpackFilterSubject = matched.code;
+    renderBackpackView();
+
+    setTimeout(() => {
+      const section = document.getElementById(`bp-subject-${matched.code.toLowerCase()}`);
+      if (section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        section.style.borderColor = 'var(--accent-primary)';
+        section.style.boxShadow = '0 0 24px rgba(99, 102, 241, 0.45)';
+        setTimeout(() => {
+          section.style.borderColor = '';
+          section.style.boxShadow = '';
+        }, 2500);
+      }
+    }, 120);
+  }
+};
+
+/**
+ * Preview file modal handler
+ */
+window.previewFile = function(fileId) {
+  const file = state.backpackFiles.find(f => f.id === fileId);
+  if (!file) return;
+
+  const modal = elements.filePreviewModal;
+  const fileIconInfo = getFileIcon(file.type, file.name);
+
+  elements.previewFileName.textContent = file.name;
+  elements.previewFileSub.textContent = `${file.subjectCode} • ${file.size || 'Tài liệu'}`;
+  elements.previewFileIcon.className = `${fileIconInfo.icon} ${fileIconInfo.cls}`;
+
+  // Handle external open button
+  if (file.driveUrl) {
+    elements.previewOpenExtBtn.style.display = 'inline-flex';
+    elements.previewOpenExtBtn.href = file.driveUrl;
+  } else {
+    elements.previewOpenExtBtn.style.display = 'none';
+  }
+
+  // Handle download button
+  if (file.fileBlob) {
+    elements.previewDownloadBtn.style.display = 'inline-flex';
+    elements.previewDownloadBtn.onclick = () => downloadOfflineFile(file.id);
+  } else {
+    elements.previewDownloadBtn.style.display = 'none';
+  }
+
+  elements.previewModalBody.innerHTML = '';
+
+  // Render preview content
+  if (file.fileBlob) {
+    const objectUrl = URL.createObjectURL(file.fileBlob);
+    const ext = file.name.split('.').pop().toLowerCase();
+
+    if (ext === 'pdf') {
+      elements.previewModalBody.innerHTML = `
+        <iframe class="preview-iframe" src="${objectUrl}#toolbar=1&navpanes=1"></iframe>
+      `;
+    } else if (['png', 'jpg', 'jpeg', 'webp', 'svg'].includes(ext)) {
+      elements.previewModalBody.innerHTML = `
+        <img class="preview-img" src="${objectUrl}" alt="${escapeHtml(file.name)}">
+      `;
+    } else {
+      elements.previewModalBody.innerHTML = `
+        <div style="text-align: center; padding: 3rem;">
+          <i class="${fileIconInfo.icon}" style="font-size: 4rem; color: var(--accent-primary); margin-bottom: 1rem;"></i>
+          <h3>${escapeHtml(file.name)}</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Tài liệu đã được lưu trữ Offline trên máy của bạn.</p>
+          <button class="btn-primary-small" onclick="downloadOfflineFile('${file.id}')">
+            <i class="fa-solid fa-download"></i> Tải về máy để mở
+          </button>
+        </div>
+      `;
+    }
+  } else if (file.driveUrl) {
+    // If it's a Drive URL, embed Google Drive preview or open button
+    let embedUrl = file.driveUrl;
+    if (embedUrl.includes('drive.google.com/file/d/')) {
+      embedUrl = embedUrl.replace(/\/view.*$/, '/preview');
+    }
+
+    elements.previewModalBody.innerHTML = `
+      <iframe class="preview-iframe" src="${embedUrl}" allow="autoplay"></iframe>
+    `;
+  }
+
+  modal.classList.remove('hidden');
+};
+
+window.downloadOfflineFile = function(fileId) {
+  const file = state.backpackFiles.find(f => f.id === fileId);
+  if (!file || !file.fileBlob) return;
+
+  const url = URL.createObjectURL(file.fileBlob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = file.name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast(`Đang tải xuống: ${file.name}`);
+};
+
+window.deleteCustomBackpackFile = async function(fileId) {
+  if (!confirm('Bạn có chắc chắn muốn xóa tài liệu này khỏi Chiếc cặp?')) return;
+  await deleteFileFromIndexedDB(fileId);
+  state.backpackFiles = state.backpackFiles.filter(f => f.id !== fileId);
+  renderBackpackView();
+  showToast('Đã xóa tài liệu khỏi Chiếc cặp');
+};
+
+/**
+ * Handle new files upload (Drag & Drop or File Input)
+ */
+async function handleFilesUpload(filesList, targetSubject = null) {
+  if (!filesList || filesList.length === 0) return;
+
+  let addedCount = 0;
+  for (let i = 0; i < filesList.length; i++) {
+    const file = filesList[i];
+    const subjectCode = targetSubject || state.backpackFilterSubject || 'CO3117'; // default to CO3117 if none selected
+    const ext = file.name.split('.').pop().toLowerCase();
+    
+    // Categorize
+    let category = 'slides';
+    if (file.name.toLowerCase().includes('btl') || file.name.toLowerCase().includes('nhom')) category = 'btl';
+    if (file.name.toLowerCase().includes('thi') || file.name.toLowerCase().includes('de')) category = 'exams';
+
+    const fileItem = {
+      id: 'custom-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+      subjectCode: subjectCode,
+      category: category,
+      name: file.name,
+      type: ext,
+      size: (file.size / (1024 * 1024) > 1) ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` : `${Math.round(file.size / 1024)} KB`,
+      updatedAt: new Date().toISOString().split('T')[0],
+      fileBlob: file,
+      isOffline: true,
+      isCustom: true,
+      description: 'Tài liệu tải lên lưu trữ Offline'
+    };
+
+    await saveFileToIndexedDB(fileItem);
+    state.backpackFiles.unshift(fileItem);
+    addedCount++;
+  }
+
+  renderBackpackView();
+  showToast(`Đã lưu thành công ${addedCount} tệp vào Chiếc cặp (Offline)!`);
+}
+
+/* ==========================================================================
+   INTERACTION HELPERS & UTILS
+   ========================================================================== */
+
 function renderMarkdownInline(text) {
   if (!text) return '';
   let safe = escapeHtml(text);
-  // [text](url) -> <a href="url" target="_blank" rel="noopener noreferrer">text</a>
   safe = safe.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: var(--primary-light); text-decoration: underline;">$1</a>');
-  // **bold** -> <strong>bold</strong>
   safe = safe.replace(/\*\*(.*?)\*\*/g, '<strong style="color: var(--text-primary); font-weight: 700;">$1</strong>');
-  // *italic* -> <em>italic</em>
   safe = safe.replace(/\*(.*?)\*/g, '<em>$1</em>');
   return safe;
 }
 
-/**
- * Render Notes and Reminders
- */
 function renderNotesView(notes) {
   if (!notes || notes.length === 0) {
     elements.notesSection.style.display = 'none';
@@ -836,9 +1545,6 @@ function renderNotesView(notes) {
   `;
 }
 
-/**
- * Determines and displays next class in hero banner
- */
 function updateNextClassBadge(days, currentDayOfWeek) {
   const todayDay = days.find(d => d.dayOfWeekNumber === currentDayOfWeek);
   
@@ -847,7 +1553,6 @@ function updateNextClassBadge(days, currentDayOfWeek) {
     elements.nextClassName.textContent = firstClass.subject;
     elements.nextClassDetail.innerHTML = `<i class="fa-solid fa-location-dot"></i> ${escapeHtml(firstClass.room)} | <i class="fa-regular fa-clock"></i> ${escapeHtml(firstClass.timeRange)}`;
   } else {
-    // Find next upcoming class in future days of the week
     let foundNext = null;
     let foundDayName = '';
 
@@ -871,13 +1576,6 @@ function updateNextClassBadge(days, currentDayOfWeek) {
   }
 }
 
-/* ==========================================================================
-   DATA LOADING & MANAGEMENT
-   ========================================================================== */
-
-/**
- * Loads list of weeks from schedules/index.json if available
- */
 async function loadWeeksIndex() {
   try {
     const res = await fetch('schedules/index.json');
@@ -891,7 +1589,6 @@ async function loadWeeksIndex() {
     console.warn('Could not fetch schedules/index.json, using fallback weeks.', err);
   }
 
-  // Populate Select Dropdown
   elements.weekSelect.innerHTML = '';
   state.weeksList.forEach(w => {
     const opt = document.createElement('option');
@@ -903,9 +1600,6 @@ async function loadWeeksIndex() {
   elements.weekSelect.value = state.currentWeekFile;
 }
 
-/**
- * Loads a Markdown file content
- */
 async function loadWeekMarkdown(filePath) {
   state.currentWeekFile = filePath;
   elements.weekSelect.value = filePath;
@@ -933,10 +1627,6 @@ async function loadWeekMarkdown(filePath) {
   state.parsedSchedule = parseScheduleMarkdown(markdownContent);
   renderSchedule();
 }
-
-/* ==========================================================================
-   INTERACTION HELPERS & UTILS
-   ========================================================================== */
 
 function showToast(message) {
   const toast = document.createElement('div');
@@ -967,7 +1657,7 @@ function updateCurrentClock() {
   const now = new Date();
   const dayNames = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
   const dayStr = dayNames[now.getDay()];
-  const dateStr = now.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const dateStr = now.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
   const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
   elements.currentDateText.textContent = `${dayStr}, ${dateStr} • ${timeStr}`;
 }
@@ -977,15 +1667,19 @@ function switchView(viewName) {
   elements.viewGridBtn.classList.toggle('active', viewName === 'grid');
   elements.viewTodayBtn.classList.toggle('active', viewName === 'today');
   elements.viewGradesBtn.classList.toggle('active', viewName === 'grades');
+  elements.viewBackpackBtn.classList.toggle('active', viewName === 'backpack');
   elements.viewRawBtn.classList.toggle('active', viewName === 'raw');
 
   elements.gridViewContainer.classList.toggle('active', viewName === 'grid');
   elements.todayViewContainer.classList.toggle('active', viewName === 'today');
   elements.gradesViewContainer.classList.toggle('active', viewName === 'grades');
+  elements.backpackViewContainer.classList.toggle('active', viewName === 'backpack');
   elements.rawViewContainer.classList.toggle('active', viewName === 'raw');
 
   if (viewName === 'grades') {
     renderGradesView(state.gradesSearchQuery);
+  } else if (viewName === 'backpack') {
+    renderBackpackView();
   }
 }
 
@@ -1031,6 +1725,7 @@ function setupEventListeners() {
   elements.viewGridBtn.addEventListener('click', () => switchView('grid'));
   elements.viewTodayBtn.addEventListener('click', () => switchView('today'));
   elements.viewGradesBtn.addEventListener('click', () => switchView('grades'));
+  elements.viewBackpackBtn.addEventListener('click', () => switchView('backpack'));
   elements.viewRawBtn.addEventListener('click', () => switchView('raw'));
 
   // Search Box
@@ -1054,6 +1749,142 @@ function setupEventListeners() {
       renderGradesView(state.gradesSearchQuery);
     });
   }
+
+  // Backpack Search Box
+  if (elements.backpackSearchInput) {
+    elements.backpackSearchInput.addEventListener('input', (e) => {
+      state.backpackSearchQuery = e.target.value.trim();
+      elements.bpClearSearchBtn.classList.toggle('hidden', !state.backpackSearchQuery);
+      renderBackpackView();
+    });
+  }
+
+  if (elements.bpClearSearchBtn) {
+    elements.bpClearSearchBtn.addEventListener('click', () => {
+      elements.backpackSearchInput.value = '';
+      state.backpackSearchQuery = '';
+      elements.bpClearSearchBtn.classList.add('hidden');
+      renderBackpackView();
+    });
+  }
+
+  // Backpack Upload Actions
+  if (elements.bpUploadBtn) {
+    elements.bpUploadBtn.addEventListener('click', () => {
+      elements.backpackFileInput.removeAttribute('data-target-subject');
+      elements.backpackFileInput.click();
+    });
+  }
+
+  if (elements.backpackFileInput) {
+    elements.backpackFileInput.addEventListener('change', (e) => {
+      const targetSub = elements.backpackFileInput.getAttribute('data-target-subject');
+      handleFilesUpload(e.target.files, targetSub);
+      elements.backpackFileInput.value = '';
+    });
+  }
+
+  // Drag and Drop Zone
+  if (elements.backpackDropzone) {
+    elements.backpackDropzone.addEventListener('click', () => {
+      elements.backpackFileInput.removeAttribute('data-target-subject');
+      elements.backpackFileInput.click();
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      elements.backpackDropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        elements.backpackDropzone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      elements.backpackDropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        elements.backpackDropzone.classList.remove('dragover');
+      });
+    });
+
+    elements.backpackDropzone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      handleFilesUpload(files);
+    });
+  }
+
+  // Add Link Modal
+  if (elements.bpAddLinkBtn) {
+    elements.bpAddLinkBtn.addEventListener('click', () => {
+      elements.addLinkModal.classList.remove('hidden');
+    });
+  }
+
+  if (elements.addLinkCloseBtn) {
+    elements.addLinkCloseBtn.addEventListener('click', () => {
+      elements.addLinkModal.classList.add('hidden');
+    });
+  }
+
+  if (elements.addLinkCancelBtn) {
+    elements.addLinkCancelBtn.addEventListener('click', () => {
+      elements.addLinkModal.classList.add('hidden');
+    });
+  }
+
+  if (elements.addLinkForm) {
+    elements.addLinkForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const subject = elements.linkSubjectSelect.value;
+      const category = elements.linkCategorySelect.value;
+      const name = elements.linkNameInput.value.trim();
+      const url = elements.linkUrlInput.value.trim();
+
+      if (!name || !url) return;
+
+      const newLinkItem = {
+        id: 'link-' + Date.now(),
+        subjectCode: subject,
+        category: category,
+        name: name,
+        type: url.includes('drive.google.com') ? 'drive' : 'link',
+        size: 'Liên kết',
+        updatedAt: new Date().toISOString().split('T')[0],
+        driveUrl: url,
+        isOffline: false,
+        isCustom: true,
+        description: 'Liên kết do bạn thêm'
+      };
+
+      await saveFileToIndexedDB(newLinkItem);
+      state.backpackFiles.unshift(newLinkItem);
+      renderBackpackView();
+
+      elements.addLinkForm.reset();
+      elements.addLinkModal.classList.add('hidden');
+      showToast(`Đã thêm liên kết: ${name}`);
+    });
+  }
+
+  // Preview Modal Close
+  if (elements.previewCloseBtn) {
+    elements.previewCloseBtn.addEventListener('click', () => {
+      elements.filePreviewModal.classList.add('hidden');
+      elements.previewModalBody.innerHTML = '';
+    });
+  }
+
+  // Close modals when clicking backdrop
+  window.addEventListener('click', (e) => {
+    if (e.target === elements.filePreviewModal) {
+      elements.filePreviewModal.classList.add('hidden');
+      elements.previewModalBody.innerHTML = '';
+    }
+    if (e.target === elements.addLinkModal) {
+      elements.addLinkModal.classList.add('hidden');
+    }
+  });
 
   // Print Button
   elements.printScheduleBtn.addEventListener('click', () => {
@@ -1082,7 +1913,7 @@ function setupEventListeners() {
 }
 
 /* ==========================================================================
-   APP INITIALIZATION
+   APP INITIALIZATION & PWA SERVICE WORKER
    ========================================================================== */
 
 async function init() {
@@ -1101,12 +1932,27 @@ async function init() {
   // Setup Event Listeners
   setupEventListeners();
 
-  // Initial render of Grades View
+  // Load custom offline files from IndexedDB and combine with defaults
+  const dbFiles = await getAllFilesFromIndexedDB();
+  state.backpackFiles = [...dbFiles, ...DEFAULT_BACKPACK_ITEMS];
+
+  // Initial render of Views
   renderGradesView();
+  renderBackpackView();
 
   // Load available weeks and load initial week
   await loadWeeksIndex();
   await loadWeekMarkdown(state.currentWeekFile);
+
+  // Register PWA Service Worker for Offline capability
+  if ('serviceWorker' in navigator) {
+    try {
+      const reg = await navigator.serviceWorker.register('./sw.js');
+      console.log('PWA Service Worker đã kích hoạt:', reg.scope);
+    } catch (err) {
+      console.warn('Không thể đăng ký Service Worker:', err);
+    }
+  }
 }
 
 // Run when DOM is ready

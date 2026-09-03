@@ -10,9 +10,18 @@ Hệ thống quản lý thời khóa biểu & lịch học sinh viên thông min
 - 🎨 **Giao diện Glassmorphism Hiện Đại**: Hỗ trợ Dark / Light Theme, tối ưu hiển thị mượt mà trên cả Điện thoại và Máy tính.
 - 🧠 **Bộ phân tích Markdown thông minh**: Tự động nhận diện giờ học, tiết học, môn học, phòng học, cơ sở (CS1/CS2) và các mục lưu ý.
 - 🌈 **Tự động gắn nhãn màu môn học**: Mỗi môn học tự động được tạo mã màu riêng biệt giúp dễ nhìn.
+- 🎒 **Chiếc Cặp Thông Minh (Smart Backpack & Offline Drive)**:
+  - Hệ thống quản lý tệp tin (File Explorer) độc lập theo từng môn học: Slide bài giảng, Bài tập lớn, Đề thi cũ, Thư mục Google Drive.
+  - Lưu trữ tài liệu **Offline 100% bằng IndexedDB**: Kéo thả file PDF, Slide vào web để lưu trực tiếp trong máy tính/điện thoại, mất mạng vẫn mở đọc bài giảng bình thường.
+  - Trình xem trước tệp tích hợp (In-App Preview Modal): Đọc trực tiếp PDF/ảnh/link Drive ngay trong trang web.
+- 📱 **Hỗ trợ cài đặt App Điện Thoại (Progressive Web App - PWA)**:
+  - Cài đặt trực tiếp lên màn hình chính (Add to Home Screen) trên iPhone và Android, chạy toàn màn hình như ứng dụng native.
+  - Tích hợp **Service Worker** hỗ trợ chạy offline hoàn toàn khi không có mạng Wi-Fi/4G trên giảng đường.
+- 📊 **Tỉ Lệ Điểm Thành Phần Các Môn (Grade Breakdown)**: Biểu đồ tròn tương tác (Donut Chart) trực quan hóa trọng số kiểm tra giữa kỳ, bài tập lớn, thi cuối kỳ theo chuẩn đề cương.
 - 🕒 **Chế độ xem đa dạng**:
   - **Lưới tuần (Week Grid)**: Xem toàn bộ các thứ trong tuần.
   - **Hôm nay (Today Focus)**: Tập trung hiển thị lịch học của ngày hiện tại và đếm ngược tiết học kế tiếp.
+  - **Chiếc cặp (Backpack)**: Quản lý toàn bộ kho tài liệu và slide các môn.
   - **Xem & Sửa Markdown trực tiếp (Live Editor)**: Cho phép sửa và kiểm tra nhanh hiển thị trước khi lưu.
 - 🔍 **Tìm kiếm & Lọc**: Tìm kiếm theo tên môn, phòng học, hoặc lọc theo từng môn học chỉ với 1 cú nhấp chuột.
 - 🖨️ **Hỗ trợ In ấn / Xuất PDF**: Có nút in được tối ưu riêng biệt cho trang giấy A4.

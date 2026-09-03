@@ -14,6 +14,14 @@
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
+  <!-- PWA Manifest & Mobile Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6366f1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Lịch Học & Cặp">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎒</text></svg>">
+  
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="theme-dark">
@@ -64,6 +72,9 @@
           </button>
           <button id="view-grades-btn" class="btn-toggle" title="Xem Tỉ lệ điểm thành phần các môn">
             <i class="fa-solid fa-chart-pie"></i> <span class="btn-text">Tỉ lệ điểm</span>
+          </button>
+          <button id="view-backpack-btn" class="btn-toggle" title="Chiếc cặp thông minh (Tài liệu & Offline Drive)">
+            <i class="fa-solid fa-briefcase"></i> <span class="btn-text">Chiếc cặp</span>
           </button>
           <button id="view-raw-btn" class="btn-toggle" title="Xem Markdown gốc">
             <i class="fa-brands fa-markdown"></i> <span class="btn-text">Markdown</span>
@@ -171,7 +182,67 @@
         </div>
       </section>
 
-      <!-- VIEW 4: Raw Markdown View & Live Editor -->
+      <!-- VIEW 4: Smart Backpack (Chiếc Cặp Thông Minh) -->
+      <section id="backpack-view-container" class="view-panel">
+        <div class="backpack-hero-card">
+          <div class="backpack-hero-info">
+            <div class="badge-backpack"><i class="fa-solid fa-briefcase"></i> Chiếc Cặp Thông Minh 🎒</div>
+            <h2 class="backpack-main-title">Kho Tài Liệu & Drive Học Tập Độc Lập</h2>
+            <p class="backpack-subtitle">Hỗ trợ lưu trữ bài giảng, slide, đề thi Offline (IndexedDB) và đồng bộ Google Drive. Kéo thả file để lưu trữ ngay!</p>
+          </div>
+          <div class="backpack-stats-pills">
+            <div class="bp-stat" id="bp-stat-storage" title="Dung lượng đã lưu trữ trong máy">
+              <i class="fa-solid fa-database"></i> <span id="bp-storage-text">Offline: 0 MB</span>
+            </div>
+            <div class="bp-stat" title="Tổng số tài liệu">
+              <i class="fa-solid fa-file-lines"></i> <span id="bp-files-count">0 tài liệu</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Backpack Toolbar & Actions -->
+        <div class="backpack-toolbar">
+          <div class="bp-actions-left">
+            <input type="file" id="backpack-file-input" multiple style="display: none;">
+            <button id="bp-upload-btn" class="btn-bp-action btn-bp-primary" title="Tải file từ máy tính lưu vào cặp">
+              <i class="fa-solid fa-cloud-arrow-up"></i> <span>Tải tệp vào máy (Offline)</span>
+            </button>
+            <button id="bp-add-link-btn" class="btn-bp-action btn-bp-secondary" title="Gắn liên kết Google Drive hoặc website">
+              <i class="fa-brands fa-google-drive"></i> <span>Thêm Link Drive</span>
+            </button>
+          </div>
+
+          <div class="bp-search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="backpack-search-input" placeholder="Tìm tài liệu, slide, đề cương..." autocomplete="off">
+            <button id="bp-clear-search-btn" class="btn-clear hidden" title="Xóa tìm kiếm"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <!-- Subject Filter Tabs for Backpack -->
+        <div class="backpack-filter-tags" id="backpack-subject-tags">
+          <!-- Dynamically populated subjects -->
+        </div>
+
+        <!-- Breadcrumbs Navigation -->
+        <div class="backpack-breadcrumbs" id="backpack-breadcrumbs">
+          <span class="crumb active"><i class="fa-solid fa-house"></i> Tất cả môn học</span>
+        </div>
+
+        <!-- Drag and Drop Zone -->
+        <div class="backpack-dropzone" id="backpack-dropzone">
+          <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+          <p class="drop-text">Kéo thả tệp PDF, Slide PPTX, Word, Ảnh vào đây để lưu trữ Offline</p>
+          <span class="drop-sub">Tài liệu lưu trực tiếp trong máy tính / điện thoại của bạn, không cần internet</span>
+        </div>
+
+        <!-- Files & Folders Container -->
+        <div class="backpack-explorer" id="backpack-explorer">
+          <!-- Dynamically rendered folders and files -->
+        </div>
+      </section>
+
+      <!-- VIEW 5: Raw Markdown View & Live Editor -->
       <section id="raw-view-container" class="view-panel">
         <div class="raw-markdown-card">
           <div class="raw-card-header">
@@ -262,6 +333,80 @@
 
   <!-- Toast Notification Container -->
   <div id="toast-container" class="toast-container"></div>
+
+  <!-- Modal 1: In-App File Preview Modal -->
+  <div id="file-preview-modal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <i id="preview-file-icon" class="fa-solid fa-file-pdf"></i>
+          <div>
+            <h4 id="preview-file-name">Tên tệp tin</h4>
+            <span id="preview-file-sub">Xem trước tài liệu</span>
+          </div>
+        </div>
+        <div class="modal-header-actions">
+          <a id="preview-open-ext-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn-modal-action" title="Mở trong tab mới">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+          <button id="preview-download-btn" class="btn-modal-action" title="Tải về máy">
+            <i class="fa-solid fa-download"></i>
+          </button>
+          <button id="preview-close-btn" class="btn-modal-action btn-close" title="Đóng">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+      <div class="modal-body" id="preview-modal-body">
+        <!-- Embedded preview content -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Add Custom Google Drive Link -->
+  <div id="add-link-modal" class="modal-backdrop hidden">
+    <div class="modal-card modal-card-sm">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <i class="fa-brands fa-google-drive" style="color: #34a853; font-size: 1.3rem;"></i>
+          <div>
+            <h4>Thêm Liên Kết Google Drive</h4>
+            <span style="font-size: 0.78rem; color: var(--text-muted);">Gắn link folder hoặc file vào Chiếc cặp</span>
+          </div>
+        </div>
+        <button id="add-link-close-btn" class="btn-modal-action btn-close" title="Đóng"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="add-link-form" class="modal-form">
+        <div class="form-group">
+          <label for="link-subject-select">Môn học</label>
+          <select id="link-subject-select" required>
+            <!-- Subjects options -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="link-category-select">Loại tài liệu</label>
+          <select id="link-category-select" required>
+            <option value="slides">📂 Slide & Bài giảng</option>
+            <option value="btl">📂 Bài tập lớn & Đồ án nhóm</option>
+            <option value="exams">📂 Đề thi & Ôn tập</option>
+            <option value="other">📂 Thư mục Google Drive chung</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="link-name-input">Tên tài liệu / Thư mục</label>
+          <input type="text" id="link-name-input" placeholder="Ví dụ: Slide Bài 1-5 hoặc Folder BTL Nhóm" required>
+        </div>
+        <div class="form-group">
+          <label for="link-url-input">Đường dẫn Google Drive / Web</label>
+          <input type="url" id="link-url-input" placeholder="https://drive.google.com/..." required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="add-link-cancel-btn" class="btn-action-small">Hủy</button>
+          <button type="submit" class="btn-primary-small"><i class="fa-solid fa-plus"></i> Lưu vào cặp</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>
