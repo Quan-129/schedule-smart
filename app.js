@@ -900,6 +900,18 @@ function renderBackpackView() {
     const card = document.createElement('div');
     card.className = 'bp-drive-card';
     card.id = `bp-card-${subject.code.toLowerCase()}`;
+    card.style.borderLeft = `4px solid ${color}`;
+
+    // Calculate link count for this subject
+    let linkCountText = 'Chưa gắn Drive';
+    const totalSubLinks = links.length;
+    if (subject.driveUrl && totalSubLinks > 0) {
+      linkCountText = `Drive + ${totalSubLinks} link`;
+    } else if (subject.driveUrl) {
+      linkCountText = '1 Folder Drive';
+    } else if (totalSubLinks > 0) {
+      linkCountText = `${totalSubLinks} link con`;
+    }
 
     // Main Google Drive Folder button or Prompt
     let mainDriveHtml = '';
@@ -907,7 +919,7 @@ function renderBackpackView() {
       mainDriveHtml = `
         <div class="bp-main-drive-action">
           <a href="${escapeHtml(subject.driveUrl)}" target="_blank" rel="noopener noreferrer" class="btn-main-drive-active" title="Mở thư mục Google Drive chính của môn">
-            <span><i class="fa-brands fa-google-drive"></i> Mở Google Drive môn học</span>
+            <span><i class="fa-brands fa-google-drive"></i> Mở Folder Google Drive</span>
             <i class="fa-solid fa-arrow-up-right-from-square"></i>
           </a>
         </div>
@@ -916,7 +928,7 @@ function renderBackpackView() {
       mainDriveHtml = `
         <div class="bp-main-drive-action">
           <button class="btn-main-drive-empty" onclick="editSubjectMainDrive('${subject.code}')" title="Gắn đường dẫn Google Drive của môn này">
-            <i class="fa-brands fa-google-drive"></i> Gắn link Google Drive môn học
+            <i class="fa-brands fa-google-drive"></i> Gắn link Google Drive của môn
           </button>
         </div>
       `;
@@ -954,17 +966,20 @@ function renderBackpackView() {
     card.innerHTML = `
       <div class="bp-drive-card-header">
         <div class="bp-drive-title-group">
-          <div class="bp-drive-icon-badge" style="background-color: ${color}22; color: ${color};">
+          <div class="bp-drive-icon-badge" style="background-color: ${color}22; color: ${color}; border-color: ${color}44;">
             <i class="fa-solid fa-book-bookmark"></i>
           </div>
           <div class="bp-drive-name-group">
             <h3 class="bp-drive-subject-name">${escapeHtml(subject.name)}</h3>
-            <span class="bp-drive-subject-code">${escapeHtml(subject.code)}</span>
+            <div class="bp-drive-badges">
+              <span class="bp-drive-subject-code">${escapeHtml(subject.code)}</span>
+              <span class="bp-drive-link-count">${escapeHtml(linkCountText)}</span>
+            </div>
           </div>
         </div>
         ${subject.driveUrl ? `
-          <button class="btn-file-action" title="Đổi link Drive chính" onclick="editSubjectMainDrive('${subject.code}')" style="width: 28px; height: 28px;">
-            <i class="fa-solid fa-pen" style="font-size: 0.75rem;"></i>
+          <button class="btn-drive-action" title="Đổi link Drive chính" onclick="editSubjectMainDrive('${subject.code}')">
+            <i class="fa-solid fa-pen"></i>
           </button>
         ` : ''}
       </div>
@@ -984,7 +999,7 @@ function renderBackpackView() {
 
   if (renderedCount === 0) {
     elements.backpackExplorer.innerHTML = `
-      <div class="day-off-card" style="padding: 3.5rem 1rem;">
+      <div class="day-off-card" style="grid-column: 1 / -1; padding: 3.5rem 1rem;">
         <div class="day-off-icon" style="font-size: 3rem;"><i class="fa-solid fa-magnifying-glass"></i></div>
         <h3>Không tìm thấy môn học</h3>
         <p>Thử tìm kiếm với tên môn hoặc mã môn khác...</p>

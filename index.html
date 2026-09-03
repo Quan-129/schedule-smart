@@ -184,44 +184,33 @@
 
       <!-- VIEW 4: Smart Backpack (Chiếc Cặp Google Drive) -->
       <section id="backpack-view-container" class="view-panel">
-        <div class="backpack-hero-card">
-          <div class="backpack-hero-info">
+        <div class="backpack-header-card">
+          <div class="backpack-header-info">
             <div class="badge-backpack"><i class="fa-brands fa-google-drive"></i> Chiếc Cặp Google Drive 🎒</div>
-            <h2 class="backpack-main-title">Kho Liên Kết Google Drive Từng Môn Học</h2>
-            <p class="backpack-subtitle">Gắn thư mục Google Drive, slide bài giảng & link nộp bài của từng môn để truy cập nhanh 1-chạm mọi lúc mọi nơi.</p>
+            <h2 class="backpack-main-title">Kho Thư Mục Google Drive Theo Môn</h2>
+            <p class="backpack-subtitle">Kết nối trực tiếp thư mục Google Drive của từng môn để mở tài liệu, slide bài giảng & đề thi 1-chạm</p>
           </div>
-          <div class="backpack-stats-pills">
-            <div class="bp-stat" title="Số môn học">
-              <i class="fa-solid fa-graduation-cap"></i> <span id="bp-subjects-count">7 Môn học</span>
-            </div>
-            <div class="bp-stat" title="Tổng số liên kết Drive đã gắn">
-              <i class="fa-brands fa-google-drive" style="color: #34a853;"></i> <span id="bp-files-count">0 Liên kết Drive</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Backpack Toolbar & Actions (Pure Google Drive) -->
-        <div class="backpack-toolbar">
-          <div class="bp-actions-left">
-            <button id="bp-add-link-btn" class="btn-bp-action btn-bp-primary" title="Thêm liên kết Google Drive cho môn học">
-              <i class="fa-solid fa-plus"></i> <span>Gắn Link Drive mới</span>
-            </button>
-            <div class="backpack-filter-tags" id="backpack-subject-tags" style="margin-bottom: 0; padding-bottom: 0;">
-              <!-- Subject filter pills -->
-            </div>
-          </div>
-
-          <div class="bp-actions-right">
-            <div class="bp-search-box">
+          <div class="backpack-header-actions">
+            <div class="backpack-filter-box">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" id="backpack-search-input" placeholder="Tìm môn học, liên kết Drive..." autocomplete="off">
+              <input type="text" id="backpack-search-input" placeholder="Lọc môn học, tài liệu..." autocomplete="off">
               <button id="bp-clear-search-btn" class="btn-clear hidden" title="Xóa tìm kiếm"><i class="fa-solid fa-xmark"></i></button>
             </div>
+            <button id="bp-add-link-btn" class="btn-bp-action btn-bp-primary" title="Thêm liên kết Google Drive">
+              <i class="fa-solid fa-plus"></i> <span>Gắn Link Mới</span>
+            </button>
           </div>
         </div>
 
-        <!-- Drive Subjects Explorer Grid -->
-        <div class="backpack-explorer" id="backpack-explorer">
+        <!-- Subject Filter Pills (Đồng bộ chuẩn giao diện) -->
+        <div class="backpack-filter-bar">
+          <div class="filter-tags" id="backpack-subject-tags">
+            <!-- Dynamically populated tags -->
+          </div>
+        </div>
+
+        <!-- Drive Subjects Grid -->
+        <div class="backpack-grid" id="backpack-explorer">
           <!-- Dynamically rendered Google Drive subject cards -->
         </div>
       </section>
