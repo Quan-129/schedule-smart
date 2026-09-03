@@ -903,6 +903,8 @@ function renderBackpackView() {
     btn.addEventListener('mouseleave', cancelPress);
     btn.addEventListener('touchend', cancelPress);
     btn.addEventListener('touchcancel', cancelPress);
+    btn.addEventListener('selectstart', (e) => e.preventDefault());
+    btn.addEventListener('dragstart', (e) => e.preventDefault());
     
     btn.addEventListener('contextmenu', (e) => {
       e.preventDefault();
