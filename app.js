@@ -1,6 +1,6 @@
 /**
  * ==========================================================================
- * LỊCH HỌC MARKDOWN HUB & CHIẾC CẶP GOOGLE DRIVE (SPEED-DIAL 1-CHẠM)
+ * LỊCH HỌC MARKDOWN HUB & CHIẾC CẶP GOOGLE DRIVE (SPEED-DIAL & iOS JIGGLE DELETE)
  * ==========================================================================
  */
 
@@ -195,6 +195,7 @@ const state = {
   gradesSearchQuery: '',
   backpackSearchQuery: '',
   activeView: 'grid', // 'grid', 'today', 'grades', 'backpack', 'raw'
+  isJiggleMode: false, // iOS Jiggle Delete Mode state
   weeksList: [
     { id: 'tuan-35', title: 'Tuần 35', filename: 'schedules/tuan-35.md' },
     { id: 'tuan-36', title: 'Tuần 36', filename: 'schedules/tuan-36.md' }
@@ -233,6 +234,7 @@ const elements = {
   // Speed Dial Backpack Elements
   backpackLauncherGrid: document.getElementById('backpack-launcher-grid'),
   bpAddSubjectBtn: document.getElementById('bp-add-subject-btn'),
+  bpDoneJiggleBtn: document.getElementById('bp-done-jiggle-btn'),
   backpackSearchInput: document.getElementById('backpack-search-input'),
   bpClearSearchBtn: document.getElementById('bp-clear-search-btn'),
   
@@ -382,7 +384,7 @@ function getSubjectColor(subjectName) {
 
 /* ==========================================================================
    SCHEDULE RENDERING
-   ========================================================================== */
+   ========================================================================= */
 
 function renderSchedule() {
   if (!state.parsedSchedule) return;
@@ -775,7 +777,7 @@ window.viewSubjectGrade = function(subjectName) {
 };
 
 /* ==========================================================================
-   SPEED-DIAL 1-CHẠM GOOGLE DRIVE (CHIẾC CẶP)
+   SPEED-DIAL 1-CHẠM GOOGLE DRIVE & iOS JIGGLE DELETE
    ========================================================================== */
 
 function loadDriveData() {
@@ -803,6 +805,55 @@ function saveDriveData() {
 }
 
 /**
+ * Enter iOS Jiggle / Wiggle Mode
+ */
+function enterJiggleMode() {
+  state.isJiggleMode = true;
+  if (elements.backpackLauncherGrid) {
+    elements.backpackLauncherGrid.classList.add('is-jiggle-mode');
+  }
+  if (elements.bpDoneJiggleBtn) {
+    elements.bpDoneJiggleBtn.classList.remove('hidden');
+  }
+  if (navigator.vibrate) {
+    try { navigator.vibrate([40, 30, 40]); } catch (e) {}
+  }
+  renderBackpackView();
+  showToast('Đang ở chế độ chỉnh sửa: Bấm (-) để xóa môn học!');
+}
+
+/**
+ * Exit iOS Jiggle Mode
+ */
+function exitJiggleMode() {
+  state.isJiggleMode = false;
+  if (elements.backpackLauncherGrid) {
+    elements.backpackLauncherGrid.classList.remove('is-jiggle-mode');
+  }
+  if (elements.bpDoneJiggleBtn) {
+    elements.bpDoneJiggleBtn.classList.add('hidden');
+  }
+  renderBackpackView();
+}
+
+/**
+ * Delete a subject from Backpack
+ */
+window.deleteSubjectCard = function(subjectCode, event) {
+  if (event) event.stopPropagation();
+
+  const subject = state.driveSubjects.find(s => s.code === subjectCode);
+  if (!subject) return;
+
+  if (confirm(`Bạn có chắc muốn xóa môn "${subject.name}" (${subject.code}) khỏi Chiếc Cặp?`)) {
+    state.driveSubjects = state.driveSubjects.filter(s => s.code !== subjectCode);
+    saveDriveData();
+    renderBackpackView();
+    showToast(`Đã xóa môn ${subject.name}!`);
+  }
+};
+
+/**
  * Render square App Launcher buttons in Backpack
  */
 function renderBackpackView() {
@@ -826,10 +877,53 @@ function renderBackpackView() {
     btn.style.setProperty('--app-color', color);
     btn.setAttribute('title', hasDrive ? `Mở Google Drive môn ${subject.name} ↗` : `Chưa có link Drive. Bấm để gắn link môn ${subject.name}`);
     
-    // Direct 1-click to open Google Drive
-    btn.onclick = () => handleSubjectClick(subject.code);
+    // Long-press detection variables
+    let pressTimer = null;
+    let isLongPressTriggered = false;
+
+    const startPress = (e) => {
+      if (state.isJiggleMode) return;
+      isLongPressTriggered = false;
+      pressTimer = setTimeout(() => {
+        isLongPressTriggered = true;
+        enterJiggleMode();
+      }, 480);
+    };
+
+    const cancelPress = () => {
+      if (pressTimer) {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+      }
+    };
+
+    btn.addEventListener('mousedown', startPress);
+    btn.addEventListener('touchstart', startPress, { passive: true });
+    btn.addEventListener('mouseup', cancelPress);
+    btn.addEventListener('mouseleave', cancelPress);
+    btn.addEventListener('touchend', cancelPress);
+    btn.addEventListener('touchcancel', cancelPress);
+    
+    btn.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      if (!state.isJiggleMode) enterJiggleMode();
+    });
+
+    btn.onclick = (e) => {
+      if (isLongPressTriggered) return;
+      if (state.isJiggleMode) return; // In jiggle mode, clicking card does nothing
+      handleSubjectClick(subject.code);
+    };
+
+    // Build Card HTML (Delete badge if jiggle mode, pencil if normal)
+    const deleteBadgeHtml = state.isJiggleMode ? `
+      <button class="btn-delete-node-badge" title="Xóa môn ${escapeHtml(subject.name)}" onclick="deleteSubjectCard('${escapeHtml(subject.code)}', event)">
+        <i class="fa-solid fa-minus"></i>
+      </button>
+    ` : '';
 
     btn.innerHTML = `
+      ${deleteBadgeHtml}
       <div class="bp-app-top">
         <span class="bp-app-code">${escapeHtml(subject.code)}</span>
         <button class="btn-edit-node-pencil" title="Chỉnh sửa link Google Drive" onclick="editSubjectDriveLink('${escapeHtml(subject.code)}', event)">
@@ -852,11 +946,14 @@ function renderBackpackView() {
     elements.backpackLauncherGrid.appendChild(btn);
   });
 
-  // Always append the [+ Thêm Môn] App button at the end
+  // Always append the [+ Thêm Môn] App button at the end (not shaken in jiggle mode)
   const addBtn = document.createElement('div');
   addBtn.className = 'bp-app-btn btn-add-app';
   addBtn.title = 'Tạo thêm môn học mới';
-  addBtn.onclick = () => openAddSubjectModal();
+  addBtn.onclick = () => {
+    if (state.isJiggleMode) exitJiggleMode();
+    openAddSubjectModal();
+  };
   addBtn.innerHTML = `
     <i class="fa-solid fa-circle-plus"></i>
     <span>Thêm Môn</span>
@@ -1077,6 +1174,8 @@ function updateCurrentClock() {
 
 function switchView(viewName) {
   state.activeView = viewName;
+  if (state.isJiggleMode) exitJiggleMode();
+
   elements.viewGridBtn.classList.toggle('active', viewName === 'grid');
   elements.viewTodayBtn.classList.toggle('active', viewName === 'today');
   elements.viewGradesBtn.classList.toggle('active', viewName === 'grades');
@@ -1173,6 +1272,11 @@ function setupEventListeners() {
     });
   }
 
+  // Done Jiggle Button
+  if (elements.bpDoneJiggleBtn) {
+    elements.bpDoneJiggleBtn.addEventListener('click', exitJiggleMode);
+  }
+
   // Add Subject Triggers
   if (elements.bpAddSubjectBtn) {
     elements.bpAddSubjectBtn.addEventListener('click', openAddSubjectModal);
@@ -1251,6 +1355,15 @@ function setupEventListeners() {
       elements.editDriveModal.classList.add('hidden');
     });
   }
+
+  // Exit Jiggle Mode when clicking on background
+  document.addEventListener('click', (e) => {
+    if (state.isJiggleMode) {
+      if (!e.target.closest('.bp-app-btn') && !e.target.closest('#bp-done-jiggle-btn')) {
+        exitJiggleMode();
+      }
+    }
+  });
 
   window.addEventListener('click', (e) => {
     if (e.target === elements.editDriveModal) elements.editDriveModal.classList.add('hidden');
