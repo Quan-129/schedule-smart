@@ -1,6 +1,6 @@
 /**
  * ==========================================================================
- * LỊCH HỌC MARKDOWN HUB & CHIẾC CẶP GOOGLE DRIVE
+ * LỊCH HỌC MARKDOWN HUB & CHIẾC CẶP GOOGLE DRIVE (APP LAUNCHER & NODE SYSTEM)
  * ==========================================================================
  */
 
@@ -174,15 +174,15 @@ const GRADE_SCHEMES = [
   }
 ];
 
-// Clean Initial Subject List (PURE GOOGLE DRIVE - NO DUMMY FOLDERS OR MOCK FILES)
+// Initial Clean Subject List for App Launcher Grid
 const INITIAL_SUBJECT_DRIVE = [
-  { code: 'CO3117', name: 'Học máy', color: '#6366f1', driveUrl: '', links: [] },
-  { code: 'IM1025', name: 'Quản lý Dự án cho Kỹ sư', color: '#f59e0b', driveUrl: '', links: [] },
-  { code: 'IM1019', name: 'Tiếp thị Căn bản', color: '#ec4899', driveUrl: '', links: [] },
-  { code: 'CO3061', name: 'Nhập môn Trí tuệ Nhân tạo', color: '#06b6d4', driveUrl: '', links: [] },
-  { code: 'SP1035', name: 'Tư tưởng Hồ Chí Minh', color: '#10b981', driveUrl: '', links: [] },
-  { code: 'SP1039', name: 'Pháp luật Việt Nam Đại cương', color: '#8b5cf6', driveUrl: '', links: [] },
-  { code: 'JP1007', name: 'Tiếng Nhật 7', color: '#14b8a6', driveUrl: '', links: [] }
+  { code: 'CO3117', name: 'Học máy', icon: 'fa-solid fa-robot', color: '#6366f1', driveUrl: '', nodes: [] },
+  { code: 'IM1025', name: 'Quản lý Dự án', icon: 'fa-solid fa-diagram-project', color: '#f59e0b', driveUrl: '', nodes: [] },
+  { code: 'IM1019', name: 'Tiếp thị Căn bản', icon: 'fa-solid fa-chart-line', color: '#ec4899', driveUrl: '', nodes: [] },
+  { code: 'CO3061', name: 'Nhập môn AI', icon: 'fa-solid fa-brain', color: '#06b6d4', driveUrl: '', nodes: [] },
+  { code: 'SP1035', name: 'Tư tưởng HCM', icon: 'fa-solid fa-landmark', color: '#10b981', driveUrl: '', nodes: [] },
+  { code: 'SP1039', name: 'Pháp luật VN', icon: 'fa-solid fa-scale-balanced', color: '#8b5cf6', driveUrl: '', nodes: [] },
+  { code: 'JP1007', name: 'Tiếng Nhật 7', icon: 'fa-solid fa-torii-gate', color: '#14b8a6', driveUrl: '', nodes: [] }
 ];
 
 // App State
@@ -194,14 +194,14 @@ const state = {
   searchQuery: '',
   gradesSearchQuery: '',
   backpackSearchQuery: '',
-  backpackFilterSubject: null,
   activeView: 'grid', // 'grid', 'today', 'grades', 'backpack', 'raw'
   weeksList: [
     { id: 'tuan-35', title: 'Tuần 35', filename: 'schedules/tuan-35.md' },
     { id: 'tuan-36', title: 'Tuần 36', filename: 'schedules/tuan-36.md' }
   ],
   subjectColorMap: new Map(),
-  driveSubjects: [] // Pure Google Drive data
+  driveSubjects: [], // Array of subjects with .nodes
+  currentDrawerSubjectCode: null // Currently opened subject in drawer
 };
 
 // DOM Elements
@@ -231,16 +231,47 @@ const elements = {
   gradesGrid: document.getElementById('grades-grid'),
   gradesSearchInput: document.getElementById('grades-search-input'),
   
-  // Minimal Backpack Elements (Google Drive Hub)
-  backpackExplorer: document.getElementById('backpack-explorer'),
-  backpackSubjectTags: document.getElementById('backpack-subject-tags'),
-  bpAddLinkBtn: document.getElementById('bp-add-link-btn'),
+  // App Launcher & Node Backpack Elements
+  backpackLauncherGrid: document.getElementById('backpack-launcher-grid'),
+  bpAddSubjectBtn: document.getElementById('bp-add-subject-btn'),
   backpackSearchInput: document.getElementById('backpack-search-input'),
   bpClearSearchBtn: document.getElementById('bp-clear-search-btn'),
-  bpSubjectsCount: document.getElementById('bp-subjects-count'),
-  bpFilesCount: document.getElementById('bp-files-count'),
   
-  // Modals
+  // Subject Drawer Modal
+  subjectDrawerModal: document.getElementById('subject-drawer-modal'),
+  drawerSubjectIconBadge: document.getElementById('drawer-subject-icon-badge'),
+  drawerSubjectName: document.getElementById('drawer-subject-name'),
+  drawerSubjectCode: document.getElementById('drawer-subject-code'),
+  drawerNodeCountBadge: document.getElementById('drawer-node-count-badge'),
+  drawerMainDriveBox: document.getElementById('drawer-main-drive-box'),
+  drawerNodesList: document.getElementById('drawer-nodes-list'),
+  drawerAddNodeBtn: document.getElementById('drawer-add-node-btn'),
+  drawerEditSubjectBtn: document.getElementById('drawer-edit-subject-btn'),
+  drawerCloseBtn: document.getElementById('drawer-close-btn'),
+  
+  // Node Form Modal
+  nodeFormModal: document.getElementById('node-form-modal'),
+  nodeForm: document.getElementById('node-form'),
+  nodeEditId: document.getElementById('node-edit-id'),
+  nodeSubjectCode: document.getElementById('node-subject-code'),
+  nodeModalTitle: document.getElementById('node-modal-title'),
+  nodeNameInput: document.getElementById('node-name-input'),
+  nodeTypeSelect: document.getElementById('node-type-select'),
+  nodeUrlInput: document.getElementById('node-url-input'),
+  nodeNoteInput: document.getElementById('node-note-input'),
+  nodeFormCloseBtn: document.getElementById('node-form-close-btn'),
+  nodeFormCancelBtn: document.getElementById('node-form-cancel-btn'),
+  
+  // Add Subject Modal
+  addSubjectModal: document.getElementById('add-subject-modal'),
+  addSubjectForm: document.getElementById('add-subject-form'),
+  newSubjNameInput: document.getElementById('new-subj-name-input'),
+  newSubjCodeInput: document.getElementById('new-subj-code-input'),
+  newSubjDriveInput: document.getElementById('new-subj-drive-input'),
+  addSubjectCloseBtn: document.getElementById('add-subject-close-btn'),
+  addSubjectCancelBtn: document.getElementById('add-subject-cancel-btn'),
+  
+  // Preview Modal
   filePreviewModal: document.getElementById('file-preview-modal'),
   previewFileName: document.getElementById('preview-file-name'),
   previewFileSub: document.getElementById('preview-file-sub'),
@@ -248,15 +279,6 @@ const elements = {
   previewModalBody: document.getElementById('preview-modal-body'),
   previewOpenExtBtn: document.getElementById('preview-open-ext-btn'),
   previewCloseBtn: document.getElementById('preview-close-btn'),
-  
-  addLinkModal: document.getElementById('add-link-modal'),
-  addLinkForm: document.getElementById('add-link-form'),
-  linkSubjectSelect: document.getElementById('link-subject-select'),
-  linkCategorySelect: document.getElementById('link-category-select'),
-  linkNameInput: document.getElementById('link-name-input'),
-  linkUrlInput: document.getElementById('link-url-input'),
-  addLinkCloseBtn: document.getElementById('add-link-close-btn'),
-  addLinkCancelBtn: document.getElementById('add-link-cancel-btn'),
   
   scheduleTitle: document.getElementById('schedule-title'),
   scheduleSubtitle: document.getElementById('schedule-subtitle'),
@@ -531,7 +553,7 @@ function renderGridView(days, currentDayOfWeek) {
                 <button class="btn-view-subject-grade" title="Xem tỉ lệ điểm môn ${escapeHtml(c.subject)}" onclick="viewSubjectGrade('${escapeHtml(c.subject)}')">
                   <i class="fa-solid fa-chart-pie"></i>
                 </button>
-                <button class="btn-view-subject-backpack" title="Mở Google Drive môn ${escapeHtml(c.subject)}" onclick="viewSubjectBackpack('${escapeHtml(c.subject)}')">
+                <button class="btn-view-subject-backpack" title="Mở Chiếc Cặp môn ${escapeHtml(c.subject)}" onclick="viewSubjectBackpack('${escapeHtml(c.subject)}')">
                   <i class="fa-brands fa-google-drive"></i>
                 </button>
                 <button class="btn-copy-info" title="Sao chép thông tin tiết học" onclick="copyClassInfo('${escapeHtml(c.subject)}', '${escapeHtml(c.timeRange)}', '${escapeHtml(c.room)}')">
@@ -599,7 +621,7 @@ function renderTodayView(days, currentDayOfWeek) {
           <button class="btn-view-subject-grade" title="Xem tỉ lệ điểm môn ${escapeHtml(c.subject)}" onclick="viewSubjectGrade('${escapeHtml(c.subject)}')">
             <i class="fa-solid fa-chart-pie"></i>
           </button>
-          <button class="btn-view-subject-backpack" title="Mở Google Drive môn ${escapeHtml(c.subject)}" onclick="viewSubjectBackpack('${escapeHtml(c.subject)}')">
+          <button class="btn-view-subject-backpack" title="Mở Chiếc Cặp môn ${escapeHtml(c.subject)}" onclick="viewSubjectBackpack('${escapeHtml(c.subject)}')">
             <i class="fa-brands fa-google-drive"></i>
           </button>
         </div>
@@ -777,12 +799,12 @@ window.viewSubjectGrade = function(subjectName) {
 };
 
 /* ==========================================================================
-   PURE GOOGLE DRIVE HUB (NO DUMMY FOLDERS - FULLY USER-CONTROLLED)
+   APP LAUNCHER & NODE SYSTEM (CHIẾC CẶP GOOGLE DRIVE)
    ========================================================================== */
 
 function loadDriveData() {
   try {
-    const saved = localStorage.getItem('smart_backpack_subjects');
+    const saved = localStorage.getItem('smart_backpack_subjects_v2');
     if (saved) {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed) && parsed.length > 0) {
@@ -799,217 +821,195 @@ function loadDriveData() {
 
 function saveDriveData() {
   try {
-    localStorage.setItem('smart_backpack_subjects', JSON.stringify(state.driveSubjects));
+    localStorage.setItem('smart_backpack_subjects_v2', JSON.stringify(state.driveSubjects));
   } catch (e) {
     console.warn('Could not save to localStorage', e);
   }
 }
 
-function getDriveLinkIcon(type) {
+function getNodeIconInfo(type) {
   switch (type) {
-    case 'pdf': return { icon: 'fa-solid fa-file-pdf', cls: 'pdf' };
-    case 'slides': return { icon: 'fa-solid fa-file-powerpoint', cls: 'slides' };
-    case 'btl': return { icon: 'fa-solid fa-users-rectangle', cls: 'btl' };
-    case 'exams': return { icon: 'fa-solid fa-file-signature', cls: 'exams' };
-    case 'drive': return { icon: 'fa-brands fa-google-drive', cls: 'drive' };
-    default: return { icon: 'fa-solid fa-arrow-up-right-from-square', cls: 'link' };
+    case 'pdf': return { icon: 'fa-solid fa-file-pdf', cls: 'pdf', label: 'PDF' };
+    case 'slides': return { icon: 'fa-solid fa-file-powerpoint', cls: 'slides', label: 'Slide' };
+    case 'btl': return { icon: 'fa-solid fa-users-rectangle', cls: 'btl', label: 'BTL' };
+    case 'exams': return { icon: 'fa-solid fa-file-signature', cls: 'exams', label: 'Đề thi' };
+    case 'drive': return { icon: 'fa-brands fa-google-drive', cls: 'drive', label: 'Drive' };
+    default: return { icon: 'fa-solid fa-arrow-up-right-from-square', cls: 'link', label: 'Link' };
   }
 }
 
+/**
+ * Render square App Launcher buttons
+ */
 function renderBackpackView() {
-  if (!elements.backpackExplorer) return;
-  elements.backpackExplorer.innerHTML = '';
+  if (!elements.backpackLauncherGrid) return;
+  elements.backpackLauncherGrid.innerHTML = '';
 
-  // Render Subject Filter Tabs
-  if (elements.backpackSubjectTags) {
-    elements.backpackSubjectTags.innerHTML = '';
-
-    const allBtn = document.createElement('button');
-    allBtn.className = `tag-btn ${!state.backpackFilterSubject ? 'active' : ''}`;
-    allBtn.innerHTML = `Tất cả môn (${state.driveSubjects.length})`;
-    allBtn.addEventListener('click', () => {
-      state.backpackFilterSubject = null;
-      renderBackpackView();
-    });
-    elements.backpackSubjectTags.appendChild(allBtn);
-
-    state.driveSubjects.forEach(s => {
-      const btn = document.createElement('button');
-      btn.className = `tag-btn ${state.backpackFilterSubject === s.code ? 'active' : ''}`;
-      btn.innerHTML = `<span class="tag-color-indicator" style="background-color: ${s.color || '#6366f1'}"></span> ${s.name}`;
-      btn.addEventListener('click', () => {
-        state.backpackFilterSubject = state.backpackFilterSubject === s.code ? null : s.code;
-        renderBackpackView();
-      });
-      elements.backpackSubjectTags.appendChild(btn);
-    });
-  }
-
-  // Populate Select Options in Add Link Modal
-  if (elements.linkSubjectSelect) {
-    elements.linkSubjectSelect.innerHTML = '';
-    state.driveSubjects.forEach(s => {
-      const opt = document.createElement('option');
-      opt.value = s.code;
-      opt.textContent = `${s.code} - ${s.name}`;
-      elements.linkSubjectSelect.appendChild(opt);
-    });
-  }
-
-  // Filter subjects
   const q = (state.backpackSearchQuery || '').toLowerCase().trim();
-  let subjects = state.driveSubjects.filter(s => {
-    if (state.backpackFilterSubject && s.code !== state.backpackFilterSubject) {
-      return false;
-    }
-    return true;
+
+  let filteredSubjects = state.driveSubjects.filter(s => {
+    if (!q) return true;
+    const matchSubj = s.name.toLowerCase().includes(q) || s.code.toLowerCase().includes(q);
+    if (matchSubj) return true;
+    const nodes = s.nodes || s.links || [];
+    return nodes.some(n => n.name.toLowerCase().includes(q) || (n.note && n.note.toLowerCase().includes(q)));
   });
 
-  // Calculate total links
-  let totalLinksCount = 0;
-  state.driveSubjects.forEach(s => {
-    if (s.driveUrl) totalLinksCount++;
-    if (s.links) totalLinksCount += s.links.length;
-  });
-
-  if (elements.bpSubjectsCount) elements.bpSubjectsCount.textContent = `${state.driveSubjects.length} Môn học`;
-  if (elements.bpFilesCount) elements.bpFilesCount.textContent = `${totalLinksCount} Liên kết Drive`;
-
-  const driveGrid = document.createElement('div');
-  driveGrid.className = 'bp-drive-grid';
-
-  let renderedCount = 0;
-
-  subjects.forEach(subject => {
-    let links = subject.links || [];
-    if (q) {
-      const subjectMatches = subject.name.toLowerCase().includes(q) || subject.code.toLowerCase().includes(q);
-      if (!subjectMatches) {
-        links = links.filter(l => 
-          l.name.toLowerCase().includes(q) || 
-          (l.note && l.note.toLowerCase().includes(q))
-        );
-        if (!subject.driveUrl || !subjectMatches) {
-          if (links.length === 0) return;
-        }
-      }
-    }
-
-    renderedCount++;
+  filteredSubjects.forEach(subject => {
+    const nodes = subject.nodes || subject.links || [];
     const color = subject.color || '#6366f1';
-    const card = document.createElement('div');
-    card.className = 'bp-drive-card';
-    card.id = `bp-card-${subject.code.toLowerCase()}`;
-    card.style.borderLeft = `4px solid ${color}`;
+    const icon = subject.icon || 'fa-solid fa-book-bookmark';
+    const hasDrive = !!subject.driveUrl;
 
-    // Calculate link count for this subject
-    let linkCountText = 'Chưa gắn Drive';
-    const totalSubLinks = links.length;
-    if (subject.driveUrl && totalSubLinks > 0) {
-      linkCountText = `Drive + ${totalSubLinks} link`;
-    } else if (subject.driveUrl) {
-      linkCountText = '1 Folder Drive';
-    } else if (totalSubLinks > 0) {
-      linkCountText = `${totalSubLinks} link con`;
-    }
+    const btn = document.createElement('div');
+    btn.className = 'bp-app-btn';
+    btn.style.setProperty('--app-color', color);
+    btn.setAttribute('title', `Mở quản lý môn ${subject.name}`);
+    btn.onclick = () => openSubjectDrawer(subject.code);
 
-    // Main Google Drive Folder button or Prompt
-    let mainDriveHtml = '';
-    if (subject.driveUrl) {
-      mainDriveHtml = `
-        <div class="bp-main-drive-action">
-          <a href="${escapeHtml(subject.driveUrl)}" target="_blank" rel="noopener noreferrer" class="btn-main-drive-active" title="Mở thư mục Google Drive chính của môn">
-            <span><i class="fa-brands fa-google-drive"></i> Mở Folder Google Drive</span>
-            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-          </a>
-        </div>
-      `;
-    } else {
-      mainDriveHtml = `
-        <div class="bp-main-drive-action">
-          <button class="btn-main-drive-empty" onclick="editSubjectMainDrive('${subject.code}')" title="Gắn đường dẫn Google Drive của môn này">
-            <i class="fa-brands fa-google-drive"></i> Gắn link Google Drive của môn
-          </button>
-        </div>
-      `;
-    }
-
-    // Additional sub-links (if any)
-    const linksHtml = links.map(l => {
-      const iconInfo = getDriveLinkIcon(l.type);
-      return `
-        <div class="bp-drive-link-item">
-          <div class="bp-link-left">
-            <i class="${iconInfo.icon} bp-link-icon ${iconInfo.cls}"></i>
-            <div class="bp-link-text">
-              <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer" class="bp-link-title" title="${escapeHtml(l.name)}">
-                ${escapeHtml(l.name)}
-              </a>
-              ${l.note ? `<span class="bp-link-note">${escapeHtml(l.note)}</span>` : ''}
-            </div>
-          </div>
-          <div class="bp-link-actions">
-            <button class="btn-drive-action" title="Xem trước tài liệu" onclick="previewDriveUrl('${escapeHtml(l.name)}', '${escapeHtml(l.url)}', '${iconInfo.icon}', '${iconInfo.cls}')">
-              <i class="fa-regular fa-eye"></i>
-            </button>
-            <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer" class="btn-drive-action" title="Mở link">
-              <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            </a>
-            <button class="btn-drive-action delete" title="Xóa link này" onclick="deleteSubLink('${subject.code}', '${l.id}')">
-              <i class="fa-regular fa-trash-can"></i>
-            </button>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    card.innerHTML = `
-      <div class="bp-drive-card-header">
-        <div class="bp-drive-title-group">
-          <div class="bp-drive-icon-badge" style="background-color: ${color}22; color: ${color}; border-color: ${color}44;">
-            <i class="fa-solid fa-book-bookmark"></i>
-          </div>
-          <div class="bp-drive-name-group">
-            <h3 class="bp-drive-subject-name">${escapeHtml(subject.name)}</h3>
-            <div class="bp-drive-badges">
-              <span class="bp-drive-subject-code">${escapeHtml(subject.code)}</span>
-              <span class="bp-drive-link-count">${escapeHtml(linkCountText)}</span>
-            </div>
-          </div>
-        </div>
-        ${subject.driveUrl ? `
-          <button class="btn-drive-action" title="Đổi link Drive chính" onclick="editSubjectMainDrive('${subject.code}')">
-            <i class="fa-solid fa-pen"></i>
-          </button>
-        ` : ''}
+    btn.innerHTML = `
+      <div class="bp-app-top">
+        <span class="bp-app-code">${escapeHtml(subject.code)}</span>
+        <span class="bp-drive-status-dot ${hasDrive ? '' : 'inactive'}" title="${hasDrive ? 'Đã kết nối Google Drive' : 'Chưa gắn link Google Drive'}"></span>
+      </div>
+      
+      <div class="bp-app-icon-wrapper">
+        <i class="${icon}"></i>
       </div>
 
-      ${mainDriveHtml}
+      <div class="bp-app-details">
+        <span class="bp-app-title">${escapeHtml(subject.name)}</span>
+        <span class="bp-app-node-pill">${nodes.length} nodes</span>
+      </div>
+    `;
 
-      <div class="bp-drive-links-list">
-        ${linksHtml}
-        <button class="btn-add-sublink" onclick="openAddLinkModalFor('${subject.code}')">
-          <i class="fa-solid fa-plus"></i> Thêm tài liệu / link con
+    elements.backpackLauncherGrid.appendChild(btn);
+  });
+
+  // Always append the [+ Thêm Môn Mới] App button at the end
+  const addBtn = document.createElement('div');
+  addBtn.className = 'bp-app-btn btn-add-app';
+  addBtn.title = 'Tạo thêm môn học mới';
+  addBtn.onclick = () => openAddSubjectModal();
+  addBtn.innerHTML = `
+    <i class="fa-solid fa-circle-plus"></i>
+    <span>Thêm Môn</span>
+  `;
+  elements.backpackLauncherGrid.appendChild(addBtn);
+}
+
+/**
+ * Open the Subject Drawer / Modal to manage nodes
+ */
+window.openSubjectDrawer = function(subjectCode) {
+  const subject = state.driveSubjects.find(s => s.code === subjectCode);
+  if (!subject) return;
+
+  state.currentDrawerSubjectCode = subjectCode;
+  const nodes = subject.nodes || subject.links || [];
+  const color = subject.color || '#6366f1';
+  const icon = subject.icon || 'fa-solid fa-book-bookmark';
+
+  // Update Drawer Header
+  elements.drawerSubjectName.textContent = subject.name;
+  elements.drawerSubjectCode.textContent = subject.code;
+  elements.drawerNodeCountBadge.textContent = `${nodes.length} Nodes`;
+  elements.drawerSubjectIconBadge.style.backgroundColor = `${color}22`;
+  elements.drawerSubjectIconBadge.style.color = color;
+  elements.drawerSubjectIconBadge.style.borderColor = `${color}44`;
+  elements.drawerSubjectIconBadge.innerHTML = `<i class="${icon}"></i>`;
+
+  // Render Main Google Drive Box
+  if (subject.driveUrl) {
+    elements.drawerMainDriveBox.innerHTML = `
+      <div class="drawer-drive-left">
+        <i class="fa-brands fa-google-drive drawer-drive-icon"></i>
+        <div class="drawer-drive-info">
+          <span class="drawer-drive-title">Folder Google Drive Chính</span>
+          <span class="drawer-drive-sub">${escapeHtml(subject.driveUrl)}</span>
+        </div>
+      </div>
+      <div class="drawer-drive-actions">
+        <a href="${escapeHtml(subject.driveUrl)}" target="_blank" rel="noopener noreferrer" class="btn-open-drive-main">
+          <i class="fa-brands fa-google-drive"></i> Mở Drive ↗
+        </a>
+        <button class="btn-drive-action" title="Đổi link Drive" onclick="editSubjectMainDrive('${subject.code}')">
+          <i class="fa-solid fa-pen"></i>
         </button>
       </div>
     `;
-
-    driveGrid.appendChild(card);
-  });
-
-  if (renderedCount === 0) {
-    elements.backpackExplorer.innerHTML = `
-      <div class="day-off-card" style="grid-column: 1 / -1; padding: 3.5rem 1rem;">
-        <div class="day-off-icon" style="font-size: 3rem;"><i class="fa-solid fa-magnifying-glass"></i></div>
-        <h3>Không tìm thấy môn học</h3>
-        <p>Thử tìm kiếm với tên môn hoặc mã môn khác...</p>
+  } else {
+    elements.drawerMainDriveBox.innerHTML = `
+      <div class="drawer-drive-left">
+        <i class="fa-brands fa-google-drive drawer-drive-icon" style="color: var(--text-muted);"></i>
+        <div class="drawer-drive-info">
+          <span class="drawer-drive-title">Chưa gắn Folder Google Drive</span>
+          <span class="drawer-drive-sub">Gắn link để truy cập nhanh thư mục môn học 1-chạm</span>
+        </div>
+      </div>
+      <div class="drawer-drive-actions">
+        <button class="btn-attach-drive-main" onclick="editSubjectMainDrive('${subject.code}')">
+          <i class="fa-solid fa-plus"></i> Gắn Link Drive
+        </button>
       </div>
     `;
-    return;
   }
 
-  elements.backpackExplorer.appendChild(driveGrid);
-}
+  // Render Nodes List
+  elements.drawerNodesList.innerHTML = '';
+  if (nodes.length === 0) {
+    elements.drawerNodesList.innerHTML = `
+      <div class="node-empty-state">
+        <i class="fa-solid fa-cubes-stacked"></i>
+        <p>Môn này chưa có node tài liệu con nào.</p>
+        <button class="btn-primary-small" style="margin-top: 0.75rem;" onclick="openNodeFormModal('${subject.code}')">
+          <i class="fa-solid fa-plus"></i> Thêm Node Ngay
+        </button>
+      </div>
+    `;
+  } else {
+    nodes.forEach(node => {
+      const iconInfo = getNodeIconInfo(node.type);
+      const item = document.createElement('div');
+      item.className = 'node-card-item';
+
+      item.innerHTML = `
+        <div class="node-left">
+          <div class="node-type-icon ${iconInfo.cls}">
+            <i class="${iconInfo.icon}"></i>
+          </div>
+          <div class="node-info">
+            <div class="node-title-row">
+              <a href="${escapeHtml(node.url)}" target="_blank" rel="noopener noreferrer" class="node-title" title="${escapeHtml(node.name)}">
+                ${escapeHtml(node.name)}
+              </a>
+              ${node.note ? `<span class="node-note-badge">${escapeHtml(node.note)}</span>` : ''}
+            </div>
+            <span style="font-size: 0.74rem; color: var(--text-muted);">${escapeHtml(node.url)}</span>
+          </div>
+        </div>
+        <div class="node-actions">
+          <button class="btn-drive-action" title="Xem trước tài liệu" onclick="previewDriveUrl('${escapeHtml(node.name)}', '${escapeHtml(node.url)}', '${iconInfo.icon}', '${iconInfo.cls}')">
+            <i class="fa-regular fa-eye"></i>
+          </button>
+          <a href="${escapeHtml(node.url)}" target="_blank" rel="noopener noreferrer" class="btn-drive-action" title="Mở đường dẫn">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+          <button class="btn-drive-action" title="Sửa Node này" onclick="editNodeItem('${subject.code}', '${node.id}')">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          <button class="btn-drive-action delete" title="Xóa Node này" onclick="deleteNodeItem('${subject.code}', '${node.id}')">
+            <i class="fa-regular fa-trash-can"></i>
+          </button>
+        </div>
+      `;
+      elements.drawerNodesList.appendChild(item);
+    });
+  }
+
+  // Open Drawer Modal
+  elements.subjectDrawerModal.classList.remove('hidden');
+};
 
 /**
  * Prompt to attach or edit main Google Drive URL for a subject
@@ -1025,6 +1025,9 @@ window.editSubjectMainDrive = function(subjectCode) {
     subject.driveUrl = newUrl.trim();
     saveDriveData();
     renderBackpackView();
+    if (state.currentDrawerSubjectCode === subjectCode) {
+      openSubjectDrawer(subjectCode);
+    }
     if (subject.driveUrl) {
       showToast(`Đã gắn link Google Drive cho môn ${subject.name}!`);
     } else {
@@ -1034,29 +1037,62 @@ window.editSubjectMainDrive = function(subjectCode) {
 };
 
 /**
- * Open modal to add a sub-link to a specific subject
+ * Open Node Form Modal to Add or Edit a Node
  */
-window.openAddLinkModalFor = function(subjectCode) {
-  if (elements.addLinkModal) {
-    elements.addLinkModal.classList.remove('hidden');
-    if (elements.linkSubjectSelect) elements.linkSubjectSelect.value = subjectCode;
-    if (elements.linkNameInput) elements.linkNameInput.focus();
+window.openNodeFormModal = function(subjectCode, editNodeId = null) {
+  const subject = state.driveSubjects.find(s => s.code === subjectCode);
+  if (!subject) return;
+
+  elements.nodeSubjectCode.value = subjectCode;
+  elements.nodeEditId.value = editNodeId || '';
+
+  if (editNodeId) {
+    const nodes = subject.nodes || subject.links || [];
+    const node = nodes.find(n => n.id === editNodeId);
+    if (node) {
+      elements.nodeModalTitle.textContent = `Chỉnh sửa Node - ${subject.name}`;
+      elements.nodeNameInput.value = node.name;
+      elements.nodeTypeSelect.value = node.type || 'drive';
+      elements.nodeUrlInput.value = node.url;
+      elements.nodeNoteInput.value = node.note || '';
+    }
+  } else {
+    elements.nodeModalTitle.textContent = `Thêm Node Mới - ${subject.name}`;
+    elements.nodeForm.reset();
+    elements.nodeEditId.value = '';
+    elements.nodeSubjectCode.value = subjectCode;
+  }
+
+  elements.nodeFormModal.classList.remove('hidden');
+  elements.nodeNameInput.focus();
+};
+
+window.editNodeItem = function(subjectCode, nodeId) {
+  openNodeFormModal(subjectCode, nodeId);
+};
+
+window.deleteNodeItem = function(subjectCode, nodeId) {
+  const subject = state.driveSubjects.find(s => s.code === subjectCode);
+  if (!subject) return;
+
+  const nodes = subject.nodes || subject.links || [];
+  if (confirm('Bạn có chắc muốn xóa Node tài liệu này?')) {
+    subject.nodes = nodes.filter(n => n.id !== nodeId);
+    subject.links = subject.nodes;
+    saveDriveData();
+    renderBackpackView();
+    openSubjectDrawer(subjectCode);
+    showToast('Đã xóa Node tài liệu');
   }
 };
 
 /**
- * Delete a specific sub-link from a subject
+ * Open Add Subject Modal
  */
-window.deleteSubLink = function(subjectCode, linkId) {
-  const subject = state.driveSubjects.find(s => s.code === subjectCode);
-  if (!subject || !subject.links) return;
-
-  if (confirm('Bạn có chắc muốn xóa liên kết này?')) {
-    subject.links = subject.links.filter(l => l.id !== linkId);
-    saveDriveData();
-    renderBackpackView();
-    showToast('Đã xóa liên kết');
-  }
+window.openAddSubjectModal = function() {
+  elements.addSubjectForm.reset();
+  elements.addSubjectModal.classList.remove('hidden');
+  elements.newSubjNameInput.focus();
 };
 
 /**
@@ -1092,21 +1128,7 @@ window.viewSubjectBackpack = function(subjectName) {
   );
 
   if (matched) {
-    state.backpackFilterSubject = matched.code;
-    renderBackpackView();
-
-    setTimeout(() => {
-      const card = document.getElementById(`bp-card-${matched.code.toLowerCase()}`);
-      if (card) {
-        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        card.style.borderColor = 'var(--accent-primary)';
-        card.style.boxShadow = '0 0 24px rgba(99, 102, 241, 0.45)';
-        setTimeout(() => {
-          card.style.borderColor = '';
-          card.style.boxShadow = '';
-        }, 2500);
-      }
-    }, 120);
+    openSubjectDrawer(matched.code);
   }
 };
 
@@ -1270,7 +1292,7 @@ function switchView(viewName) {
 
 /* ==========================================================================
    EVENT LISTENERS INITIALIZATION
-   ========================================================================= */
+   ========================================================================== */
 
 function setupEventListeners() {
   // Theme Toggle
@@ -1327,7 +1349,7 @@ function setupEventListeners() {
     });
   }
 
-  // Backpack Drive Search Box
+  // Backpack Search Box
   if (elements.backpackSearchInput) {
     elements.backpackSearchInput.addEventListener('input', (e) => {
       state.backpackSearchQuery = e.target.value.trim();
@@ -1345,57 +1367,123 @@ function setupEventListeners() {
     });
   }
 
-  // Add Link Modal Triggers
-  if (elements.bpAddLinkBtn) {
-    elements.bpAddLinkBtn.addEventListener('click', () => {
-      elements.addLinkModal.classList.remove('hidden');
-      if (elements.linkSubjectSelect && state.backpackFilterSubject) {
-        elements.linkSubjectSelect.value = state.backpackFilterSubject;
+  // Add Subject Triggers
+  if (elements.bpAddSubjectBtn) {
+    elements.bpAddSubjectBtn.addEventListener('click', openAddSubjectModal);
+  }
+
+  if (elements.addSubjectCloseBtn) {
+    elements.addSubjectCloseBtn.addEventListener('click', () => elements.addSubjectModal.classList.add('hidden'));
+  }
+  if (elements.addSubjectCancelBtn) {
+    elements.addSubjectCancelBtn.addEventListener('click', () => elements.addSubjectModal.classList.add('hidden'));
+  }
+
+  if (elements.addSubjectForm) {
+    elements.addSubjectForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = elements.newSubjNameInput.value.trim();
+      const code = elements.newSubjCodeInput.value.trim().toUpperCase();
+      const driveUrl = elements.newSubjDriveInput.value.trim();
+
+      if (!name || !code) return;
+
+      const randomColors = ['#6366f1', '#ec4899', '#06b6d4', '#10b981', '#f59e0b', '#8b5cf6', '#14b8a6', '#f97316'];
+      const chosenColor = randomColors[state.driveSubjects.length % randomColors.length];
+
+      state.driveSubjects.push({
+        code: code,
+        name: name,
+        icon: 'fa-solid fa-book-bookmark',
+        color: chosenColor,
+        driveUrl: driveUrl,
+        nodes: []
+      });
+
+      saveDriveData();
+      renderBackpackView();
+      elements.addSubjectModal.classList.add('hidden');
+      showToast(`Đã tạo môn học mới: ${name} (${code})!`);
+    });
+  }
+
+  // Drawer Modal Triggers
+  if (elements.drawerCloseBtn) {
+    elements.drawerCloseBtn.addEventListener('click', () => {
+      elements.subjectDrawerModal.classList.add('hidden');
+      state.currentDrawerSubjectCode = null;
+    });
+  }
+
+  if (elements.drawerAddNodeBtn) {
+    elements.drawerAddNodeBtn.addEventListener('click', () => {
+      if (state.currentDrawerSubjectCode) {
+        openNodeFormModal(state.currentDrawerSubjectCode);
       }
     });
   }
 
-  if (elements.addLinkCloseBtn) {
-    elements.addLinkCloseBtn.addEventListener('click', () => {
-      elements.addLinkModal.classList.add('hidden');
+  if (elements.drawerEditSubjectBtn) {
+    elements.drawerEditSubjectBtn.addEventListener('click', () => {
+      if (state.currentDrawerSubjectCode) {
+        editSubjectMainDrive(state.currentDrawerSubjectCode);
+      }
     });
   }
 
-  if (elements.addLinkCancelBtn) {
-    elements.addLinkCancelBtn.addEventListener('click', () => {
-      elements.addLinkModal.classList.add('hidden');
-    });
+  // Node Form Modal Triggers
+  if (elements.nodeFormCloseBtn) {
+    elements.nodeFormCloseBtn.addEventListener('click', () => elements.nodeFormModal.classList.add('hidden'));
+  }
+  if (elements.nodeFormCancelBtn) {
+    elements.nodeFormCancelBtn.addEventListener('click', () => elements.nodeFormModal.classList.add('hidden'));
   }
 
-  if (elements.addLinkForm) {
-    elements.addLinkForm.addEventListener('submit', (e) => {
+  if (elements.nodeForm) {
+    elements.nodeForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      const subjectCode = elements.linkSubjectSelect.value;
-      const category = elements.linkCategorySelect.value;
-      const name = elements.linkNameInput.value.trim();
-      const url = elements.linkUrlInput.value.trim();
+      const subjectCode = elements.nodeSubjectCode.value;
+      const editId = elements.nodeEditId.value;
+      const name = elements.nodeNameInput.value.trim();
+      const type = elements.nodeTypeSelect.value;
+      const url = elements.nodeUrlInput.value.trim();
+      const note = elements.nodeNoteInput.value.trim();
 
       if (!name || !url) return;
 
-      const targetSubject = state.driveSubjects.find(s => s.code === subjectCode);
-      if (targetSubject) {
-        if (!targetSubject.links) targetSubject.links = [];
-        targetSubject.links.unshift({
-          id: 'link-' + Date.now(),
-          name: name,
-          category: category,
-          type: url.includes('drive.google.com') ? 'drive' : 'link',
-          url: url,
-          note: 'Liên kết do bạn thêm'
-        });
+      const subject = state.driveSubjects.find(s => s.code === subjectCode);
+      if (subject) {
+        if (!subject.nodes) subject.nodes = subject.links || [];
 
+        if (editId) {
+          // Update existing node
+          const node = subject.nodes.find(n => n.id === editId);
+          if (node) {
+            node.name = name;
+            node.type = type;
+            node.url = url;
+            node.note = note;
+          }
+          showToast(`Đã cập nhật Node: ${name}!`);
+        } else {
+          // Create new node
+          subject.nodes.unshift({
+            id: 'node-' + Date.now(),
+            name: name,
+            type: type,
+            url: url,
+            note: note
+          });
+          showToast(`Đã thêm Node mới cho môn ${subjectCode}!`);
+        }
+
+        subject.links = subject.nodes;
         saveDriveData();
         renderBackpackView();
+        openSubjectDrawer(subjectCode);
       }
 
-      elements.addLinkForm.reset();
-      elements.addLinkModal.classList.add('hidden');
-      showToast(`Đã thêm link Drive cho môn ${subjectCode}!`);
+      elements.nodeFormModal.classList.add('hidden');
     });
   }
 
@@ -1412,7 +1500,12 @@ function setupEventListeners() {
       elements.filePreviewModal.classList.add('hidden');
       elements.previewModalBody.innerHTML = '';
     }
-    if (e.target === elements.addLinkModal) elements.addLinkModal.classList.add('hidden');
+    if (e.target === elements.subjectDrawerModal) {
+      elements.subjectDrawerModal.classList.add('hidden');
+      state.currentDrawerSubjectCode = null;
+    }
+    if (e.target === elements.nodeFormModal) elements.nodeFormModal.classList.add('hidden');
+    if (e.target === elements.addSubjectModal) elements.addSubjectModal.classList.add('hidden');
   });
 
   // Print Button
