@@ -1977,233 +1977,300 @@ body.theme-light .bg-glow {
 
 .backpack-breadcrumbs .crumb.active {
   font-weight: 700;
+  color: var(--text-primary);
+  cursor: default;
+  background: var(--accent-subtle);
+}
+
+.backpack-breadcrumbs .separator {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+/* Actions Right (Search & View mode) */
+.bp-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.bp-view-switch {
+  display: flex;
+  align-items: center;
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.15rem;
+  gap: 0.2rem;
+}
+
+.bp-view-switch .btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.bp-view-switch .btn-icon.active {
+  background: var(--accent-primary);
+  color: #ffffff;
+}
+
 /* ==========================================================================
-   MINIMALIST GOOGLE DRIVE HUB STYLES (ĐỒNG BỘ 100% CẢ PC & ĐIỆN THOẠI)
+   DRIVE SECTIONS: FOLDERS & FILES GRIDS
    ========================================================================== */
 
-.backpack-explorer {
+.bp-section-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.85rem;
   display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.bp-drive-grid {
+.bp-section-title i {
+  color: var(--accent-primary);
+}
+
+/* FOLDERS GRID (Google Drive Style) */
+.bp-folders-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
-@media (max-width: 768px) {
-  .bp-drive-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.bp-drive-card {
+.bp-folder-card {
   background: var(--surface-card);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  box-shadow: var(--shadow-glass);
+  border-radius: var(--radius-md);
+  padding: 0.9rem 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  user-select: none;
+}
+
+.bp-folder-card:hover {
+  border-color: var(--accent-primary);
+  background: var(--bg-tertiary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.bp-folder-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.bp-folder-icon {
+  font-size: 1.4rem;
+  color: var(--accent-primary);
+  flex-shrink: 0;
+}
+
+.bp-folder-details {
+  min-width: 0;
+}
+
+.bp-folder-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.bp-folder-count {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.bp-folder-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.bp-folder-card:hover .bp-folder-actions {
+  opacity: 1;
+}
+
+/* FILES GRID (Google Drive Style) */
+.bp-files-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 1rem;
+}
+
+.bp-file-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.1rem;
   display: flex;
   flex-direction: column;
-  transition: var(--transition-normal);
+  justify-content: space-between;
+  transition: var(--transition-fast);
+  cursor: pointer;
   position: relative;
   overflow: hidden;
 }
 
-.bp-drive-card:hover {
+.bp-file-card:hover {
   border-color: var(--accent-primary);
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
-.bp-drive-card-header {
+.bp-file-card-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 0.85rem;
 }
 
-.bp-drive-title-group {
+.bp-file-card-icon {
+  font-size: 2.2rem;
+}
+
+.bp-file-card-actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  min-width: 0;
+  gap: 0.25rem;
 }
 
-.bp-drive-icon-badge {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-  flex-shrink: 0;
-}
-
-.bp-drive-name-group {
-  min-width: 0;
-}
-
-.bp-drive-subject-name {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  line-height: 1.3;
-  margin-bottom: 0.2rem;
-}
-
-.bp-drive-subject-code {
-  display: inline-block;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.15rem 0.5rem;
-  border-radius: var(--radius-sm);
-  background: var(--bg-tertiary);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-color);
-}
-
-.btn-open-main-drive {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 0.85rem;
-  background: rgba(52, 168, 83, 0.12);
-  border: 1px solid rgba(52, 168, 83, 0.3);
-  color: #34a853;
-  border-radius: var(--radius-md);
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-decoration: none;
-  transition: var(--transition-fast);
-  white-space: nowrap;
-}
-
-.btn-open-main-drive:hover {
-  background: #34a853;
-  color: #ffffff;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(52, 168, 83, 0.3);
-}
-
-/* Links List */
-.bp-drive-links-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-  flex: 1;
-}
-
-.bp-drive-link-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.7rem 0.9rem;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  transition: var(--transition-fast);
-  gap: 0.75rem;
-}
-
-.bp-drive-link-item:hover {
-  border-color: rgba(99, 102, 241, 0.4);
-  background: var(--bg-tertiary);
-  transform: translateX(3px);
-}
-
-.bp-link-left {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  min-width: 0;
-  flex: 1;
-}
-
-.bp-link-icon {
-  font-size: 1.2rem;
-  flex-shrink: 0;
-}
-
-.bp-link-icon.pdf { color: #ef4444; }
-.bp-link-icon.slides { color: #f59e0b; }
-.bp-link-icon.btl { color: #10b981; }
-.bp-link-icon.exams { color: #8b5cf6; }
-.bp-link-icon.drive { color: #34a853; }
-.bp-link-icon.link { color: #06b6d4; }
-
-.bp-link-text {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.bp-link-title {
+.bp-file-card-title {
   font-size: 0.88rem;
   font-weight: 700;
   color: var(--text-primary);
-  white-space: nowrap;
+  line-height: 1.35;
+  margin-bottom: 0.4rem;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  text-decoration: none;
 }
 
-.bp-link-title:hover {
-  color: var(--accent-primary);
-  text-decoration: underline;
-}
-
-.bp-link-note {
-  font-size: 0.74rem;
-  color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.bp-link-actions {
+.bp-file-card-meta {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-  flex-shrink: 0;
+  justify-content: space-between;
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-color);
+  padding-top: 0.6rem;
+  margin-top: 0.6rem;
 }
 
-.btn-drive-action {
+/* FILES LIST VIEW (Table format) */
+.bp-files-list {
   background: var(--surface-card);
   border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.bp-list-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 100px;
+  padding: 0.75rem 1.25rem;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.78rem;
+  font-weight: 700;
   color: var(--text-secondary);
-  width: 30px;
-  height: 30px;
-  border-radius: var(--radius-sm);
-  display: inline-flex;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.bp-list-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 100px;
+  padding: 0.85rem 1.25rem;
   align-items: center;
-  justify-content: center;
-  font-size: 0.8rem;
-  cursor: pointer;
-  text-decoration: none;
+  border-bottom: 1px solid var(--border-color);
   transition: var(--transition-fast);
+  cursor: pointer;
+  font-size: 0.86rem;
 }
 
-.btn-drive-action:hover {
+.bp-list-row:last-child {
+  border-bottom: none;
+}
+
+.bp-list-row:hover {
   background: var(--accent-subtle);
-  color: var(--accent-primary);
-  border-color: var(--accent-primary);
-  transform: scale(1.08);
 }
 
-.btn-drive-action.edit:hover {
-  background: rgba(245, 158, 11, 0.15);
-  color: #f59e0b;
-  border-color: #f59e0b;
+.bp-list-name-col {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 0;
+}
+
+.bp-list-name-col span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bp-list-meta-col {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+.bp-list-actions-col {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.bp-empty-state {
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  color: var(--text-muted);
+}
+
+.bp-empty-state i {
+  font-size: 3.5rem;
+  color: var(--border-color);
+  margin-bottom: 1rem;
+}
+
+.bp-empty-state h3 {
+  color: var(--text-primary);
+  font-size: 1.15rem;
+  margin-bottom: 0.35rem;
+}
+
+.bp-empty-state p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
 }
 
 /* ==========================================================================

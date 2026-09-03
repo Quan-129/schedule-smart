@@ -1,6 +1,6 @@
 /**
  * ==========================================================================
- * LỊCH HỌC MARKDOWN HUB & CHIẾC CẶP GOOGLE DRIVE
+ * LỊCH HỌC MARKDOWN HUB & CHIẾC CẶP GOOGLE DRIVE ĐỘC LẬP
  * ==========================================================================
  */
 
@@ -174,22 +174,71 @@ const GRADE_SCHEMES = [
   }
 ];
 
+// Default Hierarchical Drive Structure (Folders & Files)
+const DEFAULT_DRIVE_ITEMS = [
+  // ROOT SUBJECT FOLDERS (parentId: null)
+  { id: 'folder-co3117', type: 'folder', name: 'Học máy (CO3117)', parentId: null, subjectCode: 'CO3117', color: '#6366f1', isSystem: true },
+  { id: 'folder-im1025', type: 'folder', name: 'Quản lý Dự án cho Kỹ sư (IM1025)', parentId: null, subjectCode: 'IM1025', color: '#f59e0b', isSystem: true },
+  { id: 'folder-im1019', type: 'folder', name: 'Tiếp thị Căn bản (IM1019)', parentId: null, subjectCode: 'IM1019', color: '#ec4899', isSystem: true },
+  { id: 'folder-co3061', type: 'folder', name: 'Nhập môn Trí tuệ Nhân tạo (CO3061)', parentId: null, subjectCode: 'CO3061', color: '#06b6d4', isSystem: true },
+  { id: 'folder-sp1035', type: 'folder', name: 'Tư tưởng Hồ Chí Minh (SP1035)', parentId: null, subjectCode: 'SP1035', color: '#10b981', isSystem: true },
+  { id: 'folder-sp1039', type: 'folder', name: 'Pháp luật Việt Nam Đại cương (SP1039)', parentId: null, subjectCode: 'SP1039', color: '#8b5cf6', isSystem: true },
+  { id: 'folder-jp1007', type: 'folder', name: 'Tiếng Nhật 7 (JP1007)', parentId: null, subjectCode: 'JP1007', color: '#14b8a6', isSystem: true },
+
+  // SUBFOLDERS IN CO3117
+  { id: 'folder-ml-slides', type: 'folder', name: 'Slide bài giảng', parentId: 'folder-co3117', isSystem: true },
+  { id: 'folder-ml-btl', type: 'folder', name: 'Bài tập lớn nhóm', parentId: 'folder-co3117', isSystem: true },
+  { id: 'folder-ml-exams', type: 'folder', name: 'Đề thi & Ôn tập', parentId: 'folder-co3117', isSystem: true },
+
+  // FILES IN CO3117
+  { id: 'file-ml-1', type: 'pdf', name: 'De_cuong_chi_tiet_Hoc_May_CO3117.pdf', parentId: 'folder-ml-slides', size: '1.2 MB', updatedAt: '2026-08-25', driveUrl: 'https://drive.google.com/', description: 'Đề cương học phần chi tiết' },
+  { id: 'file-ml-2', type: 'pdf', name: 'Slide_Chuong_1_Tong_Quan_ML.pdf', parentId: 'folder-ml-slides', size: '4.8 MB', updatedAt: '2026-08-28', driveUrl: 'https://drive.google.com/', description: 'Chương 1: Giới thiệu Học máy' },
+  { id: 'file-ml-3', type: 'pdf', name: 'Huong_dan_BTL_Hoc_May_Nhom.pdf', parentId: 'folder-ml-btl', size: '850 KB', updatedAt: '2026-09-01', driveUrl: 'https://drive.google.com/', description: 'Yêu cầu đề tài BTL nhóm (10%)' },
+
+  // SUBFOLDERS IN IM1025
+  { id: 'folder-pm-slides', type: 'folder', name: 'Slide & Giáo trình', parentId: 'folder-im1025', isSystem: true },
+  { id: 'folder-pm-btl', type: 'folder', name: 'Bài tập lớn & Biểu mẫu', parentId: 'folder-im1025', isSystem: true },
+
+  // FILES IN IM1025
+  { id: 'file-pm-1', type: 'pdf', name: 'De_cuong_chi_tiet_QLDA_IM1025.pdf', parentId: 'folder-pm-slides', size: '980 KB', updatedAt: '2026-08-20', driveUrl: 'https://drive.google.com/', description: 'Đề cương Quản lý Dự án' },
+  { id: 'file-pm-2', type: 'link', name: 'LINK ĐĂNG KÝ NHÓM (Hạn 15-09-2026)', parentId: 'folder-pm-btl', size: 'Google Forms', updatedAt: '2026-09-01', driveUrl: 'https://docs.google.com/forms/', description: 'Deadline Thứ 3 Tuần 38' },
+  { id: 'file-pm-3', type: 'link', name: 'LINK NỘP BÀI TẬP LỚN (Hạn 30-11-2026)', parentId: 'folder-pm-btl', size: 'BKEL LMS', updatedAt: '2026-09-01', driveUrl: 'https://e-learning.hcmut.edu.vn/', description: 'Deadline Thứ 2 Tuần 49' },
+  { id: 'file-pm-4', type: 'drive', name: 'Folder Google Drive Chung - QLDA', parentId: 'folder-im1025', size: 'Google Drive', updatedAt: '2026-09-01', driveUrl: 'https://drive.google.com/', description: 'Kho tài liệu chung cả lớp' },
+
+  // FILES IN IM1019
+  { id: 'folder-mkt-slides', type: 'folder', name: 'Bài giảng & Giáo trình', parentId: 'folder-im1019', isSystem: true },
+  { id: 'file-mkt-1', type: 'pdf', name: 'De_cuong_chi_tiet_Tiep_Thi_Can_Ban.pdf', parentId: 'folder-mkt-slides', size: '1.1 MB', updatedAt: '2026-08-22', driveUrl: 'https://drive.google.com/', description: 'Đề cương Tiếp thị căn bản' },
+  { id: 'file-mkt-2', type: 'pptx', name: 'Slide_Marketing_Ch1_Tong_Quan.pptx', parentId: 'folder-mkt-slides', size: '7.5 MB', updatedAt: '2026-08-29', driveUrl: 'https://drive.google.com/', description: 'Slide bài giảng Chương 1' },
+  { id: 'file-mkt-3', type: 'pdf', name: 'Rubric_Danh_gia_Thuyet_trinh_BTL.pdf', parentId: 'folder-im1019', size: '620 KB', updatedAt: '2026-09-01', driveUrl: 'https://drive.google.com/', description: 'Tiêu chí chấm điểm BTL 30%' },
+
+  // FILES IN CO3061
+  { id: 'file-ai-1', type: 'pdf', name: 'Slide_AI_Search_Algorithms.pdf', parentId: 'folder-co3061', size: '5.2 MB', updatedAt: '2026-08-30', driveUrl: 'https://drive.google.com/', description: 'Thuật toán tìm kiếm A*, CSP' },
+  { id: 'file-ai-2', type: 'zip', name: 'Kho_De_thi_giua_ky_AI_cac_nam.zip', parentId: 'folder-co3061', size: '14.8 MB', updatedAt: '2026-09-01', driveUrl: 'https://drive.google.com/', description: 'Đề thi GK và bài giải tham khảo' },
+
+  // FILES IN OTHER SUBJECTS
+  { id: 'file-hcm-1', type: 'pdf', name: 'Tai_lieu_Hoc_Tap_BKEL_Tu_Tuong_HCM.pdf', parentId: 'folder-sp1035', size: '3.4 MB', updatedAt: '2026-08-20', driveUrl: 'https://drive.google.com/', description: 'Tài liệu hướng dẫn thảo luận' },
+  { id: 'file-law-1', type: 'pdf', name: 'Giao_trinh_Phap_luat_Dai_cuong.pdf', parentId: 'folder-sp1039', size: '6.1 MB', updatedAt: '2026-08-20', driveUrl: 'https://drive.google.com/', description: 'Giáo trình chuẩn' },
+  { id: 'file-jp-1', type: 'pdf', name: 'Tu_vung_Kaiwa_Ngu_phap_Tuan_35_36.pdf', parentId: 'folder-jp1007', size: '2.1 MB', updatedAt: '2026-08-26', driveUrl: 'https://drive.google.com/', description: 'Tài liệu chuẩn bị bài trước giờ học' }
+];
+
 // App State
 const state = {
   currentWeekFile: 'schedules/tuan-35.md',
+  currentRawMarkdown: '',
   parsedSchedule: null,
   activeFilterSubject: null,
   searchQuery: '',
   gradesSearchQuery: '',
   backpackSearchQuery: '',
-  backpackFilterSubject: null,
-  activeView: 'grid', // 'grid', 'today', 'grades', 'backpack'
+  currentFolderId: null, // null = Root of Chiếc cặp
+  backpackViewMode: 'grid', // 'grid' or 'list'
+  activeView: 'grid', // 'grid', 'today', 'grades', 'backpack', 'raw'
   weeksList: [
     { id: 'tuan-35', title: 'Tuần 35', filename: 'schedules/tuan-35.md' },
     { id: 'tuan-36', title: 'Tuần 36', filename: 'schedules/tuan-36.md' }
   ],
   subjectColorMap: new Map(),
-  driveSubjects: [] // Loaded from schedules/drive-links.json
+  driveItems: [] // Combined items from IndexedDB + Defaults
 };
 
 // DOM Elements
@@ -203,11 +252,13 @@ const elements = {
   viewTodayBtn: document.getElementById('view-today-btn'),
   viewGradesBtn: document.getElementById('view-grades-btn'),
   viewBackpackBtn: document.getElementById('view-backpack-btn'),
+  viewRawBtn: document.getElementById('view-raw-btn'),
   
   gridViewContainer: document.getElementById('grid-view-container'),
   todayViewContainer: document.getElementById('today-view-container'),
   gradesViewContainer: document.getElementById('grades-view-container'),
   backpackViewContainer: document.getElementById('backpack-view-container'),
+  rawViewContainer: document.getElementById('raw-view-container'),
   
   scheduleGrid: document.getElementById('schedule-grid'),
   todayTimelineList: document.getElementById('today-timeline-list'),
@@ -217,13 +268,20 @@ const elements = {
   gradesGrid: document.getElementById('grades-grid'),
   gradesSearchInput: document.getElementById('grades-search-input'),
   
-  // Minimal Backpack Elements (Google Drive Hub)
+  // Backpack Elements (Drive Style)
   backpackExplorer: document.getElementById('backpack-explorer'),
-  backpackSubjectTags: document.getElementById('backpack-subject-tags'),
+  backpackBreadcrumbs: document.getElementById('backpack-breadcrumbs'),
+  bpBackBtn: document.getElementById('bp-back-btn'),
+  backpackDropzone: document.getElementById('backpack-dropzone'),
+  backpackFileInput: document.getElementById('backpack-file-input'),
+  bpNewFolderBtn: document.getElementById('bp-new-folder-btn'),
+  bpUploadBtn: document.getElementById('bp-upload-btn'),
   bpAddLinkBtn: document.getElementById('bp-add-link-btn'),
+  bpViewGridBtn: document.getElementById('bp-view-grid-btn'),
+  bpViewListBtn: document.getElementById('bp-view-list-btn'),
   backpackSearchInput: document.getElementById('backpack-search-input'),
   bpClearSearchBtn: document.getElementById('bp-clear-search-btn'),
-  bpSubjectsCount: document.getElementById('bp-subjects-count'),
+  bpStorageText: document.getElementById('bp-storage-text'),
   bpFilesCount: document.getElementById('bp-files-count'),
   
   // Modals
@@ -233,6 +291,7 @@ const elements = {
   previewFileIcon: document.getElementById('preview-file-icon'),
   previewModalBody: document.getElementById('preview-modal-body'),
   previewOpenExtBtn: document.getElementById('preview-open-ext-btn'),
+  previewDownloadBtn: document.getElementById('preview-download-btn'),
   previewCloseBtn: document.getElementById('preview-close-btn'),
   
   addLinkModal: document.getElementById('add-link-modal'),
@@ -243,6 +302,12 @@ const elements = {
   linkUrlInput: document.getElementById('link-url-input'),
   addLinkCloseBtn: document.getElementById('add-link-close-btn'),
   addLinkCancelBtn: document.getElementById('add-link-cancel-btn'),
+  
+  newFolderModal: document.getElementById('new-folder-modal'),
+  newFolderForm: document.getElementById('new-folder-form'),
+  folderNameInput: document.getElementById('folder-name-input'),
+  newFolderCloseBtn: document.getElementById('new-folder-close-btn'),
+  newFolderCancelBtn: document.getElementById('new-folder-cancel-btn'),
   
   scheduleTitle: document.getElementById('schedule-title'),
   scheduleSubtitle: document.getElementById('schedule-subtitle'),
@@ -259,8 +324,96 @@ const elements = {
   
   notesSection: document.getElementById('notes-section'),
   notesBody: document.getElementById('notes-body'),
+  
+  rawFileName: document.getElementById('raw-file-name'),
+  markdownRawContent: document.getElementById('markdown-raw-content'),
+  copyMarkdownBtn: document.getElementById('copy-markdown-btn'),
+  reloadMarkdownBtn: document.getElementById('reload-markdown-btn'),
+  applyRawBtn: document.getElementById('apply-raw-btn'),
   toastContainer: document.getElementById('toast-container')
 };
+
+/* ==========================================================================
+   INDEXED-DB OFFLINE STORAGE ENGINE
+   ========================================================================== */
+
+const DB_NAME = 'SmartBackpackDriveDB';
+const DB_VERSION = 2;
+const STORE_NAME = 'drive_items';
+
+function openBackpackDB() {
+  return new Promise((resolve) => {
+    if (!window.indexedDB) {
+      console.warn('Trình duyệt không hỗ trợ IndexedDB.');
+      return resolve(null);
+    }
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        store.createIndex('parentId', 'parentId', { unique: false });
+        store.createIndex('type', 'type', { unique: false });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => {
+      console.error('Không thể mở IndexedDB:', request.error);
+      resolve(null);
+    };
+  });
+}
+
+async function saveItemToIndexedDB(item) {
+  const db = await openBackpackDB();
+  if (!db) return false;
+  return new Promise((resolve) => {
+    try {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      store.put(item);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    } catch (err) {
+      console.error('Lỗi lưu IndexedDB:', err);
+      resolve(false);
+    }
+  });
+}
+
+async function getAllItemsFromIndexedDB() {
+  const db = await openBackpackDB();
+  if (!db) return [];
+  return new Promise((resolve) => {
+    try {
+      const tx = db.transaction(STORE_NAME, 'readonly');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => resolve([]);
+    } catch (err) {
+      console.error('Lỗi đọc IndexedDB:', err);
+      resolve([]);
+    }
+  });
+}
+
+async function deleteItemFromIndexedDB(id) {
+  const db = await openBackpackDB();
+  if (!db) return false;
+  return new Promise((resolve) => {
+    try {
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      store.delete(id);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    } catch (err) {
+      console.error('Lỗi xóa IndexedDB:', err);
+      resolve(false);
+    }
+  });
+}
 
 /* ==========================================================================
    MARKDOWN PARSER
@@ -363,7 +516,7 @@ function getSubjectColor(subjectName) {
 }
 
 /* ==========================================================================
-   SCHEDULE RENDERING
+   UI RENDERING FUNCTIONS (SCHEDULE & TODAY)
    ========================================================================== */
 
 function renderSchedule() {
@@ -375,6 +528,7 @@ function renderSchedule() {
 
   elements.scheduleTitle.textContent = title;
   elements.scheduleSubtitle.textContent = `Hiển thị dữ liệu từ ${state.currentWeekFile}`;
+  elements.rawFileName.textContent = state.currentWeekFile;
 
   let totalClasses = 0;
   const uniqueSubjects = new Set();
@@ -510,8 +664,8 @@ function renderGridView(days, currentDayOfWeek) {
                 <button class="btn-view-subject-grade" title="Xem tỉ lệ điểm môn ${escapeHtml(c.subject)}" onclick="viewSubjectGrade('${escapeHtml(c.subject)}')">
                   <i class="fa-solid fa-chart-pie"></i>
                 </button>
-                <button class="btn-view-subject-backpack" title="Mở Google Drive môn ${escapeHtml(c.subject)}" onclick="viewSubjectBackpack('${escapeHtml(c.subject)}')">
-                  <i class="fa-brands fa-google-drive"></i>
+                <button class="btn-view-subject-backpack" title="Mở thư mục Chiếc cặp môn ${escapeHtml(c.subject)}" onclick="viewSubjectBackpack('${escapeHtml(c.subject)}')">
+                  <i class="fa-solid fa-folder-open"></i>
                 </button>
                 <button class="btn-copy-info" title="Sao chép thông tin tiết học" onclick="copyClassInfo('${escapeHtml(c.subject)}', '${escapeHtml(c.timeRange)}', '${escapeHtml(c.room)}')">
                   <i class="fa-regular fa-copy"></i>
@@ -547,7 +701,7 @@ function renderTodayView(days, currentDayOfWeek) {
   );
 
   if (!todayDay || todayDay.isDayOff || todayDay.classes.length === 0) {
-    elements.todaySummaryText.textContent = `Hôm nay bạn không có lịch học. Tận hưởng thời gian nghỉ ngơi nhé!`;
+    elements.todaySummaryText.textContent = `Hôm nay bạn không có lịch học. Tận hưởng thời gian nghỉ ngơi hoặc tự học nhé!`;
     elements.todayTimelineList.innerHTML = `
       <div class="day-off-card" style="padding: 3rem 1rem;">
         <div class="day-off-icon" style="font-size: 3rem;"><i class="fa-solid fa-mug-hot"></i></div>
@@ -578,8 +732,8 @@ function renderTodayView(days, currentDayOfWeek) {
           <button class="btn-view-subject-grade" title="Xem tỉ lệ điểm môn ${escapeHtml(c.subject)}" onclick="viewSubjectGrade('${escapeHtml(c.subject)}')">
             <i class="fa-solid fa-chart-pie"></i>
           </button>
-          <button class="btn-view-subject-backpack" title="Mở Google Drive môn ${escapeHtml(c.subject)}" onclick="viewSubjectBackpack('${escapeHtml(c.subject)}')">
-            <i class="fa-brands fa-google-drive"></i>
+          <button class="btn-view-subject-backpack" title="Mở thư mục Chiếc cặp môn ${escapeHtml(c.subject)}" onclick="viewSubjectBackpack('${escapeHtml(c.subject)}')">
+            <i class="fa-solid fa-folder-open"></i>
           </button>
         </div>
       </div>
@@ -756,281 +910,488 @@ window.viewSubjectGrade = function(subjectName) {
 };
 
 /* ==========================================================================
-   MINIMALIST GOOGLE DRIVE HUB LOGIC (ĐỒNG BỘ 100% CẢ PC & ĐIỆN THOẠI)
+   FREE-FORM GOOGLE DRIVE BACKPACK LOGIC & NAVIGATION
    ========================================================================== */
 
+function getFileIcon(type, name = '') {
+  const t = (type || '').toLowerCase();
+  const ext = name.split('.').pop().toLowerCase();
+  
+  if (t === 'pdf' || ext === 'pdf') return { icon: 'fa-solid fa-file-pdf', cls: 'pdf' };
+  if (t === 'pptx' || t === 'ppt' || ext === 'pptx' || ext === 'ppt') return { icon: 'fa-solid fa-file-powerpoint', cls: 'pptx' };
+  if (t === 'docx' || t === 'doc' || ext === 'docx' || ext === 'doc') return { icon: 'fa-solid fa-file-word', cls: 'docx' };
+  if (t === 'xlsx' || t === 'xls' || ext === 'xlsx' || ext === 'xls') return { icon: 'fa-solid fa-file-excel', cls: 'xlsx' };
+  if (t === 'zip' || t === 'rar' || ext === 'zip' || ext === 'rar') return { icon: 'fa-solid fa-file-zipper', cls: 'zip' };
+  if (t === 'drive') return { icon: 'fa-brands fa-google-drive', cls: 'drive' };
+  if (t === 'link') return { icon: 'fa-solid fa-arrow-up-right-from-square', cls: 'link' };
+  if (['png', 'jpg', 'jpeg', 'webp', 'svg'].includes(ext)) return { icon: 'fa-solid fa-file-image', cls: 'img' };
+  
+  return { icon: 'fa-regular fa-file-lines', cls: 'other' };
+}
+
+async function updateBackpackStorageStats() {
+  const offlineFiles = state.driveItems.filter(f => f.type !== 'folder' && f.fileBlob);
+  let totalBytes = 0;
+  offlineFiles.forEach(f => {
+    if (f.fileBlob && f.fileBlob.size) totalBytes += f.fileBlob.size;
+  });
+
+  const mb = (totalBytes / (1024 * 1024)).toFixed(1);
+  if (elements.bpStorageText) {
+    elements.bpStorageText.textContent = `Offline: ${mb} MB (${offlineFiles.length} file)`;
+  }
+  if (elements.bpFilesCount) {
+    const totalFiles = state.driveItems.filter(f => f.type !== 'folder').length;
+    elements.bpFilesCount.textContent = `${totalFiles} tài liệu`;
+  }
+}
+
 /**
- * Loads drive links from schedules/drive-links.json and merges with localStorage
+ * Returns breadcrumb path from root to current folder
  */
-async function loadDriveLinks() {
-  let list = [];
-  try {
-    const res = await fetch('schedules/drive-links.json');
-    if (res.ok) {
-      list = await res.json();
+function getBreadcrumbsPath(folderId) {
+  const crumbs = [];
+  let currId = folderId;
+
+  while (currId) {
+    const folder = state.driveItems.find(i => i.id === currId && i.type === 'folder');
+    if (folder) {
+      crumbs.unshift(folder);
+      currId = folder.parentId;
+    } else {
+      break;
     }
-  } catch (err) {
-    console.warn('Could not fetch schedules/drive-links.json', err);
   }
 
-  // Check localStorage custom overrides
-  try {
-    const localData = localStorage.getItem('custom_drive_links');
-    if (localData) {
-      const customLinks = JSON.parse(localData);
-      if (Array.isArray(customLinks) && customLinks.length > 0) {
-        list = customLinks;
-      }
-    }
-  } catch (e) {
-    console.warn('Could not read localStorage drive links', e);
-  }
-
-  state.driveSubjects = list;
-}
-
-function getDriveLinkIcon(type) {
-  switch (type) {
-    case 'pdf': return { icon: 'fa-solid fa-file-pdf', cls: 'pdf' };
-    case 'slides': return { icon: 'fa-solid fa-file-powerpoint', cls: 'slides' };
-    case 'btl': return { icon: 'fa-solid fa-users-rectangle', cls: 'btl' };
-    case 'exams': return { icon: 'fa-solid fa-file-signature', cls: 'exams' };
-    case 'drive': return { icon: 'fa-brands fa-google-drive', cls: 'drive' };
-    default: return { icon: 'fa-solid fa-arrow-up-right-from-square', cls: 'link' };
-  }
+  return crumbs;
 }
 
 /**
- * Render Minimalist Google Drive View
+ * Open a folder and re-render
+ */
+window.openBackpackFolder = function(folderId) {
+  state.currentFolderId = folderId;
+  state.backpackSearchQuery = '';
+  if (elements.backpackSearchInput) {
+    elements.backpackSearchInput.value = '';
+    elements.bpClearSearchBtn.classList.add('hidden');
+  }
+  renderBackpackView();
+};
+
+/**
+ * Navigate to parent folder
+ */
+window.navigateBackpackUp = function() {
+  if (!state.currentFolderId) return;
+  const currFolder = state.driveItems.find(i => i.id === state.currentFolderId && i.type === 'folder');
+  state.currentFolderId = currFolder ? currFolder.parentId : null;
+  renderBackpackView();
+};
+
+/**
+ * Jump directly from Timetable to Subject folder
+ */
+window.viewSubjectBackpack = function(subjectName) {
+  switchView('backpack');
+
+  // Match root folder of this subject
+  const rootFolder = state.driveItems.find(i => 
+    i.parentId === null && 
+    i.type === 'folder' && 
+    (i.name.toLowerCase().includes(subjectName.toLowerCase()) || subjectName.toLowerCase().includes(i.name.toLowerCase()))
+  );
+
+  if (rootFolder) {
+    state.currentFolderId = rootFolder.id;
+  } else {
+    state.currentFolderId = null;
+  }
+
+  renderBackpackView();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+/**
+ * Render Breadcrumbs Bar
+ */
+function renderBreadcrumbs() {
+  if (!elements.backpackBreadcrumbs) return;
+
+  const crumbs = getBreadcrumbsPath(state.currentFolderId);
+
+  // Toggle Back Button visibility
+  if (elements.bpBackBtn) {
+    elements.bpBackBtn.style.display = state.currentFolderId ? 'inline-flex' : 'none';
+  }
+
+  let html = `<span class="crumb ${!state.currentFolderId ? 'active' : ''}" onclick="openBackpackFolder(null)"><i class="fa-solid fa-house"></i> Chiếc cặp</span>`;
+
+  crumbs.forEach((c, idx) => {
+    const isLast = idx === crumbs.length - 1;
+    html += `
+      <span class="separator"><i class="fa-solid fa-chevron-right"></i></span>
+      <span class="crumb ${isLast ? 'active' : ''}" onclick="openBackpackFolder('${c.id}')">
+        <i class="fa-solid fa-folder"></i> ${escapeHtml(c.name)}
+      </span>
+    `;
+  });
+
+  elements.backpackBreadcrumbs.innerHTML = html;
+}
+
+/**
+ * Count total items inside a folder (files + subfolders)
+ */
+function countFolderContents(folderId) {
+  return state.driveItems.filter(i => i.parentId === folderId).length;
+}
+
+/**
+ * Main render function for Free-form Drive Backpack
  */
 function renderBackpackView() {
   if (!elements.backpackExplorer) return;
   elements.backpackExplorer.innerHTML = '';
 
-  // Render Subject Filter Tabs
-  if (elements.backpackSubjectTags) {
-    elements.backpackSubjectTags.innerHTML = '';
+  renderBreadcrumbs();
+  updateBackpackStorageStats();
 
-    const allBtn = document.createElement('button');
-    allBtn.className = `tag-btn ${!state.backpackFilterSubject ? 'active' : ''}`;
-    allBtn.innerHTML = `Tất cả môn (${state.driveSubjects.length})`;
-    allBtn.addEventListener('click', () => {
-      state.backpackFilterSubject = null;
-      renderBackpackView();
-    });
-    elements.backpackSubjectTags.appendChild(allBtn);
-
-    state.driveSubjects.forEach(s => {
-      const btn = document.createElement('button');
-      btn.className = `tag-btn ${state.backpackFilterSubject === s.code ? 'active' : ''}`;
-      btn.innerHTML = `<span class="tag-color-indicator" style="background-color: ${s.color || '#6366f1'}"></span> ${s.name}`;
-      btn.addEventListener('click', () => {
-        state.backpackFilterSubject = state.backpackFilterSubject === s.code ? null : s.code;
-        renderBackpackView();
-      });
-      elements.backpackSubjectTags.appendChild(btn);
-    });
-  }
-
-  // Populate Select Options in Add Link Modal
+  // Populate options in Add Link Modal
   if (elements.linkSubjectSelect) {
     elements.linkSubjectSelect.innerHTML = '';
-    state.driveSubjects.forEach(s => {
+    const allFolders = state.driveItems.filter(i => i.type === 'folder');
+    allFolders.forEach(f => {
       const opt = document.createElement('option');
-      opt.value = s.code;
-      opt.textContent = `${s.code} - ${s.name}`;
+      opt.value = f.id;
+      opt.textContent = f.name;
+      if (f.id === state.currentFolderId) opt.selected = true;
       elements.linkSubjectSelect.appendChild(opt);
     });
   }
 
-  // Filter subjects
   const q = (state.backpackSearchQuery || '').toLowerCase().trim();
-  let subjects = state.driveSubjects.filter(s => {
-    if (state.backpackFilterSubject && s.code !== state.backpackFilterSubject) {
-      return false;
-    }
-    return true;
-  });
 
-  // Calculate total links
-  let totalLinksCount = 0;
-  state.driveSubjects.forEach(s => {
-    totalLinksCount += (s.links ? s.links.length : 0);
-  });
+  // Filter items in current directory OR matching search query anywhere
+  let itemsInView = [];
+  if (q) {
+    itemsInView = state.driveItems.filter(i => 
+      i.name.toLowerCase().includes(q) || 
+      (i.description && i.description.toLowerCase().includes(q))
+    );
+  } else {
+    itemsInView = state.driveItems.filter(i => i.parentId === state.currentFolderId);
+  }
 
-  if (elements.bpSubjectsCount) elements.bpSubjectsCount.textContent = `${state.driveSubjects.length} Môn học`;
-  if (elements.bpFilesCount) elements.bpFilesCount.textContent = `${totalLinksCount} Tài liệu Drive`;
+  const folders = itemsInView.filter(i => i.type === 'folder');
+  const files = itemsInView.filter(i => i.type !== 'folder');
 
-  const driveGrid = document.createElement('div');
-  driveGrid.className = 'bp-drive-grid';
-
-  let renderedCount = 0;
-
-  subjects.forEach(subject => {
-    let links = subject.links || [];
-    if (q) {
-      const subjectMatches = subject.name.toLowerCase().includes(q) || subject.code.toLowerCase().includes(q);
-      if (!subjectMatches) {
-        links = links.filter(l => 
-          l.name.toLowerCase().includes(q) || 
-          (l.note && l.note.toLowerCase().includes(q))
-        );
-      }
-    }
-
-    if (q && links.length === 0) return;
-    renderedCount++;
-
-    const color = subject.color || '#6366f1';
-    const card = document.createElement('div');
-    card.className = 'bp-drive-card';
-    card.id = `bp-card-${subject.code.toLowerCase()}`;
-
-    const linksHtml = links.map(l => {
-      const iconInfo = getDriveLinkIcon(l.type);
-      return `
-        <div class="bp-drive-link-item">
-          <div class="bp-link-left">
-            <i class="${iconInfo.icon} bp-link-icon ${iconInfo.cls}"></i>
-            <div class="bp-link-text">
-              <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer" class="bp-link-title" title="${escapeHtml(l.name)}">
-                ${escapeHtml(l.name)}
-              </a>
-              ${l.note ? `<span class="bp-link-note">${escapeHtml(l.note)}</span>` : ''}
-            </div>
-          </div>
-          <div class="bp-link-actions">
-            <button class="btn-drive-action" title="Xem trước tài liệu" onclick="previewDriveUrl('${escapeHtml(l.name)}', '${escapeHtml(l.url)}', '${iconInfo.icon}', '${iconInfo.cls}')">
-              <i class="fa-regular fa-eye"></i>
-            </button>
-            <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener noreferrer" class="btn-drive-action" title="Mở trên Google Drive">
-              <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            </a>
-            <button class="btn-drive-action edit" title="Sửa link này" onclick="editDriveLink('${subject.code}', '${l.id}')">
-              <i class="fa-solid fa-pen"></i>
-            </button>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    card.innerHTML = `
-      <div class="bp-drive-card-header">
-        <div class="bp-drive-title-group">
-          <div class="bp-drive-icon-badge" style="background-color: ${color}22; color: ${color};">
-            <i class="fa-solid fa-book-bookmark"></i>
-          </div>
-          <div class="bp-drive-name-group">
-            <h3 class="bp-drive-subject-name">${escapeHtml(subject.name)}</h3>
-            <span class="bp-drive-subject-code">${escapeHtml(subject.code)}</span>
-          </div>
-        </div>
-        ${subject.mainFolderUrl ? `
-          <a href="${escapeHtml(subject.mainFolderUrl)}" target="_blank" rel="noopener noreferrer" class="btn-open-main-drive" title="Mở thư mục Google Drive chính của môn">
-            <i class="fa-brands fa-google-drive"></i> Folder Môn
-          </a>
-        ` : ''}
-      </div>
-
-      <div class="bp-drive-links-list">
-        ${linksHtml.length > 0 ? linksHtml : '<div style="color: var(--text-muted); font-size: 0.85rem; padding: 1rem 0;">Chưa có tài liệu phù hợp.</div>'}
-      </div>
-    `;
-
-    driveGrid.appendChild(card);
-  });
-
-  if (renderedCount === 0) {
+  if (itemsInView.length === 0) {
     elements.backpackExplorer.innerHTML = `
-      <div class="day-off-card" style="padding: 3.5rem 1rem;">
-        <div class="day-off-icon" style="font-size: 3rem;"><i class="fa-solid fa-magnifying-glass"></i></div>
-        <h3>Không tìm thấy tài liệu</h3>
-        <p>Thử tìm kiếm với từ khóa khác như "Học máy", "Slide", "BTL", "Đề cương"...</p>
+      <div class="bp-empty-state">
+        <i class="fa-regular fa-folder-open"></i>
+        <h3>Thư mục này đang trống</h3>
+        <p>Bấm nút <strong>"+ Thư mục mới"</strong>, <strong>"Tải tệp lên"</strong> hoặc kéo thả file vào đây để bắt đầu lưu trữ.</p>
       </div>
     `;
     return;
   }
 
-  elements.backpackExplorer.appendChild(driveGrid);
+  // 1. RENDER FOLDERS SECTION (Google Drive Style)
+  if (folders.length > 0) {
+    const folderSection = document.createElement('div');
+    folderSection.innerHTML = `
+      <div class="bp-section-title">
+        <i class="fa-solid fa-folder"></i> Thư mục (${folders.length})
+      </div>
+    `;
+
+    const foldersGrid = document.createElement('div');
+    foldersGrid.className = 'bp-folders-grid';
+
+    folders.forEach(f => {
+      const childCount = countFolderContents(f.id);
+      const card = document.createElement('div');
+      card.className = 'bp-folder-card';
+      card.onclick = () => openBackpackFolder(f.id);
+
+      card.innerHTML = `
+        <div class="bp-folder-left">
+          <i class="fa-solid fa-folder bp-folder-icon" style="color: ${f.color || 'var(--accent-primary)'};"></i>
+          <div class="bp-folder-details">
+            <span class="bp-folder-name" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>
+            <span class="bp-folder-count">${childCount} mục</span>
+          </div>
+        </div>
+        ${!f.isSystem ? `
+          <div class="bp-folder-actions" onclick="event.stopPropagation();">
+            <button class="btn-file-action delete" title="Xóa thư mục này" onclick="deleteBackpackItem('${f.id}')">
+              <i class="fa-regular fa-trash-can"></i>
+            </button>
+          </div>
+        ` : ''}
+      `;
+      foldersGrid.appendChild(card);
+    });
+
+    folderSection.appendChild(foldersGrid);
+    elements.backpackExplorer.appendChild(folderSection);
+  }
+
+  // 2. RENDER FILES SECTION (Grid or List View)
+  if (files.length > 0) {
+    const fileSection = document.createElement('div');
+    fileSection.innerHTML = `
+      <div class="bp-section-title">
+        <i class="fa-solid fa-file"></i> Tệp tin (${files.length})
+      </div>
+    `;
+
+    if (state.backpackViewMode === 'grid') {
+      const filesGrid = document.createElement('div');
+      filesGrid.className = 'bp-files-grid';
+
+      files.forEach(file => {
+        const fileIconInfo = getFileIcon(file.type, file.name);
+        const card = document.createElement('div');
+        card.className = 'bp-file-card';
+        card.onclick = () => previewFile(file.id);
+
+        card.innerHTML = `
+          <div class="bp-file-card-top">
+            <i class="${fileIconInfo.icon} bp-file-card-icon ${fileIconInfo.cls}"></i>
+            <div class="bp-file-card-actions" onclick="event.stopPropagation();">
+              ${file.driveUrl ? `
+                <a href="${escapeHtml(file.driveUrl)}" target="_blank" rel="noopener noreferrer" class="btn-file-action" title="Mở link Google Drive">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>
+              ` : ''}
+              ${file.fileBlob ? `
+                <button class="btn-file-action" title="Tải về máy" onclick="downloadOfflineFile('${file.id}')">
+                  <i class="fa-solid fa-download"></i>
+                </button>
+              ` : ''}
+              ${file.isCustom ? `
+                <button class="btn-file-action delete" title="Xóa tệp" onclick="deleteBackpackItem('${file.id}')">
+                  <i class="fa-regular fa-trash-can"></i>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+          <div class="bp-file-card-title" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</div>
+          <div class="bp-file-card-meta">
+            <span>${file.size || 'Tệp'}</span>
+            ${file.isOffline ? `<span class="bp-offline-tag"><i class="fa-solid fa-circle-check"></i> Offline</span>` : `<span>${file.updatedAt || ''}</span>`}
+          </div>
+        `;
+        filesGrid.appendChild(card);
+      });
+
+      fileSection.appendChild(filesGrid);
+    } else {
+      // List View
+      const listContainer = document.createElement('div');
+      listContainer.className = 'bp-files-list';
+
+      listContainer.innerHTML = `
+        <div class="bp-list-header">
+          <div>Tên tệp</div>
+          <div>Lần sửa cuối</div>
+          <div>Kích cỡ</div>
+          <div style="text-align: right;">Thao tác</div>
+        </div>
+      `;
+
+      files.forEach(file => {
+        const fileIconInfo = getFileIcon(file.type, file.name);
+        const row = document.createElement('div');
+        row.className = 'bp-list-row';
+        row.onclick = () => previewFile(file.id);
+
+        row.innerHTML = `
+          <div class="bp-list-name-col">
+            <i class="${fileIconInfo.icon} ${fileIconInfo.cls}" style="font-size: 1.25rem;"></i>
+            <span title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</span>
+          </div>
+          <div class="bp-list-meta-col">${file.updatedAt || '--'}</div>
+          <div class="bp-list-meta-col">
+            ${file.size || '--'} ${file.isOffline ? `<span class="bp-offline-tag" style="margin-left: 0.3rem;"><i class="fa-solid fa-circle-check"></i></span>` : ''}
+          </div>
+          <div class="bp-list-actions-col" onclick="event.stopPropagation();">
+            <button class="btn-file-action" title="Xem trước" onclick="previewFile('${file.id}')">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+            ${file.driveUrl ? `
+              <a href="${escapeHtml(file.driveUrl)}" target="_blank" rel="noopener noreferrer" class="btn-file-action" title="Mở link">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              </a>
+            ` : ''}
+            ${file.fileBlob ? `
+              <button class="btn-file-action" title="Tải xuống" onclick="downloadOfflineFile('${file.id}')">
+                <i class="fa-solid fa-download"></i>
+              </button>
+            ` : ''}
+            ${file.isCustom ? `
+              <button class="btn-file-action delete" title="Xóa" onclick="deleteBackpackItem('${file.id}')">
+                <i class="fa-regular fa-trash-can"></i>
+              </button>
+            ` : ''}
+          </div>
+        `;
+        listContainer.appendChild(row);
+      });
+
+      fileSection.appendChild(listContainer);
+    }
+
+    elements.backpackExplorer.appendChild(fileSection);
+  }
 }
 
 /**
- * Preview Google Drive / Web URL in modal
+ * Delete item (Folder or File)
  */
-window.previewDriveUrl = function(title, url, iconCls = 'fa-brands fa-google-drive', colorCls = 'drive') {
-  elements.previewFileName.textContent = title;
-  elements.previewFileSub.textContent = 'Google Drive Preview';
-  elements.previewFileIcon.className = `${iconCls} ${colorCls}`;
-  elements.previewOpenExtBtn.href = url;
+window.deleteBackpackItem = async function(id) {
+  const item = state.driveItems.find(i => i.id === id);
+  if (!item) return;
 
-  let embedUrl = url;
-  if (embedUrl.includes('drive.google.com/file/d/')) {
-    embedUrl = embedUrl.replace(/\/view.*$/, '/preview');
+  const isFolder = item.type === 'folder';
+  const msg = isFolder 
+    ? `Bạn có chắc muốn xóa thư mục "${item.name}" và toàn bộ tệp bên trong?` 
+    : `Bạn có chắc muốn xóa tệp "${item.name}"?`;
+
+  if (!confirm(msg)) return;
+
+  // If folder, recursively find all child IDs
+  const idsToDelete = [id];
+  if (isFolder) {
+    const findChildren = (pid) => {
+      const children = state.driveItems.filter(i => i.parentId === pid);
+      children.forEach(c => {
+        idsToDelete.push(c.id);
+        if (c.type === 'folder') findChildren(c.id);
+      });
+    };
+    findChildren(id);
   }
 
-  elements.previewModalBody.innerHTML = `
-    <iframe class="preview-iframe" src="${embedUrl}" allow="autoplay" loading="lazy"></iframe>
-  `;
+  for (const delId of idsToDelete) {
+    await deleteItemFromIndexedDB(delId);
+  }
 
-  elements.filePreviewModal.classList.remove('hidden');
+  state.driveItems = state.driveItems.filter(i => !idsToDelete.includes(i.id));
+  renderBackpackView();
+  showToast(`Đã xóa ${isFolder ? 'thư mục' : 'tệp tin'}`);
 };
 
 /**
- * Edit a specific drive link
+ * Preview file modal handler
  */
-window.editDriveLink = function(subjectCode, linkId) {
-  const subject = state.driveSubjects.find(s => s.code === subjectCode);
-  if (!subject) return;
+window.previewFile = function(fileId) {
+  const file = state.driveItems.find(f => f.id === fileId);
+  if (!file || file.type === 'folder') return;
 
-  const link = subject.links.find(l => l.id === linkId);
-  if (!link) return;
+  const modal = elements.filePreviewModal;
+  const fileIconInfo = getFileIcon(file.type, file.name);
 
-  const newUrl = prompt(`Nhập link Google Drive mới cho "${link.name}":`, link.url);
-  if (newUrl && newUrl.trim() && newUrl.trim() !== link.url) {
-    link.url = newUrl.trim();
-    saveCustomDriveLinks();
-    renderBackpackView();
-    showToast(`Đã cập nhật link cho ${link.name}`);
+  elements.previewFileName.textContent = file.name;
+  elements.previewFileSub = file.size || 'Tài liệu';
+  elements.previewFileIcon.className = `${fileIconInfo.icon} ${fileIconInfo.cls}`;
+
+  if (file.driveUrl) {
+    elements.previewOpenExtBtn.style.display = 'inline-flex';
+    elements.previewOpenExtBtn.href = file.driveUrl;
+  } else {
+    elements.previewOpenExtBtn.style.display = 'none';
   }
+
+  if (file.fileBlob) {
+    elements.previewDownloadBtn.style.display = 'inline-flex';
+    elements.previewDownloadBtn.onclick = () => downloadOfflineFile(file.id);
+  } else {
+    elements.previewDownloadBtn.style.display = 'none';
+  }
+
+  elements.previewModalBody.innerHTML = '';
+
+  if (file.fileBlob) {
+    const objectUrl = URL.createObjectURL(file.fileBlob);
+    const ext = file.name.split('.').pop().toLowerCase();
+
+    if (ext === 'pdf') {
+      elements.previewModalBody.innerHTML = `<iframe class="preview-iframe" src="${objectUrl}#toolbar=1"></iframe>`;
+    } else if (['png', 'jpg', 'jpeg', 'webp', 'svg'].includes(ext)) {
+      elements.previewModalBody.innerHTML = `<img class="preview-img" src="${objectUrl}" alt="${escapeHtml(file.name)}">`;
+    } else {
+      elements.previewModalBody.innerHTML = `
+        <div style="text-align: center; padding: 3rem;">
+          <i class="${fileIconInfo.icon}" style="font-size: 4rem; color: var(--accent-primary); margin-bottom: 1rem;"></i>
+          <h3>${escapeHtml(file.name)}</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Tệp đã được lưu trữ Offline trong máy của bạn.</p>
+          <button class="btn-primary-small" onclick="downloadOfflineFile('${file.id}')">
+            <i class="fa-solid fa-download"></i> Tải về máy để mở
+          </button>
+        </div>
+      `;
+    }
+  } else if (file.driveUrl) {
+    let embedUrl = file.driveUrl;
+    if (embedUrl.includes('drive.google.com/file/d/')) {
+      embedUrl = embedUrl.replace(/\/view.*$/, '/preview');
+    }
+    elements.previewModalBody.innerHTML = `<iframe class="preview-iframe" src="${embedUrl}" allow="autoplay"></iframe>`;
+  }
+
+  modal.classList.remove('hidden');
 };
 
-function saveCustomDriveLinks() {
-  try {
-    localStorage.setItem('custom_drive_links', JSON.stringify(state.driveSubjects));
-  } catch (e) {
-    console.warn('Could not save to localStorage', e);
+window.downloadOfflineFile = function(fileId) {
+  const file = state.driveItems.find(f => f.id === fileId);
+  if (!file || !file.fileBlob) return;
+
+  const url = URL.createObjectURL(file.fileBlob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = file.name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast(`Đang tải: ${file.name}`);
+};
+
+/**
+ * Handle new files upload into current active folder
+ */
+async function handleFilesUpload(filesList) {
+  if (!filesList || filesList.length === 0) return;
+
+  let addedCount = 0;
+  for (let i = 0; i < filesList.length; i++) {
+    const file = filesList[i];
+    const ext = file.name.split('.').pop().toLowerCase();
+
+    const fileItem = {
+      id: 'custom-file-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+      parentId: state.currentFolderId,
+      name: file.name,
+      type: ext,
+      size: (file.size / (1024 * 1024) > 1) ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` : `${Math.round(file.size / 1024)} KB`,
+      updatedAt: new Date().toISOString().split('T')[0],
+      fileBlob: file,
+      isOffline: true,
+      isCustom: true,
+      description: 'Tài liệu Offline tải lên'
+    };
+
+    await saveItemToIndexedDB(fileItem);
+    state.driveItems.unshift(fileItem);
+    addedCount++;
   }
+
+  renderBackpackView();
+  showToast(`Đã lưu ${addedCount} tệp vào thư mục hiện tại!`);
 }
-
-/**
- * Navigate from Timetable to Subject's Drive card
- */
-window.viewSubjectBackpack = function(subjectName) {
-  switchView('backpack');
-
-  const matched = state.driveSubjects.find(s => 
-    s.name.toLowerCase().includes(subjectName.toLowerCase()) || 
-    subjectName.toLowerCase().includes(s.name.toLowerCase())
-  );
-
-  if (matched) {
-    state.backpackFilterSubject = matched.code;
-    renderBackpackView();
-
-    setTimeout(() => {
-      const card = document.getElementById(`bp-card-${matched.code.toLowerCase()}`);
-      if (card) {
-        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        card.style.borderColor = 'var(--accent-primary)';
-        card.style.boxShadow = '0 0 24px rgba(99, 102, 241, 0.45)';
-        setTimeout(() => {
-          card.style.borderColor = '';
-          card.style.boxShadow = '';
-        }, 2500);
-      }
-    }, 120);
-  }
-};
 
 /* ==========================================================================
    INTERACTION HELPERS & UTILS
@@ -1129,6 +1490,8 @@ async function loadWeekMarkdown(filePath) {
     markdownContent = filePath.includes('tuan-36') ? DEFAULT_WEEK_36_MD : DEFAULT_WEEK_35_MD;
   }
 
+  state.currentRawMarkdown = markdownContent;
+  elements.markdownRawContent.value = markdownContent;
   state.parsedSchedule = parseScheduleMarkdown(markdownContent);
   renderSchedule();
 }
@@ -1173,11 +1536,13 @@ function switchView(viewName) {
   elements.viewTodayBtn.classList.toggle('active', viewName === 'today');
   elements.viewGradesBtn.classList.toggle('active', viewName === 'grades');
   elements.viewBackpackBtn.classList.toggle('active', viewName === 'backpack');
+  elements.viewRawBtn.classList.toggle('active', viewName === 'raw');
 
   elements.gridViewContainer.classList.toggle('active', viewName === 'grid');
   elements.todayViewContainer.classList.toggle('active', viewName === 'today');
   elements.gradesViewContainer.classList.toggle('active', viewName === 'grades');
   elements.backpackViewContainer.classList.toggle('active', viewName === 'backpack');
+  elements.rawViewContainer.classList.toggle('active', viewName === 'raw');
 
   if (viewName === 'grades') {
     renderGradesView(state.gradesSearchQuery);
@@ -1221,6 +1586,7 @@ function setupEventListeners() {
   elements.viewTodayBtn.addEventListener('click', () => switchView('today'));
   elements.viewGradesBtn.addEventListener('click', () => switchView('grades'));
   elements.viewBackpackBtn.addEventListener('click', () => switchView('backpack'));
+  elements.viewRawBtn.addEventListener('click', () => switchView('raw'));
 
   // Search Box in Timetable
   elements.searchInput.addEventListener('input', (e) => {
@@ -1244,7 +1610,30 @@ function setupEventListeners() {
     });
   }
 
-  // Backpack Drive Search Box
+  // Backpack Drive Actions
+  if (elements.bpBackBtn) {
+    elements.bpBackBtn.addEventListener('click', navigateBackpackUp);
+  }
+
+  if (elements.bpViewGridBtn) {
+    elements.bpViewGridBtn.addEventListener('click', () => {
+      state.backpackViewMode = 'grid';
+      elements.bpViewGridBtn.classList.add('active');
+      elements.bpViewListBtn.classList.remove('active');
+      renderBackpackView();
+    });
+  }
+
+  if (elements.bpViewListBtn) {
+    elements.bpViewListBtn.addEventListener('click', () => {
+      state.backpackViewMode = 'list';
+      elements.bpViewListBtn.classList.add('active');
+      elements.bpViewGridBtn.classList.remove('active');
+      renderBackpackView();
+    });
+  }
+
+  // Backpack Search Box
   if (elements.backpackSearchInput) {
     elements.backpackSearchInput.addEventListener('input', (e) => {
       state.backpackSearchQuery = e.target.value.trim();
@@ -1262,13 +1651,99 @@ function setupEventListeners() {
     });
   }
 
+  // Create New Folder Modal Trigger
+  if (elements.bpNewFolderBtn) {
+    elements.bpNewFolderBtn.addEventListener('click', () => {
+      elements.newFolderModal.classList.remove('hidden');
+      elements.folderNameInput.value = '';
+      elements.folderNameInput.focus();
+    });
+  }
+
+  if (elements.newFolderCloseBtn) {
+    elements.newFolderCloseBtn.addEventListener('click', () => {
+      elements.newFolderModal.classList.add('hidden');
+    });
+  }
+
+  if (elements.newFolderCancelBtn) {
+    elements.newFolderCancelBtn.addEventListener('click', () => {
+      elements.newFolderModal.classList.add('hidden');
+    });
+  }
+
+  if (elements.newFolderForm) {
+    elements.newFolderForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const folderName = elements.folderNameInput.value.trim();
+      if (!folderName) return;
+
+      const newFolder = {
+        id: 'custom-folder-' + Date.now(),
+        type: 'folder',
+        name: folderName,
+        parentId: state.currentFolderId,
+        color: '#6366f1',
+        isCustom: true,
+        updatedAt: new Date().toISOString().split('T')[0]
+      };
+
+      await saveItemToIndexedDB(newFolder);
+      state.driveItems.unshift(newFolder);
+      renderBackpackView();
+
+      elements.newFolderModal.classList.add('hidden');
+      showToast(`Đã tạo thư mục: ${folderName}`);
+    });
+  }
+
+  // Backpack Upload File Trigger
+  if (elements.bpUploadBtn) {
+    elements.bpUploadBtn.addEventListener('click', () => {
+      elements.backpackFileInput.click();
+    });
+  }
+
+  if (elements.backpackFileInput) {
+    elements.backpackFileInput.addEventListener('change', (e) => {
+      handleFilesUpload(e.target.files);
+      elements.backpackFileInput.value = '';
+    });
+  }
+
+  // Drag and Drop Zone
+  if (elements.backpackDropzone) {
+    elements.backpackDropzone.addEventListener('click', () => {
+      elements.backpackFileInput.click();
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      elements.backpackDropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        elements.backpackDropzone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      elements.backpackDropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        elements.backpackDropzone.classList.remove('dragover');
+      });
+    });
+
+    elements.backpackDropzone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      handleFilesUpload(dt.files);
+    });
+  }
+
   // Add Link Modal Triggers
   if (elements.bpAddLinkBtn) {
     elements.bpAddLinkBtn.addEventListener('click', () => {
       elements.addLinkModal.classList.remove('hidden');
-      if (elements.linkSubjectSelect && state.backpackFilterSubject) {
-        elements.linkSubjectSelect.value = state.backpackFilterSubject;
-      }
+      if (elements.linkSubjectSelect) elements.linkSubjectSelect.value = state.currentFolderId || '';
     });
   }
 
@@ -1285,34 +1760,33 @@ function setupEventListeners() {
   }
 
   if (elements.addLinkForm) {
-    elements.addLinkForm.addEventListener('submit', (e) => {
+    elements.addLinkForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const subjectCode = elements.linkSubjectSelect.value;
-      const category = elements.linkCategorySelect.value;
+      const parentId = elements.linkSubjectSelect.value || state.currentFolderId;
       const name = elements.linkNameInput.value.trim();
       const url = elements.linkUrlInput.value.trim();
 
       if (!name || !url) return;
 
-      const targetSubject = state.driveSubjects.find(s => s.code === subjectCode);
-      if (targetSubject) {
-        if (!targetSubject.links) targetSubject.links = [];
-        targetSubject.links.unshift({
-          id: 'link-' + Date.now(),
-          name: name,
-          category: category,
-          type: url.includes('drive.google.com') ? 'drive' : 'link',
-          url: url,
-          note: 'Liên kết do bạn thêm'
-        });
+      const newLinkItem = {
+        id: 'custom-link-' + Date.now(),
+        parentId: parentId || null,
+        name: name,
+        type: url.includes('drive.google.com') ? 'drive' : 'link',
+        size: 'Google Drive',
+        updatedAt: new Date().toISOString().split('T')[0],
+        driveUrl: url,
+        isCustom: true,
+        description: 'Liên kết do bạn thêm'
+      };
 
-        saveCustomDriveLinks();
-        renderBackpackView();
-      }
+      await saveItemToIndexedDB(newLinkItem);
+      state.driveItems.unshift(newLinkItem);
+      renderBackpackView();
 
       elements.addLinkForm.reset();
       elements.addLinkModal.classList.add('hidden');
-      showToast(`Đã thêm link Drive cho môn ${subjectCode}!`);
+      showToast(`Đã thêm liên kết: ${name}`);
     });
   }
 
@@ -1324,16 +1798,38 @@ function setupEventListeners() {
     });
   }
 
+  // Close modals when clicking backdrop
   window.addEventListener('click', (e) => {
     if (e.target === elements.filePreviewModal) {
       elements.filePreviewModal.classList.add('hidden');
       elements.previewModalBody.innerHTML = '';
     }
     if (e.target === elements.addLinkModal) elements.addLinkModal.classList.add('hidden');
+    if (e.target === elements.newFolderModal) elements.newFolderModal.classList.add('hidden');
   });
 
   // Print Button
   elements.printScheduleBtn.addEventListener('click', () => window.print());
+
+  // Raw Markdown Actions
+  elements.copyMarkdownBtn.addEventListener('click', () => {
+    navigator.clipboard.writeText(elements.markdownRawContent.value).then(() => {
+      showToast('Đã sao chép toàn bộ Markdown vào bộ nhớ tạm!');
+    });
+  });
+
+  elements.reloadMarkdownBtn.addEventListener('click', () => {
+    loadWeekMarkdown(state.currentWeekFile);
+    showToast('Đã tải lại nội dung Markdown gốc');
+  });
+
+  elements.applyRawBtn.addEventListener('click', () => {
+    const editedMd = elements.markdownRawContent.value;
+    state.parsedSchedule = parseScheduleMarkdown(editedMd);
+    renderSchedule();
+    switchView('grid');
+    showToast('Đã cập nhật giao diện xem thử từ Markdown!');
+  });
 }
 
 /* ==========================================================================
@@ -1353,8 +1849,9 @@ async function init() {
 
   setupEventListeners();
 
-  // Load Drive links from schedules/drive-links.json
-  await loadDriveLinks();
+  // Load custom items from IndexedDB and combine with defaults
+  const dbItems = await getAllItemsFromIndexedDB();
+  state.driveItems = [...dbItems, ...DEFAULT_DRIVE_ITEMS];
 
   renderGradesView();
   renderBackpackView();
@@ -1364,9 +1861,10 @@ async function init() {
 
   if ('serviceWorker' in navigator) {
     try {
-      await navigator.serviceWorker.register('./sw.js');
+      const reg = await navigator.serviceWorker.register('./sw.js');
+      console.log('PWA Service Worker đã kích hoạt:', reg.scope);
     } catch (err) {
-      console.warn('Service Worker registration skipped:', err);
+      console.warn('Không thể đăng ký Service Worker:', err);
     }
   }
 }

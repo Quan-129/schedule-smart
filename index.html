@@ -39,6 +39,7 @@
         </div>
         <div class="brand-info">
           <h1 id="app-title">Lịch Học Sinh Viên</h1>
+          <span class="badge-git"><i class="fa-brands fa-git-alt"></i> Markdown Git Deploy</span>
         </div>
       </div>
 
@@ -69,11 +70,14 @@
           <button id="view-today-btn" class="btn-toggle" title="Xem ngày Hôm nay">
             <i class="fa-solid fa-calendar-day"></i> <span class="btn-text">Hôm nay</span>
           </button>
-          <button id="view-grades-btn" class="btn-toggle" title="Xem Tỉ lệ điểm môn học">
+          <button id="view-grades-btn" class="btn-toggle" title="Xem Tỉ lệ điểm thành phần các môn">
             <i class="fa-solid fa-chart-pie"></i> <span class="btn-text">Tỉ lệ điểm</span>
           </button>
-          <button id="view-backpack-btn" class="btn-toggle" title="Chiếc cặp Google Drive">
-            <i class="fa-brands fa-google-drive"></i> <span class="btn-text">Chiếc cặp</span>
+          <button id="view-backpack-btn" class="btn-toggle" title="Chiếc cặp thông minh (Tài liệu & Offline Drive)">
+            <i class="fa-solid fa-briefcase"></i> <span class="btn-text">Chiếc cặp</span>
+          </button>
+          <button id="view-raw-btn" class="btn-toggle" title="Xem Markdown gốc">
+            <i class="fa-brands fa-markdown"></i> <span class="btn-text">Markdown</span>
           </button>
         </div>
 
@@ -178,47 +182,101 @@
         </div>
       </section>
 
-      <!-- VIEW 4: Smart Backpack (Chiếc Cặp Google Drive) -->
+      <!-- VIEW 4: Smart Backpack (Chiếc Cặp Thông Minh) -->
       <section id="backpack-view-container" class="view-panel">
         <div class="backpack-hero-card">
           <div class="backpack-hero-info">
-            <div class="badge-backpack"><i class="fa-brands fa-google-drive"></i> Chiếc Cặp Google Drive 🎒</div>
-            <h2 class="backpack-main-title">Kho Tài Liệu & Thư Mục Google Drive</h2>
-            <p class="backpack-subtitle">Tập hợp thư mục Drive, slide bài giảng, đề thi & link nộp bài của từng môn học. Đồng bộ tức thì trên cả máy tính và điện thoại!</p>
+            <div class="badge-backpack"><i class="fa-solid fa-briefcase"></i> Chiếc Cặp Thông Minh 🎒</div>
+            <h2 class="backpack-main-title">Kho Tài Liệu & Drive Học Tập Độc Lập</h2>
+            <p class="backpack-subtitle">Hỗ trợ lưu trữ bài giảng, slide, đề thi Offline (IndexedDB) và đồng bộ Google Drive. Kéo thả file để lưu trữ ngay!</p>
           </div>
           <div class="backpack-stats-pills">
-            <div class="bp-stat" title="Số môn học">
-              <i class="fa-solid fa-graduation-cap"></i> <span id="bp-subjects-count">7 Môn học</span>
+            <div class="bp-stat" id="bp-stat-storage" title="Dung lượng đã lưu trữ trong máy">
+              <i class="fa-solid fa-database"></i> <span id="bp-storage-text">Offline: 0 MB</span>
             </div>
-            <div class="bp-stat" title="Tổng số liên kết Drive">
-              <i class="fa-brands fa-google-drive" style="color: #34a853;"></i> <span id="bp-files-count">22 Tài liệu Drive</span>
+            <div class="bp-stat" title="Tổng số tài liệu">
+              <i class="fa-solid fa-file-lines"></i> <span id="bp-files-count">0 tài liệu</span>
             </div>
           </div>
         </div>
 
-        <!-- Backpack Toolbar & Actions (Minimal Google Drive) -->
+        <!-- Backpack Toolbar & Actions (Drive Style) -->
         <div class="backpack-toolbar">
           <div class="bp-actions-left">
-            <button id="bp-add-link-btn" class="btn-bp-action btn-bp-primary" title="Thêm hoặc thay đổi liên kết Google Drive của môn">
-              <i class="fa-solid fa-plus"></i> <span>Gắn Link Drive của bạn</span>
+            <input type="file" id="backpack-file-input" multiple style="display: none;">
+            <button id="bp-new-folder-btn" class="btn-bp-action btn-bp-primary" title="Tạo thư mục mới trong thư mục hiện tại">
+              <i class="fa-solid fa-folder-plus"></i> <span>Thư mục mới</span>
             </button>
-            <div class="backpack-filter-tags" id="backpack-subject-tags" style="margin-bottom: 0; padding-bottom: 0;">
-              <!-- Subject pills filter -->
-            </div>
+            <button id="bp-upload-btn" class="btn-bp-action btn-bp-secondary" title="Tải file từ máy tính lưu vào thư mục này (Offline)">
+              <i class="fa-solid fa-cloud-arrow-up"></i> <span>Tải tệp lên</span>
+            </button>
+            <button id="bp-add-link-btn" class="btn-bp-action btn-bp-secondary" title="Gắn liên kết Google Drive hoặc website">
+              <i class="fa-brands fa-google-drive"></i> <span>Thêm Link Drive</span>
+            </button>
           </div>
 
           <div class="bp-actions-right">
             <div class="bp-search-box">
               <i class="fa-solid fa-magnifying-glass"></i>
-              <input type="text" id="backpack-search-input" placeholder="Tìm tài liệu, slide, đề cương..." autocomplete="off">
+              <input type="text" id="backpack-search-input" placeholder="Tìm kiếm trong Drive..." autocomplete="off">
               <button id="bp-clear-search-btn" class="btn-clear hidden" title="Xóa tìm kiếm"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="bp-view-switch">
+              <button id="bp-view-grid-btn" class="btn-icon active" title="Xem dạng Lưới"><i class="fa-solid fa-table-cells-large"></i></button>
+              <button id="bp-view-list-btn" class="btn-icon" title="Xem dạng Danh sách"><i class="fa-solid fa-list-ul"></i></button>
             </div>
           </div>
         </div>
 
-        <!-- Drive Subjects Explorer Grid -->
+        <!-- Breadcrumbs Navigation with Back button -->
+        <div class="backpack-nav-bar">
+          <button id="bp-back-btn" class="btn-action-small" title="Quay lại thư mục cha" style="display: none;">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại
+          </button>
+          <div class="backpack-breadcrumbs" id="backpack-breadcrumbs">
+            <span class="crumb active"><i class="fa-solid fa-house"></i> Chiếc cặp của tôi</span>
+          </div>
+        </div>
+
+        <!-- Drag and Drop Zone -->
+        <div class="backpack-dropzone" id="backpack-dropzone">
+          <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+          <p class="drop-text">Kéo thả tệp vào đây để lưu trữ Offline trong thư mục này</p>
+          <span class="drop-sub">Tự do tổ chức thư mục & tệp tin như Google Drive</span>
+        </div>
+
+        <!-- Files & Folders Container -->
         <div class="backpack-explorer" id="backpack-explorer">
-          <!-- Dynamically rendered Google Drive subject cards -->
+          <!-- Dynamically rendered folders and files -->
+        </div>
+      </section>
+
+      <!-- VIEW 5: Raw Markdown View & Live Editor -->
+      <section id="raw-view-container" class="view-panel">
+        <div class="raw-markdown-card">
+          <div class="raw-card-header">
+            <div class="raw-header-left">
+              <i class="fa-brands fa-markdown"></i>
+              <span id="raw-file-name">schedules/tuan-35.md</span>
+            </div>
+            <div class="raw-header-right">
+              <button id="copy-markdown-btn" class="btn-action-small">
+                <i class="fa-regular fa-copy"></i> Sao chép Markdown
+              </button>
+              <button id="reload-markdown-btn" class="btn-action-small">
+                <i class="fa-solid fa-arrows-rotate"></i> Tải lại
+              </button>
+            </div>
+          </div>
+          <div class="raw-editor-container">
+            <textarea id="markdown-raw-content" spellcheck="false" placeholder="Nhập hoặc dán nội dung Markdown vào đây để xem trực tiếp..."></textarea>
+          </div>
+          <div class="raw-card-footer">
+            <span class="raw-hint"><i class="fa-solid fa-circle-info"></i> Bạn có thể sửa trực tiếp Markdown ở trên để xem thời khóa biểu tự động cập nhật ngay lập tức!</span>
+            <button id="apply-raw-btn" class="btn-primary-small">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Xem thử thay đổi
+            </button>
+          </div>
         </div>
       </section>
 
@@ -231,7 +289,7 @@
             </div>
             <div>
               <h3>Lưu ý & Ghi chú Tuần</h3>
-              <p class="notes-sub">Các nhắc nhở quan trọng trong tuần học</p>
+              <p class="notes-sub">Các nhắc nhở quan trọng được phân tích từ file Markdown</p>
             </div>
           </div>
           <div class="notes-body" id="notes-body">
@@ -239,11 +297,46 @@
           </div>
         </div>
       </section>
+
+      <!-- Git Quick Guide Section -->
+      <section class="git-guide-section">
+        <details class="guide-accordion">
+          <summary>
+            <span><i class="fa-brands fa-github"></i> Hướng dẫn Thêm tuần mới & Deploy qua Git</span>
+            <i class="fa-solid fa-chevron-down arrow-icon"></i>
+          </summary>
+          <div class="guide-content">
+            <div class="guide-steps">
+              <div class="guide-step">
+                <div class="step-num">1</div>
+                <div class="step-text">
+                  <h4>Tạo file Markdown mới</h4>
+                  <p>Tạo file <code>schedules/tuan-37.md</code> và nhập lịch học theo mẫu tương tự tuần 35.</p>
+                </div>
+              </div>
+              <div class="guide-step">
+                <div class="step-num">2</div>
+                <div class="step-text">
+                  <h4>Khai báo trong <code>schedules/index.json</code></h4>
+                  <p>Thêm tên file vào danh sách để menu chọn tuần tự động hiển thị.</p>
+                </div>
+              </div>
+              <div class="guide-step">
+                <div class="step-num">3</div>
+                <div class="step-text">
+                  <h4>Đẩy lên Git (Push)</h4>
+                  <p>Chạy <code>git add .</code>, <code>git commit -m "Thêm lịch tuần 37"</code> và <code>git push</code>. GitHub Actions sẽ tự động deploy lên web sau 30 giây!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
     </main>
 
     <!-- Footer -->
     <footer class="footer">
-      <p>Lịch Học & Chiếc Cặp Google Drive • Đồng Bộ Đa Nền Tảng</p>
+      <p>Hệ thống Thời Khóa Biểu Tự Động • Xây dựng cho Sinh viên • Hỗ trợ triển khai GitHub Pages</p>
     </footer>
   </div>
 
@@ -262,9 +355,12 @@
           </div>
         </div>
         <div class="modal-header-actions">
-          <a id="preview-open-ext-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn-modal-action" title="Mở trong Google Drive">
+          <a id="preview-open-ext-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn-modal-action" title="Mở trong tab mới">
             <i class="fa-solid fa-arrow-up-right-from-square"></i>
           </a>
+          <button id="preview-download-btn" class="btn-modal-action" title="Tải về máy">
+            <i class="fa-solid fa-download"></i>
+          </button>
           <button id="preview-close-btn" class="btn-modal-action btn-close" title="Đóng">
             <i class="fa-solid fa-xmark"></i>
           </button>
@@ -316,6 +412,32 @@
         <div class="modal-footer">
           <button type="button" id="add-link-cancel-btn" class="btn-action-small">Hủy</button>
           <button type="submit" class="btn-primary-small"><i class="fa-solid fa-plus"></i> Lưu vào cặp</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Create New Folder Modal -->
+  <div id="new-folder-modal" class="modal-backdrop hidden">
+    <div class="modal-card modal-card-sm">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <i class="fa-solid fa-folder-plus" style="color: var(--accent-primary); font-size: 1.3rem;"></i>
+          <div>
+            <h4>Thư Mục Mới</h4>
+            <span style="font-size: 0.78rem; color: var(--text-secondary);">Tạo thư mục con để sắp xếp tài liệu</span>
+          </div>
+        </div>
+        <button id="new-folder-close-btn" class="btn-modal-action btn-close" title="Đóng"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="new-folder-form" class="modal-form">
+        <div class="form-group">
+          <label for="folder-name-input">Tên thư mục</label>
+          <input type="text" id="folder-name-input" placeholder="Ví dụ: Slide bài giảng, Đồ án nhóm, Lab 1..." required autofocus>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="new-folder-cancel-btn" class="btn-action-small">Hủy</button>
+          <button type="submit" class="btn-primary-small"><i class="fa-solid fa-check"></i> Tạo thư mục</button>
         </div>
       </form>
     </div>

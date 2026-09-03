@@ -4,7 +4,7 @@
  * ==========================================================================
  */
 
-const CACHE_NAME = 'smart-schedule-backpack-v2';
+const CACHE_NAME = 'smart-schedule-backpack-v1';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -12,7 +12,6 @@ const STATIC_ASSETS = [
   './app.js',
   './manifest.json',
   './schedules/index.json',
-  './schedules/drive-links.json',
   './schedules/tuan-35.md',
   './schedules/tuan-36.md',
   './schedules/tuan-37.md',
