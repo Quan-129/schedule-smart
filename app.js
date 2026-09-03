@@ -1,6 +1,6 @@
 /**
  * ==========================================================================
- * LỊCH HỌC MARKDOWN HUB & CHIẾC CẶP THÔNG MINH - JAVASCRIPT LOGIC
+ * LỊCH HỌC MARKDOWN HUB & CHIẾC CẶP GOOGLE DRIVE ĐỘC LẬP
  * ==========================================================================
  */
 
@@ -67,7 +67,7 @@ const SUBJECT_COLORS = [
   { border: '#3b82f6', bg: 'rgba(59, 130, 246, 0.12)', text: '#60a5fa' }
 ];
 
-// Grade Schemes parsed from official Course Syllabi (HK261 / HK262 / HK263)
+// Grade Schemes parsed from official Course Syllabi
 const GRADE_SCHEMES = [
   {
     id: 'co3117',
@@ -78,11 +78,11 @@ const GRADE_SCHEMES = [
     lecturers: 'Lê Thành Sách, Trương Vĩnh Lân, Nguyễn Đức Dũng, Lê Hồng Trang, Võ Thanh Hùng, Nguyễn An Khương',
     department: 'Khoa Khoa học & Kỹ thuật Máy tính (CSE)',
     items: [
-      { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 60, type: 'Tự luận (Constructed response)', duration: '90 phút', color: '#6366f1', note: 'Từ chương 6 đến chương 10' },
-      { id: 'item-gk', name: 'Kiểm tra giữa kỳ (Midterm Exam)', weight: 30, type: 'Tự luận (Constructed response)', duration: '60 phút', color: '#ec4899', note: 'Đến hết chương 5' },
+      { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 60, type: 'Tự luận', duration: '90 phút', color: '#6366f1', note: 'Từ chương 6 đến chương 10' },
+      { id: 'item-gk', name: 'Kiểm tra giữa kỳ (Midterm Exam)', weight: 30, type: 'Tự luận', duration: '60 phút', color: '#ec4899', note: 'Đến hết chương 5' },
       { id: 'item-btl', name: 'Bài tập lớn (Group Assignment)', weight: 10, type: 'Project nhóm thực hành', duration: '45 tiết', color: '#10b981', note: 'Triển khai mô hình bài toán thực tế' }
     ],
-    notes: 'Quy định AI: Chỉ cho phép dùng hỗ trợ tìm kiếm tài liệu, gợi ý ngữ pháp. Nghiêm cấm nộp sản phẩm hoàn toàn do AI tạo ra. Báo cáo phải trích dẫn công cụ AI.'
+    notes: 'Quy định AI: Chỉ cho phép dùng hỗ trợ tìm kiếm tài liệu. Nghiêm cấm nộp sản phẩm hoàn toàn do AI tạo ra.'
   },
   {
     id: 'im1025',
@@ -93,12 +93,12 @@ const GRADE_SCHEMES = [
     lecturers: 'Huỳnh Thị Phương Lan, Nguyễn Thùy Trang, Nguyễn Thị Đức Nguyên, Nguyễn Bắc Nguyên, Đường Võ Hùng, Lê Phước Luông',
     department: 'Khoa Quản Lý Công Nghiệp (SIM)',
     items: [
-      { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 40, type: 'Trắc nghiệm chấm máy (MCQ)', duration: '70 phút', color: '#6366f1', note: 'Bắt buộc tham gia >= 80% số giờ học để đủ điều kiện thi' },
-      { id: 'item-gk', name: 'Kiểm tra giữa kỳ (Midterm Exam)', weight: 30, type: 'Trắc nghiệm chấm máy (MCQ)', duration: '50 phút', color: '#f59e0b', note: 'Đánh giá kiến thức nửa đầu học kỳ' },
-      { id: 'item-cn', name: 'Bài tập cá nhân (Individual)', weight: 15, type: 'Bài tập về nhà & Báo cáo phản tư', duration: '--', color: '#06b6d4', note: 'Đánh giá nhận thức & bài học kinh nghiệm' },
-      { id: 'item-nhom', name: 'Bài tập nhóm (Group Assignment)', weight: 15, type: 'Báo cáo dự án & Thuyết trình nhóm', duration: '--', color: '#10b981', note: 'Phối hợp làm việc nhóm' }
+      { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 40, type: 'Trắc nghiệm chấm máy', duration: '70 phút', color: '#6366f1', note: 'Bắt buộc tham gia >= 80% số giờ học' },
+      { id: 'item-gk', name: 'Kiểm tra giữa kỳ (Midterm Exam)', weight: 30, type: 'Trắc nghiệm chấm máy', duration: '50 phút', color: '#f59e0b', note: 'Đánh giá kiến thức nửa đầu học kỳ' },
+      { id: 'item-cn', name: 'Bài tập cá nhân (Individual)', weight: 15, type: 'Bài tập về nhà & Phản tư', duration: '--', color: '#06b6d4', note: 'Đánh giá nhận thức cá nhân' },
+      { id: 'item-nhom', name: 'Bài tập nhóm (Group Assignment)', weight: 15, type: 'Báo cáo dự án & Thuyết trình', duration: '--', color: '#10b981', note: 'Phối hợp làm việc nhóm' }
     ],
-    notes: 'Nộp bài trễ trên LMS không có lý do chính đáng bị trừ 2 điểm cho mỗi ngày trễ. Tham dự tối thiểu 80% số giờ học là điều kiện bắt buộc để được dự thi và xét đạt.'
+    notes: 'Nộp bài trễ trên LMS bị trừ 2 điểm/ngày. Tham dự tối thiểu 80% số giờ học là điều kiện bắt buộc.'
   },
   {
     id: 'im1019',
@@ -109,11 +109,11 @@ const GRADE_SCHEMES = [
     lecturers: 'Bùi Huy Hải Bích, Phạm Ngọc Trâm Anh, Mai Thị Mỹ Quyên, Nguyễn Văn Tuấn, Dương Thị Ngọc Liên, Lê Nguyễn Hậu',
     department: 'Khoa Quản Lý Công Nghiệp (SIM)',
     items: [
-      { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Trắc nghiệm (MCQ)', duration: '60 phút', color: '#6366f1', note: 'Thi tập trung theo lịch chung' },
+      { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Trắc nghiệm', duration: '60 phút', color: '#6366f1', note: 'Thi tập trung theo lịch chung' },
       { id: 'item-btl', name: 'Bài tập lớn (Group Project)', weight: 30, type: 'Dự án nhóm & Thuyết trình', duration: 'Nhóm 6-7 SV', color: '#ec4899', note: 'Vắng thuyết trình BTL bị 0 điểm BTL' },
-      { id: 'item-tx', name: 'Đánh giá thường xuyên (Formative)', weight: 20, type: 'Bài tập trên lớp / Online / Chuyên cần', duration: '--', color: '#10b981', note: 'Vắng bài tập nào bị 0 điểm bài đó' }
+      { id: 'item-tx', name: 'Đánh giá thường xuyên (Formative)', weight: 20, type: 'Bài tập trên lớp / Online', duration: '--', color: '#10b981', note: 'Vắng bài tập nào bị 0 điểm bài đó' }
     ],
-    notes: 'Sinh viên làm việc nhóm 6-7 người. Vắng bài tập nào tính 0 điểm bài đó. Vắng buổi thuyết trình BTL bị 0 điểm BTL. Sử dụng AI phải tuân thủ liêm chính học thuật.'
+    notes: 'Sinh viên làm việc nhóm 6-7 người. Vắng buổi thuyết trình BTL bị 0 điểm BTL.'
   },
   {
     id: 'co3061',
@@ -125,10 +125,10 @@ const GRADE_SCHEMES = [
     department: 'Khoa Khoa học và Kỹ thuật Máy tính (CSE)',
     items: [
       { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Tự luận / Trắc nghiệm', duration: '90 phút', color: '#6366f1', note: 'Đánh giá toàn diện các chủ đề AI' },
-      { id: 'item-gk', name: 'Kiểm tra giữa kỳ (Midterm Exam)', weight: 30, type: 'Tự luận / Trắc nghiệm', duration: '60 phút', color: '#f59e0b', note: 'Thuật toán tìm kiếm, ràng buộc, Logic' },
+      { id: 'item-gk', name: 'Kiểm tra giữa kỳ (Midterm Exam)', weight: 30, type: 'Tự luận / Trắc nghiệm', duration: '60 phút', color: '#f59e0b', note: 'Thuật toán tìm kiếm, Logic, CSP' },
       { id: 'item-btl', name: 'Bài tập lớn / Thực hành', weight: 20, type: 'Project lập trình AI theo nhóm', duration: 'Hạn: 30/11', color: '#10b981', note: 'Cài đặt thuật toán & nộp báo cáo' }
     ],
-    notes: 'Deadline nộp Bài tập lớn vào Thứ 2 (30/11/2026). Tuần 44 có các tiết bổ sung vào buổi tối.'
+    notes: 'Deadline nộp Bài tập lớn vào Thứ 2 (30/11/2026).'
   },
   {
     id: 'sp1035',
@@ -140,9 +140,9 @@ const GRADE_SCHEMES = [
     department: 'Khoa Khoa học Ứng dụng',
     items: [
       { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Trắc nghiệm / Tự luận', duration: '60 phút', color: '#6366f1', note: 'Thi tập trung cuối kỳ' },
-      { id: 'item-qt', name: 'Đánh giá quá trình (Quá trình & GK)', weight: 50, type: 'Chuyên cần, Thảo luận & Kiểm tra trắc nghiệm', duration: '--', color: '#ec4899', note: 'Bài tập trên hệ thống BKEL' }
+      { id: 'item-qt', name: 'Đánh giá quá trình (Quá trình & GK)', weight: 50, type: 'Chuyên cần & Trắc nghiệm online', duration: '--', color: '#ec4899', note: 'Bài tập trên hệ thống BKEL' }
     ],
-    notes: 'Tuần 47 là tuần học cuối môn. Sinh viên cần tham gia đầy đủ các buổi học và làm bài tập trên hệ thống BKEL.'
+    notes: 'Tuần 47 là tuần học cuối môn.'
   },
   {
     id: 'sp1039',
@@ -154,7 +154,7 @@ const GRADE_SCHEMES = [
     department: 'Khoa Khoa học Ứng dụng',
     items: [
       { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 70, type: 'Trắc nghiệm', duration: '60 phút', color: '#6366f1', note: 'Thi tập trung cuối kỳ' },
-      { id: 'item-qt', name: 'Đánh giá quá trình (Giữa kỳ + Thảo luận)', weight: 30, type: 'Trắc nghiệm online / Bài tập lớp', duration: '--', color: '#f59e0b', note: 'Kiểm tra trên hệ thống BKEL' }
+      { id: 'item-qt', name: 'Đánh giá quá trình (Giữa kỳ & Thảo luận)', weight: 30, type: 'Trắc nghiệm online / Bài tập lớp', duration: '--', color: '#f59e0b', note: 'Kiểm tra trên hệ thống BKEL' }
     ],
     notes: 'Tuần 47 là tuần học cuối môn.'
   },
@@ -167,194 +167,58 @@ const GRADE_SCHEMES = [
     lecturers: 'Giảng viên Bộ môn Ngoại ngữ',
     department: 'Văn phòng Đào tạo Quốc tế (OISP)',
     items: [
-      { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Nghe, Đọc, Viết & Phỏng vấn Kaiwa', duration: '90 phút', color: '#6366f1', note: 'Đánh giá toàn diện 4 kỹ năng' },
-      { id: 'item-qt', name: 'Đánh giá quá trình (Quá trình & GK)', weight: 50, type: 'Kiểm tra từ vựng, Ngữ pháp, Kaiwa, Chuyên cần', duration: '--', color: '#10b981', note: 'Kiểm tra định kỳ theo từng tuần học' }
+      { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Nghe, Đọc, Viết & Kaiwa', duration: '90 phút', color: '#6366f1', note: 'Đánh giá toàn diện 4 kỹ năng' },
+      { id: 'item-qt', name: 'Đánh giá quá trình (Quá trình & GK)', weight: 50, type: 'Kiểm tra từ vựng, Kaiwa, Chuyên cần', duration: '--', color: '#10b981', note: 'Kiểm tra định kỳ theo từng tuần học' }
     ],
-    notes: 'Lịch học 4 buổi sáng liên tục mỗi tuần (Thứ 3 đến Thứ 6). Yêu cầu chuẩn bị bài trước khi đến lớp.'
+    notes: 'Lịch học 4 buổi sáng liên tục mỗi tuần (Thứ 3 đến Thứ 6).'
   }
 ];
 
-// Default pre-populated documents in the Smart Backpack (linked with official courses & drives)
-const DEFAULT_BACKPACK_ITEMS = [
-  // CO3117 - Học máy
-  {
-    id: 'default-ml-1',
-    subjectCode: 'CO3117',
-    category: 'slides',
-    name: 'De_cuong_chi_tiet_Hoc_May_CO3117.pdf',
-    type: 'pdf',
-    size: '1.2 MB',
-    updatedAt: '2026-08-25',
-    driveUrl: 'https://drive.google.com/',
-    isOffline: false,
-    description: 'Đề cương học phần chi tiết Học máy HK261'
-  },
-  {
-    id: 'default-ml-2',
-    subjectCode: 'CO3117',
-    category: 'slides',
-    name: 'Slide_Chuong_1_Tong_Quan_Hoc_May.pdf',
-    type: 'pdf',
-    size: '4.8 MB',
-    updatedAt: '2026-08-28',
-    driveUrl: 'https://drive.google.com/',
-    isOffline: false,
-    description: 'Bài giảng Chương 1: Giới thiệu Học máy & Quy trình ML'
-  },
-  {
-    id: 'default-ml-3',
-    subjectCode: 'CO3117',
-    category: 'btl',
-    name: 'Huong_dan_BTL_Hoc_May_Nhom.pdf',
-    type: 'pdf',
-    size: '850 KB',
-    updatedAt: '2026-09-01',
-    driveUrl: 'https://drive.google.com/',
-    isOffline: false,
-    description: 'Yêu cầu đề tài Bài tập lớn nhóm (10% điểm)'
-  },
+// Default Hierarchical Drive Structure (Folders & Files)
+const DEFAULT_DRIVE_ITEMS = [
+  // ROOT SUBJECT FOLDERS (parentId: null)
+  { id: 'folder-co3117', type: 'folder', name: 'Học máy (CO3117)', parentId: null, subjectCode: 'CO3117', color: '#6366f1', isSystem: true },
+  { id: 'folder-im1025', type: 'folder', name: 'Quản lý Dự án cho Kỹ sư (IM1025)', parentId: null, subjectCode: 'IM1025', color: '#f59e0b', isSystem: true },
+  { id: 'folder-im1019', type: 'folder', name: 'Tiếp thị Căn bản (IM1019)', parentId: null, subjectCode: 'IM1019', color: '#ec4899', isSystem: true },
+  { id: 'folder-co3061', type: 'folder', name: 'Nhập môn Trí tuệ Nhân tạo (CO3061)', parentId: null, subjectCode: 'CO3061', color: '#06b6d4', isSystem: true },
+  { id: 'folder-sp1035', type: 'folder', name: 'Tư tưởng Hồ Chí Minh (SP1035)', parentId: null, subjectCode: 'SP1035', color: '#10b981', isSystem: true },
+  { id: 'folder-sp1039', type: 'folder', name: 'Pháp luật Việt Nam Đại cương (SP1039)', parentId: null, subjectCode: 'SP1039', color: '#8b5cf6', isSystem: true },
+  { id: 'folder-jp1007', type: 'folder', name: 'Tiếng Nhật 7 (JP1007)', parentId: null, subjectCode: 'JP1007', color: '#14b8a6', isSystem: true },
 
-  // IM1025 - Quản lý Dự án cho Kỹ sư
-  {
-    id: 'default-pm-1',
-    subjectCode: 'IM1025',
-    category: 'slides',
-    name: 'De_cuong_chi_tiet_QLDA_IM1025.pdf',
-    type: 'pdf',
-    size: '980 KB',
-    updatedAt: '2026-08-20',
-    driveUrl: 'https://drive.google.com/',
-    isOffline: false,
-    description: 'Đề cương học phần Quản lý Dự án cho Kỹ sư'
-  },
-  {
-    id: 'default-pm-2',
-    subjectCode: 'IM1025',
-    category: 'btl',
-    name: 'LINK ĐĂNG KÝ NHÓM (Hạn 15-09-2026)',
-    type: 'link',
-    size: 'Google Forms',
-    updatedAt: '2026-09-01',
-    driveUrl: 'https://docs.google.com/forms/',
-    isOffline: false,
-    description: 'Hạn chót Thứ 3 Tuần 38 (15/09/2026)'
-  },
-  {
-    id: 'default-pm-3',
-    subjectCode: 'IM1025',
-    category: 'btl',
-    name: 'LINK NỘP BÀI TẬP LỚN (Hạn 30-11-2026)',
-    type: 'link',
-    size: 'BKEL LMS',
-    updatedAt: '2026-09-01',
-    driveUrl: 'https://e-learning.hcmut.edu.vn/',
-    isOffline: false,
-    description: 'Hạn nộp báo cáo dự án BTL (Thứ 2 Tuần 49)'
-  },
-  {
-    id: 'default-pm-4',
-    subjectCode: 'IM1025',
-    category: 'other',
-    name: 'Folder Google Drive Chung - QLDA',
-    type: 'drive',
-    size: 'Google Drive',
-    updatedAt: '2026-09-01',
-    driveUrl: 'https://drive.google.com/',
-    isOffline: false,
-    description: 'Thư mục tài liệu, biểu mẫu WBS, Gantt Chart'
-  },
+  // SUBFOLDERS IN CO3117
+  { id: 'folder-ml-slides', type: 'folder', name: 'Slide bài giảng', parentId: 'folder-co3117', isSystem: true },
+  { id: 'folder-ml-btl', type: 'folder', name: 'Bài tập lớn nhóm', parentId: 'folder-co3117', isSystem: true },
+  { id: 'folder-ml-exams', type: 'folder', name: 'Đề thi & Ôn tập', parentId: 'folder-co3117', isSystem: true },
 
-  // IM1019 - Tiếp thị Căn bản
-  {
-    id: 'default-mkt-1',
-    subjectCode: 'IM1019',
-    category: 'slides',
-    name: 'De_cuong_chi_tiet_Tiep_Thi_Can_Ban.pdf',
-    type: 'pdf',
-    size: '1.1 MB',
-    updatedAt: '2026-08-22',
-    driveUrl: 'https://drive.google.com/',
-    isOffline: false,
-    description: 'Đề cương môn Tiếp thị căn bản'
-  },
-  {
-    id: 'default-mkt-2',
-    subjectCode: 'IM1019',
-    category: 'slides',
-    name: 'Slide_Marketing_Ch1_Tong_Quan.pptx',
-    type: 'pptx',
-    size: '7.5 MB',
-    updatedAt: '2026-08-29',
-    driveUrl: 'https://drive.google.com/',
-    isOffline: false,
-    description: 'Slide bài giảng Chương 1'
-  },
-  {
-    id: 'default-mkt-3',
-    subjectCode: 'IM1019',
-    category: 'btl',
-    name: 'Rubric_Danh_gia_Thuyet_trinh_BTL_Marketing.pdf',
-    type: 'pdf',
-    size: '620 KB',
-    updatedAt: '2026-09-01',
-    driveUrl: 'https://drive.google.com/',
-    isOffline: false,
-    description: 'Tiêu chí chấm điểm thuyết trình nhóm 6-7 sinh viên'
-  },
+  // FILES IN CO3117
+  { id: 'file-ml-1', type: 'pdf', name: 'De_cuong_chi_tiet_Hoc_May_CO3117.pdf', parentId: 'folder-ml-slides', size: '1.2 MB', updatedAt: '2026-08-25', driveUrl: 'https://drive.google.com/', description: 'Đề cương học phần chi tiết' },
+  { id: 'file-ml-2', type: 'pdf', name: 'Slide_Chuong_1_Tong_Quan_ML.pdf', parentId: 'folder-ml-slides', size: '4.8 MB', updatedAt: '2026-08-28', driveUrl: 'https://drive.google.com/', description: 'Chương 1: Giới thiệu Học máy' },
+  { id: 'file-ml-3', type: 'pdf', name: 'Huong_dan_BTL_Hoc_May_Nhom.pdf', parentId: 'folder-ml-btl', size: '850 KB', updatedAt: '2026-09-01', driveUrl: 'https://drive.google.com/', description: 'Yêu cầu đề tài BTL nhóm (10%)' },
 
-  // CO3061 - Nhập môn Trí tuệ Nhân tạo
-  {
-    id: 'default-ai-1',
-    subjectCode: 'CO3061',
-    category: 'slides',
-    name: 'Slide_AI_Search_Algorithms.pdf',
-    type: 'pdf',
-    size: '5.2 MB',
-    updatedAt: '2026-08-30',
-    driveUrl: 'https://drive.google.com/',
-    isOffline: false,
-    description: 'Thuật toán tìm kiếm A*, BFS, DFS, CSP'
-  },
-  {
-    id: 'default-ai-2',
-    subjectCode: 'CO3061',
-    category: 'exams',
-    name: 'Kho_De_thi_giua_ky_AI_cac_nam.zip',
-    type: 'zip',
-    size: '14.8 MB',
-    updatedAt: '2026-09-01',
-    driveUrl: 'https://drive.google.com/',
-    isOffline: false,
-    description: 'Tổng hợp đề thi GK và bài giải tham khảo'
-  },
+  // SUBFOLDERS IN IM1025
+  { id: 'folder-pm-slides', type: 'folder', name: 'Slide & Giáo trình', parentId: 'folder-im1025', isSystem: true },
+  { id: 'folder-pm-btl', type: 'folder', name: 'Bài tập lớn & Biểu mẫu', parentId: 'folder-im1025', isSystem: true },
 
-  // SP1035 - Tư tưởng Hồ Chí Minh
-  {
-    id: 'default-hcm-1',
-    subjectCode: 'SP1035',
-    category: 'slides',
-    name: 'Tai_lieu_Hoc_Tap_BKEL_Tu_Tuong_HCM.pdf',
-    type: 'pdf',
-    size: '3.4 MB',
-    updatedAt: '2026-08-20',
-    driveUrl: 'https://drive.google.com/',
-    isOffline: false,
-    description: 'Tài liệu hướng dẫn thảo luận và ôn tập trắc nghiệm'
-  },
+  // FILES IN IM1025
+  { id: 'file-pm-1', type: 'pdf', name: 'De_cuong_chi_tiet_QLDA_IM1025.pdf', parentId: 'folder-pm-slides', size: '980 KB', updatedAt: '2026-08-20', driveUrl: 'https://drive.google.com/', description: 'Đề cương Quản lý Dự án' },
+  { id: 'file-pm-2', type: 'link', name: 'LINK ĐĂNG KÝ NHÓM (Hạn 15-09-2026)', parentId: 'folder-pm-btl', size: 'Google Forms', updatedAt: '2026-09-01', driveUrl: 'https://docs.google.com/forms/', description: 'Deadline Thứ 3 Tuần 38' },
+  { id: 'file-pm-3', type: 'link', name: 'LINK NỘP BÀI TẬP LỚN (Hạn 30-11-2026)', parentId: 'folder-pm-btl', size: 'BKEL LMS', updatedAt: '2026-09-01', driveUrl: 'https://e-learning.hcmut.edu.vn/', description: 'Deadline Thứ 2 Tuần 49' },
+  { id: 'file-pm-4', type: 'drive', name: 'Folder Google Drive Chung - QLDA', parentId: 'folder-im1025', size: 'Google Drive', updatedAt: '2026-09-01', driveUrl: 'https://drive.google.com/', description: 'Kho tài liệu chung cả lớp' },
 
-  // JP1007 - Tiếng Nhật 7
-  {
-    id: 'default-jp-1',
-    subjectCode: 'JP1007',
-    category: 'slides',
-    name: 'Tu_vung_Kaiwa_Ngu_phap_Tuan_35_36.pdf',
-    type: 'pdf',
-    size: '2.1 MB',
-    updatedAt: '2026-08-26',
-    driveUrl: 'https://drive.google.com/',
-    isOffline: false,
-    description: 'Tài liệu chuẩn bị bài trước giờ học (4 buổi sáng/tuần)'
-  }
+  // FILES IN IM1019
+  { id: 'folder-mkt-slides', type: 'folder', name: 'Bài giảng & Giáo trình', parentId: 'folder-im1019', isSystem: true },
+  { id: 'file-mkt-1', type: 'pdf', name: 'De_cuong_chi_tiet_Tiep_Thi_Can_Ban.pdf', parentId: 'folder-mkt-slides', size: '1.1 MB', updatedAt: '2026-08-22', driveUrl: 'https://drive.google.com/', description: 'Đề cương Tiếp thị căn bản' },
+  { id: 'file-mkt-2', type: 'pptx', name: 'Slide_Marketing_Ch1_Tong_Quan.pptx', parentId: 'folder-mkt-slides', size: '7.5 MB', updatedAt: '2026-08-29', driveUrl: 'https://drive.google.com/', description: 'Slide bài giảng Chương 1' },
+  { id: 'file-mkt-3', type: 'pdf', name: 'Rubric_Danh_gia_Thuyet_trinh_BTL.pdf', parentId: 'folder-im1019', size: '620 KB', updatedAt: '2026-09-01', driveUrl: 'https://drive.google.com/', description: 'Tiêu chí chấm điểm BTL 30%' },
+
+  // FILES IN CO3061
+  { id: 'file-ai-1', type: 'pdf', name: 'Slide_AI_Search_Algorithms.pdf', parentId: 'folder-co3061', size: '5.2 MB', updatedAt: '2026-08-30', driveUrl: 'https://drive.google.com/', description: 'Thuật toán tìm kiếm A*, CSP' },
+  { id: 'file-ai-2', type: 'zip', name: 'Kho_De_thi_giua_ky_AI_cac_nam.zip', parentId: 'folder-co3061', size: '14.8 MB', updatedAt: '2026-09-01', driveUrl: 'https://drive.google.com/', description: 'Đề thi GK và bài giải tham khảo' },
+
+  // FILES IN OTHER SUBJECTS
+  { id: 'file-hcm-1', type: 'pdf', name: 'Tai_lieu_Hoc_Tap_BKEL_Tu_Tuong_HCM.pdf', parentId: 'folder-sp1035', size: '3.4 MB', updatedAt: '2026-08-20', driveUrl: 'https://drive.google.com/', description: 'Tài liệu hướng dẫn thảo luận' },
+  { id: 'file-law-1', type: 'pdf', name: 'Giao_trinh_Phap_luat_Dai_cuong.pdf', parentId: 'folder-sp1039', size: '6.1 MB', updatedAt: '2026-08-20', driveUrl: 'https://drive.google.com/', description: 'Giáo trình chuẩn' },
+  { id: 'file-jp-1', type: 'pdf', name: 'Tu_vung_Kaiwa_Ngu_phap_Tuan_35_36.pdf', parentId: 'folder-jp1007', size: '2.1 MB', updatedAt: '2026-08-26', driveUrl: 'https://drive.google.com/', description: 'Tài liệu chuẩn bị bài trước giờ học' }
 ];
 
 // App State
@@ -366,14 +230,15 @@ const state = {
   searchQuery: '',
   gradesSearchQuery: '',
   backpackSearchQuery: '',
-  backpackFilterSubject: null,
+  currentFolderId: null, // null = Root of Chiếc cặp
+  backpackViewMode: 'grid', // 'grid' or 'list'
   activeView: 'grid', // 'grid', 'today', 'grades', 'backpack', 'raw'
   weeksList: [
     { id: 'tuan-35', title: 'Tuần 35', filename: 'schedules/tuan-35.md' },
     { id: 'tuan-36', title: 'Tuần 36', filename: 'schedules/tuan-36.md' }
   ],
   subjectColorMap: new Map(),
-  backpackFiles: []
+  driveItems: [] // Combined items from IndexedDB + Defaults
 };
 
 // DOM Elements
@@ -403,14 +268,17 @@ const elements = {
   gradesGrid: document.getElementById('grades-grid'),
   gradesSearchInput: document.getElementById('grades-search-input'),
   
-  // Backpack Elements
+  // Backpack Elements (Drive Style)
   backpackExplorer: document.getElementById('backpack-explorer'),
-  backpackSubjectTags: document.getElementById('backpack-subject-tags'),
   backpackBreadcrumbs: document.getElementById('backpack-breadcrumbs'),
+  bpBackBtn: document.getElementById('bp-back-btn'),
   backpackDropzone: document.getElementById('backpack-dropzone'),
   backpackFileInput: document.getElementById('backpack-file-input'),
+  bpNewFolderBtn: document.getElementById('bp-new-folder-btn'),
   bpUploadBtn: document.getElementById('bp-upload-btn'),
   bpAddLinkBtn: document.getElementById('bp-add-link-btn'),
+  bpViewGridBtn: document.getElementById('bp-view-grid-btn'),
+  bpViewListBtn: document.getElementById('bp-view-list-btn'),
   backpackSearchInput: document.getElementById('backpack-search-input'),
   bpClearSearchBtn: document.getElementById('bp-clear-search-btn'),
   bpStorageText: document.getElementById('bp-storage-text'),
@@ -434,6 +302,12 @@ const elements = {
   linkUrlInput: document.getElementById('link-url-input'),
   addLinkCloseBtn: document.getElementById('add-link-close-btn'),
   addLinkCancelBtn: document.getElementById('add-link-cancel-btn'),
+  
+  newFolderModal: document.getElementById('new-folder-modal'),
+  newFolderForm: document.getElementById('new-folder-form'),
+  folderNameInput: document.getElementById('folder-name-input'),
+  newFolderCloseBtn: document.getElementById('new-folder-close-btn'),
+  newFolderCancelBtn: document.getElementById('new-folder-cancel-btn'),
   
   scheduleTitle: document.getElementById('schedule-title'),
   scheduleSubtitle: document.getElementById('schedule-subtitle'),
@@ -463,12 +337,12 @@ const elements = {
    INDEXED-DB OFFLINE STORAGE ENGINE
    ========================================================================== */
 
-const DB_NAME = 'SmartBackpackDB';
-const DB_VERSION = 1;
-const STORE_NAME = 'backpack_files';
+const DB_NAME = 'SmartBackpackDriveDB';
+const DB_VERSION = 2;
+const STORE_NAME = 'drive_items';
 
 function openBackpackDB() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     if (!window.indexedDB) {
       console.warn('Trình duyệt không hỗ trợ IndexedDB.');
       return resolve(null);
@@ -478,8 +352,8 @@ function openBackpackDB() {
       const db = e.target.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-        store.createIndex('subjectCode', 'subjectCode', { unique: false });
-        store.createIndex('updatedAt', 'updatedAt', { unique: false });
+        store.createIndex('parentId', 'parentId', { unique: false });
+        store.createIndex('type', 'type', { unique: false });
       }
     };
     request.onsuccess = () => resolve(request.result);
@@ -490,14 +364,14 @@ function openBackpackDB() {
   });
 }
 
-async function saveFileToIndexedDB(fileObj) {
+async function saveItemToIndexedDB(item) {
   const db = await openBackpackDB();
   if (!db) return false;
   return new Promise((resolve) => {
     try {
       const tx = db.transaction(STORE_NAME, 'readwrite');
       const store = tx.objectStore(STORE_NAME);
-      store.put(fileObj);
+      store.put(item);
       tx.oncomplete = () => resolve(true);
       tx.onerror = () => resolve(false);
     } catch (err) {
@@ -507,7 +381,7 @@ async function saveFileToIndexedDB(fileObj) {
   });
 }
 
-async function getAllFilesFromIndexedDB() {
+async function getAllItemsFromIndexedDB() {
   const db = await openBackpackDB();
   if (!db) return [];
   return new Promise((resolve) => {
@@ -524,7 +398,7 @@ async function getAllFilesFromIndexedDB() {
   });
 }
 
-async function deleteFileFromIndexedDB(id) {
+async function deleteItemFromIndexedDB(id) {
   const db = await openBackpackDB();
   if (!db) return false;
   return new Promise((resolve) => {
@@ -545,23 +419,13 @@ async function deleteFileFromIndexedDB(id) {
    MARKDOWN PARSER
    ========================================================================== */
 
-/**
- * Parses markdown schedule text into structured JavaScript Object
- * @param {string} markdownText 
- */
 function parseScheduleMarkdown(markdownText) {
   const lines = markdownText.split(/\r?\n/);
-  
-  const result = {
-    title: 'Lịch học',
-    days: [],
-    notes: []
-  };
+  const result = { title: 'Lịch học', days: [], notes: [] };
 
   let currentDay = null;
   let inNotesSection = false;
 
-  // Regex patterns for line matching
   const titleRegex = /^#\s+(.+)$/i;
   const dayHeaderRegex = /^(?:##\s+)?(Thứ\s+[2-7]|Thứ\s+7\s*&\s*Chủ\s+Nhật|Chủ\s+Nhật)/i;
   const notesHeaderRegex = /^(?:##\s+)?(Lưu\s+ý(?:\s+nhỏ)?|Ghi\s+chú):?/i;
@@ -571,7 +435,6 @@ function parseScheduleMarkdown(markdownText) {
     const rawLine = lines[i].trim();
     if (!rawLine) continue;
 
-    // 1. Check Schedule Title
     const titleMatch = rawLine.match(titleRegex);
     if (titleMatch && !result.titleSet) {
       result.title = titleMatch[1].trim();
@@ -579,7 +442,6 @@ function parseScheduleMarkdown(markdownText) {
       continue;
     }
 
-    // 2. Check Notes / Lưu ý header
     const notesMatch = rawLine.match(notesHeaderRegex);
     if (notesMatch) {
       inNotesSection = true;
@@ -587,16 +449,12 @@ function parseScheduleMarkdown(markdownText) {
       continue;
     }
 
-    // 3. If in notes section, collect bullet points or lines
     if (inNotesSection) {
       const cleanNote = rawLine.replace(/^[-*]\s*/, '').trim();
-      if (cleanNote) {
-        result.notes.push(cleanNote);
-      }
+      if (cleanNote) result.notes.push(cleanNote);
       continue;
     }
 
-    // 4. Check Day Header (Thứ 2 -> Chủ Nhật)
     const dayMatch = rawLine.match(dayHeaderRegex);
     if (dayMatch) {
       currentDay = {
@@ -610,7 +468,6 @@ function parseScheduleMarkdown(markdownText) {
       continue;
     }
 
-    // 5. Parse Class Items within a Day
     if (currentDay) {
       if (/^(?:[-*]\s*)?Nghỉ/i.test(rawLine)) {
         currentDay.isDayOff = true;
@@ -624,22 +481,12 @@ function parseScheduleMarkdown(markdownText) {
         const period = classMatch[2] ? classMatch[2].trim() : '';
         const subject = classMatch[3].trim();
         const room = classMatch[4] ? classMatch[4].trim() : 'Chưa xếp phòng';
-
         const [startTime, endTime] = timeRange.split('-').map(t => t.trim());
 
-        currentDay.classes.push({
-          timeRange,
-          startTime,
-          endTime,
-          period,
-          subject,
-          room
-        });
+        currentDay.classes.push({ timeRange, startTime, endTime, period, subject, room });
       } else {
         const cleanText = rawLine.replace(/^[-*]\s*/, '').trim();
-        if (cleanText) {
-          currentDay.rawNotes.push(cleanText);
-        }
+        if (cleanText) currentDay.rawNotes.push(cleanText);
       }
     }
   }
@@ -669,7 +516,7 @@ function getSubjectColor(subjectName) {
 }
 
 /* ==========================================================================
-   UI RENDERING FUNCTIONS
+   UI RENDERING FUNCTIONS (SCHEDULE & TODAY)
    ========================================================================== */
 
 function renderSchedule() {
@@ -677,9 +524,8 @@ function renderSchedule() {
 
   const { title, days, notes } = state.parsedSchedule;
   const today = new Date();
-  const currentDayOfWeek = today.getDay(); // 0 = Sun, 1 = Mon, ...
+  const currentDayOfWeek = today.getDay();
 
-  // Update Title & Subtitle
   elements.scheduleTitle.textContent = title;
   elements.scheduleSubtitle.textContent = `Hiển thị dữ liệu từ ${state.currentWeekFile}`;
   elements.rawFileName.textContent = state.currentWeekFile;
@@ -818,8 +664,8 @@ function renderGridView(days, currentDayOfWeek) {
                 <button class="btn-view-subject-grade" title="Xem tỉ lệ điểm môn ${escapeHtml(c.subject)}" onclick="viewSubjectGrade('${escapeHtml(c.subject)}')">
                   <i class="fa-solid fa-chart-pie"></i>
                 </button>
-                <button class="btn-view-subject-backpack" title="Mở Chiếc cặp tài liệu môn ${escapeHtml(c.subject)}" onclick="viewSubjectBackpack('${escapeHtml(c.subject)}')">
-                  <i class="fa-solid fa-briefcase"></i>
+                <button class="btn-view-subject-backpack" title="Mở thư mục Chiếc cặp môn ${escapeHtml(c.subject)}" onclick="viewSubjectBackpack('${escapeHtml(c.subject)}')">
+                  <i class="fa-solid fa-folder-open"></i>
                 </button>
                 <button class="btn-copy-info" title="Sao chép thông tin tiết học" onclick="copyClassInfo('${escapeHtml(c.subject)}', '${escapeHtml(c.timeRange)}', '${escapeHtml(c.room)}')">
                   <i class="fa-regular fa-copy"></i>
@@ -886,8 +732,8 @@ function renderTodayView(days, currentDayOfWeek) {
           <button class="btn-view-subject-grade" title="Xem tỉ lệ điểm môn ${escapeHtml(c.subject)}" onclick="viewSubjectGrade('${escapeHtml(c.subject)}')">
             <i class="fa-solid fa-chart-pie"></i>
           </button>
-          <button class="btn-view-subject-backpack" title="Mở Chiếc cặp tài liệu môn ${escapeHtml(c.subject)}" onclick="viewSubjectBackpack('${escapeHtml(c.subject)}')">
-            <i class="fa-solid fa-briefcase"></i>
+          <button class="btn-view-subject-backpack" title="Mở thư mục Chiếc cặp môn ${escapeHtml(c.subject)}" onclick="viewSubjectBackpack('${escapeHtml(c.subject)}')">
+            <i class="fa-solid fa-folder-open"></i>
           </button>
         </div>
       </div>
@@ -1064,28 +910,9 @@ window.viewSubjectGrade = function(subjectName) {
 };
 
 /* ==========================================================================
-   SMART BACKPACK (CHIẾC CẶP THÔNG MINH) LOGIC & RENDERING
+   FREE-FORM GOOGLE DRIVE BACKPACK LOGIC & NAVIGATION
    ========================================================================== */
 
-/**
- * Get category metadata
- */
-function getCategoryInfo(cat) {
-  switch (cat) {
-    case 'slides':
-      return { label: 'Slide & Bài giảng', icon: 'fa-solid fa-file-powerpoint' };
-    case 'btl':
-      return { label: 'Bài tập lớn & Dự án', icon: 'fa-solid fa-users-rectangle' };
-    case 'exams':
-      return { label: 'Đề thi & Ôn tập', icon: 'fa-solid fa-pen-ruler' };
-    default:
-      return { label: 'Tài liệu khác & Drive', icon: 'fa-brands fa-google-drive' };
-  }
-}
-
-/**
- * Get icon class and color for file type
- */
 function getFileIcon(type, name = '') {
   const t = (type || '').toLowerCase();
   const ext = name.split('.').pop().toLowerCase();
@@ -1102,302 +929,375 @@ function getFileIcon(type, name = '') {
   return { icon: 'fa-regular fa-file-lines', cls: 'other' };
 }
 
-/**
- * Calculates offline storage used in MB
- */
 async function updateBackpackStorageStats() {
-  const customFiles = state.backpackFiles.filter(f => f.isOffline && f.fileBlob);
+  const offlineFiles = state.driveItems.filter(f => f.type !== 'folder' && f.fileBlob);
   let totalBytes = 0;
-  customFiles.forEach(f => {
-    if (f.fileBlob && f.fileBlob.size) {
-      totalBytes += f.fileBlob.size;
-    }
+  offlineFiles.forEach(f => {
+    if (f.fileBlob && f.fileBlob.size) totalBytes += f.fileBlob.size;
   });
 
   const mb = (totalBytes / (1024 * 1024)).toFixed(1);
   if (elements.bpStorageText) {
-    elements.bpStorageText.textContent = `Offline: ${mb} MB (${customFiles.length} file)`;
+    elements.bpStorageText.textContent = `Offline: ${mb} MB (${offlineFiles.length} file)`;
   }
   if (elements.bpFilesCount) {
-    elements.bpFilesCount.textContent = `${state.backpackFiles.length} tài liệu`;
+    const totalFiles = state.driveItems.filter(f => f.type !== 'folder').length;
+    elements.bpFilesCount.textContent = `${totalFiles} tài liệu`;
   }
 }
 
 /**
- * Renders subject filter pills and options
+ * Returns breadcrumb path from root to current folder
  */
-function renderBackpackFilters() {
-  if (!elements.backpackSubjectTags) return;
-  elements.backpackSubjectTags.innerHTML = '';
+function getBreadcrumbsPath(folderId) {
+  const crumbs = [];
+  let currId = folderId;
 
-  // "Tất cả" tag
-  const allBtn = document.createElement('button');
-  allBtn.className = `tag-btn ${!state.backpackFilterSubject ? 'active' : ''}`;
-  allBtn.innerHTML = `Tất cả môn (${GRADE_SCHEMES.length})`;
-  allBtn.addEventListener('click', () => {
-    state.backpackFilterSubject = null;
-    renderBackpackView();
-  });
-  elements.backpackSubjectTags.appendChild(allBtn);
-
-  // Populate Select in Add Link Modal
-  if (elements.linkSubjectSelect) {
-    elements.linkSubjectSelect.innerHTML = '';
+  while (currId) {
+    const folder = state.driveItems.find(i => i.id === currId && i.type === 'folder');
+    if (folder) {
+      crumbs.unshift(folder);
+      currId = folder.parentId;
+    } else {
+      break;
+    }
   }
 
-  GRADE_SCHEMES.forEach(scheme => {
-    const color = getSubjectColor(scheme.name);
-    const btn = document.createElement('button');
-    btn.className = `tag-btn ${state.backpackFilterSubject === scheme.code ? 'active' : ''}`;
-    btn.innerHTML = `<span class="tag-color-indicator" style="background-color: ${color.border}"></span> ${scheme.name} (${scheme.code})`;
-    btn.addEventListener('click', () => {
-      state.backpackFilterSubject = state.backpackFilterSubject === scheme.code ? null : scheme.code;
-      renderBackpackView();
-    });
-    elements.backpackSubjectTags.appendChild(btn);
-
-    if (elements.linkSubjectSelect) {
-      const opt = document.createElement('option');
-      opt.value = scheme.code;
-      opt.textContent = `${scheme.code} - ${scheme.name}`;
-      elements.linkSubjectSelect.appendChild(opt);
-    }
-  });
+  return crumbs;
 }
 
 /**
- * Main render function for Smart Backpack
+ * Open a folder and re-render
+ */
+window.openBackpackFolder = function(folderId) {
+  state.currentFolderId = folderId;
+  state.backpackSearchQuery = '';
+  if (elements.backpackSearchInput) {
+    elements.backpackSearchInput.value = '';
+    elements.bpClearSearchBtn.classList.add('hidden');
+  }
+  renderBackpackView();
+};
+
+/**
+ * Navigate to parent folder
+ */
+window.navigateBackpackUp = function() {
+  if (!state.currentFolderId) return;
+  const currFolder = state.driveItems.find(i => i.id === state.currentFolderId && i.type === 'folder');
+  state.currentFolderId = currFolder ? currFolder.parentId : null;
+  renderBackpackView();
+};
+
+/**
+ * Jump directly from Timetable to Subject folder
+ */
+window.viewSubjectBackpack = function(subjectName) {
+  switchView('backpack');
+
+  // Match root folder of this subject
+  const rootFolder = state.driveItems.find(i => 
+    i.parentId === null && 
+    i.type === 'folder' && 
+    (i.name.toLowerCase().includes(subjectName.toLowerCase()) || subjectName.toLowerCase().includes(i.name.toLowerCase()))
+  );
+
+  if (rootFolder) {
+    state.currentFolderId = rootFolder.id;
+  } else {
+    state.currentFolderId = null;
+  }
+
+  renderBackpackView();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+/**
+ * Render Breadcrumbs Bar
+ */
+function renderBreadcrumbs() {
+  if (!elements.backpackBreadcrumbs) return;
+
+  const crumbs = getBreadcrumbsPath(state.currentFolderId);
+
+  // Toggle Back Button visibility
+  if (elements.bpBackBtn) {
+    elements.bpBackBtn.style.display = state.currentFolderId ? 'inline-flex' : 'none';
+  }
+
+  let html = `<span class="crumb ${!state.currentFolderId ? 'active' : ''}" onclick="openBackpackFolder(null)"><i class="fa-solid fa-house"></i> Chiếc cặp</span>`;
+
+  crumbs.forEach((c, idx) => {
+    const isLast = idx === crumbs.length - 1;
+    html += `
+      <span class="separator"><i class="fa-solid fa-chevron-right"></i></span>
+      <span class="crumb ${isLast ? 'active' : ''}" onclick="openBackpackFolder('${c.id}')">
+        <i class="fa-solid fa-folder"></i> ${escapeHtml(c.name)}
+      </span>
+    `;
+  });
+
+  elements.backpackBreadcrumbs.innerHTML = html;
+}
+
+/**
+ * Count total items inside a folder (files + subfolders)
+ */
+function countFolderContents(folderId) {
+  return state.driveItems.filter(i => i.parentId === folderId).length;
+}
+
+/**
+ * Main render function for Free-form Drive Backpack
  */
 function renderBackpackView() {
   if (!elements.backpackExplorer) return;
   elements.backpackExplorer.innerHTML = '';
 
-  renderBackpackFilters();
+  renderBreadcrumbs();
   updateBackpackStorageStats();
 
-  const q = (state.backpackSearchQuery || '').toLowerCase().trim();
-  const todayDayIndex = (new Date()).getDay();
-
-  // Filter schemes
-  let schemes = GRADE_SCHEMES.filter(s => {
-    if (state.backpackFilterSubject && s.code !== state.backpackFilterSubject) {
-      return false;
-    }
-    return true;
-  });
-
-  // Highlight or sort subjects that have classes today to the top!
-  schemes.sort((a, b) => {
-    const aHasClass = state.parsedSchedule?.days?.some(d => 
-      d.dayOfWeekNumber === todayDayIndex && d.classes.some(c => c.subject.includes(a.name) || a.name.includes(c.subject))
-    );
-    const bHasClass = state.parsedSchedule?.days?.some(d => 
-      d.dayOfWeekNumber === todayDayIndex && d.classes.some(c => c.subject.includes(b.name) || b.name.includes(c.subject))
-    );
-    if (aHasClass && !bHasClass) return -1;
-    if (!aHasClass && bHasClass) return 1;
-    return 0;
-  });
-
-  // Update Breadcrumbs
-  if (elements.backpackBreadcrumbs) {
-    if (state.backpackFilterSubject) {
-      const currentScheme = GRADE_SCHEMES.find(s => s.code === state.backpackFilterSubject);
-      elements.backpackBreadcrumbs.innerHTML = `
-        <span class="crumb" onclick="clearBackpackFilter()"><i class="fa-solid fa-house"></i> Chiếc cặp</span>
-        <span class="separator"><i class="fa-solid fa-chevron-right"></i></span>
-        <span class="crumb active"><i class="fa-solid fa-folder-open"></i> ${escapeHtml(currentScheme ? currentScheme.name : state.backpackFilterSubject)}</span>
-      `;
-    } else {
-      elements.backpackBreadcrumbs.innerHTML = `<span class="crumb active"><i class="fa-solid fa-house"></i> Tất cả môn học (${schemes.length} ngăn cặp)</span>`;
-    }
+  // Populate options in Add Link Modal
+  if (elements.linkSubjectSelect) {
+    elements.linkSubjectSelect.innerHTML = '';
+    const allFolders = state.driveItems.filter(i => i.type === 'folder');
+    allFolders.forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f.id;
+      opt.textContent = f.name;
+      if (f.id === state.currentFolderId) opt.selected = true;
+      elements.linkSubjectSelect.appendChild(opt);
+    });
   }
 
-  let totalRenderedSubjects = 0;
+  const q = (state.backpackSearchQuery || '').toLowerCase().trim();
 
-  schemes.forEach(scheme => {
-    // Get all files for this subject
-    const subjectFiles = state.backpackFiles.filter(f => f.subjectCode === scheme.code);
-    
-    // Apply search query filter if present
-    const matchingFiles = subjectFiles.filter(f => 
-      !q || 
-      f.name.toLowerCase().includes(q) || 
-      (f.description && f.description.toLowerCase().includes(q)) ||
-      scheme.name.toLowerCase().includes(q) ||
-      scheme.code.toLowerCase().includes(q)
+  // Filter items in current directory OR matching search query anywhere
+  let itemsInView = [];
+  if (q) {
+    itemsInView = state.driveItems.filter(i => 
+      i.name.toLowerCase().includes(q) || 
+      (i.description && i.description.toLowerCase().includes(q))
     );
+  } else {
+    itemsInView = state.driveItems.filter(i => i.parentId === state.currentFolderId);
+  }
 
-    if (q && matchingFiles.length === 0) {
-      return;
-    }
+  const folders = itemsInView.filter(i => i.type === 'folder');
+  const files = itemsInView.filter(i => i.type !== 'folder');
 
-    totalRenderedSubjects++;
-    const color = getSubjectColor(scheme.name);
+  if (itemsInView.length === 0) {
+    elements.backpackExplorer.innerHTML = `
+      <div class="bp-empty-state">
+        <i class="fa-regular fa-folder-open"></i>
+        <h3>Thư mục này đang trống</h3>
+        <p>Bấm nút <strong>"+ Thư mục mới"</strong>, <strong>"Tải tệp lên"</strong> hoặc kéo thả file vào đây để bắt đầu lưu trữ.</p>
+      </div>
+    `;
+    return;
+  }
 
-    const section = document.createElement('div');
-    section.className = 'bp-subject-section';
-    section.id = `bp-subject-${scheme.code.toLowerCase()}`;
+  // 1. RENDER FOLDERS SECTION (Google Drive Style)
+  if (folders.length > 0) {
+    const folderSection = document.createElement('div');
+    folderSection.innerHTML = `
+      <div class="bp-section-title">
+        <i class="fa-solid fa-folder"></i> Thư mục (${folders.length})
+      </div>
+    `;
 
-    // Categories: slides, btl, exams, other
-    const categories = ['slides', 'btl', 'exams', 'other'];
+    const foldersGrid = document.createElement('div');
+    foldersGrid.className = 'bp-folders-grid';
 
-    const categoriesHtml = categories.map(catKey => {
-      const catInfo = getCategoryInfo(catKey);
-      const catFiles = matchingFiles.filter(f => f.category === catKey);
+    folders.forEach(f => {
+      const childCount = countFolderContents(f.id);
+      const card = document.createElement('div');
+      card.className = 'bp-folder-card';
+      card.onclick = () => openBackpackFolder(f.id);
 
-      let filesListHtml = '';
-      if (catFiles.length === 0) {
-        filesListHtml = `<div class="bp-empty-cat"><i class="fa-regular fa-folder"></i> Chưa có tệp nào</div>`;
-      } else {
-        filesListHtml = catFiles.map(file => {
-          const fileIconInfo = getFileIcon(file.type, file.name);
-          return `
-            <div class="bp-file-item" id="file-${file.id}">
-              <div class="bp-file-info">
-                <i class="${fileIconInfo.icon} bp-file-icon ${fileIconInfo.cls}"></i>
-                <div class="bp-file-text">
-                  <span class="bp-file-name" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</span>
-                  <div class="bp-file-meta">
-                    <span>${file.size || 'Tệp'}</span>
-                    ${file.isOffline ? `<span class="bp-offline-tag"><i class="fa-solid fa-circle-check"></i> Offline</span>` : ''}
-                    ${file.description ? `<span>• ${escapeHtml(file.description)}</span>` : ''}
-                  </div>
-                </div>
-              </div>
-              <div class="bp-file-actions">
-                <button class="btn-file-action" title="Xem trước tài liệu" onclick="previewFile('${file.id}')">
-                  <i class="fa-regular fa-eye"></i>
+      card.innerHTML = `
+        <div class="bp-folder-left">
+          <i class="fa-solid fa-folder bp-folder-icon" style="color: ${f.color || 'var(--accent-primary)'};"></i>
+          <div class="bp-folder-details">
+            <span class="bp-folder-name" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>
+            <span class="bp-folder-count">${childCount} mục</span>
+          </div>
+        </div>
+        ${!f.isSystem ? `
+          <div class="bp-folder-actions" onclick="event.stopPropagation();">
+            <button class="btn-file-action delete" title="Xóa thư mục này" onclick="deleteBackpackItem('${f.id}')">
+              <i class="fa-regular fa-trash-can"></i>
+            </button>
+          </div>
+        ` : ''}
+      `;
+      foldersGrid.appendChild(card);
+    });
+
+    folderSection.appendChild(foldersGrid);
+    elements.backpackExplorer.appendChild(folderSection);
+  }
+
+  // 2. RENDER FILES SECTION (Grid or List View)
+  if (files.length > 0) {
+    const fileSection = document.createElement('div');
+    fileSection.innerHTML = `
+      <div class="bp-section-title">
+        <i class="fa-solid fa-file"></i> Tệp tin (${files.length})
+      </div>
+    `;
+
+    if (state.backpackViewMode === 'grid') {
+      const filesGrid = document.createElement('div');
+      filesGrid.className = 'bp-files-grid';
+
+      files.forEach(file => {
+        const fileIconInfo = getFileIcon(file.type, file.name);
+        const card = document.createElement('div');
+        card.className = 'bp-file-card';
+        card.onclick = () => previewFile(file.id);
+
+        card.innerHTML = `
+          <div class="bp-file-card-top">
+            <i class="${fileIconInfo.icon} bp-file-card-icon ${fileIconInfo.cls}"></i>
+            <div class="bp-file-card-actions" onclick="event.stopPropagation();">
+              ${file.driveUrl ? `
+                <a href="${escapeHtml(file.driveUrl)}" target="_blank" rel="noopener noreferrer" class="btn-file-action" title="Mở link Google Drive">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>
+              ` : ''}
+              ${file.fileBlob ? `
+                <button class="btn-file-action" title="Tải về máy" onclick="downloadOfflineFile('${file.id}')">
+                  <i class="fa-solid fa-download"></i>
                 </button>
-                ${file.driveUrl ? `
-                  <a href="${escapeHtml(file.driveUrl)}" target="_blank" rel="noopener noreferrer" class="btn-file-action" title="Mở trên Google Drive">
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                  </a>
-                ` : ''}
-                ${file.fileBlob ? `
-                  <button class="btn-file-action" title="Tải xuống máy" onclick="downloadOfflineFile('${file.id}')">
-                    <i class="fa-solid fa-download"></i>
-                  </button>
-                ` : ''}
-                ${file.isCustom ? `
-                  <button class="btn-file-action delete" title="Xóa tài liệu này" onclick="deleteCustomBackpackFile('${file.id}')">
-                    <i class="fa-regular fa-trash-can"></i>
-                  </button>
-                ` : ''}
-              </div>
+              ` : ''}
+              ${file.isCustom ? `
+                <button class="btn-file-action delete" title="Xóa tệp" onclick="deleteBackpackItem('${file.id}')">
+                  <i class="fa-regular fa-trash-can"></i>
+                </button>
+              ` : ''}
             </div>
-          `;
-        }).join('');
-      }
+          </div>
+          <div class="bp-file-card-title" title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</div>
+          <div class="bp-file-card-meta">
+            <span>${file.size || 'Tệp'}</span>
+            ${file.isOffline ? `<span class="bp-offline-tag"><i class="fa-solid fa-circle-check"></i> Offline</span>` : `<span>${file.updatedAt || ''}</span>`}
+          </div>
+        `;
+        filesGrid.appendChild(card);
+      });
 
-      return `
-        <div class="bp-category-card">
-          <div class="bp-cat-header">
-            <span><i class="${catInfo.icon}"></i> ${catInfo.label}</span>
-            <span class="bp-cat-badge">${catFiles.length}</span>
-          </div>
-          <div class="bp-file-list">
-            ${filesListHtml}
-          </div>
+      fileSection.appendChild(filesGrid);
+    } else {
+      // List View
+      const listContainer = document.createElement('div');
+      listContainer.className = 'bp-files-list';
+
+      listContainer.innerHTML = `
+        <div class="bp-list-header">
+          <div>Tên tệp</div>
+          <div>Lần sửa cuối</div>
+          <div>Kích cỡ</div>
+          <div style="text-align: right;">Thao tác</div>
         </div>
       `;
-    }).join('');
 
-    section.innerHTML = `
-      <div class="bp-subject-header">
-        <div class="bp-subject-title-group">
-          <div class="bp-subject-icon" style="background-color: ${color.bg}; color: ${color.border}">
-            <i class="fa-solid fa-book-bookmark"></i>
+      files.forEach(file => {
+        const fileIconInfo = getFileIcon(file.type, file.name);
+        const row = document.createElement('div');
+        row.className = 'bp-list-row';
+        row.onclick = () => previewFile(file.id);
+
+        row.innerHTML = `
+          <div class="bp-list-name-col">
+            <i class="${fileIconInfo.icon} ${fileIconInfo.cls}" style="font-size: 1.25rem;"></i>
+            <span title="${escapeHtml(file.name)}">${escapeHtml(file.name)}</span>
           </div>
-          <div>
-            <span class="bp-subject-name">${escapeHtml(scheme.name)}</span>
-            <span class="bp-subject-code">${escapeHtml(scheme.code)}</span>
+          <div class="bp-list-meta-col">${file.updatedAt || '--'}</div>
+          <div class="bp-list-meta-col">
+            ${file.size || '--'} ${file.isOffline ? `<span class="bp-offline-tag" style="margin-left: 0.3rem;"><i class="fa-solid fa-circle-check"></i></span>` : ''}
           </div>
-        </div>
-        <div>
-          <button class="btn-action-small" onclick="quickUploadForSubject('${scheme.code}')" title="Thêm tài liệu cho môn này">
-            <i class="fa-solid fa-plus"></i> Thêm tệp môn này
-          </button>
-        </div>
-      </div>
-      <div class="bp-categories-grid">
-        ${categoriesHtml}
-      </div>
-    `;
+          <div class="bp-list-actions-col" onclick="event.stopPropagation();">
+            <button class="btn-file-action" title="Xem trước" onclick="previewFile('${file.id}')">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+            ${file.driveUrl ? `
+              <a href="${escapeHtml(file.driveUrl)}" target="_blank" rel="noopener noreferrer" class="btn-file-action" title="Mở link">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              </a>
+            ` : ''}
+            ${file.fileBlob ? `
+              <button class="btn-file-action" title="Tải xuống" onclick="downloadOfflineFile('${file.id}')">
+                <i class="fa-solid fa-download"></i>
+              </button>
+            ` : ''}
+            ${file.isCustom ? `
+              <button class="btn-file-action delete" title="Xóa" onclick="deleteBackpackItem('${file.id}')">
+                <i class="fa-regular fa-trash-can"></i>
+              </button>
+            ` : ''}
+          </div>
+        `;
+        listContainer.appendChild(row);
+      });
 
-    elements.backpackExplorer.appendChild(section);
-  });
+      fileSection.appendChild(listContainer);
+    }
 
-  if (totalRenderedSubjects === 0) {
-    elements.backpackExplorer.innerHTML = `
-      <div class="day-off-card" style="padding: 3.5rem 1rem;">
-        <div class="day-off-icon" style="font-size: 3rem;"><i class="fa-solid fa-magnifying-glass"></i></div>
-        <h3>Không tìm thấy tài liệu phù hợp</h3>
-        <p>Thử tìm kiếm với tên tài liệu khác hoặc chọn "Tất cả môn".</p>
-      </div>
-    `;
+    elements.backpackExplorer.appendChild(fileSection);
   }
 }
 
-window.clearBackpackFilter = function() {
-  state.backpackFilterSubject = null;
-  renderBackpackView();
-};
-
-window.quickUploadForSubject = function(subjectCode) {
-  if (elements.linkSubjectSelect) {
-    elements.linkSubjectSelect.value = subjectCode;
-  }
-  elements.backpackFileInput.setAttribute('data-target-subject', subjectCode);
-  elements.backpackFileInput.click();
-};
-
 /**
- * Navigate to Backpack View from Timetable item
+ * Delete item (Folder or File)
  */
-window.viewSubjectBackpack = function(subjectName) {
-  switchView('backpack');
-  
-  // Find matching scheme
-  const matched = GRADE_SCHEMES.find(s => 
-    s.name.toLowerCase().includes(subjectName.toLowerCase()) ||
-    subjectName.toLowerCase().includes(s.name.toLowerCase())
-  );
+window.deleteBackpackItem = async function(id) {
+  const item = state.driveItems.find(i => i.id === id);
+  if (!item) return;
 
-  if (matched) {
-    state.backpackFilterSubject = matched.code;
-    renderBackpackView();
+  const isFolder = item.type === 'folder';
+  const msg = isFolder 
+    ? `Bạn có chắc muốn xóa thư mục "${item.name}" và toàn bộ tệp bên trong?` 
+    : `Bạn có chắc muốn xóa tệp "${item.name}"?`;
 
-    setTimeout(() => {
-      const section = document.getElementById(`bp-subject-${matched.code.toLowerCase()}`);
-      if (section) {
-        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        section.style.borderColor = 'var(--accent-primary)';
-        section.style.boxShadow = '0 0 24px rgba(99, 102, 241, 0.45)';
-        setTimeout(() => {
-          section.style.borderColor = '';
-          section.style.boxShadow = '';
-        }, 2500);
-      }
-    }, 120);
+  if (!confirm(msg)) return;
+
+  // If folder, recursively find all child IDs
+  const idsToDelete = [id];
+  if (isFolder) {
+    const findChildren = (pid) => {
+      const children = state.driveItems.filter(i => i.parentId === pid);
+      children.forEach(c => {
+        idsToDelete.push(c.id);
+        if (c.type === 'folder') findChildren(c.id);
+      });
+    };
+    findChildren(id);
   }
+
+  for (const delId of idsToDelete) {
+    await deleteItemFromIndexedDB(delId);
+  }
+
+  state.driveItems = state.driveItems.filter(i => !idsToDelete.includes(i.id));
+  renderBackpackView();
+  showToast(`Đã xóa ${isFolder ? 'thư mục' : 'tệp tin'}`);
 };
 
 /**
  * Preview file modal handler
  */
 window.previewFile = function(fileId) {
-  const file = state.backpackFiles.find(f => f.id === fileId);
-  if (!file) return;
+  const file = state.driveItems.find(f => f.id === fileId);
+  if (!file || file.type === 'folder') return;
 
   const modal = elements.filePreviewModal;
   const fileIconInfo = getFileIcon(file.type, file.name);
 
   elements.previewFileName.textContent = file.name;
-  elements.previewFileSub.textContent = `${file.subjectCode} • ${file.size || 'Tài liệu'}`;
+  elements.previewFileSub = file.size || 'Tài liệu';
   elements.previewFileIcon.className = `${fileIconInfo.icon} ${fileIconInfo.cls}`;
 
-  // Handle external open button
   if (file.driveUrl) {
     elements.previewOpenExtBtn.style.display = 'inline-flex';
     elements.previewOpenExtBtn.href = file.driveUrl;
@@ -1405,7 +1305,6 @@ window.previewFile = function(fileId) {
     elements.previewOpenExtBtn.style.display = 'none';
   }
 
-  // Handle download button
   if (file.fileBlob) {
     elements.previewDownloadBtn.style.display = 'inline-flex';
     elements.previewDownloadBtn.onclick = () => downloadOfflineFile(file.id);
@@ -1415,25 +1314,20 @@ window.previewFile = function(fileId) {
 
   elements.previewModalBody.innerHTML = '';
 
-  // Render preview content
   if (file.fileBlob) {
     const objectUrl = URL.createObjectURL(file.fileBlob);
     const ext = file.name.split('.').pop().toLowerCase();
 
     if (ext === 'pdf') {
-      elements.previewModalBody.innerHTML = `
-        <iframe class="preview-iframe" src="${objectUrl}#toolbar=1&navpanes=1"></iframe>
-      `;
+      elements.previewModalBody.innerHTML = `<iframe class="preview-iframe" src="${objectUrl}#toolbar=1"></iframe>`;
     } else if (['png', 'jpg', 'jpeg', 'webp', 'svg'].includes(ext)) {
-      elements.previewModalBody.innerHTML = `
-        <img class="preview-img" src="${objectUrl}" alt="${escapeHtml(file.name)}">
-      `;
+      elements.previewModalBody.innerHTML = `<img class="preview-img" src="${objectUrl}" alt="${escapeHtml(file.name)}">`;
     } else {
       elements.previewModalBody.innerHTML = `
         <div style="text-align: center; padding: 3rem;">
           <i class="${fileIconInfo.icon}" style="font-size: 4rem; color: var(--accent-primary); margin-bottom: 1rem;"></i>
           <h3>${escapeHtml(file.name)}</h3>
-          <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Tài liệu đã được lưu trữ Offline trên máy của bạn.</p>
+          <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">Tệp đã được lưu trữ Offline trong máy của bạn.</p>
           <button class="btn-primary-small" onclick="downloadOfflineFile('${file.id}')">
             <i class="fa-solid fa-download"></i> Tải về máy để mở
           </button>
@@ -1441,22 +1335,18 @@ window.previewFile = function(fileId) {
       `;
     }
   } else if (file.driveUrl) {
-    // If it's a Drive URL, embed Google Drive preview or open button
     let embedUrl = file.driveUrl;
     if (embedUrl.includes('drive.google.com/file/d/')) {
       embedUrl = embedUrl.replace(/\/view.*$/, '/preview');
     }
-
-    elements.previewModalBody.innerHTML = `
-      <iframe class="preview-iframe" src="${embedUrl}" allow="autoplay"></iframe>
-    `;
+    elements.previewModalBody.innerHTML = `<iframe class="preview-iframe" src="${embedUrl}" allow="autoplay"></iframe>`;
   }
 
   modal.classList.remove('hidden');
 };
 
 window.downloadOfflineFile = function(fileId) {
-  const file = state.backpackFiles.find(f => f.id === fileId);
+  const file = state.driveItems.find(f => f.id === fileId);
   if (!file || !file.fileBlob) return;
 
   const url = URL.createObjectURL(file.fileBlob);
@@ -1467,38 +1357,23 @@ window.downloadOfflineFile = function(fileId) {
   a.click();
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 1000);
-  showToast(`Đang tải xuống: ${file.name}`);
-};
-
-window.deleteCustomBackpackFile = async function(fileId) {
-  if (!confirm('Bạn có chắc chắn muốn xóa tài liệu này khỏi Chiếc cặp?')) return;
-  await deleteFileFromIndexedDB(fileId);
-  state.backpackFiles = state.backpackFiles.filter(f => f.id !== fileId);
-  renderBackpackView();
-  showToast('Đã xóa tài liệu khỏi Chiếc cặp');
+  showToast(`Đang tải: ${file.name}`);
 };
 
 /**
- * Handle new files upload (Drag & Drop or File Input)
+ * Handle new files upload into current active folder
  */
-async function handleFilesUpload(filesList, targetSubject = null) {
+async function handleFilesUpload(filesList) {
   if (!filesList || filesList.length === 0) return;
 
   let addedCount = 0;
   for (let i = 0; i < filesList.length; i++) {
     const file = filesList[i];
-    const subjectCode = targetSubject || state.backpackFilterSubject || 'CO3117'; // default to CO3117 if none selected
     const ext = file.name.split('.').pop().toLowerCase();
-    
-    // Categorize
-    let category = 'slides';
-    if (file.name.toLowerCase().includes('btl') || file.name.toLowerCase().includes('nhom')) category = 'btl';
-    if (file.name.toLowerCase().includes('thi') || file.name.toLowerCase().includes('de')) category = 'exams';
 
     const fileItem = {
-      id: 'custom-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
-      subjectCode: subjectCode,
-      category: category,
+      id: 'custom-file-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+      parentId: state.currentFolderId,
       name: file.name,
       type: ext,
       size: (file.size / (1024 * 1024) > 1) ? `${(file.size / (1024 * 1024)).toFixed(1)} MB` : `${Math.round(file.size / 1024)} KB`,
@@ -1506,16 +1381,16 @@ async function handleFilesUpload(filesList, targetSubject = null) {
       fileBlob: file,
       isOffline: true,
       isCustom: true,
-      description: 'Tài liệu tải lên lưu trữ Offline'
+      description: 'Tài liệu Offline tải lên'
     };
 
-    await saveFileToIndexedDB(fileItem);
-    state.backpackFiles.unshift(fileItem);
+    await saveItemToIndexedDB(fileItem);
+    state.driveItems.unshift(fileItem);
     addedCount++;
   }
 
   renderBackpackView();
-  showToast(`Đã lưu thành công ${addedCount} tệp vào Chiếc cặp (Offline)!`);
+  showToast(`Đã lưu ${addedCount} tệp vào thư mục hiện tại!`);
 }
 
 /* ==========================================================================
@@ -1581,9 +1456,7 @@ async function loadWeeksIndex() {
     const res = await fetch('schedules/index.json');
     if (res.ok) {
       const json = await res.json();
-      if (Array.isArray(json) && json.length > 0) {
-        state.weeksList = json;
-      }
+      if (Array.isArray(json) && json.length > 0) state.weeksList = json;
     }
   } catch (err) {
     console.warn('Could not fetch schedules/index.json, using fallback weeks.', err);
@@ -1605,7 +1478,6 @@ async function loadWeekMarkdown(filePath) {
   elements.weekSelect.value = filePath;
 
   let markdownContent = '';
-
   try {
     const res = await fetch(filePath);
     if (res.ok) {
@@ -1615,11 +1487,7 @@ async function loadWeekMarkdown(filePath) {
     }
   } catch (err) {
     console.warn(`Could not fetch ${filePath} via network. Using embedded data fallback.`, err);
-    if (filePath.includes('tuan-36')) {
-      markdownContent = DEFAULT_WEEK_36_MD;
-    } else {
-      markdownContent = DEFAULT_WEEK_35_MD;
-    }
+    markdownContent = filePath.includes('tuan-36') ? DEFAULT_WEEK_36_MD : DEFAULT_WEEK_35_MD;
   }
 
   state.currentRawMarkdown = markdownContent;
@@ -1698,27 +1566,19 @@ function setupEventListeners() {
   });
 
   // Week Select Dropdown
-  elements.weekSelect.addEventListener('change', (e) => {
-    loadWeekMarkdown(e.target.value);
-  });
+  elements.weekSelect.addEventListener('change', (e) => loadWeekMarkdown(e.target.value));
 
   // Prev / Next Week Buttons
   elements.prevWeekBtn.addEventListener('click', () => {
     const currentIndex = state.weeksList.findIndex(w => w.filename === state.currentWeekFile);
-    if (currentIndex > 0) {
-      loadWeekMarkdown(state.weeksList[currentIndex - 1].filename);
-    } else {
-      showToast('Đang ở tuần đầu tiên');
-    }
+    if (currentIndex > 0) loadWeekMarkdown(state.weeksList[currentIndex - 1].filename);
+    else showToast('Đang ở tuần đầu tiên');
   });
 
   elements.nextWeekBtn.addEventListener('click', () => {
     const currentIndex = state.weeksList.findIndex(w => w.filename === state.currentWeekFile);
-    if (currentIndex < state.weeksList.length - 1) {
-      loadWeekMarkdown(state.weeksList[currentIndex + 1].filename);
-    } else {
-      showToast('Đang ở tuần mới nhất');
-    }
+    if (currentIndex < state.weeksList.length - 1) loadWeekMarkdown(state.weeksList[currentIndex + 1].filename);
+    else showToast('Đang ở tuần mới nhất');
   });
 
   // View Switchers
@@ -1728,7 +1588,7 @@ function setupEventListeners() {
   elements.viewBackpackBtn.addEventListener('click', () => switchView('backpack'));
   elements.viewRawBtn.addEventListener('click', () => switchView('raw'));
 
-  // Search Box
+  // Search Box in Timetable
   elements.searchInput.addEventListener('input', (e) => {
     state.searchQuery = e.target.value.trim();
     elements.clearSearchBtn.classList.toggle('hidden', !state.searchQuery);
@@ -1750,6 +1610,29 @@ function setupEventListeners() {
     });
   }
 
+  // Backpack Drive Actions
+  if (elements.bpBackBtn) {
+    elements.bpBackBtn.addEventListener('click', navigateBackpackUp);
+  }
+
+  if (elements.bpViewGridBtn) {
+    elements.bpViewGridBtn.addEventListener('click', () => {
+      state.backpackViewMode = 'grid';
+      elements.bpViewGridBtn.classList.add('active');
+      elements.bpViewListBtn.classList.remove('active');
+      renderBackpackView();
+    });
+  }
+
+  if (elements.bpViewListBtn) {
+    elements.bpViewListBtn.addEventListener('click', () => {
+      state.backpackViewMode = 'list';
+      elements.bpViewListBtn.classList.add('active');
+      elements.bpViewGridBtn.classList.remove('active');
+      renderBackpackView();
+    });
+  }
+
   // Backpack Search Box
   if (elements.backpackSearchInput) {
     elements.backpackSearchInput.addEventListener('input', (e) => {
@@ -1768,18 +1651,62 @@ function setupEventListeners() {
     });
   }
 
-  // Backpack Upload Actions
+  // Create New Folder Modal Trigger
+  if (elements.bpNewFolderBtn) {
+    elements.bpNewFolderBtn.addEventListener('click', () => {
+      elements.newFolderModal.classList.remove('hidden');
+      elements.folderNameInput.value = '';
+      elements.folderNameInput.focus();
+    });
+  }
+
+  if (elements.newFolderCloseBtn) {
+    elements.newFolderCloseBtn.addEventListener('click', () => {
+      elements.newFolderModal.classList.add('hidden');
+    });
+  }
+
+  if (elements.newFolderCancelBtn) {
+    elements.newFolderCancelBtn.addEventListener('click', () => {
+      elements.newFolderModal.classList.add('hidden');
+    });
+  }
+
+  if (elements.newFolderForm) {
+    elements.newFolderForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const folderName = elements.folderNameInput.value.trim();
+      if (!folderName) return;
+
+      const newFolder = {
+        id: 'custom-folder-' + Date.now(),
+        type: 'folder',
+        name: folderName,
+        parentId: state.currentFolderId,
+        color: '#6366f1',
+        isCustom: true,
+        updatedAt: new Date().toISOString().split('T')[0]
+      };
+
+      await saveItemToIndexedDB(newFolder);
+      state.driveItems.unshift(newFolder);
+      renderBackpackView();
+
+      elements.newFolderModal.classList.add('hidden');
+      showToast(`Đã tạo thư mục: ${folderName}`);
+    });
+  }
+
+  // Backpack Upload File Trigger
   if (elements.bpUploadBtn) {
     elements.bpUploadBtn.addEventListener('click', () => {
-      elements.backpackFileInput.removeAttribute('data-target-subject');
       elements.backpackFileInput.click();
     });
   }
 
   if (elements.backpackFileInput) {
     elements.backpackFileInput.addEventListener('change', (e) => {
-      const targetSub = elements.backpackFileInput.getAttribute('data-target-subject');
-      handleFilesUpload(e.target.files, targetSub);
+      handleFilesUpload(e.target.files);
       elements.backpackFileInput.value = '';
     });
   }
@@ -1787,7 +1714,6 @@ function setupEventListeners() {
   // Drag and Drop Zone
   if (elements.backpackDropzone) {
     elements.backpackDropzone.addEventListener('click', () => {
-      elements.backpackFileInput.removeAttribute('data-target-subject');
       elements.backpackFileInput.click();
     });
 
@@ -1809,15 +1735,15 @@ function setupEventListeners() {
 
     elements.backpackDropzone.addEventListener('drop', (e) => {
       const dt = e.dataTransfer;
-      const files = dt.files;
-      handleFilesUpload(files);
+      handleFilesUpload(dt.files);
     });
   }
 
-  // Add Link Modal
+  // Add Link Modal Triggers
   if (elements.bpAddLinkBtn) {
     elements.bpAddLinkBtn.addEventListener('click', () => {
       elements.addLinkModal.classList.remove('hidden');
+      if (elements.linkSubjectSelect) elements.linkSubjectSelect.value = state.currentFolderId || '';
     });
   }
 
@@ -1836,29 +1762,26 @@ function setupEventListeners() {
   if (elements.addLinkForm) {
     elements.addLinkForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const subject = elements.linkSubjectSelect.value;
-      const category = elements.linkCategorySelect.value;
+      const parentId = elements.linkSubjectSelect.value || state.currentFolderId;
       const name = elements.linkNameInput.value.trim();
       const url = elements.linkUrlInput.value.trim();
 
       if (!name || !url) return;
 
       const newLinkItem = {
-        id: 'link-' + Date.now(),
-        subjectCode: subject,
-        category: category,
+        id: 'custom-link-' + Date.now(),
+        parentId: parentId || null,
         name: name,
         type: url.includes('drive.google.com') ? 'drive' : 'link',
-        size: 'Liên kết',
+        size: 'Google Drive',
         updatedAt: new Date().toISOString().split('T')[0],
         driveUrl: url,
-        isOffline: false,
         isCustom: true,
         description: 'Liên kết do bạn thêm'
       };
 
-      await saveFileToIndexedDB(newLinkItem);
-      state.backpackFiles.unshift(newLinkItem);
+      await saveItemToIndexedDB(newLinkItem);
+      state.driveItems.unshift(newLinkItem);
       renderBackpackView();
 
       elements.addLinkForm.reset();
@@ -1881,15 +1804,12 @@ function setupEventListeners() {
       elements.filePreviewModal.classList.add('hidden');
       elements.previewModalBody.innerHTML = '';
     }
-    if (e.target === elements.addLinkModal) {
-      elements.addLinkModal.classList.add('hidden');
-    }
+    if (e.target === elements.addLinkModal) elements.addLinkModal.classList.add('hidden');
+    if (e.target === elements.newFolderModal) elements.newFolderModal.classList.add('hidden');
   });
 
   // Print Button
-  elements.printScheduleBtn.addEventListener('click', () => {
-    window.print();
-  });
+  elements.printScheduleBtn.addEventListener('click', () => window.print());
 
   // Raw Markdown Actions
   elements.copyMarkdownBtn.addEventListener('click', () => {
@@ -1917,7 +1837,6 @@ function setupEventListeners() {
    ========================================================================== */
 
 async function init() {
-  // Load saved theme
   const savedTheme = localStorage.getItem('sched_theme');
   if (savedTheme === 'light') {
     document.body.classList.remove('theme-dark');
@@ -1925,26 +1844,21 @@ async function init() {
     elements.themeToggleBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
   }
 
-  // Setup Clock and update every 10 seconds
   updateCurrentClock();
   setInterval(updateCurrentClock, 10000);
 
-  // Setup Event Listeners
   setupEventListeners();
 
-  // Load custom offline files from IndexedDB and combine with defaults
-  const dbFiles = await getAllFilesFromIndexedDB();
-  state.backpackFiles = [...dbFiles, ...DEFAULT_BACKPACK_ITEMS];
+  // Load custom items from IndexedDB and combine with defaults
+  const dbItems = await getAllItemsFromIndexedDB();
+  state.driveItems = [...dbItems, ...DEFAULT_DRIVE_ITEMS];
 
-  // Initial render of Views
   renderGradesView();
   renderBackpackView();
 
-  // Load available weeks and load initial week
   await loadWeeksIndex();
   await loadWeekMarkdown(state.currentWeekFile);
 
-  // Register PWA Service Worker for Offline capability
   if ('serviceWorker' in navigator) {
     try {
       const reg = await navigator.serviceWorker.register('./sw.js');
@@ -1955,5 +1869,4 @@ async function init() {
   }
 }
 
-// Run when DOM is ready
 document.addEventListener('DOMContentLoaded', init);
