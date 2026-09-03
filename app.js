@@ -1,6 +1,6 @@
 /**
  * ==========================================================================
- * LỊCH HỌC MARKDOWN HUB & CHIẾC CẶP GOOGLE DRIVE ĐỒNG BỘ
+ * LỊCH HỌC MARKDOWN HUB & CHIẾC CẶP GOOGLE DRIVE
  * ==========================================================================
  */
 
@@ -177,14 +177,13 @@ const GRADE_SCHEMES = [
 // App State
 const state = {
   currentWeekFile: 'schedules/tuan-35.md',
-  currentRawMarkdown: '',
   parsedSchedule: null,
   activeFilterSubject: null,
   searchQuery: '',
   gradesSearchQuery: '',
   backpackSearchQuery: '',
   backpackFilterSubject: null,
-  activeView: 'grid', // 'grid', 'today', 'grades', 'backpack', 'raw'
+  activeView: 'grid', // 'grid', 'today', 'grades', 'backpack'
   weeksList: [
     { id: 'tuan-35', title: 'Tuần 35', filename: 'schedules/tuan-35.md' },
     { id: 'tuan-36', title: 'Tuần 36', filename: 'schedules/tuan-36.md' }
@@ -204,13 +203,11 @@ const elements = {
   viewTodayBtn: document.getElementById('view-today-btn'),
   viewGradesBtn: document.getElementById('view-grades-btn'),
   viewBackpackBtn: document.getElementById('view-backpack-btn'),
-  viewRawBtn: document.getElementById('view-raw-btn'),
   
   gridViewContainer: document.getElementById('grid-view-container'),
   todayViewContainer: document.getElementById('today-view-container'),
   gradesViewContainer: document.getElementById('grades-view-container'),
   backpackViewContainer: document.getElementById('backpack-view-container'),
-  rawViewContainer: document.getElementById('raw-view-container'),
   
   scheduleGrid: document.getElementById('schedule-grid'),
   todayTimelineList: document.getElementById('today-timeline-list'),
@@ -262,12 +259,6 @@ const elements = {
   
   notesSection: document.getElementById('notes-section'),
   notesBody: document.getElementById('notes-body'),
-  
-  rawFileName: document.getElementById('raw-file-name'),
-  markdownRawContent: document.getElementById('markdown-raw-content'),
-  copyMarkdownBtn: document.getElementById('copy-markdown-btn'),
-  reloadMarkdownBtn: document.getElementById('reload-markdown-btn'),
-  applyRawBtn: document.getElementById('apply-raw-btn'),
   toastContainer: document.getElementById('toast-container')
 };
 
@@ -384,7 +375,6 @@ function renderSchedule() {
 
   elements.scheduleTitle.textContent = title;
   elements.scheduleSubtitle.textContent = `Hiển thị dữ liệu từ ${state.currentWeekFile}`;
-  elements.rawFileName.textContent = state.currentWeekFile;
 
   let totalClasses = 0;
   const uniqueSubjects = new Set();
@@ -557,7 +547,7 @@ function renderTodayView(days, currentDayOfWeek) {
   );
 
   if (!todayDay || todayDay.isDayOff || todayDay.classes.length === 0) {
-    elements.todaySummaryText.textContent = `Hôm nay bạn không có lịch học. Tận hưởng thời gian nghỉ ngơi hoặc tự học nhé!`;
+    elements.todaySummaryText.textContent = `Hôm nay bạn không có lịch học. Tận hưởng thời gian nghỉ ngơi nhé!`;
     elements.todayTimelineList.innerHTML = `
       <div class="day-off-card" style="padding: 3rem 1rem;">
         <div class="day-off-icon" style="font-size: 3rem;"><i class="fa-solid fa-mug-hot"></i></div>
@@ -877,7 +867,6 @@ function renderBackpackView() {
   let renderedCount = 0;
 
   subjects.forEach(subject => {
-    // Filter links inside subject if search query
     let links = subject.links || [];
     if (q) {
       const subjectMatches = subject.name.toLowerCase().includes(q) || subject.code.toLowerCase().includes(q);
@@ -1140,8 +1129,6 @@ async function loadWeekMarkdown(filePath) {
     markdownContent = filePath.includes('tuan-36') ? DEFAULT_WEEK_36_MD : DEFAULT_WEEK_35_MD;
   }
 
-  state.currentRawMarkdown = markdownContent;
-  elements.markdownRawContent.value = markdownContent;
   state.parsedSchedule = parseScheduleMarkdown(markdownContent);
   renderSchedule();
 }
@@ -1186,13 +1173,11 @@ function switchView(viewName) {
   elements.viewTodayBtn.classList.toggle('active', viewName === 'today');
   elements.viewGradesBtn.classList.toggle('active', viewName === 'grades');
   elements.viewBackpackBtn.classList.toggle('active', viewName === 'backpack');
-  elements.viewRawBtn.classList.toggle('active', viewName === 'raw');
 
   elements.gridViewContainer.classList.toggle('active', viewName === 'grid');
   elements.todayViewContainer.classList.toggle('active', viewName === 'today');
   elements.gradesViewContainer.classList.toggle('active', viewName === 'grades');
   elements.backpackViewContainer.classList.toggle('active', viewName === 'backpack');
-  elements.rawViewContainer.classList.toggle('active', viewName === 'raw');
 
   if (viewName === 'grades') {
     renderGradesView(state.gradesSearchQuery);
@@ -1236,7 +1221,6 @@ function setupEventListeners() {
   elements.viewTodayBtn.addEventListener('click', () => switchView('today'));
   elements.viewGradesBtn.addEventListener('click', () => switchView('grades'));
   elements.viewBackpackBtn.addEventListener('click', () => switchView('backpack'));
-  elements.viewRawBtn.addEventListener('click', () => switchView('raw'));
 
   // Search Box in Timetable
   elements.searchInput.addEventListener('input', (e) => {
@@ -1350,26 +1334,6 @@ function setupEventListeners() {
 
   // Print Button
   elements.printScheduleBtn.addEventListener('click', () => window.print());
-
-  // Raw Markdown Actions
-  elements.copyMarkdownBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(elements.markdownRawContent.value).then(() => {
-      showToast('Đã sao chép toàn bộ Markdown vào bộ nhớ tạm!');
-    });
-  });
-
-  elements.reloadMarkdownBtn.addEventListener('click', () => {
-    loadWeekMarkdown(state.currentWeekFile);
-    showToast('Đã tải lại nội dung Markdown gốc');
-  });
-
-  elements.applyRawBtn.addEventListener('click', () => {
-    const editedMd = elements.markdownRawContent.value;
-    state.parsedSchedule = parseScheduleMarkdown(editedMd);
-    renderSchedule();
-    switchView('grid');
-    showToast('Đã cập nhật giao diện xem thử từ Markdown!');
-  });
 }
 
 /* ==========================================================================

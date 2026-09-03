@@ -1,49 +1,30 @@
-# Hướng dẫn & Tổng kết: "Chiếc Cặp Thông Minh" & Cài Đặt Ứng Dụng PWA
+# Chiếc Cặp Google Drive Tối Giản (Đồng Bộ 100% Đa Thiết Bị)
 
-Hệ thống đã được bổ sung thành công tính năng **"Chiếc cặp thông minh" (Smart Backpack)** độc lập, tích hợp công nghệ lưu trữ tệp **Offline bằng IndexedDB** và nâng cấp thành **Ứng dụng Web cấp tiến (PWA)** có thể cài đặt trực tiếp lên điện thoại (iOS / Android) và máy tính.
-
----
-
-## 🎒 1. Các Tính Năng Của "Chiếc Cặp Thông Minh"
-
-### 📁 Quản lý Tệp Tin Theo Từng Môn Học
-- Truy cập thông qua Tab **"Chiếc cặp"** trên thanh Menu hoặc bấm icon chiếc cặp 🎒 trên bất kỳ tiết học nào trong Thời Khóa Biểu.
-- Mỗi môn học được phân chia thành 4 ngăn rõ ràng:
-  - 📂 **Slide & Bài giảng**: Đề cương, slide bài học các chương.
-  - 📂 **Bài tập lớn & Dự án nhóm**: Hướng dẫn đề tài, tiêu chí chấm (Rubric), link nộp bài (30/11), link đăng ký nhóm (15/09).
-  - 📂 **Đề thi & Ôn tập**: Tổng hợp đề thi các năm cũ, bài tập mẫu.
-  - 📂 **Tài liệu khác & Google Drive**: Folder Drive chung của môn, liên kết tài liệu mở rộng.
-
-### 💾 Lưu Trữ Offline 100% Không Cần Mạng (IndexedDB)
-- **Kéo & Thả (Drag & Drop)**: Kéo file PDF, Slide PowerPoint, Word, Ảnh từ máy tính thả trực tiếp vào giao diện Chiếc cặp để lưu trữ.
-- **Nút "Tải tệp vào máy (Offline)"**: Chọn tệp từ máy để lưu vào bộ nhớ cơ sở dữ liệu IndexedDB của trình duyệt.
-- **Xem trước tệp (In-App Preview Modal)**: Bấm nút mắt 👁️ trên tài liệu để đọc bài giảng PDF hoặc xem ảnh trực tiếp ngay trong web mà không cần rời trang.
-- **Tải về (Download)**: Tải lại tệp tin đã lưu trong máy bất cứ lúc nào.
-
-### 🔗 Tùy Biến Gắn Link Google Drive
-- Bấm nút **"Thêm Link Drive"**: Cho phép bạn dán bất kỳ đường link Google Drive, thư mục nhóm, hoặc link nộp bài nào vào môn học mong muốn.
+Đã tối giản toàn bộ hệ thống lưu trữ theo **Cách 1: Đồng bộ thuần qua Google Drive**, loại bỏ hoàn toàn việc lưu tệp nhị phân cục bộ trên máy tính để đảm bảo **máy tính và điện thoại luôn hiển thị giống nhau 100%**.
 
 ---
 
-## 📱 2. Hướng Dẫn Cài Đặt Thành App Trên Điện Thoại (PWA)
+## 🎯 1. Nguyên Tắc Hoạt Động Mới
+1. **Lưu trữ trên đám mây Google Drive**: 
+   - Mọi tài liệu (slide bài giảng, đề cương, bài tập lớn, đề thi cũ) đều được liên kết trực tiếp tới Google Drive / LMS / Google Forms.
+2. **Đồng bộ xuyên suốt qua file cấu hình `schedules/drive-links.json`**:
+   - Mọi liên kết môn học được lưu trực tiếp vào file `schedules/drive-links.json` trên Git.
+   - Bất cứ khi nào bạn cập nhật link Drive trên máy tính và push Git, **điện thoại của bạn mở lên là có đầy đủ ngay tức khắc**.
+3. **Chỉnh sửa nhanh trực tiếp trên giao diện**:
+   - Có nút bút chì ✏️ trên từng tài liệu để bạn dán link Drive của bạn.
+   - Có nút **"Gắn Link Drive của bạn"** để thêm liên kết mới.
 
-### Trên iPhone / iPad (Trình duyệt Safari):
-1. Mở link trang web trên Safari.
-2. Bấm vào nút **Chia sẻ (Share)** (biểu tượng hình vuông có mũi tên chỉ lên ở thanh dưới cùng).
-3. Cuộn xuống và chọn **"Thêm vào MH chính" (Add to Home Screen)**.
-4. Bấm **Thêm (Add)**. 
-👉 Một biểu tượng ứng dụng **🎒 Lịch Học** sẽ xuất hiện trên màn hình chính của iPhone. Khi mở ra, app sẽ chạy toàn màn hình, mượt mà và hoạt động được ngay cả khi mất mạng!
+---
 
-### Trên Android (Trình duyệt Chrome):
-1. Mở link trang web trên Google Chrome.
-2. Bấm vào menu **3 dấu chấm ⋮** ở góc trên bên phải.
-3. Chọn **"Cài đặt ứng dụng"** hoặc **"Thêm vào màn hình chính" (Install app / Add to Home Screen)**.
-4. Xác nhận Cài đặt.
-👉 Ứng dụng sẽ được cài đặt vào danh sách ứng dụng của điện thoại như một app native.
+## 🎒 2. Giao Diện "Google Drive Hub" Tinh Gọn
+- **Thẻ môn học theo màu nhận diện**: Mỗi môn (Học máy, QLDA, Tiếp thị căn bản, AI...) là 1 card sang trọng.
+- **Nút `[📁 Folder Môn]`**: Bấm 1 phát là mở thẳng sang Thư mục Google Drive chính của môn học đó.
+- **Nút `[👁️ Xem]`**: Mở trình xem trước tài liệu trực tiếp trong trang web.
+- **Nút `[↗️ Mở Drive]`**: Mở sang Google Drive hoặc LMS trường học.
+- **Nút 🎒 trên Thời Khóa Biểu**: Bấm vào tiết học bất kỳ sẽ tự động nhảy vào đúng thẻ Drive của môn đó.
 
 ---
 
 ## 🚀 3. Trạng Thái Triển Khai
 - **Repository**: [`Quan-129/schedule-smart`](https://github.com/Quan-129/schedule-smart)
-- **Mã Commit**: `0121b75`
-- **GitHub Pages**: Đang tự động cập nhật phiên bản mới nhất qua GitHub Actions.
+- **Commit**: `ce3de6b`
