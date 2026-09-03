@@ -1,10 +1,10 @@
 /**
  * ==========================================================================
- * SERVICE WORKER - OFFLINE SUPPORT & CACHE ENGINE
+ * SERVICE WORKER - OFFLINE SUPPORT & CACHE ENGINE (V2)
  * ==========================================================================
  */
 
-const CACHE_NAME = 'smart-schedule-backpack-v1';
+const CACHE_NAME = 'smart-schedule-backpack-v2';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -54,14 +54,18 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Event: Stale-While-Revalidate Strategy
+// Fetch Event: Network-First Strategy for live updates
 self.addEventListener('fetch', (event) => {
-  // Chỉ cache các request HTTP/HTTPS nội bộ hoặc static CDNs
   if (event.request.method !== 'GET') return;
 
+  // Do not intercept Firebase or external Auth requests
+  if (event.request.url.includes('googleapis.com') || event.request.url.includes('google.com') || event.request.url.includes('firebase')) {
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
+    fetch(event.request)
+      .then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
           const responseClone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -69,12 +73,9 @@ self.addEventListener('fetch', (event) => {
           });
         }
         return networkResponse;
-      }).catch(() => {
-        // Mất mạng hoàn toàn: trả về cache nếu có
-        return cachedResponse;
-      });
-
-      return cachedResponse || fetchPromise;
-    })
+      })
+      .catch(() => {
+        return caches.match(event.request);
+      })
   );
 });

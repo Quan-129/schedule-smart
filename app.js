@@ -369,19 +369,29 @@ function initFirebaseAuth() {
 
 function updateUserAuthUI(user) {
   if (user) {
-    if (elements.authLoginBtn) elements.authLoginBtn.classList.add('hidden');
+    if (elements.authLoginBtn) {
+      elements.authLoginBtn.style.display = 'none';
+      elements.authLoginBtn.classList.add('hidden');
+    }
     if (elements.userProfileWidget) {
+      elements.userProfileWidget.style.display = 'inline-flex';
       elements.userProfileWidget.classList.remove('hidden');
       if (elements.userAvatar) {
         elements.userAvatar.src = user.photoURL || 'https://lh3.googleusercontent.com/a/default-user';
       }
       if (elements.userDisplayName) {
-        elements.userDisplayName.textContent = user.displayName || user.email.split('@')[0];
+        elements.userDisplayName.textContent = user.displayName || (user.email ? user.email.split('@')[0] : 'Sinh viên');
       }
     }
   } else {
-    if (elements.authLoginBtn) elements.authLoginBtn.classList.remove('hidden');
-    if (elements.userProfileWidget) elements.userProfileWidget.classList.add('hidden');
+    if (elements.authLoginBtn) {
+      elements.authLoginBtn.style.display = 'inline-flex';
+      elements.authLoginBtn.classList.remove('hidden');
+    }
+    if (elements.userProfileWidget) {
+      elements.userProfileWidget.style.display = 'none';
+      elements.userProfileWidget.classList.add('hidden');
+    }
   }
 }
 
