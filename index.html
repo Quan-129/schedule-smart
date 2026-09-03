@@ -79,6 +79,19 @@
           <button id="print-schedule-btn" class="btn-icon btn-print" title="In thời khóa biểu"><i class="fa-solid fa-print"></i></button>
           <button id="theme-toggle-btn" class="btn-icon btn-theme" title="Đổi giao diện Sáng / Tối"><i class="fa-solid fa-sun"></i></button>
         </div>
+
+        <!-- User Auth & Cloud Sync Widget -->
+        <div class="user-auth-group">
+          <button id="auth-login-btn" class="btn-auth-login" title="Đăng nhập Google để đồng bộ dữ liệu đa thiết bị">
+            <i class="fa-brands fa-google"></i>
+            <span>Đăng nhập</span>
+          </button>
+          <div id="user-profile-widget" class="user-profile-widget hidden">
+            <img id="user-avatar" class="user-avatar" src="" alt="Avatar" referrerpolicy="no-referrer">
+            <span id="user-display-name" class="user-display-name">Sinh viên</span>
+            <button id="auth-logout-btn" class="btn-auth-logout" title="Đăng xuất tài khoản"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -364,6 +377,11 @@
       </form>
     </div>
   </div>
+
+  <!-- Firebase SDKs (v10.8.0 Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <script src="app.js"></script>
 </body>

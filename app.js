@@ -1,6 +1,6 @@
 /**
  * ==========================================================================
- * LỊCH HỌC MARKDOWN HUB & CHIẾC CẶP GOOGLE DRIVE (SPEED-DIAL & iOS JIGGLE DELETE)
+ * LỊCH HỌC MARKDOWN HUB & CHIẾC CẶP GOOGLE DRIVE (FIREBASE CLOUD SYNC)
  * ==========================================================================
  */
 
@@ -185,6 +185,34 @@ const INITIAL_SUBJECT_DRIVE = [
   { code: 'JP1007', name: 'Tiếng Nhật 7', icon: 'fa-solid fa-torii-gate', color: '#14b8a6', driveUrl: '' }
 ];
 
+// Firebase Project Configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDfFsMGvFKQSOk1HgzT-QtNc66thwjEOLE",
+  authDomain: "schedule-smart-ee05e.firebaseapp.com",
+  projectId: "schedule-smart-ee05e",
+  storageBucket: "schedule-smart-ee05e.firebasestorage.app",
+  messagingSenderId: "1036082312669",
+  appId: "1:1036082312669:web:0b3d8d2fedeeedf889f234",
+  measurementId: "G-9CE6MNZT5Z"
+};
+
+// Initialize Firebase App, Auth & Firestore
+let firebaseApp = null;
+let auth = null;
+let db = null;
+let currentUser = null;
+let firestoreUnsubscribe = null;
+
+try {
+  if (typeof firebase !== 'undefined') {
+    firebaseApp = firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.firestore();
+  }
+} catch (e) {
+  console.warn('Firebase init error:', e);
+}
+
 // App State
 const state = {
   currentWeekFile: 'schedules/tuan-35.md',
@@ -231,6 +259,13 @@ const elements = {
   gradesGrid: document.getElementById('grades-grid'),
   gradesSearchInput: document.getElementById('grades-search-input'),
   
+  // User Auth Elements
+  authLoginBtn: document.getElementById('auth-login-btn'),
+  userProfileWidget: document.getElementById('user-profile-widget'),
+  userAvatar: document.getElementById('user-avatar'),
+  userDisplayName: document.getElementById('user-display-name'),
+  authLogoutBtn: document.getElementById('auth-logout-btn'),
+
   // Speed Dial Backpack Elements
   backpackLauncherGrid: document.getElementById('backpack-launcher-grid'),
   bpAddSubjectBtn: document.getElementById('bp-add-subject-btn'),
@@ -281,6 +316,103 @@ const elements = {
   applyRawBtn: document.getElementById('apply-raw-btn'),
   toastContainer: document.getElementById('toast-container')
 };
+
+/* ==========================================================================
+   FIREBASE AUTH & CLOUD FIRESTORE SYNCHRONIZATION
+   ========================================================================== */
+
+function initFirebaseAuth() {
+  if (!auth) return;
+
+  auth.onAuthStateChanged((user) => {
+    currentUser = user;
+    updateUserAuthUI(user);
+
+    if (user) {
+      // User is logged in -> Listen to Firestore Realtime updates
+      attachFirestoreListener(user.uid);
+      showToast(`Xin chào, ${user.displayName || 'bạn'}! Đã kết nối Cloud.`);
+    } else {
+      // User logged out -> detach listener & fallback to localStorage
+      if (firestoreUnsubscribe) {
+        firestoreUnsubscribe();
+        firestoreUnsubscribe = null;
+      }
+      loadDriveData();
+      renderBackpackView();
+    }
+  });
+
+  if (elements.authLoginBtn) {
+    elements.authLoginBtn.addEventListener('click', async () => {
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await auth.signInWithPopup(provider);
+      } catch (err) {
+        console.error('Google Sign In Error:', err);
+        showToast('Lỗi đăng nhập: ' + (err.message || 'Vui lòng kiểm tra kết nối'));
+      }
+    });
+  }
+
+  if (elements.authLogoutBtn) {
+    elements.authLogoutBtn.addEventListener('click', async () => {
+      try {
+        await auth.signOut();
+        showToast('Đã đăng xuất tài khoản');
+      } catch (err) {
+        console.error('Logout Error:', err);
+      }
+    });
+  }
+}
+
+function updateUserAuthUI(user) {
+  if (user) {
+    if (elements.authLoginBtn) elements.authLoginBtn.classList.add('hidden');
+    if (elements.userProfileWidget) {
+      elements.userProfileWidget.classList.remove('hidden');
+      if (elements.userAvatar) {
+        elements.userAvatar.src = user.photoURL || 'https://lh3.googleusercontent.com/a/default-user';
+      }
+      if (elements.userDisplayName) {
+        elements.userDisplayName.textContent = user.displayName || user.email.split('@')[0];
+      }
+    }
+  } else {
+    if (elements.authLoginBtn) elements.authLoginBtn.classList.remove('hidden');
+    if (elements.userProfileWidget) elements.userProfileWidget.classList.add('hidden');
+  }
+}
+
+function attachFirestoreListener(uid) {
+  if (!db) return;
+
+  const docRef = db.collection('users').doc(uid);
+
+  if (firestoreUnsubscribe) firestoreUnsubscribe();
+
+  firestoreUnsubscribe = docRef.onSnapshot((doc) => {
+    if (doc.exists) {
+      const data = doc.data();
+      if (Array.isArray(data.driveSubjects)) {
+        state.driveSubjects = data.driveSubjects;
+        renderBackpackView();
+      }
+    } else {
+      // Upload existing local state to initialize user document
+      docRef.set({
+        email: currentUser.email,
+        displayName: currentUser.displayName,
+        photoURL: currentUser.photoURL,
+        driveSubjects: state.driveSubjects,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    }
+  }, (err) => {
+    console.warn('Firestore snapshot error:', err);
+  });
+}
 
 /* ==========================================================================
    MARKDOWN PARSER
@@ -384,7 +516,7 @@ function getSubjectColor(subjectName) {
 
 /* ==========================================================================
    SCHEDULE RENDERING
-   ========================================================================= */
+   ========================================================================== */
 
 function renderSchedule() {
   if (!state.parsedSchedule) return;
@@ -801,6 +933,16 @@ function saveDriveData() {
     localStorage.setItem('smart_backpack_subjects_speeddial', JSON.stringify(state.driveSubjects));
   } catch (e) {
     console.warn('Could not save to localStorage', e);
+  }
+
+  // If user is logged in with Firebase, sync directly to Firestore!
+  if (currentUser && db) {
+    db.collection('users').doc(currentUser.uid).set({
+      driveSubjects: state.driveSubjects,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true }).catch(err => {
+      console.warn('Could not sync to Firestore:', err);
+    });
   }
 }
 
@@ -1461,7 +1603,10 @@ async function init() {
 
   setupEventListeners();
 
-  // Load clean Drive data
+  // Initialize Firebase Auth & Cloud Firestore
+  initFirebaseAuth();
+
+  // Load local Drive data as initial fallback
   loadDriveData();
 
   renderGradesView();
