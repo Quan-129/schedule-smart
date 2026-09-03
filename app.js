@@ -1095,6 +1095,41 @@ function updateNextClassBadge(days, currentDayOfWeek) {
   }
 }
 
+function findWeekForDate(date, weeksList) {
+  if (!weeksList || weeksList.length === 0) return null;
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const targetDateStr = `${year}-${month}-${day}`;
+
+  for (let i = 0; i < weeksList.length; i++) {
+    const w = weeksList[i];
+    if (!w.startDate) continue;
+
+    const start = new Date(w.startDate);
+    const end = new Date(w.startDate);
+    end.setDate(end.getDate() + 6); // 7 days of the week
+
+    const endYear = end.getFullYear();
+    const endMonth = String(end.getMonth() + 1).padStart(2, '0');
+    const endDay = String(end.getDate()).padStart(2, '0');
+    const endDateStr = `${endYear}-${endMonth}-${endDay}`;
+
+    if (targetDateStr >= w.startDate && targetDateStr <= endDateStr) {
+      return w;
+    }
+  }
+
+  // Fallback: If before the start of the semester, return first week
+  if (weeksList[0] && weeksList[0].startDate && targetDateStr < weeksList[0].startDate) {
+    return weeksList[0];
+  }
+
+  // Fallback: If after semester ends, return the latest week
+  return weeksList[weeksList.length - 1];
+}
+
 async function loadWeeksIndex() {
   try {
     const res = await fetch('schedules/index.json');
@@ -1113,6 +1148,13 @@ async function loadWeeksIndex() {
     opt.textContent = w.title;
     elements.weekSelect.appendChild(opt);
   });
+
+  // Tự động tìm và chọn tuần chứa ngày hôm nay (VD: 03/09/2026 -> Tuần 36)
+  const today = new Date();
+  const currentWeek = findWeekForDate(today, state.weeksList);
+  if (currentWeek) {
+    state.currentWeekFile = currentWeek.filename;
+  }
 
   elements.weekSelect.value = state.currentWeekFile;
 }

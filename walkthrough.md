@@ -1,22 +1,18 @@
-# Chiếc Cặp Google Drive - Chế Độ Rung Lắc Xóa Môn Chuẩn iPhone (iOS Jiggle Mode) 🍏✨
+# Tự Động Chọn Tuần Học Chứa Ngày Hôm Nay 📅✨
 
-Đã triển khai hoàn tất tính năng **Nhấn Giữ Rung Rinh Xóa Môn Học** theo phong cách iOS:
-
----
-
-## 🌟 1. 📱 Trải Nghiệm Nhấn Giữ (Long-Press) Đậm Chất iPhone:
-- **Trên Điện Thoại & Máy Tính**:
-  * **Nhấn giữ vào ô môn học khoảng 0.5s** (hoặc click chuột phải trên máy tính).
-  * Chế độ **Jiggle Mode** kích hoạt: Toàn bộ các ô vuông môn học sẽ **rung lắc nhẹ qua lại (`@keyframes iosJiggle`)** cực kỳ sinh động!
-  * Thiết bị rung haptic nhẹ tạo cảm giác phản hồi xúc giác chân thực.
-  * Xuất hiện dấu **tròn đỏ `( - )`** nổi bật ở góc trên bên trái của từng môn học.
+Đã bổ sung thuật toán thông minh tự động nhận diện ngày hiện tại và chuyển tuần học tương ứng:
 
 ---
 
-## 🌟 2. 🗑️ Xóa Môn Học & Thoát Chế Độ:
-- **Bấm vào nút `( - )` màu đỏ**: Xuất hiện hộp thoại xác nhận xóa -> Xóa môn học ngay lập tức và lưu vào bộ nhớ trình duyệt.
-- **Nút `[ Xong ]` (Done)**: Nổi bật ở góc trên thanh công cụ để bạn bấm thoát chế độ rung lắc.
-- **Bấm vào khoảng trống ngoài màn hình**: Cũng tự động tắt chế độ rung lắc và trở lại bình thường.
+## 🌟 Cách Thức Hoạt Động:
+1. **Đối chiếu ngày theo thời gian thực**:
+   - Thuật toán `findWeekForDate()` lấy ngày hôm nay (Ví dụ: **03/09/2026**).
+   - Quét qua toàn bộ danh sách `schedules/index.json` (từ Tuần 35 đến Tuần 50).
+   - Ngày 03/09/2026 nằm trong khoảng từ `2026-08-31` đến `2026-09-06` -> **Tự động kích hoạt Tuần 36 (31/08)**.
+
+2. **Trải nghiệm mượt mà**:
+   - Khi bạn mở trang web lên, dropdown và bảng thời khóa biểu sẽ tự động hiển thị ngay tuần học hiện tại mà bạn không cần phải bấm chọn thủ công.
+   - Thẻ ngày hôm nay (Thứ 5, 03/09) sẽ được highlight phát sáng viền và gắn badge **"Hôm nay"**.
 
 ---
 
