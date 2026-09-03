@@ -260,6 +260,9 @@ const elements = {
   gradesSearchInput: document.getElementById('grades-search-input'),
   
   // User Auth Elements
+  loginScreen: document.getElementById('login-screen'),
+  mainAppWrapper: document.getElementById('main-app-wrapper'),
+  landingLoginBtn: document.getElementById('landing-login-btn'),
   authLoginBtn: document.getElementById('auth-login-btn'),
   userProfileWidget: document.getElementById('user-profile-widget'),
   userAvatar: document.getElementById('user-avatar'),
@@ -333,26 +336,30 @@ function initFirebaseAuth() {
       attachFirestoreListener(user.uid);
       showToast(`Xin chào, ${user.displayName || 'bạn'}! Đã kết nối Cloud.`);
     } else {
-      // User logged out -> detach listener & fallback to localStorage
+      // User logged out -> detach listener
       if (firestoreUnsubscribe) {
         firestoreUnsubscribe();
         firestoreUnsubscribe = null;
       }
-      loadDriveData();
-      renderBackpackView();
     }
   });
 
+  const handleGoogleLogin = async () => {
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      await auth.signInWithPopup(provider);
+    } catch (err) {
+      console.error('Google Sign In Error:', err);
+      showToast('Lỗi đăng nhập: ' + (err.message || 'Vui lòng kiểm tra lại'));
+    }
+  };
+
+  if (elements.landingLoginBtn) {
+    elements.landingLoginBtn.addEventListener('click', handleGoogleLogin);
+  }
+
   if (elements.authLoginBtn) {
-    elements.authLoginBtn.addEventListener('click', async () => {
-      try {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        await auth.signInWithPopup(provider);
-      } catch (err) {
-        console.error('Google Sign In Error:', err);
-        showToast('Lỗi đăng nhập: ' + (err.message || 'Vui lòng kiểm tra kết nối'));
-      }
-    });
+    elements.authLoginBtn.addEventListener('click', handleGoogleLogin);
   }
 
   if (elements.authLogoutBtn) {
@@ -369,6 +376,15 @@ function initFirebaseAuth() {
 
 function updateUserAuthUI(user) {
   if (user) {
+    // Hide Landing Login Screen & Show Main App
+    if (elements.loginScreen) {
+      elements.loginScreen.style.display = 'none';
+      elements.loginScreen.classList.add('hidden');
+    }
+    if (elements.mainAppWrapper) {
+      elements.mainAppWrapper.style.display = 'block';
+      elements.mainAppWrapper.classList.remove('hidden');
+    }
     if (elements.authLoginBtn) {
       elements.authLoginBtn.style.display = 'none';
       elements.authLoginBtn.classList.add('hidden');
@@ -384,9 +400,18 @@ function updateUserAuthUI(user) {
       }
     }
   } else {
+    // Show Landing Login Screen & Hide Main App
+    if (elements.loginScreen) {
+      elements.loginScreen.style.display = 'flex';
+      elements.loginScreen.classList.remove('hidden');
+    }
+    if (elements.mainAppWrapper) {
+      elements.mainAppWrapper.style.display = 'none';
+      elements.mainAppWrapper.classList.add('hidden');
+    }
     if (elements.authLoginBtn) {
-      elements.authLoginBtn.style.display = 'inline-flex';
-      elements.authLoginBtn.classList.remove('hidden');
+      elements.authLoginBtn.style.display = 'none';
+      elements.authLoginBtn.classList.add('hidden');
     }
     if (elements.userProfileWidget) {
       elements.userProfileWidget.style.display = 'none';

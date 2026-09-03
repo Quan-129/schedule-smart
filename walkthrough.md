@@ -1,23 +1,24 @@
-# Tích Hợp Firebase Auth & Cloud Firestore Đồng Bộ Đa Thiết Bị ☁️✨
+# Màn Hình Đăng Nhập Riêng Biệt (Authentication Gate) 🚪🔒✨
 
-Đã tích hợp thành công hệ thống **Firebase Authentication (Đăng nhập Google)** và **Cloud Firestore (Đồng bộ thời gian thực Realtime)** vào ứng dụng:
-
----
-
-## 🌟 1. 👤 Đăng Nhập Bằng Google 1-Chạm:
-- Nút **`[ 👤 Đăng nhập ]`** xuất hiện tinh tế trên thanh Navbar.
-- Khi bấm đăng nhập: Cửa sổ Google Auth xuất hiện để sinh viên đăng nhập bằng tài khoản Gmail cá nhân hoặc email trường `@hcmut.edu.vn`.
-- Sau khi đăng nhập:
-  * Hiển thị **Avatar + Tên người dùng** với hiệu ứng viền phát sáng neon.
-  * Nút **Đăng xuất** nhanh gọn khi cần.
+Đã xây dựng **Màn Hình Đăng Nhập (Login Landing Screen)** riêng biệt trước khi bước vào giao diện ứng dụng:
 
 ---
 
-## 🌟 2. 🔄 Đồng Bộ Dữ Liệu Thời Gian Thực (Realtime Sync):
-- **Độc lập người dùng**: Mỗi sinh viên có một vùng lưu trữ riêng biệt trên Cloud Firestore theo `User ID`.
-- **Đồng bộ Máy tính ⇄ Điện thoại**:
-  * Khi bạn thêm môn học hoặc đổi link Google Drive trên máy tính ➔ Điện thoại sẽ **tự động cập nhật tức thì (Realtime)** mà không cần tải lại trang!
-- **Lưu trữ ngoại tuyến (Offline-First)**: Nếu không đăng nhập hoặc mất mạng, ứng dụng vẫn hoạt động bình thường nhờ cơ chế `localStorage` song song.
+## 🌟 1. 🚪 Trải Nghiệm Khi Mới Vào Trang Web (Chưa Đăng Nhập):
+- Toàn bộ giao diện chính của ứng dụng được ẩn hoàn toàn.
+- Xuất hiện **Màn Hình Đăng Nhập Trung Tâm** cực kỳ sang trọng với hiệu ứng kính mờ (Glassmorphism), viền phát sáng neon:
+  * Logo và huy hiệu sinh viên Bách Khoa TP.HCM.
+  * Tóm tắt 4 tính năng cốt lõi (Lịch học thông minh, Tỉ lệ điểm, Chiếc Cặp Drive 1-chạm, Đồng bộ Cloud).
+  * Nút lớn nổi bật: **`[ 🔴 Đăng nhập bằng tài khoản Google ]`**.
+  * Cam kết bảo mật riêng tư 100% cho từng tài khoản.
+
+---
+
+## 🌟 2. 🚀 Trải Nghiệm Sau Khi Đăng Nhập Thành Công:
+- Màn hình đăng nhập tự động đóng lại.
+- Toàn bộ **Giao diện Ứng Dụng Chính (Thời khóa biểu, Chiếc Cặp)** mở ra.
+- Hiển thị thông tin Avatar + Tên sinh viên và tự động đồng bộ mọi dữ liệu từ Cloud Firestore.
+- Bấm **Đăng xuất**: Tự động quay trở lại Màn hình Đăng nhập ban đầu.
 
 ---
 
