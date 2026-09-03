@@ -2368,6 +2368,102 @@ body.theme-light .bg-glow {
   margin-top: 0.5rem;
 }
 
+/* Utility */
+.hidden {
+  display: none !important;
+}
+
+/* ==========================================================================
+   RESPONSIVE LAYOUT OPTIMIZATION (MOBILE & TABLET)
+   ========================================================================== */
+@media (max-width: 900px) {
+  .navbar {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .nav-left {
+    min-width: 0;
+  }
+
+  .nav-center {
+    order: 3;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 0.25rem;
+  }
+
+  .view-toggles {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .toggle-btn {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+  }
+
+  .nav-right {
+    margin-left: auto;
+    gap: 0.35rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .app-subtitle {
+    display: none;
+  }
+
+  .logo-text h1 {
+    font-size: 1.15rem;
+  }
+
+  .user-display-name {
+    display: none; /* Hide text name on mobile, keep avatar clean */
+  }
+
+  .btn-auth-login span {
+    display: none; /* Compact Google button on mobile */
+  }
+
+  .btn-auth-login {
+    padding: 0.45rem 0.65rem;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+    justify-content: center;
+  }
+
+  .week-dropdown-wrapper {
+    padding: 0.15rem 0.25rem;
+  }
+
+  .week-select {
+    font-size: 0.78rem;
+    max-width: 95px;
+    padding-left: 1.4rem;
+  }
+
+  .select-container .select-icon {
+    font-size: 0.75rem;
+    left: 0.4rem;
+  }
+
+  .action-buttons {
+    gap: 0.25rem;
+  }
+
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 0.85rem;
+  }
+}
+
 /* ==========================================================================
    PRINT STYLES
    ========================================================================== */
