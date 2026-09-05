@@ -6,6 +6,25 @@
 
 ---
 
+## 📅 [2026-09-05 14:10] - Thiết Lập Bộ Quy Chuẩn Tối Ưu Token & Cơ Chế Tự Động Kích Hoạt Kỹ Năng (Proactive Skill Automation)
+
+- **🎯 Mục tiêu**:
+  - Tối ưu hóa tối đa chi phí tiêu thụ token và nâng cao khả năng đọc hiểu ngữ cảnh cho AI Agent trong suốt quá trình phát triển dự án.
+  - Thiết lập cơ chế tự động kích hoạt các kỹ năng (`update-worklog`, `update-new-in4`, `9-more-archiver`, các skill chuyên môn 1–8) và các nguyên tắc kiến trúc mà không cần người dùng nhắc nhở thủ công.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Agent System / Rules]` Tạo mới tài liệu `.agents/rules/token_optimization_rules.md` quy định chi tiết 4 trụ cột tối ưu: *Targeted Retrieval* (`grep_search` + slice `view_file`), *Surgical Edits* (`replace_file_content`), *Fast Context Recovery* (25 dòng đầu `WORKLOG.md`), và *Proactive Automation*.
+  - `[Agent System / Core Rules]` Cập nhật `AGENTS.md` thành trung tâm điều phối hành vi tự động cho toàn bộ Agent: bắt buộc phản hồi Tiếng Việt, tự động ghi log kỹ thuật/tiếp thị, dọn dẹp file thừa và duy trì kiến trúc 5 tầng mã nguồn.
+
+- **💡 Quyết định Kỹ thuật & Kiến trúc**:
+  - *Autonomous Workflow Policy*: Mọi phiên làm việc từ nay sẽ tự động kích hoạt chu trình khép kín: Thực hiện thay đổi -> Kiểm tra quy chuẩn 5 tầng -> Cập nhật `WORKLOG.md` & `MARKETING_LOG.md` -> Thu gom tài liệu thừa vào `docs/9.More/`.
+
+- **📌 Trạng thái hiện tại & Kế hoạch tiếp theo (Next Steps)**:
+  - [x] Đã hoàn tất cấu hình Rules và Skills tự động.
+  - [x] Đã chuẩn bị sẵn sàng để commit và push lên GitHub.
+
+---
+
 ## 📅 [2026-09-05 13:59] - Tích Hợp Nút (+) & Modal Tạo Tuần Học Mới Ngay Trên Giao Diện
 
 - **🎯 Mục tiêu**:
