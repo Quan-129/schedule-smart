@@ -5,6 +5,7 @@
  */
 
 import { showToast } from '../Toast.js';
+import { generateEmptyWeekMarkdown } from '../../2.Backend/services/TimetableParser.js';
 
 let modalInitialized = false;
 
@@ -144,7 +145,7 @@ export function initAddWeekModal(getCurrentMarkdownCallback, onWeekCreatedCallba
       let id = idInput ? idInput.value.trim().toLowerCase().replace(/\s+/g, '-') : '';
       const startDate = dateInput ? dateInput.value : '';
       const desc = descInput ? descInput.value.trim() : title;
-      const mdContent = mdInput && mdInput.value.trim() ? mdInput.value.trim() : `# ${title}\n\n## Thứ 2\n- Nghỉ`;
+      const mdContent = mdInput && mdInput.value.trim() ? mdInput.value.trim() : generateEmptyWeekMarkdown(title);
 
       if (!title || !id) {
         showToast('Vui lòng nhập tên và mã định danh tuần!');

@@ -88,3 +88,78 @@ export function parseScheduleMarkdown(markdownText) {
 
   return result;
 }
+
+/**
+ * Chuyển đổi cấu trúc scheduleData JSON ngược lại thành chuỗi Markdown chuẩn
+ * @param {Object} scheduleData - { title, days, notes }
+ * @returns {string} Markdown string
+ */
+export function serializeScheduleToMarkdown(scheduleData) {
+  if (!scheduleData) return '';
+  const title = scheduleData.title || 'Lịch học';
+  const lines = [`# ${title}`, ''];
+
+  const standardDayNames = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7 & Chủ Nhật'];
+  const daysMap = new Map();
+  (scheduleData.days || []).forEach(d => {
+    daysMap.set(d.name, d);
+  });
+
+  standardDayNames.forEach(dayName => {
+    lines.push(`## ${dayName}`);
+    const day = daysMap.get(dayName);
+
+    if (!day || day.isDayOff || !day.classes || day.classes.length === 0) {
+      lines.push('- Nghỉ.');
+    } else {
+      day.classes.forEach(c => {
+        const periodText = c.period ? ` (${c.period})` : '';
+        const roomText = c.room ? ` | Phòng: ${c.room}` : '';
+        lines.push(`- ${c.timeRange}${periodText}: ${c.subject}${roomText}`);
+      });
+    }
+    lines.push('');
+  });
+
+  const notes = scheduleData.notes || [];
+  if (notes.length > 0) {
+    lines.push('## Lưu ý nhỏ:');
+    notes.forEach(n => {
+      lines.push(`- ${n}`);
+    });
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Sinh chuỗi Markdown cho một tuần học mới với 7 khung ngày trống
+ * @param {string} weekTitle - Tên tuần (VD: 'Tuần 37' hoặc 'Lịch học Tuần 37')
+ * @returns {string} Markdown string
+ */
+export function generateEmptyWeekMarkdown(weekTitle = 'Tuần mới') {
+  const cleanTitle = weekTitle.startsWith('Lịch học') ? weekTitle : `Lịch học ${weekTitle}`;
+  return `# ${cleanTitle}
+
+## Thứ 2
+- Nghỉ.
+
+## Thứ 3
+- Nghỉ.
+
+## Thứ 4
+- Nghỉ.
+
+## Thứ 5
+- Nghỉ.
+
+## Thứ 6
+- Nghỉ.
+
+## Thứ 7 & Chủ Nhật
+- Nghỉ.
+
+## Lưu ý nhỏ:
+- Bấm "+ Thêm tiết" hoặc nhấn giữ ô ngày để thêm lịch học nhanh.`;
+}
+

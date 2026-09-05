@@ -4,6 +4,35 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 20:25] - Xây Dựng Visual Schedule Builder (Tạo Tuần Trống 7 Ngày, Thêm/Sửa Tiết Trực Quan & Long-press)
+
+- **🎯 Mục tiêu**:
+  - Nâng cấp trải nghiệm tạo và biên soạn lịch học: Khi bấm `+ Thêm tuần`, ứng dụng tự động khởi tạo tuần mới với **7 khung ngày trống** (Thứ 2 ➔ Thứ 7 & Chủ Nhật) sẵn sàng để thêm môn.
+  - Hỗ trợ thao tác tương tác trực quan: Bấm nút `+ Thêm tiết` hoặc **nhấn giữ (long-press 750ms)** vào bất kỳ ngày nào để mở popup chọn môn 1-chạm từ Chiếc Cặp, chọn ca học chuẩn BK và phòng học.
+  - Cho phép Chỉnh sửa ✏️, Xóa 🗑️ hoặc Di chuyển thứ của từng tiết học trực tiếp trên Ma trận ngày và tự động serialize ngược ra Markdown chuẩn.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Fix Syntax / View]` Loại bỏ dấu ngoặc nhọn đóng thừa `}` ở dòng 235 trong [`src/1.Frontend/views/TimetableGrid.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/TimetableGrid.js) (nguyên nhân chặn JavaScript module parse).
+  - `[Backend / Parser]` Bổ sung `serializeScheduleToMarkdown()` và `generateEmptyWeekMarkdown()` vào [`src/2.Backend/services/TimetableParser.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/TimetableParser.js).
+  - `[Frontend / Component]` Tạo mới component modal [`src/1.Frontend/components/modals/AddClassModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddClassModal.js):
+    - Subject Chips Picker: Chọn nhanh các môn đã có trong Chiếc Cặp Google Drive.
+    - Time Presets Grid: 8 ca học chuẩn ĐHBK TP.HCM (Sáng ca 1-3, 2-3, 4-6; Chiều ca 7-9, 8-9, 9-10, 10-11).
+    - Room Presets Row: Các giảng đường quen thuộc (B1, B4, B9, C4...).
+    - Hỗ trợ xóa tiết học trực tiếp từ modal sửa với cờ `skipConfirm`.
+  - `[Frontend / View]` Cập nhật [`src/1.Frontend/views/TimetableGrid.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/TimetableGrid.js):
+    - Hiển thị Empty Day Card với nút `+ Thêm tiết học`.
+    - Thêm nút `+ Thêm tiết` ở cuối mỗi ngày đã có tiết.
+    - Thêm cụm nút mini-action (Sửa ✏️, Xóa 🗑️) trên từng thẻ tiết học khi hover.
+    - Bổ sung bộ lắng nghe sự kiện **Long-press (750ms)** trên thẻ ngày (`pointerdown`, `pointerup`, `pointercancel`) để mở nhanh popup thêm tiết.
+  - `[Frontend / Main]` Kết nối luồng dữ liệu hai chiều trong [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    - Đăng ký `window.openAddClassModal`, `window.openEditClassModal`, `window.deleteClassFromDay`.
+    - Hàm `handleSaveClass`, `handleDeleteClass` tự động cập nhật State, hỗ trợ di chuyển thứ/ngày, chuyển trạng thái ngày nghỉ/ngày học, tự động serialize thành Markdown và lưu vào `smart_schedule_custom_md_${filename}`.
+    - Modal Thêm Tuần (`openAddWeekModal`) mặc định nạp `generateEmptyWeekMarkdown()`.
+  - `[Frontend / CSS]` Bổ sung styles hiện đại cho Empty Box & Add Class Modal trong [`3.timetable-grid.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/3.timetable-grid.css) và [`6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css).
+  - `[Performance / PWA]` Cập nhật [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js) nâng `CACHE_NAME` lên `smart-schedule-modular-v25`.
+
+---
+
 ## 📅 [2026-09-05 16:30] - Chuyển Đổi Hero Banner & Ghi Chú Tuần Sang Trạng Thái Mặc Định Thu Gọn (Default Collapsed Bars)
 
 - **🎯 Mục tiêu**:

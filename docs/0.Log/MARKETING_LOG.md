@@ -5,6 +5,39 @@
 
 ---
 
+## 💎 ENTRY 2: [2026-09-05] - Visual Schedule Builder: Tạo Tuần Trống & Nhấn Giữ Thêm Môn 1-Chạm
+
+### 📌 Phân Loại & Tags:
+`#USP` `#FeatureSpotlight` `#VisualBuilder` `#StudentProductivity` `#ZeroFriction`
+
+### 1. 🌟 Nỗi Đau & Giải Pháp Đột Phá (Pain Point vs Solution):
+- **Nỗi đau của sinh viên**: Nhập lịch học thủ công thường rất mệt mỏi, phải tự gõ từng dòng cú pháp hoặc chỉnh file text phức tạp.
+- **Giải pháp đột phá**: **Visual Schedule Builder** – Tạo tuần mới với 7 khung ngày trống tinh giản. Chỉ cần **nhấn giữ (long-press)** vào bất kỳ ngày nào hoặc bấm `+ Thêm tiết`, hệ thống hiện ra popup chọn môn 1-chạm từ Chiếc Cặp, chọn ca học chuẩn Bách Khoa và giảng đường gợi ý. Tự động lưu và đồng bộ lịch học ngay lập tức.
+
+---
+
+### 2. 🎣 3 Viral Hooks Sắc Bén (Tiêu đề Video / Post):
+
+1. **Speed & Simplicity Hook (Tốc độ & Tiện lợi)**:
+   > *"Xếp thời khóa biểu cả tuần chỉ trong 30 giây: Nhấn giữ ngày $\rightarrow$ Chạm chọn môn từ Chiếc Cặp $\rightarrow$ Xong!"*
+
+2. **BK Standard Schedule Hook (Dành riêng cho sinh viên BK)**:
+   > *"Không cần nhớ giờ vào ca 1 là 7h hay 6h45 nữa, ứng dụng này tích hợp sẵn 8 ca học chuẩn ĐHBK TP.HCM cho bạn chọn 1 chạm."*
+
+3. **Gamification & Micro-interaction Hook (Tương tác thú vị)**:
+   > *"Trải nghiệm xếp lịch học như chơi game: Long-press vào ngày để thả môn học vào thời khóa biểu cực mượt!"*
+
+---
+
+### 3. 🎬 Kịch Bản Video Ngắn 30 Giây (TikTok / Reels / Shorts):
+
+- **[0s - 4s] (Hook Visual)**: Bấm nút `+ Thêm tuần mới` $\rightarrow$ Ma trận tuần xuất hiện 7 khung ngày trống cực đẹp.
+- **[4s - 12s] (Action 1-Touch)**: Ngón tay nhấn giữ vào ô "Thứ 2" $\rightarrow$ Modal xuất hiện với các chip môn từ Chiếc Cặp (Học máy, Tiếng Nhật...) $\rightarrow$ Bấm chọn môn $\rightarrow$ Bấm chọn Ca 4-6 $\rightarrow$ Tiết học xuất hiện lung linh trên ô Thứ 2.
+- **[12s - 22s] (Action Edit/Delete)**: Di chuyển chuột/chạm nút ✏️ để đổi phòng sang B4-505 $\rightarrow$ Mọi thứ tự động lưu và hiển thị ngay trên thanh trạng thái.
+- **[22s - 30s] (Call to Action)**: *"Thời khóa biểu thông minh nhất cho sinh viên đại học. Trải nghiệm ngay tại link bio!"*
+
+---
+
 ## 💎 ENTRY 1: [2026-09-05] - Giao Diện Node Hình Tròn Donut Ring & Chiếc Cặp Cá Nhân Hóa
 
 ### 📌 Phân Loại & Tags:

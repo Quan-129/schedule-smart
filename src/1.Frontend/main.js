@@ -7,7 +7,7 @@
 
 import { state, initApplicationState, persistDriveSubjects, setState } from '../3.Database/state.js';
 import { DEFAULT_WEEK_35_MD, DEFAULT_WEEK_36_MD } from '../3.Database/storage/SeedData.js';
-import { parseScheduleMarkdown } from '../2.Backend/services/TimetableParser.js';
+import { parseScheduleMarkdown, serializeScheduleToMarkdown, generateEmptyWeekMarkdown } from '../2.Backend/services/TimetableParser.js';
 import { formatCurrentVietnameseDate } from '../2.Backend/utils/dateHelpers.js';
 import { renderBackpackView, enterJiggleMode, exitJiggleMode } from './views/BackpackView.js';
 import { renderGradesView, highlightGradeSlice } from './views/GradesView.js';
@@ -16,6 +16,7 @@ import { ensureEditSubjectModalDom, openEditSubjectModal, openEditDriveModal } f
 import { ensureAddSubjectModalDom, openAddSubjectModal } from './components/modals/AddSubjectModal.js';
 import { ensureAddWeekModalDom } from './components/modals/AddWeekModal.js';
 import { ensureSubjectDetailModalDom, openSubjectDetailModal } from './components/modals/SubjectDetailModal.js';
+import { ensureAddClassModalDom, openAddClassModal, openEditClassModal } from './components/modals/AddClassModal.js';
 import { showToast, initToastContainer } from './components/Toast.js';
 import { initPWA, promptPWAInstall } from '../5.Performance/pwaManager.js';
 import { initVisibilityOptimizer } from '../5.Performance/visibilityOptimizer.js';
@@ -40,6 +41,7 @@ async function initApp() {
   ensureAddSubjectModalDom();
   ensureAddWeekModalDom();
   ensureSubjectDetailModalDom();
+  ensureAddClassModalDom();
 
   // 2. Gắn các hàm tiện ích toàn cục vào window để hỗ trợ HTML onclick
   setupWindowHelpers();
@@ -143,6 +145,23 @@ function setupWindowHelpers() {
   window.openEditDriveModal = openEditDriveModal;
   window.openEditSubjectModal = openEditSubjectModal;
   window.openSubjectDetailModal = openSubjectDetailModal;
+
+  // Visual Schedule Builder Handlers
+  window.openAddClassModal = (dayName = 'Thứ 2') => {
+    openAddClassModal(dayName, handleSaveClass);
+  };
+
+  window.openEditClassModal = (dayName, classIndex) => {
+    const day = (state.scheduleData?.days || []).find(d => d.name === dayName);
+    const cls = day && day.classes ? day.classes[classIndex] : null;
+    if (cls) {
+      openEditClassModal(dayName, classIndex, cls, handleSaveClass, handleDeleteClass);
+    }
+  };
+
+  window.deleteClassFromDay = (dayName, classIndex) => {
+    handleDeleteClass(dayName, classIndex);
+  };
 }
 
 /**
@@ -649,7 +668,7 @@ function initAddWeekModal() {
       let id = idInput ? idInput.value.trim().toLowerCase().replace(/\s+/g, '-') : '';
       const startDate = dateInput ? dateInput.value : '';
       const desc = descInput ? descInput.value.trim() : title;
-      const mdContent = mdInput && mdInput.value.trim() ? mdInput.value.trim() : generateDefaultWeekMarkdown(title);
+      const mdContent = mdInput && mdInput.value.trim() ? mdInput.value.trim() : generateEmptyWeekMarkdown(title);
 
       if (!title || !id) {
         showToast('Vui lòng nhập tên và mã định danh tuần!');
@@ -736,7 +755,8 @@ function openAddWeekModal() {
   }
 
   if (mdInput) {
-    mdInput.value = currentRawMarkdown || generateDefaultWeekMarkdown(suggestedTitle);
+    // Mặc định tạo 7 ngày trống theo yêu cầu người dùng
+    mdInput.value = generateEmptyWeekMarkdown(suggestedTitle);
   }
 
   modal.classList.remove('hidden');
@@ -745,31 +765,113 @@ function openAddWeekModal() {
   if (titleInput) titleInput.focus();
 }
 
-function generateDefaultWeekMarkdown(weekTitle) {
-  return `# Lịch học ${weekTitle}
+/**
+ * Xử lý thêm mới hoặc chỉnh sửa tiết học từ AddClassModal
+ */
+function handleSaveClass({ dayName, classData, isEdit, classIndex, oldDayName }) {
+  if (!state.scheduleData || !state.scheduleData.days) return;
 
-## Thứ 2
-- 07:00 - 08:50 | Tiết 1 - 2 | Nhập môn AI | Phòng: B4-301
-- 09:00 - 11:50 | Tiết 4 - 6 | Tiếng Nhật 7 | Phòng: B9-202
+  // Nếu là sửa và người dùng đổi thứ (oldDayName !== dayName)
+  if (isEdit && oldDayName && oldDayName !== dayName) {
+    const oldDay = state.scheduleData.days.find(d => d.name === oldDayName);
+    if (oldDay && oldDay.classes && oldDay.classes[classIndex]) {
+      oldDay.classes.splice(classIndex, 1);
+      if (oldDay.classes.length === 0) {
+        oldDay.isDayOff = true;
+        oldDay.dayOffText = (oldDay.name.includes('7') || oldDay.name.includes('Chủ Nhật')) ? 'Nghỉ ngơi cuối tuần' : 'Nghỉ';
+      }
+    }
+    classIndex = -1; // Chuyển thành thêm mới vào ngày đích
+    isEdit = false;
+  }
 
-## Thứ 3
-- 07:00 - 08:50 | Tiết 1 - 2 | Quản lý Dự án | Phòng: B1-212
+  const day = state.scheduleData.days.find(d => d.name === dayName);
+  if (!day) return;
 
-## Thứ 4
-- 13:00 - 15:50 | Tiết 8 - 10 | Học máy | Phòng: B4-505
+  if (!day.classes) day.classes = [];
 
-## Thứ 5
-- Nghỉ
+  if (isEdit && classIndex >= 0 && day.classes[classIndex]) {
+    // Sửa tiết đã có
+    day.classes[classIndex] = { ...day.classes[classIndex], ...classData };
+    showToast(`Đã cập nhật tiết "${classData.subject}"`);
+  } else {
+    // Thêm tiết mới
+    day.classes.push(classData);
+    showToast(`Đã thêm tiết "${classData.subject}" vào ${day.name}`);
+  }
 
-## Thứ 6
-- 09:00 - 11:50 | Tiết 4 - 6 | Tiếng Nhật 7 | Phòng: B9-202
+  // Chuyển trạng thái ngày sang có tiết
+  day.isDayOff = false;
+  day.dayOffText = '';
 
-## Thứ 7 & Chủ Nhật
-- Nghỉ ngơi cuối tuần
+  // Sắp xếp lại tiết theo giờ bắt đầu
+  day.classes.sort((a, b) => {
+    const startA = a.startTime ? a.startTime.replace(':', '') : '9999';
+    const startB = b.startTime ? b.startTime.replace(':', '') : '9999';
+    return startA.localeCompare(startB);
+  });
 
-## Lưu ý
-- Tự động đồng bộ từ Lịch Học Thông Minh.
-`;
+  persistCurrentSchedule();
+}
+
+/**
+ * Xóa một tiết học khỏi ngày
+ */
+function handleDeleteClass(dayName, classIndex, skipConfirm = false) {
+  if (!state.scheduleData || !state.scheduleData.days) return;
+
+  const day = state.scheduleData.days.find(d => d.name === dayName);
+  if (!day || !day.classes || !day.classes[classIndex]) return;
+
+  const subjectName = day.classes[classIndex]?.subject || '';
+  if (!skipConfirm && !confirm(`Bạn có chắc muốn xóa tiết "${subjectName}" trong ${day.name}?`)) {
+    return;
+  }
+
+  const removed = day.classes.splice(classIndex, 1)[0];
+
+  if (day.classes.length === 0) {
+    day.isDayOff = true;
+    day.dayOffText = (day.name.includes('7') || day.name.includes('Chủ Nhật')) ? 'Nghỉ ngơi cuối tuần' : 'Nghỉ';
+  }
+
+  showToast(`Đã xóa tiết "${removed?.subject || ''}"`);
+  persistCurrentSchedule();
+}
+
+/**
+ * Đồng bộ lưu lại Markdown của tuần hiện tại và re-render giao diện
+ */
+function persistCurrentSchedule() {
+  if (!state.scheduleData) return;
+
+  // 1. Serialize ra Markdown
+  const newMarkdown = serializeScheduleToMarkdown(state.scheduleData);
+  currentRawMarkdown = newMarkdown;
+
+  // 2. Lưu vào storage của tuần hiện tại
+  if (currentWeekFile) {
+    localStorage.setItem(`smart_schedule_custom_md_${currentWeekFile}`, newMarkdown);
+  }
+
+  // 3. Cập nhật Raw Editor textarea
+  const rawContentEl = document.getElementById('markdown-raw-content');
+  if (rawContentEl) rawContentEl.value = newMarkdown;
+
+  // 4. Cập nhật danh sách môn học tổng hợp trong tuần
+  const uniqueSubjects = new Set();
+  (state.scheduleData.days || []).forEach(d => {
+    (d.classes || []).forEach(c => {
+      if (c.subject) uniqueSubjects.add(c.subject.trim());
+    });
+  });
+  state.scheduleData.subjects = Array.from(uniqueSubjects);
+
+  // 5. Re-render UI
+  renderTimetableGrid(state.scheduleData.days || []);
+  renderTodayView(state.scheduleData.days || []);
+  updateHeroStats(state.scheduleData);
+  renderSubjectFilters(state.scheduleData.subjects || []);
 }
 
 /**

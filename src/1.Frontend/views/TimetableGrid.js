@@ -61,32 +61,34 @@ export function renderTimetableGrid(days = []) {
 
     let classesHtml = '';
 
-    if (day.isDayOff) {
+    if (day.isDayOff || (filteredClasses.length === 0 && (!state.searchQuery && !state.activeFilterSubject))) {
       classesHtml = `
-        <div class="day-off-card">
+        <div class="day-off-card day-empty-box" data-day="${escapeHtml(day.name)}">
           <div class="day-off-icon"><i class="fa-solid fa-mug-hot"></i></div>
-          <div class="day-off-text">${escapeHtml(day.dayOffText || 'Nghỉ ngơi')}</div>
+          <div class="day-off-text">${escapeHtml(day.dayOffText || 'Chưa có tiết học')}</div>
+          <button type="button" class="btn-quick-add-class" data-day="${escapeHtml(day.name)}" title="Thêm tiết học vào ${escapeHtml(day.name)}">
+            <i class="fa-solid fa-plus"></i> <span>Thêm tiết học</span>
+          </button>
         </div>
       `;
     } else if (filteredClasses.length === 0) {
-      if (day.classes && day.classes.length > 0 && (state.searchQuery || state.activeFilterSubject)) {
-        classesHtml = `<div class="day-off-card"><p class="day-off-text">Không tìm thấy môn phù hợp</p></div>`;
-      } else {
-        classesHtml = `
-          <div class="day-off-card">
-            <div class="day-off-icon"><i class="fa-regular fa-calendar-check"></i></div>
-            <div class="day-off-text">Không có tiết học</div>
-          </div>
-        `;
-      }
+      classesHtml = `<div class="day-off-card"><p class="day-off-text">Không tìm thấy môn phù hợp</p></div>`;
     } else {
-      classesHtml = `<div class="classes-list">` + filteredClasses.map(c => {
+      classesHtml = `<div class="classes-list">` + filteredClasses.map((c, cIdx) => {
         const color = getSubjectColor(c.subject);
         return `
-          <div class="class-item" style="border-left-color: ${color.border};">
+          <div class="class-item" style="border-left-color: ${color.border};" data-day="${escapeHtml(day.name)}" data-idx="${cIdx}">
             <div class="class-time-row">
               <span class="class-time"><i class="fa-regular fa-clock"></i> ${escapeHtml(c.timeRange)}</span>
               ${c.period ? `<span class="class-period">${escapeHtml(c.period)}</span>` : ''}
+              <div class="class-edit-actions">
+                <button type="button" class="btn-mini-action btn-edit-class-item" title="Chỉnh sửa tiết học này" data-day="${escapeHtml(day.name)}" data-idx="${cIdx}">
+                  <i class="fa-solid fa-pen"></i>
+                </button>
+                <button type="button" class="btn-mini-action btn-delete-class-item" title="Xóa tiết học này" data-day="${escapeHtml(day.name)}" data-idx="${cIdx}">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
             </div>
             <div class="class-subject-name" style="color: ${color.text || 'inherit'};">${escapeHtml(c.subject)}</div>
             <div class="class-room-row">
@@ -105,7 +107,11 @@ export function renderTimetableGrid(days = []) {
             </div>
           </div>
         `;
-      }).join('') + `</div>`;
+      }).join('') + `
+        <button type="button" class="btn-add-more-class" data-day="${escapeHtml(day.name)}" title="Thêm tiết học vào ${escapeHtml(day.name)}">
+          <i class="fa-solid fa-plus"></i> <span>Thêm tiết vào ${escapeHtml(day.name)}</span>
+        </button>
+      </div>`;
     }
 
     dayCard.innerHTML = `
@@ -119,10 +125,45 @@ export function renderTimetableGrid(days = []) {
       ${classesHtml}
     `;
 
+    // Gắn sự kiện Long-press trên khung ngày để thêm môn
+    attachDayCardLongPress(dayCard, day.name);
+
     scheduleGrid.appendChild(dayCard);
   });
 
-  // Gắn sự kiện cho các nút trong class item
+  // Gắn sự kiện cho các nút trong class item & add buttons
+  scheduleGrid.querySelectorAll('.btn-quick-add-class, .btn-add-more-class').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      if (window.openAddClassModal) {
+        window.openAddClassModal(btn.dataset.day);
+      }
+    };
+  });
+
+  scheduleGrid.querySelectorAll('.btn-edit-class-item').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const dayName = btn.dataset.day;
+      const idx = parseInt(btn.dataset.idx, 10);
+      const day = (days || []).find(d => d.name === dayName);
+      if (day && day.classes && day.classes[idx] && window.openEditClassModal) {
+        window.openEditClassModal(dayName, idx, day.classes[idx]);
+      }
+    };
+  });
+
+  scheduleGrid.querySelectorAll('.btn-delete-class-item').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const dayName = btn.dataset.day;
+      const idx = parseInt(btn.dataset.idx, 10);
+      if (window.deleteClassFromDay) {
+        window.deleteClassFromDay(dayName, idx);
+      }
+    };
+  });
+
   scheduleGrid.querySelectorAll('.btn-view-subject-grade').forEach(btn => {
     btn.onclick = (e) => {
       e.stopPropagation();
@@ -143,6 +184,53 @@ export function renderTimetableGrid(days = []) {
       window.copyClassInfo(btn.dataset.subject, btn.dataset.time, btn.dataset.room);
     };
   });
+}
+
+/**
+ * Gắn sự kiện Long-press trên thẻ ngày để mở modal thêm môn nhanh
+ * @param {HTMLElement} dayCard 
+ * @param {string} dayName 
+ */
+function attachDayCardLongPress(dayCard, dayName) {
+  let longPressTimer = null;
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  const startPress = (e) => {
+    if (e.target.closest('button') || e.target.closest('.class-actions-group')) return;
+    if (e.touches && e.touches[0]) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }
+    longPressTimer = setTimeout(() => {
+      if (navigator.vibrate) navigator.vibrate(60);
+      if (window.openAddClassModal) {
+        window.openAddClassModal(dayName);
+      }
+    }, 750);
+  };
+
+  const cancelPress = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+  };
+
+  const checkMove = (e) => {
+    if (!longPressTimer || !e.touches || !e.touches[0]) return;
+    const dx = Math.abs(e.touches[0].clientX - touchStartX);
+    const dy = Math.abs(e.touches[0].clientY - touchStartY);
+    if (dx > 8 || dy > 8) cancelPress();
+  };
+
+  dayCard.addEventListener('mousedown', startPress);
+  dayCard.addEventListener('touchstart', startPress, { passive: true });
+  dayCard.addEventListener('touchmove', checkMove, { passive: true });
+  dayCard.addEventListener('mouseup', cancelPress);
+  dayCard.addEventListener('mouseleave', cancelPress);
+  dayCard.addEventListener('touchend', cancelPress);
+  dayCard.addEventListener('touchcancel', cancelPress);
 }
 
 /**

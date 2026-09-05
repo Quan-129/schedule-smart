@@ -428,27 +428,138 @@
   background: var(--bg-tertiary);
 }
 
-/* Day Off / Rest Card */
-.day-off-card {
+/* Day Off / Empty Day Card */
+.day-off-card,
+.day-empty-box {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 2.25rem 1rem;
+  padding: 1.75rem 1rem;
   color: var(--text-muted);
   text-align: center;
   gap: 0.65rem;
+  border-radius: var(--radius-md);
+  border: 1.5px dashed rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.015);
+  transition: all 0.25s ease;
+}
+
+.day-empty-box:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.03);
 }
 
 .day-off-icon {
-  font-size: 2rem;
+  font-size: 1.85rem;
   opacity: 0.6;
   color: var(--info);
 }
 
 .day-off-text {
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.day-off-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.btn-quick-add-class {
+  margin-top: 0.35rem;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: var(--accent-primary);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.2s ease;
+}
+
+.btn-quick-add-class:hover {
+  background: var(--accent-primary);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Add more class button inside day card */
+.btn-add-more-class {
+  width: 100%;
+  padding: 0.55rem;
+  margin-top: 0.25rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  transition: all 0.2s ease;
+}
+
+.btn-add-more-class:hover {
+  background: var(--accent-subtle);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  transform: translateY(-1px);
+}
+
+/* Class Mini Action Buttons (Edit, Delete, Copy) */
+.class-edit-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.class-item:hover .class-edit-actions {
+  opacity: 1;
+}
+
+.btn-mini-action {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  transition: all 0.15s ease;
+}
+
+.btn-mini-action:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  transform: scale(1.1);
+}
+
+.btn-mini-action.btn-mini-edit:hover {
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.btn-mini-action.btn-mini-delete:hover {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.12);
 }
 
 /* ==========================================================================
