@@ -4,6 +4,32 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 22:20] - Thêm Chức Năng Chọn Kiểu Hiển Thị: 1 Ngày (Hôm nay) / 3 Ngày (Trước - Nay - Sau) / 7 Ngày (Tuần)
+
+- **🎯 Mục tiêu**:
+  - Bổ sung bộ điều khiển Segmented Pill Controller `[ 1 Ngày | 3 Ngày | 7 Ngày ]` cho phép sinh viên chuyển đổi linh hoạt chế độ xem lịch học:
+    1. **1 Ngày**: Tập trung vào ngày hôm nay (hoặc ngày có tiết học), căn giữa trang với thẻ to rõ nét.
+    2. **3 Ngày**: Hiển thị 3 ngày liên tiếp (Hôm qua, Hôm nay, Ngày mai) cân xứng 3 cột.
+    3. **7 Ngày**: Hiển thị trọn vẹn cả tuần từ Thứ 2 đến Chủ Nhật.
+  - Tự động ghi nhớ tùy chọn vào `LocalStorage` (`smart_schedule_days_mode`).
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Database / Central State]` Cập nhật [`src/3.Database/state.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/state.js):
+    - Thêm key `DAYS_DISPLAY_MODE` vào `STORAGE_KEYS` và trường `daysDisplayMode: '7'` vào `state`.
+    - Thêm hàm `persistDaysDisplayMode()` và nạp trạng thái đã lưu trong `initApplicationState()`.
+  - `[Frontend / App Shell]` Cập nhật [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html):
+    - Thêm cụm Segmented Button `#days-mode-selector` vào Navbar (`.nav-right`).
+  - `[Frontend / View Logic]` Cập nhật [`src/1.Frontend/views/TimetableGrid.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/TimetableGrid.js):
+    - Tính toán danh sách `daysToRender` và class `mode-1-day`, `mode-3-days`, `mode-7-days` trên `#schedule-grid`.
+  - `[Frontend / Main Controller]` Cập nhật [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    - Thêm hàm `initDaysModeSelector()` bắt sự kiện click chuyển chế độ, lưu LocalStorage và cập nhật Toast thông báo.
+  - `[Frontend / CSS Navbar & Grid]` Cập nhật [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css) và [`src/1.Frontend/styles/3.timetable-grid.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/3.timetable-grid.css):
+    - Thiết kế Segmented Pill Button dạng capsule phát sáng neon gradient.
+    - Thiết kế CSS Grid 1 cột (tập trung), 3 cột (cân đối) và 7 cột (responsive).
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v43` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 22:08] - Nâng Cấp Hero Command Navbar: To, Rõ Ràng, Cân Đối, Sang Trọng & Độc Đáo
 
 - **🎯 Mục tiêu**:

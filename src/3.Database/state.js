@@ -11,7 +11,8 @@ import { getStorageItem, setStorageItem } from './storage/LocalStorageEngine.js'
 export const STORAGE_KEYS = {
   DRIVE_SUBJECTS: 'smart_schedule_drive_v2',
   GRADES: 'smart_schedule_grades_v1',
-  THEME: 'smart_schedule_theme'
+  THEME: 'smart_schedule_theme',
+  DAYS_DISPLAY_MODE: 'smart_schedule_days_mode'
 };
 
 // Khởi tạo state ban đầu
@@ -21,6 +22,7 @@ export const state = {
   selectedWeek: 'tuan-35',
   weeks: [],
   scheduleData: null,
+  daysDisplayMode: '7', // '1' | '3' | '7'
   
   // Backpack & Drive
   driveSubjects: [],
@@ -83,6 +85,9 @@ export function initApplicationState() {
   // 3. Nạp Theme
   const savedTheme = getStorageItem(STORAGE_KEYS.THEME, 'dark');
   state.isDarkTheme = savedTheme === 'dark';
+
+  // 4. Nạp chế độ hiển thị ngày (1, 3, 7)
+  state.daysDisplayMode = getStorageItem(STORAGE_KEYS.DAYS_DISPLAY_MODE, '7');
 }
 
 /**
@@ -97,4 +102,11 @@ export function persistDriveSubjects() {
  */
 export function persistGrades() {
   setStorageItem(STORAGE_KEYS.GRADES, state.studentGrades);
+}
+
+/**
+ * Lưu chế độ hiển thị ngày vào Storage
+ */
+export function persistDaysDisplayMode() {
+  setStorageItem(STORAGE_KEYS.DAYS_DISPLAY_MODE, state.daysDisplayMode);
 }

@@ -21,7 +21,7 @@ export function getSubjectColor(subjectName) {
 }
 
 /**
- * Render ma trận thời khóa biểu 7 ngày x 12 tiết
+ * Render ma trận thời khóa biểu theo chế độ 1 ngày / 3 ngày / 7 ngày
  * @param {Array<Object>} days 
  * @param {boolean} isCurrentWeek 
  */
@@ -31,8 +31,51 @@ export function renderTimetableGrid(days = [], isCurrentWeek = false) {
 
   scheduleGrid.innerHTML = '';
   const currentDayOfWeek = new Date().getDay();
+  const mode = state.daysDisplayMode || '7';
 
-  days.forEach(day => {
+  // Cập nhật class layout trên container
+  scheduleGrid.classList.remove('mode-1-day', 'mode-3-days', 'mode-7-days');
+  scheduleGrid.classList.add(mode === '1' ? 'mode-1-day' : (mode === '3' ? 'mode-3-days' : 'mode-7-days'));
+
+  // Lọc danh sách ngày cần hiển thị theo chế độ đã chọn
+  let daysToRender = days || [];
+  if (daysToRender.length > 0) {
+    if (mode === '1') {
+      // Chế độ 1 Ngày: Ưu tiên ngày hôm nay (nếu tuần hiện tại), hoặc ngày đầu tiên có tiết học, hoặc ngày đầu tuần
+      let targetIndex = -1;
+      if (isCurrentWeek) {
+        targetIndex = daysToRender.findIndex(d => d.dayOfWeekNumber === currentDayOfWeek);
+      }
+      if (targetIndex === -1) {
+        targetIndex = daysToRender.findIndex(d => d.classes && d.classes.length > 0);
+      }
+      if (targetIndex === -1) {
+        targetIndex = 0;
+      }
+      daysToRender = [daysToRender[targetIndex]];
+    } else if (mode === '3') {
+      // Chế độ 3 Ngày: [Hôm qua, Hôm nay, Ngày mai]
+      let centerIndex = -1;
+      if (isCurrentWeek) {
+        centerIndex = daysToRender.findIndex(d => d.dayOfWeekNumber === currentDayOfWeek);
+      }
+      if (centerIndex === -1) {
+        centerIndex = daysToRender.findIndex(d => d.classes && d.classes.length > 0);
+      }
+      if (centerIndex === -1) {
+        centerIndex = 1; // Mặc định Thứ Ba hoặc giữa tuần
+      }
+      // Tính toán cửa sổ 3 ngày liền kề trong tuần
+      let startIdx = centerIndex - 1;
+      if (startIdx < 0) startIdx = 0;
+      if (startIdx + 3 > daysToRender.length) {
+        startIdx = Math.max(0, daysToRender.length - 3);
+      }
+      daysToRender = daysToRender.slice(startIdx, startIdx + 3);
+    }
+  }
+
+  daysToRender.forEach(day => {
     let filteredClasses = day.classes || [];
 
     if (state.activeFilterSubject) {

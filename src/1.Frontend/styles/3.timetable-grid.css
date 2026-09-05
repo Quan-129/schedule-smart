@@ -260,6 +260,39 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
   gap: 1.15rem;
+  transition: all 0.3s ease;
+}
+
+/* Chế độ 1 Ngày (Hôm nay / Focus): Căn giữa, thẻ to rõ ràng */
+.schedule-grid.mode-1-day {
+  grid-template-columns: minmax(320px, 580px);
+  justify-content: center;
+}
+
+.schedule-grid.mode-1-day .day-card {
+  padding: 1.2rem 1.35rem;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.3);
+}
+
+.schedule-grid.mode-1-day .day-title {
+  font-size: 1.2rem;
+}
+
+/* Chế độ 3 Ngày (Trước / Hôm nay / Sau): 3 cột cân xứng */
+.schedule-grid.mode-3-days {
+  grid-template-columns: repeat(3, minmax(280px, 1fr));
+}
+
+@media (max-width: 960px) {
+  .schedule-grid.mode-3-days {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
+/* Chế độ 7 Ngày (Cả tuần): Lưới đa cột responsive */
+.schedule-grid.mode-7-days {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
 
 /* Day Card - Khung Thẻ Thứ Nhỏ Gọn & Khoa Học */

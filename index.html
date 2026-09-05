@@ -171,6 +171,22 @@
       </div>
 
       <div class="nav-right">
+        <!-- Chế độ hiển thị ngày (1 Ngày / 3 Ngày / 7 Ngày) -->
+        <div class="days-mode-selector" id="days-mode-selector" role="group" aria-label="Kiểu hiển thị ngày">
+          <button type="button" class="btn-days-mode" data-mode="1" title="1 Ngày (Hôm nay)">
+            <i class="fa-solid fa-calendar-day"></i>
+            <span>1 Ngày</span>
+          </button>
+          <button type="button" class="btn-days-mode" data-mode="3" title="3 Ngày (Hôm qua / Hôm nay / Ngày mai)">
+            <i class="fa-solid fa-calendar-week"></i>
+            <span>3 Ngày</span>
+          </button>
+          <button type="button" class="btn-days-mode active" data-mode="7" title="7 Ngày (Cả tuần)">
+            <i class="fa-solid fa-table-columns"></i>
+            <span>7 Ngày</span>
+          </button>
+        </div>
+
         <!-- Week Selector Nav -->
         <div class="week-navigation">
           <button id="prev-week-btn" class="btn-nav" title="Tuần trước"><i class="fa-solid fa-chevron-left"></i></button>

@@ -5,7 +5,7 @@
  * ==========================================================================
  */
 
-import { state, initApplicationState, persistDriveSubjects, setState } from '../3.Database/state.js';
+import { state, initApplicationState, persistDriveSubjects, persistDaysDisplayMode, setState } from '../3.Database/state.js';
 import { DEFAULT_WEEK_35_MD, DEFAULT_WEEK_36_MD } from '../3.Database/storage/SeedData.js';
 import { parseScheduleMarkdown, serializeScheduleToMarkdown, generateEmptyWeekMarkdown } from '../2.Backend/services/TimetableParser.js';
 import { formatCurrentVietnameseDate } from '../2.Backend/utils/dateHelpers.js';
@@ -109,6 +109,7 @@ async function initApp() {
     }
   );
   initThemeToggle();
+  initDaysModeSelector();
   initPrintButton();
   initHeroToggle();
   initRawMarkdownEditor();
@@ -971,6 +972,47 @@ export async function focusTodayTarget() {
 }
 
 
+
+/**
+ * Khởi tạo Bộ điều khiển chế độ hiển thị ngày (1 Ngày / 3 Ngày / 7 Ngày)
+ */
+function initDaysModeSelector() {
+  const container = document.getElementById('days-mode-selector');
+  if (!container) return;
+
+  const currentMode = state.daysDisplayMode || '7';
+  const buttons = container.querySelectorAll('.btn-days-mode');
+
+  // Đặt trạng thái active ban đầu
+  buttons.forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === currentMode);
+  });
+
+  buttons.forEach(btn => {
+    btn.onclick = () => {
+      const selectedMode = btn.dataset.mode;
+      if (state.daysDisplayMode === selectedMode) return;
+
+      state.daysDisplayMode = selectedMode;
+      persistDaysDisplayMode();
+
+      buttons.forEach(b => b.classList.toggle('active', b.dataset.mode === selectedMode));
+
+      // Re-render Timetable Grid
+      const isCurrentWeek = checkIsCurrentWeek(currentWeekFile);
+      if (state.scheduleData) {
+        renderTimetableGrid(state.scheduleData.days || [], isCurrentWeek);
+      }
+
+      const modeLabels = {
+        '1': '1 Ngày (Hôm nay)',
+        '3': '3 Ngày (Trước / Hôm nay / Sau)',
+        '7': '7 Ngày (Cả tuần)'
+      };
+      showToast(`Chế độ xem: ${modeLabels[selectedMode] || selectedMode + ' Ngày'}`);
+    };
+  });
+}
 
 /**
  * Khởi tạo Đổi Theme Sáng/Tối
