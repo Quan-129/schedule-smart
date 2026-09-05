@@ -169,8 +169,8 @@ export function ensureAddClassModalDom() {
           </div>
         </div>
 
-        <!-- SECTION 3: NGÀY & PHÒNG HỌC (2 CỘT CÂN ĐỐI) -->
-        <div class="modal-grid-2col">
+        <!-- SECTION 3: NGÀY & PHÒNG HỌC (Ô Thứ ngắn gọn, Ô Phòng rộng thoáng) -->
+        <div class="modal-grid-day-room">
           <!-- Chọn ngày -->
           <div class="form-group-styled">
             <label for="class-day-select"><i class="fa-solid fa-calendar-day"></i> Thứ trong tuần:</label>

@@ -4,6 +4,20 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 22:38] - Tinh Chỉnh Bố Cục Modal: Thu Gọn Ô Thứ (135px) & Mở Rộng Ô Phòng Học
+
+- **🎯 Mục tiêu**:
+  - Tối ưu tỷ lệ cột trong hàng ngày & phòng học: Thu gọn ô "Thứ trong tuần" vừa khít chữ (135px) và mở rộng tối đa ô "Phòng học" (1fr) để hiển thị đầy đủ tên phòng kèm nút `+ Lưu phòng` mà không bị che khuất hay cắt chữ.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Component Modal]` Cập nhật [`src/1.Frontend/components/modals/AddClassModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddClassModal.js):
+    - Áp dụng class layout `.modal-grid-day-room` cho hàng Thứ & Phòng học.
+  - `[Frontend / CSS Modals]` Cập nhật [`src/1.Frontend/styles/6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css):
+    - Thiết lập `.modal-grid-day-room { grid-template-columns: 135px 1fr; gap: 0.85rem; }` giúp ô phòng rộng rãi, chữ hiển thị rõ ràng.
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v46` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 22:36] - Thêm Tính Năng Tạo & Lưu Sẵn Phòng Học Mẫu Tùy Chỉnh
 
 - **🎯 Mục tiêu**:

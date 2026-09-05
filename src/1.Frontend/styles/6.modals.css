@@ -266,8 +266,15 @@
   gap: 0.9rem;
 }
 
+.modal-grid-day-room {
+  display: grid;
+  grid-template-columns: 135px 1fr;
+  gap: 0.85rem;
+}
+
 @media (max-width: 540px) {
-  .modal-grid-2col {
+  .modal-grid-2col,
+  .modal-grid-day-room {
     grid-template-columns: 1fr;
     gap: 0.75rem;
   }
