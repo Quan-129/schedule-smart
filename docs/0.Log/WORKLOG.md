@@ -4,6 +4,24 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 16:00] - Thiết Lập Bộ Quy Tắc Trình Bày & Tiêu Chuẩn Thẩm Mỹ (Presentation Rules)
+
+- **🎯 Mục tiêu**:
+  - Chuẩn hóa toàn diện các quy chuẩn trình bày gồm Giao diện UI/UX (thẩm mỹ, màu sắc, micro-interactions), Mã nguồn (Clean code, Semantic HTML5, Component encapsulation), và Phản hồi của AI Agent (Tiếng Việt, súc tích, clickable file links).
+  - Ban hành bộ quy tắc `.agents/rules/presentation_rules.md` và đồng bộ vào `AGENTS.md`.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Rules]` Khởi tạo file `.agents/rules/presentation_rules.md` định nghĩa chi tiết 3 nhóm quy chuẩn:
+    1. **UI/UX Aesthetics**: Dark mode, Glassmorphism, CSS Variables bảng màu hài hòa, phông chữ `Inter`/`JetBrains Mono`, visual haptics & micro-animations, chuẩn responsive 3 breakpoint.
+    2. **Code & Template Styling**: Semantic HTML5 (`<section>`, `<details>`, `<summary>`), class naming `kebab-case`/`BEM`, ID duy nhất, thụt lề 2 spaces, đóng gói component độc lập.
+    3. **Agent Communication**: 100% Tiếng Việt, câu trả lời trực diện, không dài dòng, định dạng link markdown clickable `file:///` cho mọi file và code symbol.
+  - `[Core Rule]` Cập nhật `AGENTS.md` bổ sung Điều khoản 5: **QUY CHUẨN TRÌNH BÀY & THẨM MỸ (PRESENTATION STANDARDS)**.
+
+- **📌 Trạng thái hiện tại & Kế hoạch tiếp theo**:
+  - Toàn bộ 3 bộ quy tắc cốt lõi của dự án đã được hoàn thiện: `architecture_rules.md`, `token_optimization_rules.md`, và `presentation_rules.md`.
+
+---
+
 ## 📅 [2026-09-05 15:52] - Chuyển Đổi Thành Công Sang Component-Driven App Shell Architecture & Ràng Buộc Rút Gọn index.html
 
 - **🎯 Mục tiêu**:

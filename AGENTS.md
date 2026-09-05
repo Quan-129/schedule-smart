@@ -39,3 +39,11 @@ Mọi file mã nguồn phải nằm đúng trong 5 tầng và giữ mỗi file <
 1. **Ghi nhật ký kỹ thuật**: Tự động ghi vào `docs/0.Log/WORKLOG.md` theo skill `update-worklog`.
 2. **Ghi nhật ký tiếp thị**: Tự động trích xuất USP/Hook vào `docs/0.Log/MARKETING_LOG.md` theo skill `update-new-in4`.
 3. **Thu gom tài liệu (`docs/9.More/`)**: Thư mục gốc chỉ chứa `README.md` và `AGENTS.md`. Mọi file `.md` phát sinh khác phải tự động chuyển vào `docs/9.More/` kèm file mục lục `docs/9.More/README.md` theo skill `9-more-archiver`.
+
+---
+
+## 🎨 5. QUY CHUẨN TRÌNH BÀY & THẨM MỸ (PRESENTATION STANDARDS)
+1. **Giao diện & UI/UX**: Dark mode cao cấp, Glassmorphism, CSS Variables bảng màu hài hòa, phông chữ `Inter`/`JetBrains Mono`, micro-animations mượt mà và responsive đa nền tảng (`.agents/rules/presentation_rules.md`).
+2. **Mã nguồn & Template**: HTML5 ngữ nghĩa (`<section>`, `<details>`, `<summary>`), tên class `kebab-case`/`BEM`, ID có ý nghĩa, thụt lề chuẩn 2 spaces và đóng gói component độc lập.
+3. **Phản hồi của AI**: Luôn trả lời bằng **Tiếng Việt**, trực diện, súc tích, gắn link markdown chuẩn `file:///` cho mọi file mã nguồn và hàm/class được đề cập.
+
