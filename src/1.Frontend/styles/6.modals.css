@@ -1415,12 +1415,12 @@ body.theme-light .form-group-styled textarea:hover {
   }
 }
 
-/* Room Presets Row */
+/* Room Presets Row & Custom Room Tags */
 .room-presets-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
   padding-top: 0.25rem;
 }
 
@@ -1430,17 +1430,24 @@ body.theme-light .form-group-styled textarea:hover {
   font-weight: 600;
 }
 
+.room-preset-tag-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
 .btn-room-preset {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
-  padding: 0.22rem 0.55rem;
+  padding: 0.24rem 0.58rem;
   font-size: 0.72rem;
   font-family: var(--font-mono);
   font-weight: 600;
   color: #94a3b8;
   cursor: pointer;
   transition: all 0.18s ease;
+  user-select: none;
 }
 
 .btn-room-preset:hover {
@@ -1448,6 +1455,45 @@ body.theme-light .form-group-styled textarea:hover {
   border-color: #818cf8;
   color: #ffffff;
   transform: translateY(-1px);
+}
+
+.btn-room-preset.active {
+  background: var(--accent-gradient);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.45);
+}
+
+.room-preset-tag-wrapper.is-custom-room .btn-room-preset {
+  border: 1px dashed rgba(168, 85, 247, 0.45);
+  background: rgba(168, 85, 247, 0.06);
+  color: #d8b4fe;
+}
+
+.btn-delete-custom-room {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #ffffff;
+  border: 1.5px solid var(--bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.52rem;
+  transition: all 0.18s ease;
+  z-index: 5;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.btn-delete-custom-room:hover {
+  background: #dc2626;
+  transform: scale(1.2);
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
 }
 
 

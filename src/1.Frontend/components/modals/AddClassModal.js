@@ -33,6 +33,7 @@ const TIME_PRESETS = [
 
 const ROOM_PRESETS = ['B1-305 (CS1)', 'B4-505 (CS1)', 'B9-202 (CS1)', 'C4-402 (CS1)', 'B4-301 (CS1)', 'B1-212 (CS1)', 'B4-303 (CS1)'];
 const CUSTOM_TIME_PRESETS_KEY = 'smart_schedule_custom_time_presets';
+const CUSTOM_ROOM_PRESETS_KEY = 'smart_schedule_custom_room_presets';
 
 /**
  * Đọc danh sách ca học tùy chỉnh do người dùng lưu
@@ -60,6 +61,35 @@ function saveCustomTimePresets(presets) {
     localStorage.setItem(CUSTOM_TIME_PRESETS_KEY, JSON.stringify(presets));
   } catch (e) {
     console.error('Lỗi lưu custom time presets:', e);
+  }
+}
+
+/**
+ * Đọc danh sách phòng học tùy chỉnh do người dùng lưu
+ * @returns {Array<string>}
+ */
+function getCustomRoomPresets() {
+  try {
+    const raw = localStorage.getItem(CUSTOM_ROOM_PRESETS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (e) {
+    console.error('Lỗi đọc custom room presets:', e);
+  }
+  return [];
+}
+
+/**
+ * Lưu danh sách phòng học tùy chỉnh vào LocalStorage
+ * @param {Array<string>} presets 
+ */
+function saveCustomRoomPresets(presets) {
+  try {
+    localStorage.setItem(CUSTOM_ROOM_PRESETS_KEY, JSON.stringify(presets));
+  } catch (e) {
+    console.error('Lỗi lưu custom room presets:', e);
   }
 }
 
@@ -161,19 +191,22 @@ export function ensureAddClassModalDom() {
           <!-- Phòng học -->
           <div class="form-group-styled">
             <label for="class-room-input"><i class="fa-solid fa-door-open"></i> Phòng học:</label>
-            <div class="input-with-icon">
-              <i class="fa-solid fa-location-dot input-icon"></i>
-              <input type="text" id="class-room-input" class="form-input-styled" placeholder="VD: B1-305 (CS1)" required>
+            <div class="input-row-preset-creator" style="display: flex; gap: 0.45rem; align-items: stretch;">
+              <div class="input-with-icon" style="flex: 1;">
+                <i class="fa-solid fa-location-dot input-icon"></i>
+                <input type="text" id="class-room-input" class="form-input-styled" placeholder="VD: B1-305 (CS1)" required>
+              </div>
+              <button type="button" id="btn-save-custom-room" class="btn-save-custom-preset" title="Lưu phòng học này thành gợi ý mẫu để dùng sau">
+                <i class="fa-solid fa-plus"></i>
+                <span>Lưu phòng</span>
+              </button>
             </div>
           </div>
         </div>
 
         <!-- Gợi ý phòng học nhanh -->
         <div class="room-presets-row" id="room-presets-row">
-          <span class="room-preset-label">Gợi ý phòng:</span>
-          ${ROOM_PRESETS.map(r => `
-            <button type="button" class="btn-room-preset" data-room="${escapeHtml(r)}">${escapeHtml(r)}</button>
-          `).join('')}
+          <!-- Render động từ ROOM_PRESETS + Custom Room Presets -->
         </div>
 
         <!-- FOOTER BUTTONS -->
@@ -302,6 +335,71 @@ function renderTimePresets(activeTime = '') {
   });
 }
 
+/**
+ * Render danh sách Gợi ý phòng học (Chuẩn + Tự tạo)
+ * @param {string} selectedRoom 
+ */
+function renderRoomPresets(selectedRoom = '') {
+  const container = document.getElementById('room-presets-row');
+  if (!container) return;
+
+  const customRooms = getCustomRoomPresets();
+  const allRooms = [
+    ...ROOM_PRESETS.map(r => ({ room: r, isCustom: false })),
+    ...customRooms.map(r => ({ room: r, isCustom: true }))
+  ];
+
+  container.innerHTML = `
+    <span class="room-preset-label">Gợi ý phòng:</span>
+    ${allRooms.map((r, idx) => {
+      const isCustom = r.isCustom;
+      const customIdx = isCustom ? (idx - ROOM_PRESETS.length) : -1;
+      const isActive = selectedRoom && (r.room.trim().toLowerCase() === selectedRoom.trim().toLowerCase());
+      return `
+        <div class="room-preset-tag-wrapper ${isCustom ? 'is-custom-room' : ''}">
+          <button type="button" class="btn-room-preset ${isActive ? 'active' : ''}" data-room="${escapeHtml(r.room)}">
+            ${escapeHtml(r.room)}
+          </button>
+          ${isCustom ? `
+            <button type="button" class="btn-delete-custom-room" data-custom-idx="${customIdx}" title="Xóa phòng mẫu này">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          ` : ''}
+        </div>
+      `;
+    }).join('')}
+  `;
+
+  // Gắn sự kiện click chọn phòng
+  container.querySelectorAll('.btn-room-preset').forEach(btn => {
+    btn.onclick = () => {
+      container.querySelectorAll('.btn-room-preset').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const roomInput = document.getElementById('class-room-input');
+      if (roomInput) {
+        roomInput.value = btn.dataset.room;
+        roomInput.focus();
+      }
+    };
+  });
+
+  // Gắn sự kiện xóa phòng tự tạo
+  container.querySelectorAll('.btn-delete-custom-room').forEach(delBtn => {
+    delBtn.onclick = (e) => {
+      e.stopPropagation();
+      const customIdx = parseInt(delBtn.dataset.customIdx, 10);
+      const currentList = getCustomRoomPresets();
+      if (currentList[customIdx] !== undefined) {
+        const removed = currentList.splice(customIdx, 1)[0];
+        saveCustomRoomPresets(currentList);
+        const roomInput = document.getElementById('class-room-input');
+        renderRoomPresets(roomInput ? roomInput.value : '');
+        showToast(`Đã xóa phòng mẫu "${removed}" 🗑️`);
+      }
+    };
+  });
+}
+
 // ============================================================================
 // 4. EVENT HANDLERS & DOM BINDING
 // ============================================================================
@@ -317,6 +415,7 @@ function bindAddClassModalEvents() {
   const cancelBtn = document.getElementById('btn-cancel-add-class');
   const deleteBtn = document.getElementById('btn-delete-class');
   const savePresetBtn = document.getElementById('btn-save-custom-preset');
+  const saveRoomBtn = document.getElementById('btn-save-custom-room');
   if (!modal || !form) return;
 
   // Đóng modal
@@ -378,16 +477,35 @@ function bindAddClassModalEvents() {
     };
   }
 
-  // Gắn sự kiện presets phòng học
-  modal.querySelectorAll('.btn-room-preset').forEach(btn => {
-    btn.onclick = () => {
+  // Gắn sự kiện Lưu Phòng Học Mẫu Mới
+  if (saveRoomBtn) {
+    saveRoomBtn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       const roomInput = document.getElementById('class-room-input');
-      if (roomInput) {
-        roomInput.value = btn.dataset.room;
-        roomInput.focus();
+      const roomVal = roomInput ? roomInput.value.trim() : '';
+
+      if (!roomVal) {
+        showToast('Vui lòng nhập tên phòng học trước (VD: H6-204)!');
+        if (roomInput) roomInput.focus();
+        return;
       }
+
+      const customList = getCustomRoomPresets();
+      const isDuplicate = ROOM_PRESETS.some(r => r.toLowerCase() === roomVal.toLowerCase()) ||
+                          customList.some(r => r.toLowerCase() === roomVal.toLowerCase());
+      if (isDuplicate) {
+        showToast('Phòng học này đã có trong danh sách gợi ý!');
+        renderRoomPresets(roomVal);
+        return;
+      }
+
+      customList.push(roomVal);
+      saveCustomRoomPresets(customList);
+      renderRoomPresets(roomVal);
+      showToast(`Đã lưu phòng mẫu: "${roomVal}" 🎉`);
     };
-  });
+  }
 
   // Xóa tiết
   if (deleteBtn) {
@@ -478,9 +596,10 @@ export function openAddClassModal(targetDayName = 'Thứ 2', onSave) {
   if (deleteBtn) deleteBtn.style.display = 'none';
   if (saveText) saveText.textContent = 'Thêm Tiết Học';
 
-  // Render chips & time presets
+  // Render chips, time presets & room presets
   renderSubjectChips('');
   renderTimePresets('07:00 - 08:50');
+  renderRoomPresets('B1-305 (CS1)');
 
   // Reset form inputs
   const subjectInput = document.getElementById('class-subject-input');
@@ -523,9 +642,10 @@ export function openEditClassModal(dayName, classIndex, classData, onSave, onDel
   if (deleteBtn) deleteBtn.style.display = 'inline-flex';
   if (saveText) saveText.textContent = 'Cập Nhật Tiết Học';
 
-  // Render chips & time presets
+  // Render chips, time presets & room presets
   renderSubjectChips(classData.subject);
   renderTimePresets(classData.timeRange || '');
+  renderRoomPresets(classData.room || '');
 
   // Fill values
   const subjectInput = document.getElementById('class-subject-input');

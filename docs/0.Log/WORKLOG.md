@@ -4,6 +4,26 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 22:36] - Thêm Tính Năng Tạo & Lưu Sẵn Phòng Học Mẫu Tùy Chỉnh
+
+- **🎯 Mục tiêu**:
+  - Cho phép sinh viên nhập tên phòng học bất kỳ (ví dụ: `H6-204 (CS2)`, `A4-101`, `Lab AI 302`, `Online Zoom`...) và bấm `+ Lưu phòng` để thêm vào danh sách gợi ý phòng học mẫu.
+  - Tự động lưu trữ bền vững vào `LocalStorage` (`smart_schedule_custom_room_presets`) để tái sử dụng 1-chạm ở mọi thao tác thêm/sửa tiết học.
+  - Hỗ trợ nút xóa `×` mini trên từng thẻ phòng tự tạo để dễ dàng quản lý.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Component Modal]` Cập nhật [`src/1.Frontend/components/modals/AddClassModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddClassModal.js):
+    - Tích hợp `getCustomRoomPresets()`, `saveCustomRoomPresets()` và hàm render động `renderRoomPresets(selectedRoom)`.
+    - Thêm nút `#btn-save-custom-room` (`+ Lưu phòng`) nằm liền kề ô nhập phòng học.
+    - Render danh sách phòng kết hợp giữa các phòng mẫu chuẩn CS1 và các phòng do sinh viên tự lưu.
+    - Hỗ trợ nút xóa `×` trên từng tag phòng tự tạo.
+  - `[Frontend / CSS Modals]` Cập nhật [`src/1.Frontend/styles/6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css):
+    - Thẻ phòng tùy chỉnh viền nét đứt tím `.room-preset-tag-wrapper.is-custom-room`.
+    - Nút xóa `×` mini bo tròn trên tag phòng.
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v45` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 22:30] - Thêm Tính Năng Tạo & Lưu Sẵn Ca Học Mẫu Tùy Chỉnh (Giờ + Tiết)
 
 - **🎯 Mục tiêu**:
