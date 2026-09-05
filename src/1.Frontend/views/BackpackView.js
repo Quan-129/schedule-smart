@@ -11,6 +11,7 @@
 import { state, persistDriveSubjects } from '../../3.Database/state.js';
 import { renderCircularNodeHtml } from '../components/CircularNode.js';
 import { openEditDriveModal } from '../components/EditModal.js';
+import { openAddSubjectModal } from '../components/modals/AddSubjectModal.js';
 import { showToast } from '../components/Toast.js';
 import { syncDriveSubjectsToCloud } from '../../3.Database/auth/FirebaseAuthService.js';
 
@@ -66,12 +67,7 @@ export function renderBackpackView() {
     </div>
   `;
   addBtn.onclick = () => {
-    const addModal = document.getElementById('add-subject-modal');
-    if (addModal) {
-      addModal.classList.add('active');
-      addModal.classList.remove('hidden');
-      addModal.style.display = 'flex';
-    }
+    openAddSubjectModal();
   };
   container.appendChild(addBtn);
 

@@ -19,7 +19,8 @@ Mọi file mã nguồn mới hoặc logic chỉnh sửa phải được đặt �
 
 ## 🚫 2. CÁC ĐIỀU CẤM KỴ (STRICT CONSTRAINTS)
 
-- ❌ **CẤM viết dồn code vào 1 file khổng lồ (Monolithic File > 300 dòng)**: Mọi file JS và CSS đều phải giữ nhỏ gọn, đúng trách nhiệm đơn lẻ (Single Responsibility).
+- ❌ **CẤM viết dồn code vào 1 file khổng lồ (Monolithic File > 300 dòng)**: Mọi file JS, CSS và HTML đều phải giữ nhỏ gọn, đúng trách nhiệm đơn lẻ (Single Responsibility).
+- ❌ **CẤM hardcode hàng trăm dòng template/modal tĩnh vào `index.html`**: `index.html` phải là **App Shell tối giản (< 120–150 dòng)**, mọi modal và dynamic layout phải được componentize trong `src/1.Frontend/components/`.
 - ❌ **CẤM dồn toàn bộ CSS vào một file `style.css` duy nhất**: File `style.css` ở thư mục gốc chỉ được dùng làm Master Aggregator (`@import`) hoặc nạp trực tiếp qua `<link>` trong `index.html`.
 - ❌ **CẤM truy cập trực tiếp DOM từ tầng Backend hoặc Database**: Tầng Backend chỉ nhận dữ liệu đầu vào và trả về kết quả thuần túy (Pure Logic), không gọi `document.getElementById()`.
 - ❌ **CẤM hardcode dữ liệu mẫu rải rác**: Mọi dữ liệu mặc định phải nằm trong `src/3.Database/storage/SeedData.js`.

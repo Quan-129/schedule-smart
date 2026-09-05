@@ -12,7 +12,9 @@ import { formatCurrentVietnameseDate } from '../2.Backend/utils/dateHelpers.js';
 import { renderBackpackView, enterJiggleMode, exitJiggleMode } from './views/BackpackView.js';
 import { renderGradesView, highlightGradeSlice } from './views/GradesView.js';
 import { renderTimetableGrid, renderTodayView, getSubjectColor } from './views/TimetableGrid.js';
-import { openEditSubjectModal, openEditDriveModal } from './components/EditModal.js';
+import { ensureEditSubjectModalDom, openEditSubjectModal, openEditDriveModal } from './components/modals/EditSubjectModal.js';
+import { ensureAddSubjectModalDom, openAddSubjectModal } from './components/modals/AddSubjectModal.js';
+import { ensureAddWeekModalDom } from './components/modals/AddWeekModal.js';
 import { showToast, initToastContainer } from './components/Toast.js';
 import { initPWA, promptPWAInstall } from '../5.Performance/pwaManager.js';
 import { initVisibilityOptimizer } from '../5.Performance/visibilityOptimizer.js';
@@ -30,9 +32,12 @@ let currentWeekFile = '';
 async function initApp() {
   console.log('[Smart Schedule] 🚀 Khởi tạo hệ thống kiến trúc 5 tầng hoàn chỉnh...');
 
-  // 1. Nạp State trung tâm & Container Toast
+  // 1. Nạp State trung tâm, Container Toast & Khởi tạo DOM Modals
   initApplicationState();
   initToastContainer();
+  ensureEditSubjectModalDom();
+  ensureAddSubjectModalDom();
+  ensureAddWeekModalDom();
 
   // 2. Gắn các hàm tiện ích toàn cục vào window để hỗ trợ HTML onclick
   setupWindowHelpers();

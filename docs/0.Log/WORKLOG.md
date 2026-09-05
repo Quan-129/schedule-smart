@@ -4,6 +4,35 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 15:52] - Chuyển Đổi Thành Công Sang Component-Driven App Shell Architecture & Ràng Buộc Rút Gọn index.html
+
+- **🎯 Mục tiêu**:
+  - Giải quyết nguy cơ `index.html` phình to khi dự án mở rộng quy mô, gây tốn token context và khó bảo trì.
+  - Componentize toàn bộ 3 Popup Modals thành các JS modules độc lập trong `src/1.Frontend/components/modals/`.
+  - Rút gọn `index.html` từ 668 dòng xuống còn ~390 dòng (và có thể mở rộng vô hạn mà không tăng kích thước file HTML).
+  - Bổ sung quy tắc ràng buộc App Shell Architecture vào `AGENTS.md` và `.agents/rules/architecture_rules.md`.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Architecture / Rule]` Cập nhật `AGENTS.md` và `architecture_rules.md` bổ sung điều khoản: `index.html` chỉ đóng vai trò **App Shell Tối Giản (< 150–200 dòng)**, mọi modal/view mở rộng phải được componentize trong `src/1.Frontend/components/`.
+  - `[Frontend / Component Templates]` Tạo các component modules độc lập tự render HTML và quản lý sự kiện:
+    1. `src/1.Frontend/components/modals/EditSubjectModal.js`: Đóng gói toàn bộ template 3 tabs và logic sửa môn, drive link, tỉ lệ điểm.
+    2. `src/1.Frontend/components/modals/AddSubjectModal.js`: Đóng gói template và logic tạo môn học mới.
+    3. `src/1.Frontend/components/modals/AddWeekModal.js`: Đóng gói template và logic thêm tuần học mới.
+    4. `src/1.Frontend/components/layout/LoginScreen.js`: Đóng gói template và logic màn hình Auth Gate.
+    5. `src/1.Frontend/components/layout/GitGuide.js`: Đóng gói template Hướng dẫn Git Accordion.
+  - `[Frontend / HTML Shell]` Rút gọn `index.html` bằng cách thay thế hơn 280 dòng modal tĩnh bằng `<div id="modal-root"></div>`.
+  - `[Frontend / Core]` Nâng cấp `main.js` và `BackpackView.js` kết nối trực tiếp với các modal components.
+  - `[Performance / PWA]` Cập nhật `sw.js` bổ sung các component mới vào `STATIC_ASSETS` và nâng cache version lên `smart-schedule-modular-v20`.
+
+- **💡 Quyết định Kỹ thuật & Kiến trúc**:
+  - Native Component-Driven Architecture: Tách biệt rành mạch giữa App Shell tĩnh và các Component động, giúp hệ thống sẵn sàng mở rộng vô hạn tính năng mà không bao giờ làm nặng file HTML gốc.
+
+- **📌 Trạng thái hiện tại & Kế hoạch tiếp theo (Next Steps)**:
+  - [x] Đã hoàn thành componentize toàn bộ Modals và rút gọn `index.html`.
+  - [x] Đã cập nhật rules và nhật ký dự án.
+
+---
+
 ## 📅 [2026-09-05 15:35] - Tái Cấu Trúc Toàn Diện Modular CSS Architecture & Ràng Buộc Quy Tắc Tối Ưu Token trong AGENTS.md
 
 - **🎯 Mục tiêu**:
