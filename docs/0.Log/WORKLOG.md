@@ -4,6 +4,37 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 23:26] - Mở Rộng Kho 560+ Icons Đa Ngành & Khắc Phục Lỗi Cuộn Ngang / Bị Che Dải Tab
+
+- **🎯 Mục tiêu**:
+  - Mở rộng kho biểu tượng môn học gấp gần 5 lần (từ 120 lên **hơn 560+ icons**) bao quát toàn diện 11 nhóm ngành & biểu tượng đa năng:
+    1. 🤖 *CNTT, Lập trình & AI* (55 icons)
+    2. ⚙️ *Kỹ thuật, Cơ khí & Xây dựng* (55 icons)
+    3. 📐 *Toán học, Vật lý, Hóa học & Sinh học* (50 icons)
+    4. 🧬 *Y Dược, Sức khỏe & Nông Lâm nghiệp* (45 icons)
+    5. 🏛️ *Kinh tế, Tài chính, Kế toán & Quản trị* (55 icons)
+    6. ⚖️ *Luật pháp, Chính trị, Triết học & Xã hội* (45 icons)
+    7. 🌍 *Ngoại ngữ & Ngôn ngữ học* (45 icons)
+    8. 🎨 *Thiết kế, Mỹ thuật, Truyền thông & Âm nhạc* (55 icons)
+    9. 🏃 *Thể thao, GDTC & Rèn luyện* (45 icons)
+    10. ⭐ *Kỹ năng, Đoàn - Hội & Đời sống SV* (55 icons)
+    11. 🔷 *Ký hiệu, Biểu tượng Đa năng & Hình khối* (65 icons)
+  - Khắc phục triệt để lỗi dải tab ngành học bị che khuất ở cạnh phải: Chuyển dải tabs sang cơ chế `flex-wrap` hiển thị rõ ràng 100% tất cả 12 tab.
+  - Khắc phục triệt để thanh cuộn ngang xám ở đáy modal: Khóa cứng `overflow-x: hidden !important;`, lưới co giãn tự động `repeat(auto-fill, minmax(82px, 1fr))`, chỉ cuộn dọc với thanh cuộn custom siêu mỏng gradient tím neon.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Component Modal]` Cập nhật [`src/1.Frontend/components/modals/AddClassModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddClassModal.js):
+    - Mở rộng mảng `POPULAR_SUBJECT_ICONS` lên 560+ items chi tiết với từ khóa tra cứu song ngữ tiếng Việt & tiếng Anh.
+    - Cập nhật dải 12 category buttons: `all`, `tech`, `eng`, `science`, `med`, `biz`, `law`, `lang`, `arts`, `sport`, `life`, `shapes`.
+  - `[Frontend / CSS Modals]` Cập nhật [`src/1.Frontend/styles/6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css):
+    - `.icon-picker-tabs-row`: Chuyển sang `flex-wrap: wrap;` có max-height và scroll tinh gọn.
+    - `.icon-picker-grid-container`: `overflow-x: hidden !important;`, `overflow-y: auto !important;`, `grid-template-columns: repeat(auto-fill, minmax(82px, 1fr));`.
+    - Custom scrollbar mỏng 6px tone tím hồng neon `::-webkit-scrollbar-thumb`.
+    - `.icon-grid-item`: `width: 100%; min-width: 0; box-sizing: border-box;`.
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v54` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 23:20] - Tích Hợp Bộ Chọn Logo / Icon Môn Học (~120 Icon Tiêu Biểu Theo Ngành)
 
 - **🎯 Mục tiêu**:
