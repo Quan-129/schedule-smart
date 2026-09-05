@@ -6,6 +6,27 @@
 
 ---
 
+## 📅 [2026-09-05 13:36] - Thiết Kế Lại Modal Chỉnh Sửa Môn Học Thành 3 Phần Chuyên Nghiệp (Segmented Tab Bar)
+
+- **🎯 Mục tiêu**:
+  - Tái cấu trúc Modal Chỉnh sửa Môn học thành 3 phần rõ ràng, khắc phục hiện tượng dồn nén, rớt dòng nút xóa (-) và mất cân đối giao diện.
+  - Xây dựng thanh điều hướng 3 Tab dạng Segmented Pill: **1. Google Drive**, **2. Tỉ Lệ Điểm (%)**, **3. Quy Chế & Lưu Ý**.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend/HTML]` Nâng cấp `index.html`: Tạo thanh Tab `.modal-nav-tabs` với 3 Tab chuyên biệt, phân chia các pane `.modal-tab-pane` gọn gàng, thêm nút "Mở thử link Drive ↗" và các chip gợi ý nhanh (Preset chips).
+  - `[Frontend/CSS]` Cập nhật `style.css`: Sửa lỗi rớt dòng nút xóa bằng bảng Grid 6 cột chuẩn (`28px 1fr 90px 105px 36px 36px`), căn chỉnh Header và Close button `[X]` cân đối, thêm hiệu ứng chuyển tab mượt mà.
+  - `[Frontend/Components]` Nâng cấp `EditModal.js`: Xử lý chuyển tab tự động, gán preset ghi chú nhanh và mở tab phù hợp khi gọi từ Chiếc Cặp hoặc Bảng Điểm.
+  - `[Config / DevOps]` Nâng cấp Service Worker Cache lên `smart-schedule-modular-v12` trong `sw.js`.
+
+- **💡 Quyết định Kỹ thuật & Kiến trúc**:
+  - *3-Part Segmented Layout*: Thay vì dồn mọi thông tin vào một khung dọc dài gây chật chội, chia thành 3 phần độc lập giúp người dùng tập trung chỉnh sửa nhanh chóng mà không cần cuộn trang.
+
+- **📌 Trạng thái hiện tại & Kế hoạch tiếp theo (Next Steps)**:
+  - [x] Modal 3 phần hiển thị đẹp mắt, trực quan và hiện đại.
+  - [x] Đã đồng bộ và đẩy mã nguồn lên GitHub Pages.
+
+---
+
 ## 📅 [2026-09-05 13:28] - Nâng Cấp Bộ Thoát Chế Độ Chỉnh Sửa Jiggle Mode (Nút Xong, Click Ngoài, Phím ESC)
 
 - **🎯 Mục tiêu**:
