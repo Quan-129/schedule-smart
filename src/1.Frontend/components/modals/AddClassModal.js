@@ -659,6 +659,352 @@ export const POPULAR_SUBJECT_ICONS = [
   { icon: 'fa-solid fa-circle-radiation', label: 'Cảnh báo Nguy hiểm Danger', category: 'shapes' }
 ];
 
+/**
+ * Chuẩn hóa chuỗi tiếng Việt (bỏ dấu, chuyển chữ thường) để đối soát từ khóa
+ * @param {string} str 
+ * @returns {string}
+ */
+export function normalizeVietnamese(str = '') {
+  if (!str || typeof str !== 'string') return '';
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .toLowerCase()
+    .trim();
+}
+
+/**
+ * Bộ quy tắc từ khóa gợi ý Logo / Icon theo chuyên ngành & môn học Đại học
+ */
+export const SUBJECT_KEYWORD_RULES = [
+  // 1. CNTT / Lập trình / Phần mềm / Web / App
+  {
+    regex: /(lap trinh|code|coding|python|c\+\+|java(?!script)|javascript|js|typescript|react|vue|angular|node|frontend|backend|fullstack|html|css|web|mobile|android|ios|flutter|swift|kotlin|terminal|shell|bash|git|github)/i,
+    icons: [
+      { icon: 'fa-solid fa-code', label: 'Lập trình / Code' },
+      { icon: 'fa-brands fa-python', label: 'Python' },
+      { icon: 'fa-brands fa-js', label: 'JavaScript' },
+      { icon: 'fa-brands fa-html5', label: 'HTML5 Web' },
+      { icon: 'fa-brands fa-react', label: 'React Framework' },
+      { icon: 'fa-solid fa-laptop-code', label: 'Kỹ thuật Phần mềm' },
+      { icon: 'fa-solid fa-terminal', label: 'Dòng lệnh Terminal' }
+    ]
+  },
+  // 2. AI / Trí tuệ nhân tạo / Machine Learning / Dữ liệu
+  {
+    regex: /(ai|tri tue nhan tao|machine learning|hoc may|deep learning|data|du lieu|data science|khoa hoc du lieu|nlp|thi giac may tinh|computer vision|robot|robotics|thuat toan|cau truc du lieu|dsa)/i,
+    icons: [
+      { icon: 'fa-solid fa-brain', label: 'Trí tuệ nhân tạo AI' },
+      { icon: 'fa-solid fa-robot', label: 'Robotics / Người máy' },
+      { icon: 'fa-solid fa-microchip', label: 'Vi xử lý AI' },
+      { icon: 'fa-solid fa-database', label: 'Cơ sở dữ liệu Data' },
+      { icon: 'fa-solid fa-chart-simple', label: 'Khoa học Dữ liệu' },
+      { icon: 'fa-solid fa-wand-magic-sparkles', label: 'AI Magic' }
+    ]
+  },
+  // 3. Mạng máy tính / Hệ thống / An ninh mạng / Server / Cloud / OS
+  {
+    regex: /(mang|mang may tinh|network|an toan thong tin|an ninh mang|cyber|security|hacker|mat ma|cryptography|he dieu hanh|os|linux|windows|server|cloud|dam may|devops|docker|kubernetes)/i,
+    icons: [
+      { icon: 'fa-solid fa-network-wired', label: 'Mạng máy tính & Router' },
+      { icon: 'fa-solid fa-shield-halved', label: 'An ninh mạng & Bảo mật' },
+      { icon: 'fa-brands fa-linux', label: 'Hệ điều hành Linux' },
+      { icon: 'fa-solid fa-server', label: 'Máy chủ Server Data' },
+      { icon: 'fa-solid fa-cloud', label: 'Điện toán Đám mây Cloud' },
+      { icon: 'fa-solid fa-lock', label: 'Mật mã & Bảo mật' }
+    ]
+  },
+  // 4. Cơ sở dữ liệu / Database / SQL
+  {
+    regex: /(co so du lieu|csdl|database|sql|nosql|mongodb|oracle|postgresql|mysql)/i,
+    icons: [
+      { icon: 'fa-solid fa-database', label: 'Cơ sở dữ liệu Database' },
+      { icon: 'fa-solid fa-server', label: 'Hệ thống Lưu trữ Server' },
+      { icon: 'fa-solid fa-table-cells', label: 'Bảng dữ liệu Table' },
+      { icon: 'fa-solid fa-hard-drive', label: 'Ổ đĩa & Lưu trữ' }
+    ]
+  },
+  // 5. Toán học / Giải tích / Đại số / Thống kê
+  {
+    regex: /(toan|giai tich|calc|calculus|dai so|algebra|xac suat|thong ke|probability|statistics|roi rac|discrete|vi tich phan|hinh hoc|topology|ma tran|matrix|vecto|vector|phuong trinh)/i,
+    icons: [
+      { icon: 'fa-solid fa-calculator', label: 'Toán học / Máy tính' },
+      { icon: 'fa-solid fa-square-root-variable', label: 'Giải tích Căn bậc hai' },
+      { icon: 'fa-solid fa-chart-line', label: 'Hàm số & Đồ thị' },
+      { icon: 'fa-solid fa-infinity', label: 'Vô cực & Giới hạn' },
+      { icon: 'fa-solid fa-chart-pie', label: 'Xác suất Thống kê' },
+      { icon: 'fa-solid fa-vector-square', label: 'Đại số tuyến tính / Vector' }
+    ]
+  },
+  // 6. Vật lý / Cơ học / Nhiệt học / Quang học / Lượng tử / Hạt nhân
+  {
+    regex: /(vat ly|physics|quang hoc|nhiet hoc|nhiet dong|dien tu truong|luong tu|hat nhan|co hoc|suc ben|vat lieu|song|dao dong|thien van|astronomy|vu tru)/i,
+    icons: [
+      { icon: 'fa-solid fa-atom', label: 'Vật lý Lượng tử / Nguyên tử' },
+      { icon: 'fa-solid fa-wave-square', label: 'Vật lý Sóng & Dao động' },
+      { icon: 'fa-solid fa-magnet', label: 'Từ học & Điện từ' },
+      { icon: 'fa-solid fa-radiation', label: 'Vật lý Hạt nhân' },
+      { icon: 'fa-solid fa-sun', label: 'Quang học & Bức xạ' },
+      { icon: 'fa-solid fa-telescope', label: 'Thiên văn học Vũ trụ' }
+    ]
+  },
+  // 7. Hóa học / Hóa dầu / Hóa phân tích / Hóa hữu cơ - vô cơ
+  {
+    regex: /(hoa|hoa hoc|chemistry|huu co|vo co|hoa ly|phan tich|hoa dau|dung dich|phan ung|kiem nghiem)/i,
+    icons: [
+      { icon: 'fa-solid fa-flask', label: 'Hóa học vô cơ / Bình tam giác' },
+      { icon: 'fa-solid fa-flask-vial', label: 'Hóa học hữu cơ / Phản ứng' },
+      { icon: 'fa-solid fa-vial', label: 'Hóa phân tích / Ống nghiệm' },
+      { icon: 'fa-solid fa-vials', label: 'Phòng thí nghiệm Hóa học' },
+      { icon: 'fa-solid fa-droplet', label: 'Dung dịch & Chuẩn độ' }
+    ]
+  },
+  // 8. Sinh học / Công nghệ sinh học / Môi trường / Sinh thái
+  {
+    regex: /(sinh|sinh hoc|biology|di truyen|vi sinh|cong nghe sinh hoc|te bao|gen|dna|moi truong|sinh thai|thuc vat|dong vat|thuy sinh|rung|lam nghiep)/i,
+    icons: [
+      { icon: 'fa-solid fa-dna', label: 'Sinh học phân tử / DNA' },
+      { icon: 'fa-solid fa-microscope', label: 'Kính hiển vi / Vi sinh' },
+      { icon: 'fa-solid fa-seedling', label: 'Sinh học Thực vật' },
+      { icon: 'fa-solid fa-leaf', label: 'Môi trường & Lâm sinh' },
+      { icon: 'fa-solid fa-recycle', label: 'Bảo vệ Môi trường' },
+      { icon: 'fa-solid fa-bacterium', label: 'Vi khuẩn học' }
+    ]
+  },
+  // 9. Điện - Điện tử - Viễn thông - Tự động hóa - IoT - Điều khiển
+  {
+    regex: /(dien|dien tu|electronic|vi mach|mach dien|circuit|arduino|iot|tu dong hoa|automation|plc|dieu khien|vien thong|telecom|antenna|rf|5g|sensor|cam bien)/i,
+    icons: [
+      { icon: 'fa-solid fa-bolt', label: 'Kỹ thuật Điện / Dòng điện' },
+      { icon: 'fa-solid fa-microchip', label: 'Kỹ thuật Vi mạch / Chip' },
+      { icon: 'fa-solid fa-plug', label: 'Thiết bị & Nguồn điện' },
+      { icon: 'fa-solid fa-tower-cell', label: 'Kỹ thuật Viễn thông 5G' },
+      { icon: 'fa-solid fa-satellite-dish', label: 'Ăng-ten Sóng vô tuyến' },
+      { icon: 'fa-solid fa-robot', label: 'Tự động hóa & Robot' }
+    ]
+  },
+  // 10. Cơ khí - Chế tạo máy - Ô tô - Động cơ - Hàng không
+  {
+    regex: /(co khi|che tao|cad|cam|solidworks|may moc|dong co|piston|thuy luc|khi nen|o to|auto|automotive|xe hoi|xe dien|hang khong|aerospace|may bay|drone)/i,
+    icons: [
+      { icon: 'fa-solid fa-gears', label: 'Kỹ thuật Cơ khí / Bánh răng' },
+      { icon: 'fa-solid fa-wrench', label: 'Bảo trì & Cơ khí' },
+      { icon: 'fa-solid fa-car', label: 'Kỹ thuật Ô tô Automotive' },
+      { icon: 'fa-solid fa-car-side', label: 'Xe hơi & Khung gầm' },
+      { icon: 'fa-solid fa-plane', label: 'Kỹ thuật Hàng không' },
+      { icon: 'fa-solid fa-industry', label: 'Nhà máy Sản xuất' }
+    ]
+  },
+  // 11. Xây dựng - Kiến trúc - Quy hoạch - Cầu đường - Địa chất
+  {
+    regex: /(xay dung|civil|kien truc|architecture|cau duong|trac dia|quy hoach|ket cau|be tong|giao thong|dia chat|khoang san|mo)/i,
+    icons: [
+      { icon: 'fa-solid fa-building', label: 'Kỹ thuật Xây dựng Dân dụng' },
+      { icon: 'fa-solid fa-compass-drafting', label: 'Kiến trúc & Bản vẽ' },
+      { icon: 'fa-solid fa-helmet-safety', label: 'An toàn Lao động Công trình' },
+      { icon: 'fa-solid fa-trowel-bricks', label: 'Thi công Xây dựng' },
+      { icon: 'fa-solid fa-ruler-combined', label: 'Đo đạc & Trắc địa' },
+      { icon: 'fa-solid fa-bridge', label: 'Kỹ thuật Cầu đường' }
+    ]
+  },
+  // 12. Y Dược - Nha khoa - Điều dưỡng - Y học
+  {
+    regex: /(y hoc|y khoa|medicine|medical|bac si|duoc|pharma|thuoc|dieu duong|rang|nha khoa|xương|tim mach|giai phau|ngoai khoa|cap cuu|benh vien)/i,
+    icons: [
+      { icon: 'fa-solid fa-stethoscope', label: 'Y học / Bác sĩ đa khoa' },
+      { icon: 'fa-solid fa-pills', label: 'Dược phẩm & Thuốc' },
+      { icon: 'fa-solid fa-prescription-bottle-medical', label: 'Dược lý lâm sàng' },
+      { icon: 'fa-solid fa-heart-pulse', label: 'Tim mạch & Huyết áp' },
+      { icon: 'fa-solid fa-hospital', label: 'Bệnh viện & Quản lý Y tế' },
+      { icon: 'fa-solid fa-teeth', label: 'Răng Hàm Mặt / Nha khoa' }
+    ]
+  },
+  // 13. Kinh tế - Tài chính - Ngân hàng - Kế toán - Đầu tư
+  {
+    regex: /(kinh te|economic|tai chinh|finance|tien te|ngan hang|banking|chung khoan|dau tu|crypto|bitcoin|ke toan|kiem toan|accounting|audit|thue)/i,
+    icons: [
+      { icon: 'fa-solid fa-coins', label: 'Tài chính Ngân hàng' },
+      { icon: 'fa-solid fa-chart-line', label: 'Thị trường Chứng khoán' },
+      { icon: 'fa-solid fa-receipt', label: 'Kế toán & Hóa đơn' },
+      { icon: 'fa-solid fa-file-invoice-dollar', label: 'Kiểm toán & Thuế' },
+      { icon: 'fa-solid fa-building-columns', label: 'Ngân hàng Trung ương' },
+      { icon: 'fa-solid fa-money-bill-trend-up', label: 'Tăng trưởng Kinh tế' }
+    ]
+  },
+  // 14. Quản trị kinh doanh - Marketing - Thương mại - Logistics
+  {
+    regex: /(quan tri|business|management|mba|kinh doanh|marketing|truyen thong|quang cao|sales|ban hang|logistics|chuoi cung ung|supply chain|kho|xuat nhap khau)/i,
+    icons: [
+      { icon: 'fa-solid fa-briefcase', label: 'Quản trị Kinh doanh' },
+      { icon: 'fa-solid fa-bullhorn', label: 'Marketing & Quảng cáo' },
+      { icon: 'fa-solid fa-truck-fast', label: 'Logistics Vận chuyển' },
+      { icon: 'fa-solid fa-boxes-stacked', label: 'Chuỗi cung ứng & Kho bãi' },
+      { icon: 'fa-solid fa-chart-pie', label: 'Thị phần & Chiến lược' },
+      { icon: 'fa-solid fa-users', label: 'Quản trị Nhân sự HRM' }
+    ]
+  },
+  // 15. Luật - Pháp lý - Chính trị - Triết học - Xã hội học - Lịch sử
+  {
+    regex: /(luat|law|phap ly|phap luat|toa an|tham phan|triet|triet hoc|philosophy|marx|mac le nin|tu tuong|ho chi minh|chinh tri|lich su|lich su dang|dang|xa hoi hoc|dia ly|van hoa)/i,
+    icons: [
+      { icon: 'fa-solid fa-scale-balanced', label: 'Luật học / Cán cân công lý' },
+      { icon: 'fa-solid fa-gavel', label: 'Tòa án & Xét xử' },
+      { icon: 'fa-solid fa-landmark', label: 'Triết học & Tư tưởng chính trị' },
+      { icon: 'fa-solid fa-book-atlas', label: 'Lịch sử & Địa lý' },
+      { icon: 'fa-solid fa-feather-pointed', label: 'Văn hóa & Triết lý' },
+      { icon: 'fa-solid fa-flag', label: 'Lịch sử Đảng & Tư tưởng HCM' }
+    ]
+  },
+  // 16. Ngoại ngữ: Tiếng Anh, Tiếng Nhật, Tiếng Trung, Tiếng Hàn, Tiếng Pháp, Tiếng Đức
+  {
+    regex: /(tieng anh|anh van|english|toeic|ielts|toefl|tieng nhat|japanese|nihongo|kanji|n[1-5]|tieng trung|chinese|hsk|tieng han|korean|topik|tieng phap|french|tieng duc|german|ngon ngu)/i,
+    icons: [
+      { icon: 'fa-solid fa-language', label: 'Ngôn ngữ & Dịch thuật' },
+      { icon: 'fa-solid fa-torii-gate', label: 'Tiếng Nhật Bản' },
+      { icon: 'fa-solid fa-comment-dots', label: 'Giao tiếp Ngoại ngữ' },
+      { icon: 'fa-solid fa-earth-asia', label: 'Tiếng Trung / Đông Á' },
+      { icon: 'fa-solid fa-globe', label: 'Ngôn ngữ Quốc tế' },
+      { icon: 'fa-solid fa-book', label: 'Ngữ pháp & Từ vựng' }
+    ]
+  },
+  // 17. Thiết kế - Đồ họa - Mỹ thuật - Nhiếp ảnh - Âm nhạc - Đa phương tiện
+  {
+    regex: /(thiet ke|design|do hoa|graphic|photoshop|illustrator|figma|ui|ux|ve|my thuat|hoi hoa|am nhac|music|thanh nhac|guitar|piano|quay phim|video|cinema|nhiep anh|chup anh|camera|podcast)/i,
+    icons: [
+      { icon: 'fa-solid fa-pen-nib', label: 'Thiết kế Đồ họa Graphic' },
+      { icon: 'fa-solid fa-palette', label: 'Mỹ thuật & Bảng màu' },
+      { icon: 'fa-solid fa-bezier-curve', label: 'Vector & Illustrator' },
+      { icon: 'fa-solid fa-crop-simple', label: 'UI/UX Design' },
+      { icon: 'fa-solid fa-music', label: 'Âm nhạc & Nhạc lý' },
+      { icon: 'fa-solid fa-camera', label: 'Nhiếp ảnh & Quay phim' }
+    ]
+  },
+  // 18. Thể dục - Thể thao - Điền kinh - Bóng đá - Võ thuật - Gym
+  {
+    regex: /(the duc|the chat|pe|bong da|football|soccer|bong ro|basketball|bong chuyen|volleyball|cau long|badminton|bong ban|boi|swimming|chay|running|dien kinh|gym|fitness|yoga|vo|karate|taekwondo|the thao)/i,
+    icons: [
+      { icon: 'fa-solid fa-futbol', label: 'Bóng đá' },
+      { icon: 'fa-solid fa-basketball', label: 'Bóng rổ' },
+      { icon: 'fa-solid fa-volleyball', label: 'Bóng chuyền' },
+      { icon: 'fa-solid fa-dumbbell', label: 'Gym & Thể hình' },
+      { icon: 'fa-solid fa-person-running', label: 'Điền kinh / Chạy bộ' },
+      { icon: 'fa-solid fa-person-swimming', label: 'Bơi lội' },
+      { icon: 'fa-solid fa-medal', label: 'Huy chương TDTT' }
+    ]
+  },
+  // 19. Đồ án - Khóa luận - Thực tập - Tốt nghiệp - Nghiên cứu
+  {
+    regex: /(do an|capstone|project|khoa luan|thesis|luan van|thuc tap|intern|tot nghiep|chuyen de|seminar|nghien cuu|nckh|bao cao)/i,
+    icons: [
+      { icon: 'fa-solid fa-graduation-cap', label: 'Đồ án Tốt nghiệp / Cử nhân' },
+      { icon: 'fa-solid fa-chalkboard-user', label: 'Báo cáo Thuyết trình Đồ án' },
+      { icon: 'fa-solid fa-rocket', label: 'Dự án Bứt phá Launch' },
+      { icon: 'fa-solid fa-award', label: 'Chứng nhận & Đồ án xuất sắc' },
+      { icon: 'fa-solid fa-trophy', label: 'Bảo vệ Đồ án Điểm cao' },
+      { icon: 'fa-solid fa-briefcase', label: 'Thực tập Doanh nghiệp' }
+    ]
+  }
+];
+
+/**
+ * Gợi ý danh sách Icon Logo môn học dựa trên tên môn người dùng nhập
+ * @param {string} subjectName - Tên môn học
+ * @param {number} maxResults - Số lượng kết quả tối đa (mặc định 6)
+ * @returns {Array<{ icon: string, label: string }>}
+ */
+export function suggestIconsForSubject(subjectName = '', maxResults = 6) {
+  if (!subjectName || typeof subjectName !== 'string') return [];
+  const query = subjectName.trim();
+  if (query.length < 2) return [];
+
+  const normalizedQuery = normalizeVietnamese(query);
+  const results = [];
+  const seenIcons = new Set();
+
+  const addResult = (item) => {
+    if (!item || !item.icon) return;
+    if (!seenIcons.has(item.icon) && results.length < maxResults) {
+      seenIcons.add(item.icon);
+      results.push(item);
+    }
+  };
+
+  // 1. Kiểm tra qua mảng SUBJECT_KEYWORD_RULES
+  for (const rule of SUBJECT_KEYWORD_RULES) {
+    if (rule.regex.test(normalizedQuery) || rule.regex.test(query)) {
+      for (const iconItem of rule.icons) {
+        addResult(iconItem);
+        if (results.length >= maxResults) break;
+      }
+    }
+    if (results.length >= maxResults) break;
+  }
+
+  // 2. Nếu chưa đủ kết quả, tìm kiếm trực tiếp trong POPULAR_SUBJECT_ICONS theo label
+  if (results.length < maxResults) {
+    const words = normalizedQuery.split(/\s+/).filter(w => w.length >= 2);
+    for (const iconItem of POPULAR_SUBJECT_ICONS) {
+      const normLabel = normalizeVietnamese(iconItem.label || '');
+      // Khớp chính xác cụm từ hoặc khớp từ con
+      if (normLabel.includes(normalizedQuery) || words.some(w => normLabel.includes(w))) {
+        addResult({ icon: iconItem.icon, label: iconItem.label });
+        if (results.length >= maxResults) break;
+      }
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Render dải chip gợi ý logo vào DOM và gắn sự kiện click
+ * @param {HTMLElement} wrapEl - Container bao bọc dải gợi ý
+ * @param {HTMLElement} chipsEl - Container chứa các nút chip
+ * @param {Array<Object>} suggestions - Danh sách icon gợi ý
+ * @param {string} currentSelectedIcon - Icon đang được chọn
+ * @param {Function} onSelectIcon - Callback khi người dùng chọn chip
+ */
+export function renderSmartIconSuggestions(wrapEl, chipsEl, suggestions = [], currentSelectedIcon = '', onSelectIcon = null) {
+  if (!wrapEl || !chipsEl) return;
+
+  if (!suggestions || suggestions.length === 0) {
+    wrapEl.classList.add('hidden');
+    chipsEl.innerHTML = '';
+    return;
+  }
+
+  chipsEl.innerHTML = suggestions.map((s, idx) => {
+    const isSelected = currentSelectedIcon && s.icon === currentSelectedIcon;
+    const shortLabel = (s.label || '').split('/')[0].trim();
+    return `
+      <button type="button" class="btn-suggested-icon-chip ${isSelected ? 'active' : ''} ${idx === 0 ? 'is-best-match' : ''}" 
+        data-icon="${escapeHtml(s.icon)}" 
+        title="${escapeHtml(s.label)} (Bấm để áp dụng)">
+        <i class="${escapeHtml(s.icon)}"></i>
+        <span>${escapeHtml(shortLabel)}</span>
+      </button>
+    `;
+  }).join('');
+
+  wrapEl.classList.remove('hidden');
+
+  // Gắn sự kiện click chip
+  chipsEl.querySelectorAll('.btn-suggested-icon-chip').forEach(btn => {
+    btn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      chipsEl.querySelectorAll('.btn-suggested-icon-chip').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const icon = btn.dataset.icon;
+      if (typeof onSelectIcon === 'function') {
+        onSelectIcon(icon);
+      }
+    };
+  });
+}
+
 const TIME_PRESETS = [
   { time: '07:00 - 08:50', period: 'Tiết 2 - 3', label: 'Sáng: Tiết 2-3 (7h-8h50)' },
   { time: '09:00 - 11:50', period: 'Tiết 4 - 6', label: 'Sáng: Tiết 4-6 (9h-11h50)' },
@@ -800,6 +1146,17 @@ export function ensureAddClassModalDom() {
             <div class="input-with-icon" style="flex: 1;">
               <i class="fa-solid fa-book-open input-icon"></i>
               <input type="text" id="class-subject-input" class="form-input-styled" placeholder="Nhập tên môn học (VD: Học máy, Tiếng Nhật 7...)" required autocomplete="off">
+            </div>
+          </div>
+
+          <!-- DẢI GỢI Ý LOGO THÔNG MINH TỰ ĐỘNG KHI GÕ TÊN MÔN -->
+          <div id="add-class-smart-icon-suggestions" class="smart-icon-suggestions-wrap hidden">
+            <div class="suggestions-label">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+              <span>Gợi ý Logo phù hợp:</span>
+            </div>
+            <div class="suggestions-chips-row" id="add-class-smart-icon-chips">
+              <!-- Render động các nút chip logo -->
             </div>
           </div>
         </div>
@@ -1289,6 +1646,10 @@ function renderSubjectChips(selectedSubjectName = '') {
       // Tự động nạp Icon logo của môn
       setSelectedSubjectIcon(sIcon);
 
+      // Ẩn dải gợi ý logo vì đã chọn môn có sẵn
+      const suggestionsWrap = document.getElementById('add-class-smart-icon-suggestions');
+      if (suggestionsWrap) suggestionsWrap.classList.add('hidden');
+
       // Tự động tìm và điền link Drive của môn này từ Chiếc Cặp
       const matched = (state.driveSubjects || []).find(s => s.name.toLowerCase() === sName.toLowerCase());
       if (matched && matched.driveUrl) {
@@ -1740,6 +2101,8 @@ function bindAddClassModalEvents() {
     form.reset();
     updateDriveUrlUi('', false);
     setSelectedSubjectIcon('fa-solid fa-book');
+    const wrapEl = document.getElementById('add-class-smart-icon-suggestions');
+    if (wrapEl) wrapEl.classList.add('hidden');
   };
 
   if (closeBtn) closeBtn.onclick = closeModal;
@@ -1772,17 +2135,39 @@ function bindAddClassModalEvents() {
     };
   }
 
-  // Tự động nhận diện môn có sẵn trong Chiếc Cặp khi gõ tên môn
+  // Tự động nhận diện môn có sẵn trong Chiếc Cặp hoặc GỢI Ý LOGO THÔNG MINH khi gõ tên môn
   if (subjectInput) {
     subjectInput.addEventListener('input', () => {
       const val = subjectInput.value.trim();
+      const wrapEl = document.getElementById('add-class-smart-icon-suggestions');
+      const chipsEl = document.getElementById('add-class-smart-icon-chips');
+
       const matched = (state.driveSubjects || []).find(s => s.name.toLowerCase() === val.toLowerCase());
       if (matched) {
         if (matched.icon) setSelectedSubjectIcon(matched.icon);
         if (matched.driveUrl) updateDriveUrlUi(matched.driveUrl, true);
+        if (wrapEl) wrapEl.classList.add('hidden');
       } else {
         const syncBadge = document.getElementById('drive-sync-badge');
         if (syncBadge) syncBadge.classList.add('hidden');
+
+        // GỢI Ý LOGO THÔNG MINH KHI GÕ TÊN MÔN
+        if (val.length >= 2) {
+          const suggestions = suggestIconsForSubject(val, 6);
+          if (suggestions.length > 0) {
+            renderSmartIconSuggestions(wrapEl, chipsEl, suggestions, pickerState.selectedIcon, (chosenIcon) => {
+              setSelectedSubjectIcon(chosenIcon);
+            });
+            // Tự động áp dụng gợi ý phù hợp nhất đầu tiên
+            if (suggestions[0] && (!pickerState.selectedIcon || pickerState.selectedIcon === 'fa-solid fa-book')) {
+              setSelectedSubjectIcon(suggestions[0].icon);
+            }
+          } else {
+            if (wrapEl) wrapEl.classList.add('hidden');
+          }
+        } else {
+          if (wrapEl) wrapEl.classList.add('hidden');
+        }
       }
     });
   }
@@ -2030,6 +2415,8 @@ export function openAddClassModal(targetDayName = 'Thứ 2', onSave) {
   
   setSelectedSubjectIcon('fa-solid fa-book');
   updateDriveUrlUi('', false);
+  const wrapEl = document.getElementById('add-class-smart-icon-suggestions');
+  if (wrapEl) wrapEl.classList.add('hidden');
 
   modal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
@@ -2082,6 +2469,8 @@ export function openEditClassModal(dayName, classIndex, classData, onSave, onDel
   // Nạp link Drive từ tiết học hoặc từ Chiếc Cặp
   const urlToUse = classData.driveUrl || (matched ? matched.driveUrl : '');
   updateDriveUrlUi(urlToUse, Boolean(matched && matched.driveUrl && matched.driveUrl === urlToUse));
+  const wrapEl = document.getElementById('add-class-smart-icon-suggestions');
+  if (wrapEl) wrapEl.classList.add('hidden');
 
   modal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';

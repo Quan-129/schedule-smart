@@ -4,6 +4,29 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 23:55] - Tính Năng Tự Động Gợi Ý Logo / Biểu Tượng Thông Minh Khi Gõ Tên Môn Học 🪄
+
+- **🎯 Mục tiêu**:
+  - Khi người dùng gõ tên môn học (VD: *Giải tích, Lập trình, AI, Kinh tế, Tiếng Nhật, Thể dục, Triết học, Hóa, Vật lý...*), hệ thống tự động nhận diện từ khóa và gợi ý ra danh sách 4–6 icon phù hợp nhất.
+  - Tự động áp dụng icon có độ khớp cao nhất lên nút preview, đồng thời hiển thị dải chips gợi ý nhanh (`.smart-icon-suggestions-wrap`) dưới ô nhập tên môn để người dùng có thể bấm chọn 1 chạm.
+  - Hỗ trợ cả trên Modal **"Thêm Tiết Học"** (`AddClassModal.js`) và Modal **"Thêm Môn Học Mới"** (`AddSubjectModal.js`).
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Logic Gợi Ý & NLP]` Cập nhật [`src/1.Frontend/components/modals/AddClassModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddClassModal.js):
+    - Xây dựng hàm `normalizeVietnamese(str)` chuẩn hóa tiếng Việt không dấu để matching chính xác.
+    - Xây dựng hệ thống 19 bộ quy tắc từ khóa chuyên sâu `SUBJECT_KEYWORD_RULES` bao phủ toàn bộ các nhóm ngành Đại học (CNTT, AI, Dữ liệu, Mạng, Toán, Vật lý, Hóa, Sinh, Điện, Cơ khí, Ô tô, Xây dựng, Y Dược, Kinh tế, Quản trị, Marketing, Luật, Triết học, Ngoại ngữ, Thiết kế, Thể thao, Đồ án...).
+    - Xây dựng hàm `suggestIconsForSubject(subjectName, maxResults)` kết hợp regex rules & tìm kiếm nhãn trong kho 560+ icon.
+    - Xây dựng hàm `renderSmartIconSuggestions(wrapEl, chipsEl, suggestions, currentIcon, onSelect)` render dải chip gợi ý tương tác 1 chạm.
+    - Tích hợp dải `#add-class-smart-icon-suggestions` dưới ô nhập tên môn và tự động gán icon top 1 khi người dùng gõ.
+  - `[Frontend / Component Modal]` Cập nhật [`src/1.Frontend/components/modals/AddSubjectModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddSubjectModal.js):
+    - Tích hợp dải gợi ý `#add-subj-smart-icon-suggestions` dưới ô nhập tên môn mới.
+    - Tự động gợi ý icon và cập nhật preview `#display-new-subj-icon` theo thời gian thực khi gõ tên môn.
+  - `[Frontend / CSS Modals]` Cập nhật [`src/1.Frontend/styles/6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css):
+    - Thêm styling cho `.smart-icon-suggestions-wrap`, `.suggestions-label`, `.suggestions-chips-row`, `.btn-suggested-icon-chip` chuẩn tone tím than neon glassmorphism với hiệu ứng hover nâng nhẹ và animation lấp lánh `pulseSparkle`.
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v56` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 23:28] - Tích Hợp Bộ Chọn Logo / Icon Môn Học Vào Modal Thêm & Chỉnh Sửa Môn Học Trong Chiếc Cặp
 
 - **🎯 Mục tiêu**:

@@ -8,7 +8,7 @@ import { state, persistDriveSubjects } from '../../../3.Database/state.js';
 import { formatSafeUrl } from '../../../4.Security/urlValidator.js';
 import { showToast } from '../Toast.js';
 import { syncDriveSubjectsToCloud } from '../../../3.Database/auth/FirebaseAuthService.js';
-import { openSubjectIconPicker } from './AddClassModal.js';
+import { openSubjectIconPicker, suggestIconsForSubject, renderSmartIconSuggestions } from './AddClassModal.js';
 
 let modalInitialized = false;
 let currentSelectedIcon = 'fa-solid fa-book';
@@ -54,6 +54,17 @@ export function ensureAddSubjectModalDom() {
                   <input type="text" id="new-subj-name-input" placeholder="Ví dụ: Giải tích 1, Vật lý đại cương..." required autofocus autocomplete="off">
                 </div>
               </div>
+
+              <!-- DẢI GỢI Ý LOGO THÔNG MINH KHI GÕ TÊN MÔN MỚI -->
+              <div id="add-subj-smart-icon-suggestions" class="smart-icon-suggestions-wrap hidden">
+                <div class="suggestions-label">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  <span>Gợi ý Logo phù hợp:</span>
+                </div>
+                <div class="suggestions-chips-row" id="add-subj-smart-icon-chips">
+                  <!-- Render động các nút chip logo -->
+                </div>
+              </div>
             </div>
 
             <!-- MÃ MÔN HỌC -->
@@ -94,6 +105,9 @@ export function openAddSubjectModal() {
   const displayIcon = document.getElementById('display-new-subj-icon');
   if (displayIcon) displayIcon.className = currentSelectedIcon;
 
+  const suggestionsWrap = document.getElementById('add-subj-smart-icon-suggestions');
+  if (suggestionsWrap) suggestionsWrap.classList.add('hidden');
+
   const modal = document.getElementById('add-subject-modal');
   if (modal) {
     modal.classList.remove('hidden');
@@ -105,6 +119,9 @@ export function openAddSubjectModal() {
 export function closeAddSubjectModal() {
   const modal = document.getElementById('add-subject-modal');
   const form = document.getElementById('add-subject-form');
+  const suggestionsWrap = document.getElementById('add-subj-smart-icon-suggestions');
+  if (suggestionsWrap) suggestionsWrap.classList.add('hidden');
+
   if (modal) {
     modal.classList.remove('active');
     modal.classList.add('hidden');
@@ -123,6 +140,7 @@ export function initAddSubjectModal() {
   const cancelBtn = document.getElementById('add-subject-cancel-btn');
   const form = document.getElementById('add-subject-form');
   const iconTriggerBtn = document.getElementById('btn-open-new-subj-icon-picker');
+  const nameInput = document.getElementById('new-subj-name-input');
 
   if (closeBtn) closeBtn.onclick = closeAddSubjectModal;
   if (cancelBtn) cancelBtn.onclick = closeAddSubjectModal;
@@ -136,6 +154,35 @@ export function initAddSubjectModal() {
         if (displayIcon) displayIcon.className = newIcon;
       });
     };
+  }
+
+  // Tự động gợi ý Logo / Icon khi gõ tên môn học mới
+  if (nameInput) {
+    nameInput.addEventListener('input', () => {
+      const val = nameInput.value.trim();
+      const wrapEl = document.getElementById('add-subj-smart-icon-suggestions');
+      const chipsEl = document.getElementById('add-subj-smart-icon-chips');
+      const displayIcon = document.getElementById('display-new-subj-icon');
+
+      if (val.length >= 2) {
+        const suggestions = suggestIconsForSubject(val, 6);
+        if (suggestions.length > 0) {
+          renderSmartIconSuggestions(wrapEl, chipsEl, suggestions, currentSelectedIcon, (chosenIcon) => {
+            currentSelectedIcon = chosenIcon;
+            if (displayIcon) displayIcon.className = chosenIcon;
+          });
+          // Tự động áp dụng icon tốt nhất nếu chưa chọn thủ công
+          if (suggestions[0] && (!currentSelectedIcon || currentSelectedIcon === 'fa-solid fa-book')) {
+            currentSelectedIcon = suggestions[0].icon;
+            if (displayIcon) displayIcon.className = suggestions[0].icon;
+          }
+        } else {
+          if (wrapEl) wrapEl.classList.add('hidden');
+        }
+      } else {
+        if (wrapEl) wrapEl.classList.add('hidden');
+      }
+    });
   }
 
   if (form) {
