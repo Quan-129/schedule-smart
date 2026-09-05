@@ -13,8 +13,8 @@ import { renderBackpackView, enterJiggleMode, exitJiggleMode } from './views/Bac
 import { renderGradesView, highlightGradeSlice } from './views/GradesView.js';
 import { renderTimetableGrid, renderTodayView, getSubjectColor } from './views/TimetableGrid.js';
 import { ensureEditSubjectModalDom, openEditSubjectModal, openEditDriveModal } from './components/modals/EditSubjectModal.js';
-import { ensureAddSubjectModalDom, openAddSubjectModal } from './components/modals/AddSubjectModal.js';
-import { ensureAddWeekModalDom } from './components/modals/AddWeekModal.js';
+import { ensureAddWeekModalDom, openAddWeekModal, initAddWeekModal } from './components/modals/AddWeekModal.js';
+import { ensureDeleteWeekModalDom, openDeleteWeekModal } from './components/modals/DeleteWeekModal.js';
 import { ensureSubjectDetailModalDom, openSubjectDetailModal } from './components/modals/SubjectDetailModal.js';
 import { ensureAddClassModalDom, openAddClassModal, openEditClassModal } from './components/modals/AddClassModal.js';
 import { showToast, initToastContainer } from './components/Toast.js';
@@ -40,6 +40,7 @@ async function initApp() {
   ensureEditSubjectModalDom();
   ensureAddSubjectModalDom();
   ensureAddWeekModalDom();
+  ensureDeleteWeekModalDom();
   ensureSubjectDetailModalDom();
   ensureAddClassModalDom();
 
@@ -84,7 +85,24 @@ async function initApp() {
 
   // 10. Gắn các sự kiện Modal Thêm Môn, Thêm Tuần, Theme, Print, Raw Editor & Hero Toggle
   initAddSubjectModal();
-  initAddWeekModal();
+  initAddWeekModal(
+    () => currentRawMarkdown,
+    (newWeekData) => {
+      availableWeeks.push({
+        id: newWeekData.id,
+        title: newWeekData.title,
+        startDate: newWeekData.startDate,
+        filename: newWeekData.filename,
+        description: newWeekData.desc
+      });
+      localStorage.setItem(`smart_schedule_custom_md_${newWeekData.filename}`, newWeekData.mdContent);
+      const customWeeks = availableWeeks.filter(w => w.filename.startsWith('custom_'));
+      localStorage.setItem('smart_schedule_custom_weeks', JSON.stringify(customWeeks));
+      renderWeekDropdownOptions(newWeekData.filename);
+      loadWeekSchedule(newWeekData.filename);
+      showToast(`Đã tạo thành công ${newWeekData.title}!`);
+    }
+  );
   initThemeToggle();
   initPrintButton();
   initHeroToggle();
@@ -244,11 +262,21 @@ async function initWeekSelector() {
   const prevBtn = document.getElementById('prev-week-btn');
   const nextBtn = document.getElementById('next-week-btn');
   const addWeekNavBtn = document.getElementById('btn-add-week-modal');
+  const deleteWeekNavBtn = document.getElementById('btn-delete-week');
+
+  let deletedWeekIds = [];
+  try {
+    const delRaw = localStorage.getItem('smart_schedule_deleted_weeks');
+    if (delRaw) deletedWeekIds = JSON.parse(delRaw);
+  } catch (e) {}
 
   try {
     const res = await fetch('schedules/index.json');
     if (res.ok) {
-      availableWeeks = await res.json();
+      const fetched = await res.json();
+      if (Array.isArray(fetched)) {
+        availableWeeks = fetched.filter(w => !deletedWeekIds.includes(w.id) && !deletedWeekIds.includes(w.filename));
+      }
     }
   } catch (e) {
     console.warn('[Schedule] Không tải được schedules/index.json, dùng danh sách dự phòng:', e);
@@ -258,7 +286,7 @@ async function initWeekSelector() {
     availableWeeks = [
       { id: 'tuan-35', title: 'Tuần 35 (24/08)', filename: 'schedules/tuan-35.md', description: 'Tuần 35' },
       { id: 'tuan-36', title: 'Tuần 36 (31/08)', filename: 'schedules/tuan-36.md', description: 'Tuần 36' }
-    ];
+    ].filter(w => !deletedWeekIds.includes(w.id) && !deletedWeekIds.includes(w.filename));
   }
 
   // Nạp thêm các tuần do người dùng tự tạo từ LocalStorage
@@ -268,7 +296,7 @@ async function initWeekSelector() {
       const customWeeks = JSON.parse(customWeeksRaw);
       if (Array.isArray(customWeeks)) {
         customWeeks.forEach(cw => {
-          if (!availableWeeks.some(w => w.filename === cw.filename || w.id === cw.id)) {
+          if (!deletedWeekIds.includes(cw.id) && !deletedWeekIds.includes(cw.filename) && !availableWeeks.some(w => w.filename === cw.filename || w.id === cw.id)) {
             availableWeeks.push(cw);
           }
         });
@@ -276,6 +304,17 @@ async function initWeekSelector() {
     } catch (err) {
       console.error('Lỗi khi nạp custom weeks:', err);
     }
+  }
+
+  if (availableWeeks.length === 0) {
+    const fallbackWeek = {
+      id: 'tuan-moi',
+      title: 'Tuần học mới (Trống)',
+      startDate: '',
+      filename: 'custom_tuan-moi.md',
+      description: 'Lịch học trống'
+    };
+    availableWeeks.push(fallbackWeek);
   }
 
   renderWeekDropdownOptions();
@@ -325,9 +364,78 @@ async function initWeekSelector() {
     };
   }
 
+  if (deleteWeekNavBtn) {
+    deleteWeekNavBtn.onclick = () => {
+      const currentWeekObj = availableWeeks.find(w => w.filename === currentWeekFile) || availableWeeks[0];
+      if (!currentWeekObj) {
+        showToast('Không có tuần nào để xóa!');
+        return;
+      }
+      openDeleteWeekModal(currentWeekObj, state.scheduleData, (pendingWeek) => {
+        handleDeleteCurrentWeek(pendingWeek);
+      });
+    };
+  }
+
   // Tự động nhận diện tuần hiện tại theo ngày thực tế
   const initialWeek = getInitialWeekFilename();
   await loadWeekSchedule(initialWeek);
+}
+
+/**
+ * Xử lý xóa tuần học hiện tại khỏi danh sách và đồng bộ LocalStorage
+ * @param {Object} weekObj 
+ */
+function handleDeleteCurrentWeek(weekObj) {
+  if (!weekObj) return;
+
+  // 1. Xóa Markdown trong LocalStorage nếu có
+  localStorage.removeItem(`smart_schedule_custom_md_${weekObj.filename}`);
+
+  // 2. Cập nhật danh sách custom_weeks nếu là tuần tự tạo
+  let customWeeks = [];
+  try {
+    const raw = localStorage.getItem('smart_schedule_custom_weeks');
+    if (raw) customWeeks = JSON.parse(raw);
+  } catch (e) {}
+  customWeeks = customWeeks.filter(w => w.filename !== weekObj.filename && w.id !== weekObj.id);
+  localStorage.setItem('smart_schedule_custom_weeks', JSON.stringify(customWeeks));
+
+  // 3. Thêm vào danh sách các tuần đã xóa smart_schedule_deleted_weeks
+  let deletedWeekIds = [];
+  try {
+    const delRaw = localStorage.getItem('smart_schedule_deleted_weeks');
+    if (delRaw) deletedWeekIds = JSON.parse(delRaw);
+  } catch (e) {}
+  if (!deletedWeekIds.includes(weekObj.id)) deletedWeekIds.push(weekObj.id);
+  if (!deletedWeekIds.includes(weekObj.filename)) deletedWeekIds.push(weekObj.filename);
+  localStorage.setItem('smart_schedule_deleted_weeks', JSON.stringify(deletedWeekIds));
+
+  // 4. Cập nhật availableWeeks trong bộ nhớ
+  const deletedIndex = availableWeeks.findIndex(w => w.filename === weekObj.filename);
+  availableWeeks = availableWeeks.filter(w => w.filename !== weekObj.filename);
+
+  // 5. Nếu hết tuần, tạo 1 tuần trống mặc định
+  if (availableWeeks.length === 0) {
+    const fallbackWeek = {
+      id: 'tuan-moi',
+      title: 'Tuần học mới (Trống)',
+      startDate: '',
+      filename: 'custom_tuan-moi.md',
+      description: 'Lịch học trống'
+    };
+    availableWeeks.push(fallbackWeek);
+    localStorage.setItem(`smart_schedule_custom_md_${fallbackWeek.filename}`, generateEmptyWeekMarkdown('Tuần học mới'));
+  }
+
+  // 6. Xác định tuần tiếp theo để hiển thị
+  const nextWeek = availableWeeks[deletedIndex] || availableWeeks[deletedIndex - 1] || availableWeeks[0];
+  
+  // 7. Render lại Dropdown và load tuần mới
+  renderWeekDropdownOptions(nextWeek.filename);
+  loadWeekSchedule(nextWeek.filename);
+
+  showToast(`Đã xóa thành công ${weekObj.title}!`);
 }
 
 /**

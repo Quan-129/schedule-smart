@@ -4,6 +4,32 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 21:20] - Xây Dựng Tính Năng Xóa Tuần Học Trực Quan & Đồng Bộ LocalStorage
+
+- **🎯 Mục tiêu**:
+  - Bổ sung tính năng **Xóa Tuần Học** cho phép người dùng xóa bất kỳ tuần nào không còn dùng (tuần hệ thống hoặc tuần tự tạo).
+  - Tích hợp nút Xóa Tuần trực tiếp trên thanh điều hướng tuần ở Navbar kèm hộp thoại xác nhận cảnh báo an toàn.
+  - Tự động chuyển đổi mượt mà sang tuần kế tiếp và bảo toàn dữ liệu sau khi tải lại trang web.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Component]` Tạo mới [`src/1.Frontend/components/modals/DeleteWeekModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/DeleteWeekModal.js):
+    - Hiển thị thông tin tổng hợp của tuần sắp xóa (Tên tuần, số môn, số tiết học).
+    - Thiết kế Glassmorphism Dark Mode sang trọng, icon cảnh báo phát sáng đỏ và nút Xác Nhận Xóa trực quan.
+  - `[Frontend / App Shell & Navbar]` Cập nhật [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html) và [`2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css):
+    - Thêm nút `#btn-delete-week` (`.btn-delete-week-nav`) với icon thùng rác `fa-trash-can` nằm liền kề nút `+ Thêm Tuần`.
+    - Hiệu ứng hover đỏ phát sáng quyến rũ, ăn khớp với thiết kế hiện đại của thanh điều hướng.
+  - `[Frontend / Main Logic]` Nâng cấp [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    - Hàm `handleDeleteCurrentWeek(weekObj)`:
+      * Xóa nội dung Markdown tùy chỉnh `smart_schedule_custom_md_${filename}` trong `localStorage`.
+      * Cập nhật danh sách tuần tự tạo `smart_schedule_custom_weeks`.
+      * Lưu mã định danh tuần vào danh sách `smart_schedule_deleted_weeks` để ngăn tuần hệ thống bị nạp lại sau khi refresh trang.
+      * Tự động điều hướng và hiển thị tuần liền kề (trước hoặc sau).
+      * Tự động tạo 1 tuần trống mới nếu người dùng xóa hết tất cả các tuần.
+    - Kết nối đầy đủ callback cho modal Thêm Tuần [`AddWeekModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddWeekModal.js) để tạo tuần mới và cập nhật ngay trên giao diện.
+  - `[Performance / Service Worker]` Cập nhật [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js) lên `smart-schedule-modular-v31` và thêm `DeleteWeekModal.js` vào bộ nhớ đệm ngoại tuyến.
+
+---
+
 ## 📅 [2026-09-05 21:10] - Tách Lịch Học 7 Khung Ngày Riêng Biệt & Sửa Triệt Để Lỗi Tự Động Gắn Khung Hôm Nay Ở Thứ 7
 
 - **🎯 Mục tiêu**:

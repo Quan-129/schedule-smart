@@ -4,7 +4,7 @@
  * ==========================================================================
  */
 
-const CACHE_NAME = 'smart-schedule-modular-v30';
+const CACHE_NAME = 'smart-schedule-modular-v31';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -24,6 +24,7 @@ const STATIC_ASSETS = [
   './src/1.Frontend/components/modals/EditSubjectModal.js',
   './src/1.Frontend/components/modals/AddSubjectModal.js',
   './src/1.Frontend/components/modals/AddWeekModal.js',
+  './src/1.Frontend/components/modals/DeleteWeekModal.js',
   './src/1.Frontend/components/modals/AddClassModal.js',
   './src/1.Frontend/components/modals/SubjectDetailModal.js',
   './src/1.Frontend/components/layout/LoginScreen.js',
