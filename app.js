@@ -1288,24 +1288,47 @@ function renderBackpackView() {
       handleSubjectClick(subject.code);
     };
 
-    // Build Card HTML (Delete badge if jiggle mode, pencil if normal)
-    const deleteBadgeHtml = state.isJiggleMode ? `
-      <button class="btn-delete-node-badge" title="Xóa môn ${escapeHtml(subject.name)}" onclick="deleteSubjectCard('${escapeHtml(subject.code)}', event)">
-        <i class="fa-solid fa-minus"></i>
-      </button>
-    ` : '';
-
-    // Mini Grade Breakdown Progress Bar & Pills
+    // Calculate Circular Ring SVG Segments for Grade Breakdown
     const gradeItems = subject.gradeItems || [];
     const totalW = gradeItems.reduce((acc, cur) => acc + (Number(cur.weight) || 0), 0);
-    
-    const gradeBarHtml = totalW > 0 ? `
-      <div class="bp-app-grade-bar">
-        ${gradeItems.map(g => `
-          <div class="bp-grade-segment" style="width: ${(Number(g.weight) / totalW) * 100}%; background-color: ${g.color || '#6366f1'};" title="${escapeHtml(g.name)}: ${g.weight}%"></div>
-        `).join('')}
-      </div>
-    ` : '';
+    const radius = 48;
+    const circumference = 2 * Math.PI * radius; // ~301.59
+    let cumulative = 0;
+
+    let ringSlicesHtml = '';
+    if (totalW > 0) {
+      ringSlicesHtml = gradeItems.map(g => {
+        const weightNum = Number(g.weight) || 0;
+        const strokeDash = (weightNum / totalW) * circumference;
+        const strokeOffset = -(cumulative / totalW) * circumference;
+        cumulative += weightNum;
+        return `
+          <circle class="bp-ring-slice"
+            cx="55" cy="55" r="${radius}"
+            fill="none"
+            stroke="${g.color || color}"
+            stroke-width="6.5"
+            stroke-dasharray="${strokeDash} ${circumference}"
+            stroke-dashoffset="${strokeOffset}"
+            stroke-linecap="round"
+          >
+            <title>${escapeHtml(g.name)}: ${weightNum}%</title>
+          </circle>
+        `;
+      }).join('');
+    } else {
+      ringSlicesHtml = `
+        <circle class="bp-ring-slice"
+          cx="55" cy="55" r="${radius}"
+          fill="none"
+          stroke="${color}"
+          stroke-width="5"
+          stroke-dasharray="${circumference} ${circumference}"
+          stroke-dashoffset="0"
+          opacity="0.5"
+        />
+      `;
+    }
 
     const gradePillsHtml = gradeItems.length > 0 ? `
       <div class="bp-grade-pill-row">
@@ -1316,25 +1339,38 @@ function renderBackpackView() {
       </div>
     ` : '';
 
+    const deleteBadgeHtml = state.isJiggleMode ? `
+      <button class="btn-delete-node-badge" title="Xóa môn ${escapeHtml(subject.name)}" onclick="deleteSubjectCard('${escapeHtml(subject.code)}', event)">
+        <i class="fa-solid fa-minus"></i>
+      </button>
+    ` : '';
+
     btn.innerHTML = `
-      ${deleteBadgeHtml}
-      <div class="bp-app-top">
-        <span class="bp-app-code">${escapeHtml(subject.code)}</span>
+      <div class="bp-circle-wrapper">
+        <svg class="bp-circle-ring-svg" viewBox="0 0 110 110">
+          <circle class="bp-ring-track" cx="55" cy="55" r="${radius}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6.5" />
+          ${ringSlicesHtml}
+        </svg>
+
+        <div class="bp-circle-core">
+          <span class="bp-app-code">${escapeHtml(subject.code)}</span>
+          <div class="bp-app-icon-wrapper">
+            <i class="${icon}"></i>
+          </div>
+          <span class="bp-circle-total-val">${totalW > 0 ? totalW + '%' : '100%'}</span>
+        </div>
+
+        ${deleteBadgeHtml}
         <button class="btn-edit-node-pencil" title="Chỉnh sửa link Google Drive & Tỉ lệ điểm môn ${escapeHtml(subject.name)}" onclick="editSubjectDriveLink('${escapeHtml(subject.code)}', event)">
           <i class="fa-solid fa-pen"></i>
         </button>
       </div>
-      
-      <div class="bp-app-icon-wrapper">
-        <i class="${icon}"></i>
-      </div>
 
       <div class="bp-app-details">
-        <span class="bp-app-title">${escapeHtml(subject.name)}</span>
+        <span class="bp-app-title" title="${escapeHtml(subject.name)}">${escapeHtml(subject.name)}</span>
         <span class="bp-app-drive-status ${hasDrive ? '' : 'not-set'}">
           ${hasDrive ? '<i class="fa-brands fa-google-drive"></i> Drive ↗' : '<i class="fa-solid fa-link-slash"></i> Chưa gắn'}
         </span>
-        ${gradeBarHtml}
         ${gradePillsHtml}
       </div>
     `;
@@ -1351,8 +1387,15 @@ function renderBackpackView() {
     openAddSubjectModal();
   };
   addBtn.innerHTML = `
-    <i class="fa-solid fa-circle-plus"></i>
-    <span>Thêm Môn</span>
+    <div class="bp-circle-wrapper">
+      <div class="bp-circle-core bp-circle-add-core">
+        <i class="fa-solid fa-plus"></i>
+      </div>
+    </div>
+    <div class="bp-app-details">
+      <span class="bp-app-title">Thêm Môn</span>
+      <span class="bp-app-drive-status" style="visibility: hidden;">--</span>
+    </div>
   `;
   elements.backpackLauncherGrid.appendChild(addBtn);
 }

@@ -1880,126 +1880,205 @@ body.theme-light .bg-glow {
 
 .bp-launcher-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 1.25rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 1.6rem 1rem;
+  margin-bottom: 2.5rem;
+  justify-items: center;
 }
 
 @media (max-width: 768px) {
   .bp-launcher-grid {
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 0.85rem;
+    gap: 1.25rem 0.65rem;
   }
 }
 
-/* Individual Square App Button */
+/* Circular Subject Node Button */
 .bp-app-btn {
-  aspect-ratio: 1 / 1;
-  background: var(--bg-card);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 0.9rem 0.75rem;
+  width: 100%;
+  max-width: 140px;
+  background: transparent;
+  border: none;
+  padding: 0.35rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.45rem;
   cursor: pointer;
   position: relative;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
   user-select: none;
   -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.bp-app-btn::before {
-  content: '';
+.bp-app-btn:hover {
+  transform: translateY(-4px);
+}
+
+.bp-app-btn:active {
+  transform: scale(0.96);
+}
+
+/* Circular Orb & Donut Ring Wrapper */
+.bp-circle-wrapper {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.bp-circle-ring-svg {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 4px;
-  background: var(--app-color, var(--accent-primary));
-  opacity: 0.85;
+  height: 100%;
+  transform: rotate(-90deg);
+  overflow: visible;
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.35));
+  transition: filter 0.3s ease;
 }
 
-.bp-app-btn:hover {
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25);
-  border-color: var(--app-color, var(--accent-primary));
+.bp-app-btn:hover .bp-circle-ring-svg {
+  filter: drop-shadow(0 0 10px var(--app-color, var(--accent-primary)));
 }
 
-.bp-app-btn:active {
-  transform: scale(0.97);
+.bp-ring-slice {
+  transition: stroke-dasharray 0.35s ease, stroke-dashoffset 0.35s ease;
 }
 
-.bp-app-top {
-  width: 100%;
+/* Inner Circular Core / Hub */
+.bp-circle-core {
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.08), transparent 75%), var(--bg-secondary);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  font-size: 0.72rem;
-  font-weight: 700;
-  font-family: var(--font-mono);
+  justify-content: center;
+  gap: 0.1rem;
   z-index: 2;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bp-app-btn:hover .bp-circle-core {
+  transform: scale(1.05);
+  border-color: var(--app-color, var(--accent-primary));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 12px rgba(255, 255, 255, 0.06);
 }
 
 .bp-app-code {
+  font-size: 0.62rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
   color: var(--app-color, var(--accent-primary));
-  background: rgba(255, 255, 255, 0.05);
-  padding: 0.1rem 0.35rem;
-  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.04rem 0.32rem;
+  border-radius: var(--radius-full);
+  line-height: 1;
 }
 
-/* Pencil Button in Top-Right Corner */
+/* Center Icon Inside Circle */
+.bp-app-icon-wrapper {
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.1rem 0;
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.bp-app-btn:hover .bp-app-icon-wrapper {
+  transform: scale(1.15);
+  color: var(--app-color, var(--accent-primary));
+}
+
+.bp-circle-total-val {
+  font-size: 0.6rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+/* Pencil Button in Circular Orbit (Top-Right) */
 .btn-edit-node-pencil {
+  position: absolute;
+  top: 0;
+  right: 0;
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 0.72rem;
   cursor: pointer;
+  z-index: 5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   transition: all 0.2s ease;
 }
 
 .btn-edit-node-pencil:hover {
-  background: rgba(245, 158, 11, 0.25);
-  color: #f59e0b;
+  background: #f59e0b;
+  color: #ffffff;
   border-color: #f59e0b;
-  transform: scale(1.18);
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+  transform: scale(1.15);
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.5);
 }
 
-/* Center Icon Wrapper */
-.bp-app-icon-wrapper {
-  width: 50px;
-  height: 50px;
-  border-radius: 16px;
+/* Delete badge in Circular Orbit (Top-Left) */
+.btn-delete-node-badge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 26px;
+  height: 26px;
+  background: #ef4444;
+  color: #ffffff;
+  border: 2px solid var(--bg-secondary);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  color: var(--app-color, var(--accent-primary));
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: transform 0.25s ease, background 0.25s ease;
-  margin: 0.15rem 0;
+  font-size: 0.68rem;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5);
+  animation: badgePopIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.15s ease, background 0.15s ease;
 }
 
-.bp-app-btn:hover .bp-app-icon-wrapper {
-  transform: scale(1.12);
-  background: rgba(255, 255, 255, 0.08);
+.btn-delete-node-badge:hover {
+  transform: scale(1.2);
+  background: #dc2626;
+}
+
+/* Circular Add Subject Button */
+.bp-circle-add-core {
+  border: 2px dashed var(--border-color) !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  transition: all 0.25s ease;
+}
+
+.bp-app-btn.btn-add-app:hover .bp-circle-add-core {
+  border-color: var(--accent-primary) !important;
+  color: var(--accent-primary);
+  background: var(--accent-subtle) !important;
+  transform: scale(1.08);
 }
 
 /* App Bottom Details */
@@ -2018,6 +2097,7 @@ body.theme-light .bg-glow {
   color: var(--text-primary);
   line-height: 1.25;
   width: 100%;
+  max-width: 130px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
