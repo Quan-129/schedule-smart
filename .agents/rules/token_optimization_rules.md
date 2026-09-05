@@ -21,6 +21,7 @@ Mọi AI Agent khi làm việc trên repository này **BẮT BUỘC TỰ ĐỘNG
 1. **Tự động đọc `WORKLOG.md` (Top 25 dòng)**: Khi bắt đầu một phiên làm việc hoặc tiếp tục sau khi bị nén context (compaction), Agent chỉ cần đọc 1–2 entry mới nhất ở đầu [docs/0.Log/WORKLOG.md](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/docs/0.Log/WORKLOG.md) để nắm toàn bộ quyết định kỹ thuật và việc cần làm tiếp theo.
 2. **Giữ file nhỏ gọn (< 250–300 dòng)**: Phân tách mô-đun hóa 5 tầng (`src/1.Frontend/`, `src/2.Backend/`, `src/3.Database/`, `src/4.Security/`, `src/5.Performance/`) để mỗi file chỉ đảm nhiệm 1 việc.
 3. **Modular CSS (`src/1.Frontend/styles/`)**: Tuyệt đối không đọc/sửa file CSS nguyên khối hàng nghìn dòng. Luôn mở đúng file CSS component tương ứng (`1.variables.css`, `2.navbar.css`, `3.timetable-grid.css`, `4.grade-solver.css`, `5.backpack-drive.css`, `6.modals.css`, `7.markdown-editor.css`, `8.responsive.css`), giúp tiết kiệm đến 90% token mỗi phiên làm việc.
+4. **App Shell & Dynamic Component Architecture**: Giữ `index.html` tối giản (< 120–150 dòng) làm App Shell. Mọi popup modals, forms và sub-views đều phải được đóng gói vào `src/1.Frontend/components/` để AI chỉ cần đọc và sửa component tương ứng ~50–150 dòng thay vì tải toàn bộ file HTML khổng lồ.
 
 ---
 
