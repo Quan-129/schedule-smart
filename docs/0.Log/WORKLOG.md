@@ -4,6 +4,27 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 14:40] - Tối Ưu Hóa Responsive Layout Toàn Diện Cho Modal, Form & Controls Trên Mobile/Tablet
+
+- **🎯 Mục tiêu**:
+  - Đảm bảo toàn bộ hệ thống Modal ("Thêm Tuần Học Mới", "Thêm Môn Học Mới", "Chỉnh Sửa Môn & Điểm"), Forms và Grid hiển thị hoàn hảo, không bị tràn viền hay xô lệch trên các kích thước màn hình nhỏ (Mobile 360px–600px, Tablet 600px–900px).
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / CSS Grid]` Thiết lập class `.modal-grid-2col` hỗ trợ chia 2 cột trên desktop và tự động co thành 1 cột mượt mà trên mobile (< 540px).
+  - `[Frontend / Responsive Specs]` Bổ sung media queries chi tiết cho `.modal-backdrop`, `.modal-card`, `.modal-header`, `.modal-form`, `.modal-nav-tabs`, `.modal-footer` và các form inputs:
+    + Căn chỉnh padding, font-size, touch target của nút bấm và input tối ưu cho thao tác chạm trên điện thoại.
+    + Giới hạn chiều cao và thanh cuộn tự động thích ứng với viewport chiều dọc (`calc(90vh - 150px)`).
+  - `[Performance / PWA]` Nâng cấp `CACHE_NAME` lên `smart-schedule-modular-v15` trong `sw.js`.
+
+- **💡 Quyết định Kỹ thuật & Kiến trúc**:
+  - Thiết kế Mobile-First Fluid Adapting: loại bỏ hoàn toàn các inline-style cố định, sử dụng hệ thống token và class linh hoạt.
+
+- **📌 Trạng thái hiện tại & Kế hoạch tiếp theo (Next Steps)**:
+  - [x] Toàn bộ hệ thống Modal và Form đã đạt chuẩn responsive 100% trên mọi thiết bị.
+  - [x] Sẵn sàng commit và push lên GitHub remote.
+
+---
+
 ## 📅 [2026-09-05 14:22] - Nâng Cấp Thẩm Mỹ UI Cao Cấp Cho Toàn Bộ Form & Modal Controls
 
 - **🎯 Mục tiêu**:
