@@ -1134,112 +1134,193 @@ body.theme-light .form-group-styled textarea:hover {
 }
 
 /* ==========================================================================
-   ADD / EDIT CLASS MODAL SPECIFIC STYLES
+   ADD / EDIT CLASS MODAL SPECIFIC STYLES (PREMIUM GLASSMORPHISM)
    ========================================================================== */
+
+.add-class-modal-card {
+  max-width: 580px;
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65), 0 0 35px rgba(99, 102, 241, 0.18);
+  animation: modalPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Input With Icon (Icon lọt vào trong khung) */
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-with-icon .input-icon {
+  position: absolute;
+  left: 0.95rem;
+  color: var(--accent-primary, #818cf8);
+  font-size: 0.92rem;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.85;
+}
+
+.input-with-icon input,
+.input-with-icon select {
+  width: 100%;
+  padding: 0.72rem 0.95rem 0.72rem 2.65rem !important;
+  background: rgba(15, 23, 42, 0.7) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 10px !important;
+  color: #ffffff !important;
+  font-size: 0.88rem !important;
+  font-weight: 500 !important;
+  outline: none !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.input-with-icon input:focus,
+.input-with-icon select:focus {
+  border-color: #6366f1 !important;
+  background: rgba(15, 23, 42, 0.95) !important;
+  box-shadow: 0 0 0 3.5px rgba(99, 102, 241, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+}
+
+.input-with-icon input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.65;
+}
+
+/* Dual Column Row for Time & Period */
+.input-row-dual {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 480px) {
+  .input-row-dual {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+}
 
 /* Subject Chips Picker */
 .subject-chips-picker {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
-  max-height: 120px;
+  max-height: 105px;
   overflow-y: auto;
-  padding: 0.35rem 0.25rem;
+  padding: 0.2rem 0;
+  margin-bottom: 0.25rem;
 }
 
 .subject-chip-btn {
-  background: var(--bg-tertiary);
-  border: 1.5px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 0.35rem 0.65rem;
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  padding: 0.35rem 0.75rem;
+  color: #e2e8f0;
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  transition: all 0.2s ease;
+  gap: 0.45rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
 }
 
+.subject-chip-btn i {
+  font-size: 0.8rem;
+  color: var(--chip-color, #818cf8);
+}
+
 .subject-chip-btn:hover {
-  background: var(--accent-subtle);
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
+  background: rgba(99, 102, 241, 0.15);
+  border-color: #818cf8;
+  color: #ffffff;
   transform: translateY(-1px);
 }
 
-.subject-chip-btn.selected {
-  background: var(--accent-gradient);
+.subject-chip-btn.active {
+  background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
   border-color: transparent;
   color: #ffffff;
-  box-shadow: 0 3px 10px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
 }
 
-.chip-code {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  opacity: 0.8;
-  background: rgba(0, 0, 0, 0.2);
-  padding: 0.1rem 0.3rem;
-  border-radius: 4px;
+.subject-chip-btn.active i {
+  color: #ffffff;
 }
 
-.empty-chips-hint {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  font-style: italic;
-  padding: 0.35rem 0;
-}
-
-/* Time Presets Grid (6 Ca chuẩn ĐHBK TP.HCM) */
+/* Time Presets Grid (4 Cột Chuẩn ĐHBK TP.HCM) */
 .preset-buttons-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.45rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
 }
 
-@media (max-width: 520px) {
+@media (max-width: 600px) {
   .preset-buttons-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 .btn-time-preset {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 0.45rem 0.6rem;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 0.55rem 0.45rem;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 0.15rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
+  user-select: none;
 }
 
 .btn-time-preset:hover {
-  background: rgba(99, 102, 241, 0.1);
-  border-color: var(--accent-primary);
-  transform: translateY(-1px);
+  background: rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .btn-time-preset:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 .preset-time-title {
-  font-size: 0.76rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: #f1f5f9;
+  line-height: 1.2;
 }
 
-.preset-time-val {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--accent-primary);
+.preset-time-period {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #a5b4fc;
+  background: rgba(99, 102, 241, 0.18);
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+}
+
+.btn-time-preset.active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(236, 72, 153, 0.2) 100%);
+  border-color: #818cf8;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.35), 0 6px 16px rgba(99, 102, 241, 0.25);
+}
+
+.btn-time-preset.active .preset-time-period {
+  background: #6366f1;
+  color: #ffffff;
 }
 
 /* Room Presets Row */
@@ -1248,32 +1329,35 @@ body.theme-light .form-group-styled textarea:hover {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.4rem;
-  margin-top: 0.35rem;
+  padding-top: 0.25rem;
 }
 
 .room-preset-label {
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   color: var(--text-muted);
   font-weight: 600;
 }
 
 .btn-room-preset {
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: 0.2rem 0.55rem;
-  font-size: 0.74rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 0.22rem 0.55rem;
+  font-size: 0.72rem;
   font-family: var(--font-mono);
-  color: var(--text-secondary);
+  font-weight: 600;
+  color: #94a3b8;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.18s ease;
 }
 
 .btn-room-preset:hover {
-  background: var(--accent-subtle);
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
+  background: rgba(99, 102, 241, 0.15);
+  border-color: #818cf8;
+  color: #ffffff;
+  transform: translateY(-1px);
 }
+
 
 
 

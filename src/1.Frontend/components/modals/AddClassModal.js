@@ -48,15 +48,16 @@ export function ensureAddClassModalDom() {
   modalWrapper.id = MODAL_ID;
   modalWrapper.className = 'modal-backdrop hidden';
   modalWrapper.innerHTML = `
-    <div class="modal-card modal-card-md" role="dialog" aria-modal="true">
+    <div class="modal-card modal-card-md add-class-modal-card" role="dialog" aria-modal="true">
+      <!-- HEADER -->
       <div class="modal-header">
         <div class="modal-title-group">
-          <div class="modal-icon-glow" style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);">
+          <div class="modal-icon-glow" style="background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);">
             <i class="fa-solid fa-calendar-plus" id="add-class-modal-icon"></i>
           </div>
           <div>
-            <h3 id="add-class-modal-title" class="modal-title">Thêm Tiết Học Vào Lịch</h3>
-            <span id="add-class-modal-subtitle" class="modal-subj-sub">Chọn môn và ca học nhanh</span>
+            <h3 id="add-class-modal-title" class="modal-title">Thêm Tiết Học</h3>
+            <span id="add-class-modal-subtitle" class="modal-subj-sub">Chọn môn từ Chiếc Cặp và ca học nhanh</span>
           </div>
         </div>
         <button type="button" id="btn-close-add-class" class="btn-modal-close" title="Đóng (ESC)">
@@ -64,44 +65,37 @@ export function ensureAddClassModalDom() {
         </button>
       </div>
 
-      <form id="add-class-form" class="modal-form">
-        <!-- 1. CHỌN NGÀY TRONG TUẦN -->
+      <form id="add-class-form" class="modal-form" style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; overflow-y: auto; max-height: 520px;">
+        
+        <!-- SECTION 1: MÔN HỌC -->
         <div class="form-group-styled">
-          <label for="class-day-select"><i class="fa-solid fa-calendar-day"></i> Ngày trong tuần:</label>
-          <select id="class-day-select" class="form-input-styled" required>
-            <option value="Thứ 2">Thứ 2</option>
-            <option value="Thứ 3">Thứ 3</option>
-            <option value="Thứ 4">Thứ 4</option>
-            <option value="Thứ 5">Thứ 5</option>
-            <option value="Thứ 6">Thứ 6</option>
-            <option value="Thứ 7 & Chủ Nhật">Thứ 7 & Chủ Nhật</option>
-          </select>
-        </div>
-
-        <!-- 2. CHỌN MÔN HỌC (CHIPS TỪ CHIẾC CẶP) -->
-        <div class="form-group-styled">
-          <label><i class="fa-solid fa-book-open"></i> Chọn môn học nhanh (từ Chiếc Cặp):</label>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="class-subject-input"><i class="fa-solid fa-graduation-cap"></i> Tên môn học: <span class="required-star">*</span></label>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Gợi ý từ Chiếc Cặp:</span>
+          </div>
           <div class="subject-chips-picker" id="subject-chips-picker">
             <!-- Render danh sách chip môn học -->
           </div>
-          <div class="input-with-icon" style="margin-top: 0.5rem;">
-            <i class="fa-solid fa-graduation-cap input-icon"></i>
-            <input type="text" id="class-subject-input" class="form-input-styled" placeholder="Tên môn học (VD: Học máy, Tiếng Nhật 7...)" required>
+          <div class="input-with-icon">
+            <i class="fa-solid fa-book-open input-icon"></i>
+            <input type="text" id="class-subject-input" class="form-input-styled" placeholder="Nhập tên môn học (VD: Học máy, Tiếng Nhật 7...)" required autocomplete="off">
           </div>
         </div>
 
-        <!-- 3. CHỌN KHUNG GIỜ / TIẾT HỌC -->
+        <!-- SECTION 2: KHUNG GIỜ & CA HỌC CHUẨN ĐHBK -->
         <div class="form-group-styled">
-          <label><i class="fa-solid fa-clock"></i> Khung giờ & Tiết học chuẩn:</label>
+          <label><i class="fa-solid fa-clock"></i> Ca học chuẩn ĐHBK TP.HCM:</label>
           <div class="preset-buttons-grid" id="time-presets-grid">
             ${TIME_PRESETS.map(p => `
               <button type="button" class="btn-time-preset" data-time="${escapeHtml(p.time)}" data-period="${escapeHtml(p.period)}">
-                <strong>${escapeHtml(p.time)}</strong>
-                <span>${escapeHtml(p.period)}</span>
+                <span class="preset-time-title">${escapeHtml(p.time)}</span>
+                <span class="preset-time-period">${escapeHtml(p.period)}</span>
               </button>
             `).join('')}
           </div>
-          <div class="input-row-dual" style="margin-top: 0.5rem;">
+          
+          <!-- Hàng Dual Input: Khung giờ & Tiết học -->
+          <div class="input-row-dual" style="margin-top: 0.35rem;">
             <div class="input-with-icon">
               <i class="fa-regular fa-clock input-icon"></i>
               <input type="text" id="class-time-input" class="form-input-styled" placeholder="07:00 - 08:50" required>
@@ -113,26 +107,48 @@ export function ensureAddClassModalDom() {
           </div>
         </div>
 
-        <!-- 4. PHÒNG HỌC -->
-        <div class="form-group-styled">
-          <label for="class-room-input"><i class="fa-solid fa-door-open"></i> Phòng học:</label>
-          <div class="room-presets-row" id="room-presets-row">
-            ${ROOM_PRESETS.map(r => `
-              <button type="button" class="btn-room-preset" data-room="${escapeHtml(r)}">${escapeHtml(r)}</button>
-            `).join('')}
+        <!-- SECTION 3: NGÀY & PHÒNG HỌC (2 CỘT CÂN ĐỐI) -->
+        <div class="modal-grid-2col">
+          <!-- Chọn ngày -->
+          <div class="form-group-styled">
+            <label for="class-day-select"><i class="fa-solid fa-calendar-day"></i> Thứ trong tuần:</label>
+            <div class="input-with-icon">
+              <i class="fa-regular fa-calendar input-icon"></i>
+              <select id="class-day-select" class="form-input-styled" required>
+                <option value="Thứ 2">Thứ 2</option>
+                <option value="Thứ 3">Thứ 3</option>
+                <option value="Thứ 4">Thứ 4</option>
+                <option value="Thứ 5">Thứ 5</option>
+                <option value="Thứ 6">Thứ 6</option>
+                <option value="Thứ 7 & Chủ Nhật">Thứ 7 & Chủ Nhật</option>
+              </select>
+            </div>
           </div>
-          <div class="input-with-icon" style="margin-top: 0.5rem;">
-            <i class="fa-solid fa-location-dot input-icon"></i>
-            <input type="text" id="class-room-input" class="form-input-styled" placeholder="Phòng học (VD: B1-305 (CS1))" required>
+
+          <!-- Phòng học -->
+          <div class="form-group-styled">
+            <label for="class-room-input"><i class="fa-solid fa-door-open"></i> Phòng học:</label>
+            <div class="input-with-icon">
+              <i class="fa-solid fa-location-dot input-icon"></i>
+              <input type="text" id="class-room-input" class="form-input-styled" placeholder="VD: B1-305 (CS1)" required>
+            </div>
           </div>
         </div>
 
-        <!-- 5. FOOTER BUTTONS -->
-        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <!-- Gợi ý phòng học nhanh -->
+        <div class="room-presets-row" id="room-presets-row">
+          <span class="room-preset-label">Gợi ý phòng:</span>
+          ${ROOM_PRESETS.map(r => `
+            <button type="button" class="btn-room-preset" data-room="${escapeHtml(r)}">${escapeHtml(r)}</button>
+          `).join('')}
+        </div>
+
+        <!-- FOOTER BUTTONS -->
+        <div class="modal-footer" style="padding: 1rem 0 0 0; margin-top: 0.5rem; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color);">
           <button type="button" id="btn-delete-class" class="btn-danger-ghost" style="display: none;">
             <i class="fa-solid fa-trash-can"></i> Xóa tiết này
           </button>
-          <div style="display: flex; gap: 0.5rem; margin-left: auto;">
+          <div style="display: flex; gap: 0.65rem; margin-left: auto;">
             <button type="button" id="btn-cancel-add-class" class="btn-ghost">Hủy</button>
             <button type="submit" class="btn-primary-gradient">
               <i class="fa-solid fa-check"></i> <span id="btn-save-class-text">Thêm Tiết Học</span>
@@ -348,6 +364,11 @@ export function openAddClassModal(targetDayName = 'Thứ 2', onSave) {
   if (periodInput) periodInput.value = 'Tiết 2 - 3';
   if (roomInput) roomInput.value = 'B1-305 (CS1)';
 
+  // Sync active preset
+  modal.querySelectorAll('.btn-time-preset').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.time === '07:00 - 08:50');
+  });
+
   modal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 }
@@ -391,6 +412,11 @@ export function openEditClassModal(dayName, classIndex, classData, onSave, onDel
   if (timeInput) timeInput.value = classData.timeRange || '';
   if (periodInput) periodInput.value = classData.period || '';
   if (roomInput) roomInput.value = classData.room || '';
+
+  // Sync active preset
+  modal.querySelectorAll('.btn-time-preset').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.time === (classData.timeRange || '').trim());
+  });
 
   modal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';

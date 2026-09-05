@@ -12,7 +12,12 @@
   - Cho phép Chỉnh sửa ✏️, Xóa 🗑️ hoặc Di chuyển thứ của từng tiết học trực tiếp trên Ma trận ngày và tự động serialize ngược ra Markdown chuẩn.
 
 - **✅ Công việc đã hoàn thành**:
-  - `[Fix Bug / Path]` Sửa lỗi 404 đường dẫn import `generateEmptyWeekMarkdown` trong [`src/1.Frontend/components/modals/AddWeekModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddWeekModal.js) (đổi từ `../../2.Backend/` thành `../../../2.Backend/`).
+  - `[UI / Redesign]` Tái thiết kế toàn diện giao diện Modal Thêm / Chỉnh Sửa Tiết Học ([`AddClassModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddClassModal.js) & [`6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css)):
+    - Khắc phục lỗi icon trôi nổi ra ngoài bằng cách nhúng icon lọt vào bên trong ô input (`.input-with-icon`).
+    - Gom nhóm bố cục 2 cột cân đối cho Giờ học & Tiết học, Thứ trong tuần & Phòng học.
+    - Thiết kế lại các thẻ Ca học chuẩn ĐHBK TP.HCM dạng lưới 4 cột đa tầng, hover phát sáng và tự động highlight khi khớp giờ học.
+    - Tinh chỉnh danh sách Chip môn học và Chip phòng học theo phong cách Glassmorphism sang trọng, màu sắc tương phản cao, dễ nhìn.
+  - `[Fix Bug / Path]` Sửa lỗi 404 đường dẫn import `generateEmptyWeekMarkdown` trong [`src/1.Frontend/components/modals/AddWeekModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddWeekModal.js).
   - `[Fix Syntax / View]` Loại bỏ dấu ngoặc nhọn đóng thừa `}` ở dòng 235 trong [`src/1.Frontend/views/TimetableGrid.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/TimetableGrid.js).
   - `[Backend / Parser]` Bổ sung `serializeScheduleToMarkdown()` và `generateEmptyWeekMarkdown()` vào [`src/2.Backend/services/TimetableParser.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/TimetableParser.js).
   - `[Frontend / Component]` Tạo mới component modal [`src/1.Frontend/components/modals/AddClassModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddClassModal.js):
