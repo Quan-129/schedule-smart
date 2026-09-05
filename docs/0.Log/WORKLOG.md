@@ -4,6 +4,25 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 21:52] - Tối Ưu Thẻ Thứ (Day Card) & Thẻ Môn Học Siêu Đẹp, Nhỏ Gọn & Khoa Học
+
+- **🎯 Mục tiêu**:
+  - Xử lý triệt để lỗi ngắt dòng của Giờ học (`07:00 - \n 08:50`) và Tiết học (`Tiết 2 - \n 3`) gây vỡ khối và chiếm diện tích dọc lớn.
+  - Tinh giản toàn bộ khung thẻ ngày (Day Card) và thẻ môn học (Class Item) theo phong cách hiện đại, thanh thoát, giảm chiều cao thừa, phân cấp thông tin rõ ràng và sắc nét.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Template View]` Cập nhật [`src/1.Frontend/views/TimetableGrid.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/TimetableGrid.js):
+    - Gom Giờ học và Badge Tiết học vào nhóm `.class-time-badge-group` nằm ngang hàng, giữ cố định không bị ngắt dòng.
+  - `[Frontend / CSS Timetable Grid]` Cập nhật [`src/1.Frontend/styles/3.timetable-grid.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/3.timetable-grid.css):
+    - Khóa `white-space: nowrap;` cho `.class-time`, `.class-period`, `.class-room`.
+    - Giảm padding thẻ môn học từ `0.85rem` xuống `0.65rem 0.8rem`, bo góc mượt 12px, border-left màu nhận diện môn học 3.5px.
+    - Chuyển badge Tiết học thành capsule mờ nhẹ, bo tròn viền sáng tinh tế.
+    - Thu nhỏ các nút mini Sửa/Xóa (20x20px) và Action Pills (24x24px: Xem Điểm, Chiếc Cặp Drive, Sao chép) tinh xảo, đổi màu neon khi hover.
+    - Tinh chỉnh nút `+ Thêm tiết vào ...` thành dạng capsule mỏng thanh lịch.
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v38` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 21:45] - Tái Thiết Kế Giao Diện Khoa Học, Thẩm Mỹ Cao & Khắc Phục Triệt Để Lỗi Vỡ Layout Thanh Tìm Kiếm
 
 - **🎯 Mục tiêu**:

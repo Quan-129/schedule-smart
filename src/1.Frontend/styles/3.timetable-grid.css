@@ -298,17 +298,17 @@
   gap: 1.15rem;
 }
 
-/* Day Card */
+/* Day Card - Khung Thẻ Thứ Nhỏ Gọn & Khoa Học */
 .day-card {
   background: var(--bg-card);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 1.15rem;
+  padding: 0.95rem 1.05rem;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0.65rem;
   box-shadow: var(--shadow-sm);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
@@ -316,9 +316,9 @@
 }
 
 .day-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35);
-  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.35);
+  border-color: rgba(255, 255, 255, 0.16);
 }
 
 .day-card.is-today {
@@ -357,25 +357,25 @@
   justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid var(--border-color);
-  padding-bottom: 0.65rem;
+  padding-bottom: 0.5rem;
 }
 
 .day-title {
-  font-size: 1.12rem;
+  font-size: 1.08rem;
   font-weight: 800;
   letter-spacing: -0.015em;
   color: var(--text-primary);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
 }
 
 .badge-today {
   background: var(--accent-gradient);
   color: #ffffff;
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 700;
-  padding: 0.18rem 0.6rem;
+  padding: 0.15rem 0.55rem;
   border-radius: var(--radius-full);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -386,39 +386,39 @@
 }
 
 .class-count-badge {
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   color: var(--text-secondary);
   font-weight: 600;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  padding: 0.15rem 0.55rem;
+  padding: 0.12rem 0.5rem;
   border-radius: var(--radius-full);
 }
 
 .classes-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.55rem;
 }
 
-/* Single Class Item Card */
+/* Single Class Item Card - Tinh Giản, Nhỏ Gọn & Sắc Nét */
 .class-item {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 0.85rem 0.95rem;
+  border-radius: 12px;
+  padding: 0.65rem 0.8rem;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.35rem;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
-  border-left-width: 4px;
+  border-left-width: 3.5px;
 }
 
 .class-item:hover {
   background: var(--bg-card-hover);
-  transform: translateY(-1.5px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   border-color: rgba(255, 255, 255, 0.14);
 }
 
@@ -426,65 +426,89 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  font-size: 0.8rem;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+}
+
+.class-time-badge-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: nowrap;
+  min-width: 0;
 }
 
 .class-time {
   font-family: var(--font-mono);
   font-weight: 600;
+  font-size: 0.78rem;
   color: var(--text-primary);
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .class-time i {
   color: var(--text-muted);
-  font-size: 0.82rem;
+  font-size: 0.76rem;
 }
 
 .class-period {
-  background: var(--bg-tertiary);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
   color: var(--text-secondary);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  padding: 0.15rem 0.45rem;
-  border-radius: var(--radius-sm);
+  padding: 0.1rem 0.42rem;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .class-subject-name {
-  font-size: 0.96rem;
+  font-size: 0.94rem;
   font-weight: 700;
   color: var(--text-primary);
-  line-height: 1.35;
+  line-height: 1.3;
+  margin: 0.05rem 0;
+  word-break: break-word;
 }
 
 .class-room-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 0.82rem;
+  gap: 0.4rem;
+  font-size: 0.78rem;
   color: var(--text-secondary);
-  margin-top: 0.15rem;
+  margin-top: 0.05rem;
 }
 
 .class-room {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.32rem;
   font-family: var(--font-mono);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .class-room i {
   color: var(--text-muted);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
+  flex-shrink: 0;
 }
 
 .class-actions-group {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.25rem;
+  flex-shrink: 0;
 }
 
 .btn-view-subject-grade,
@@ -494,9 +518,9 @@
   border: 1px solid var(--border-color);
   color: var(--text-muted);
   cursor: pointer;
-  font-size: 0.8rem;
-  width: 26px;
-  height: 26px;
+  font-size: 0.75rem;
+  width: 24px;
+  height: 24px;
   border-radius: 6px;
   display: inline-flex;
   align-items: center;
@@ -528,22 +552,28 @@
 .class-edit-actions {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.2rem;
+  flex-shrink: 0;
 }
 
 .btn-mini-action {
-  width: 22px;
-  height: 22px;
-  border-radius: 5px;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
   background: transparent;
   border: none;
   color: var(--text-muted);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  opacity: 0.7;
+  transition: all 0.18s ease;
+}
+
+.btn-mini-action:hover {
+  opacity: 1;
 }
 
 .btn-mini-action.btn-edit-class-item:hover {
@@ -563,11 +593,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 1.75rem 1rem;
+  padding: 1.4rem 0.85rem;
   color: var(--text-muted);
   text-align: center;
-  gap: 0.65rem;
-  border-radius: var(--radius-md);
+  gap: 0.5rem;
+  border-radius: 12px;
   border: 1.5px dashed rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.015);
   transition: all 0.25s ease;
@@ -579,36 +609,36 @@
 }
 
 .day-off-icon {
-  font-size: 1.85rem;
+  font-size: 1.6rem;
   opacity: 0.6;
   color: var(--info);
 }
 
 .day-off-text {
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
 }
 
 .day-off-hint {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
   font-style: italic;
 }
 
 .btn-quick-add-class {
-  margin-top: 0.35rem;
+  margin-top: 0.25rem;
   background: rgba(99, 102, 241, 0.12);
   border: 1px solid rgba(99, 102, 241, 0.3);
   color: var(--accent-primary);
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   font-weight: 700;
-  padding: 0.45rem 0.9rem;
+  padding: 0.38rem 0.75rem;
   border-radius: var(--radius-full);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   transition: all 0.2s ease;
 }
 
@@ -622,19 +652,19 @@
 /* Add more class button inside day card */
 .btn-add-more-class {
   width: 100%;
-  padding: 0.55rem;
-  margin-top: 0.25rem;
-  background: rgba(255, 255, 255, 0.03);
+  padding: 0.38rem 0.6rem;
+  margin-top: 0.15rem;
+  background: rgba(255, 255, 255, 0.02);
   border: 1px dashed var(--border-color);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   color: var(--text-muted);
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
+  gap: 0.4rem;
   transition: all 0.2s ease;
 }
 

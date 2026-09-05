@@ -79,8 +79,10 @@ export function renderTimetableGrid(days = [], isCurrentWeek = false) {
         return `
           <div class="class-item" style="border-left-color: ${color.border};" data-day="${escapeHtml(day.name)}" data-idx="${cIdx}">
             <div class="class-time-row">
-              <span class="class-time"><i class="fa-regular fa-clock"></i> ${escapeHtml(c.timeRange)}</span>
-              ${c.period ? `<span class="class-period">${escapeHtml(c.period)}</span>` : ''}
+              <div class="class-time-badge-group">
+                <span class="class-time"><i class="fa-regular fa-clock"></i> ${escapeHtml(c.timeRange)}</span>
+                ${c.period ? `<span class="class-period">${escapeHtml(c.period)}</span>` : ''}
+              </div>
               <div class="class-edit-actions">
                 <button type="button" class="btn-mini-action btn-edit-class-item" title="Chỉnh sửa tiết học này" data-day="${escapeHtml(day.name)}" data-idx="${cIdx}">
                   <i class="fa-solid fa-pen"></i>
