@@ -42,8 +42,12 @@ Mọi file mã nguồn phải nằm đúng trong 5 tầng và giữ mỗi file <
 
 ---
 
-## 🎨 5. QUY CHUẨN TRÌNH BÀY & THẨM MỸ (PRESENTATION STANDARDS)
-1. **Giao diện & UI/UX**: Dark mode cao cấp, Glassmorphism, CSS Variables bảng màu hài hòa, phông chữ `Inter`/`JetBrains Mono`, micro-animations mượt mà và responsive đa nền tảng (`.agents/rules/presentation_rules.md`).
-2. **Mã nguồn & Template**: HTML5 ngữ nghĩa (`<section>`, `<details>`, `<summary>`), tên class `kebab-case`/`BEM`, ID có ý nghĩa, thụt lề chuẩn 2 spaces và đóng gói component độc lập.
-3. **Phản hồi của AI**: Luôn trả lời bằng **Tiếng Việt**, trực diện, súc tích, gắn link markdown chuẩn `file:///` cho mọi file mã nguồn và hàm/class được đề cập.
+## 🎨 5. QUY CHUẨN TRÌNH BÀY MÃ NGUỒN & THẨM MỸ (CODE PRESENTATION & STYLING STANDARDS)
+1. **Cấu trúc File & Phân đoạn (Banner Comments)**: Mọi file JS phải chia rõ các phần bằng comment phân đoạn: `1. IMPORTS`, `2. CONSTANTS`, `3. TEMPLATES / DOM`, `4. EVENT HANDLERS`, `5. EXPORTS`.
+2. **Định dạng Code Sạch (Clean Code)**: Thụt lề chuẩn 2 spaces, bắt buộc dấu chấm phẩy `;` cuối câu, ngoặc nhọn 1TBS, biến/hàm `camelCase`, components `PascalCase.js`, hằng số `UPPER_SNAKE_CASE`.
+3. **Template HTML trong JS**: Thụt lề thẻ lồng nhau theo đúng phân cấp DOM (2 spaces), bắt buộc bọc biến động qua `${escapeHtml()}`, dùng Semantic HTML5 (`<section>`, `<details>`, `<summary>`), không dùng inline style tĩnh.
+4. **Chú thích & JSDoc**: Viết bằng Tiếng Việt, giải thích lý do (Why) thay vì cú pháp (What), JSDoc chuẩn cho mọi hàm và class quan trọng.
+5. **Giao diện & UI/UX**: Dark mode cao cấp, Glassmorphism, CSS Tokens bảng màu hài hòa, phông chữ `Inter`/`JetBrains Mono`, micro-animations và responsive (`.agents/rules/presentation_rules.md`).
+6. **Phản hồi của AI**: Luôn trả lời bằng **Tiếng Việt**, trực diện, súc tích, gắn link markdown chuẩn `file:///` cho mọi file mã nguồn và hàm/class được đề cập.
+
 

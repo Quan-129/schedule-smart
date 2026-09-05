@@ -4,18 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
-## 📅 [2026-09-05 16:00] - Thiết Lập Bộ Quy Tắc Trình Bày & Tiêu Chuẩn Thẩm Mỹ (Presentation Rules)
+## 📅 [2026-09-05 16:00] - Thiết Lập Bộ Quy Tắc Trình Bày Mã Nguồn & Tiêu Chuẩn Code (Source Code Presentation Rules)
 
 - **🎯 Mục tiêu**:
-  - Chuẩn hóa toàn diện các quy chuẩn trình bày gồm Giao diện UI/UX (thẩm mỹ, màu sắc, micro-interactions), Mã nguồn (Clean code, Semantic HTML5, Component encapsulation), và Phản hồi của AI Agent (Tiếng Việt, súc tích, clickable file links).
+  - Chuẩn hóa toàn diện các quy chuẩn trình bày Source Code (Clean code, banner comments, phân đoạn module, HTML template string literals, JSDoc, Semantic HTML5), Thẩm mỹ giao diện UI/UX và Phản hồi AI.
   - Ban hành bộ quy tắc `.agents/rules/presentation_rules.md` và đồng bộ vào `AGENTS.md`.
 
 - **✅ Công việc đã hoàn thành**:
-  - `[Rules]` Khởi tạo file `.agents/rules/presentation_rules.md` định nghĩa chi tiết 3 nhóm quy chuẩn:
-    1. **UI/UX Aesthetics**: Dark mode, Glassmorphism, CSS Variables bảng màu hài hòa, phông chữ `Inter`/`JetBrains Mono`, visual haptics & micro-animations, chuẩn responsive 3 breakpoint.
-    2. **Code & Template Styling**: Semantic HTML5 (`<section>`, `<details>`, `<summary>`), class naming `kebab-case`/`BEM`, ID duy nhất, thụt lề 2 spaces, đóng gói component độc lập.
-    3. **Agent Communication**: 100% Tiếng Việt, câu trả lời trực diện, không dài dòng, định dạng link markdown clickable `file:///` cho mọi file và code symbol.
-  - `[Core Rule]` Cập nhật `AGENTS.md` bổ sung Điều khoản 5: **QUY CHUẨN TRÌNH BÀY & THẨM MỸ (PRESENTATION STANDARDS)**.
+  - `[Rules]` Khởi tạo & hoàn thiện file `.agents/rules/presentation_rules.md` định nghĩa 7 nhóm quy chuẩn:
+    1. **File Structure & Banner Comments**: Phân đoạn rõ ràng: `1. IMPORTS`, `2. CONSTANTS`, `3. TEMPLATES / DOM`, `4. EVENT HANDLERS`, `5. EXPORTS`.
+    2. **Code Formatting & Clean Code**: Bắt buộc thụt lề 2 spaces, kết thúc bằng dấu chấm phẩy `;`, 1TBS braces, đặt tên `camelCase`, `PascalCase.js`, `UPPER_SNAKE_CASE`.
+    3. **HTML Templates trong JS Literals**: Thụt lề thẻ phân cấp DOM chuẩn xác, bọc biến động qua `${escapeHtml()}`, Semantic HTML5 (`<section>`, `<details>`, `<summary>`), không dùng inline style tĩnh.
+    4. **Comments & JSDoc**: Viết bằng Tiếng Việt chuẩn mực, giải thích lý do (Why) và JSDoc đầy đủ cho functions/classes.
+    5. **Naming Conventions**: Chuẩn hóa tên file, class, function, CSS class và DOM element IDs.
+    6. **UI/UX Aesthetics**: Dark mode, Glassmorphism, CSS Tokens bảng màu hài hòa, phông chữ `Inter`/`JetBrains Mono`, micro-animations và responsive.
+    7. **Agent Communication**: 100% Tiếng Việt, câu trả lời trực diện, súc tích, định dạng link markdown clickable `file:///` cho mọi file và code symbol.
+  - `[Core Rule]` Cập nhật `AGENTS.md` bổ sung Điều khoản 5: **QUY CHUẨN TRÌNH BÀY MÃ NGUỒN & THẨM MỸ (CODE PRESENTATION & STYLING STANDARDS)**.
 
 - **📌 Trạng thái hiện tại & Kế hoạch tiếp theo**:
   - Toàn bộ 3 bộ quy tắc cốt lõi của dự án đã được hoàn thiện: `architecture_rules.md`, `token_optimization_rules.md`, và `presentation_rules.md`.
