@@ -80,11 +80,12 @@ async function initApp() {
   renderBackpackView();
   renderGradesView();
 
-  // 10. Gắn các sự kiện Modal Thêm Môn, Thêm Tuần, Theme, Print, Raw Editor
+  // 10. Gắn các sự kiện Modal Thêm Môn, Thêm Tuần, Theme, Print, Raw Editor & Hero Toggle
   initAddSubjectModal();
   initAddWeekModal();
   initThemeToggle();
   initPrintButton();
+  initHeroToggle();
   initRawMarkdownEditor();
 
   // 11. Tối ưu hiệu năng khi chuyển tab trình duyệt
@@ -867,6 +868,25 @@ function initPrintButton() {
       window.print();
     };
   }
+}
+
+/**
+ * Khởi tạo Nút Thu Gọn / Mở Rộng Hero Banner
+ */
+function initHeroToggle() {
+  const heroBanner = document.getElementById('hero-banner');
+  const toggleBtn = document.getElementById('btn-toggle-hero');
+  if (!heroBanner || !toggleBtn) return;
+
+  toggleBtn.onclick = (e) => {
+    e.stopPropagation();
+    heroBanner.classList.toggle('is-collapsed');
+    const isCollapsed = heroBanner.classList.contains('is-collapsed');
+    const textEl = toggleBtn.querySelector('.toggle-hero-text');
+    if (textEl) {
+      textEl.textContent = isCollapsed ? 'Chi tiết' : 'Thu gọn';
+    }
+  };
 }
 
 /**

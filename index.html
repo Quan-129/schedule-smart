@@ -186,11 +186,17 @@
 
       <!-- VIEW 1: Grid View (Default) -->
       <section id="grid-view-container" class="view-panel active">
-        <!-- Hero Information Banner -->
-        <div class="hero-banner">
+        <!-- Hero Information Banner (Mặc định Thu Gọn) -->
+        <div class="hero-banner is-collapsed" id="hero-banner">
           <div class="hero-left">
-            <div class="date-badge" id="current-date-badge"><i class="fa-regular fa-calendar"></i> <span id="current-date-text">--</span></div>
-            <h2 id="schedule-title" class="schedule-main-title">Lịch học</h2>
+            <div class="hero-title-row">
+              <div class="date-badge" id="current-date-badge"><i class="fa-regular fa-calendar"></i> <span id="current-date-text">--</span></div>
+              <h2 id="schedule-title" class="schedule-main-title">Lịch học</h2>
+              <div class="hero-quick-tags">
+                <span class="hero-stat-tag"><i class="fa-solid fa-graduation-cap"></i> <span id="stat-total-subjects">-- môn</span></span>
+                <span class="hero-stat-tag"><i class="fa-solid fa-book-open"></i> <span id="stat-total-classes">-- tiết</span></span>
+              </div>
+            </div>
             <p id="schedule-subtitle" class="schedule-subtitle">Đang tải dữ liệu thời khóa biểu...</p>
           </div>
           <div class="hero-right">
@@ -206,9 +212,11 @@
               </div>
             </div>
             <div class="stats-row">
-              <div class="stat-pill"><i class="fa-solid fa-graduation-cap"></i> <span id="stat-total-subjects">-- môn</span></div>
-              <div class="stat-pill"><i class="fa-solid fa-book-open"></i> <span id="stat-total-classes">-- tiết tuần này</span></div>
               <button class="stat-pill btn-print" id="print-schedule-btn" title="In thời khóa biểu"><i class="fa-solid fa-print"></i> In lịch</button>
+              <button class="btn-toggle-hero" id="btn-toggle-hero" title="Thu gọn / Mở rộng thông tin tuần">
+                <span class="toggle-hero-text">Chi tiết</span>
+                <i class="fa-solid fa-chevron-down toggle-hero-icon"></i>
+              </button>
             </div>
           </div>
         </div>
@@ -230,22 +238,23 @@
           <!-- Dynamically populated day cards -->
         </div>
 
-        <!-- Notes and Reminders Section -->
+        <!-- Notes and Reminders Section (Mặc định Thu Gọn Accordion) -->
         <section class="notes-section" id="notes-section">
-          <div class="notes-card">
-            <div class="notes-header">
-              <div class="notes-icon">
-                <i class="fa-solid fa-bell"></i>
+          <details class="notes-accordion">
+            <summary class="notes-accordion-summary">
+              <div class="notes-summary-left">
+                <div class="notes-icon-mini"><i class="fa-solid fa-bell"></i></div>
+                <span class="notes-summary-title">Lưu ý & Ghi chú Tuần</span>
+                <span class="notes-summary-hint">(Bấm để xem)</span>
               </div>
-              <div>
-                <h3>Lưu ý & Ghi chú Tuần</h3>
-                <p class="notes-sub">Các nhắc nhở quan trọng được phân tích từ file Markdown</p>
+              <i class="fa-solid fa-chevron-down arrow-icon"></i>
+            </summary>
+            <div class="notes-accordion-content">
+              <div class="notes-body" id="notes-body">
+                <!-- Notes list parsed from MD -->
               </div>
             </div>
-            <div class="notes-body" id="notes-body">
-              <!-- Notes list parsed from MD -->
-            </div>
-          </div>
+          </details>
         </section>
       </section>
 

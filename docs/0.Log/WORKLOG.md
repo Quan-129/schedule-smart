@@ -4,6 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 16:30] - Chuyển Đổi Hero Banner & Ghi Chú Tuần Sang Trạng Thái Mặc Định Thu Gọn (Default Collapsed Bars)
+
+- **🎯 Mục tiêu**:
+  - Tối ưu không gian hiển thị trên màn hình Thời khóa biểu theo yêu cầu: Không để các thanh lớn (Hero Banner, Ghi chú tuần, Hướng dẫn Git) mặc định sổ to choán màn hình.
+  - Thiết lập chế độ **Mặc định Thu Gọn (Default Collapsed)** cho Hero Banner và chuyển Ghi Chú Tuần sang dạng Accordion đóng.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Hero Banner]` Cập nhật `#hero-banner` trong [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html) và [`3.timetable-grid.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/3.timetable-grid.css):
+    - Mặc định thêm class `is-collapsed`: Rút gọn banner thành 1 thanh bar mỏng tinh tế (~42px) hiển thị Date Badge + Tên tuần + Quick Tags `7 môn • 10 tiết` và nút `[Chi tiết ▾]`.
+    - Ẩn phần subtitle và card Tiết tiếp theo cồng kềnh.
+    - Thêm logic `initHeroToggle()` trong [`main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js) cho phép bấm nút `Chi tiết / Thu gọn` để mở rộng hoặc thu gọn tùy ý.
+  - `[Frontend / Notes Accordion]` Chuyển `#notes-section` trong [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html) và [`GitGuide.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/layout/GitGuide.js) sang dạng `<details class="notes-accordion">` mặc định đóng.
+  - `[Performance / PWA]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v23` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 16:20] - Tinh Gọn Bố Cục Subject Hub (Zero Scroll) & Loại Bỏ % Tỉ Lệ Dưới Node Môn Học
 
 - **🎯 Mục tiêu**:

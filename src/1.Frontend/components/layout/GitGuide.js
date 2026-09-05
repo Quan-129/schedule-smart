@@ -12,20 +12,23 @@ export function renderGitGuideSection(containerEl) {
   if (!containerEl) return;
 
   containerEl.innerHTML = `
-    <!-- Lưu Ý & Nhắc Nhở Tuần Này -->
+    <!-- Lưu Ý & Nhắc Nhở Tuần Này (Mặc định Thu Gọn) -->
     <section class="notes-section">
-      <div class="notes-card">
-        <div class="notes-header">
-          <div class="notes-icon"><i class="fa-solid fa-bell"></i></div>
-          <div>
-            <h3>Lưu Ý & Nhắc Nhở Tuần Này</h3>
-            <span class="notes-sub">Nội dung trích xuất tự động từ file Markdown</span>
+      <details class="notes-accordion">
+        <summary class="notes-accordion-summary">
+          <div class="notes-summary-left">
+            <div class="notes-icon-mini"><i class="fa-solid fa-bell"></i></div>
+            <span class="notes-summary-title">Lưu Ý & Nhắc Nhở Tuần Này</span>
+            <span class="notes-summary-hint">(Bấm để xem)</span>
+          </div>
+          <i class="fa-solid fa-chevron-down arrow-icon"></i>
+        </summary>
+        <div class="notes-accordion-content">
+          <div class="notes-body" id="notes-body">
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Đang tải ghi chú...</p>
           </div>
         </div>
-        <div class="notes-body" id="notes-body">
-          <p style="color: var(--text-muted); font-size: 0.9rem;">Đang tải ghi chú...</p>
-        </div>
-      </div>
+      </details>
     </section>
 
     <!-- Hướng Dẫn Git Accordion Cho Sinh Viên -->
