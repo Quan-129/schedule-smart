@@ -273,11 +273,23 @@
                 <span class="notes-summary-title">Lưu ý & Ghi chú Tuần</span>
                 <span class="notes-summary-hint">(Bấm để xem)</span>
               </div>
-              <i class="fa-solid fa-chevron-down arrow-icon"></i>
+              <div class="notes-summary-right">
+                <button type="button" id="btn-edit-weekly-notes" class="btn-edit-notes-pill" title="Chỉnh sửa Lưu ý & Ghi chú tuần này">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                  <span>Sửa ghi chú</span>
+                </button>
+                <i class="fa-solid fa-chevron-down arrow-icon"></i>
+              </div>
             </summary>
             <div class="notes-accordion-content">
               <div class="notes-body" id="notes-body">
                 <!-- Notes list parsed from MD -->
+              </div>
+              <div class="notes-footer-actions">
+                <button type="button" id="btn-quick-edit-notes-bottom" class="btn-notes-action-pill" title="Chỉnh sửa Lưu ý & Ghi chú tuần">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                  <span>Chỉnh sửa nội dung ghi chú</span>
+                </button>
               </div>
             </div>
           </details>

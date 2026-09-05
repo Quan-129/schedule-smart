@@ -18,6 +18,7 @@ import { ensureAddWeekModalDom, openAddWeekModal, initAddWeekModal } from './com
 import { ensureDeleteWeekModalDom, openDeleteWeekModal } from './components/modals/DeleteWeekModal.js';
 import { ensureSubjectDetailModalDom, openSubjectDetailModal } from './components/modals/SubjectDetailModal.js';
 import { ensureAddClassModalDom, openAddClassModal, openEditClassModal } from './components/modals/AddClassModal.js';
+import { ensureEditWeeklyNotesModalDom, openEditWeeklyNotesModal } from './components/modals/EditWeeklyNotesModal.js';
 import { showToast, initToastContainer } from './components/Toast.js';
 import { initPWA, promptPWAInstall } from '../5.Performance/pwaManager.js';
 import { initVisibilityOptimizer } from '../5.Performance/visibilityOptimizer.js';
@@ -44,6 +45,7 @@ async function initApp() {
   ensureDeleteWeekModalDom();
   ensureSubjectDetailModalDom();
   ensureAddClassModalDom();
+  ensureEditWeeklyNotesModalDom();
 
   // 2. Gắn các hàm tiện ích toàn cục vào window để hỗ trợ HTML onclick
   setupWindowHelpers();
@@ -113,6 +115,7 @@ async function initApp() {
   initPrintButton();
   initHeroToggle();
   initRawMarkdownEditor();
+  initWeeklyNotesEditor();
 
   // 11. Tối ưu hiệu năng khi chuyển tab trình duyệt
   initVisibilityOptimizer(
@@ -170,6 +173,7 @@ function setupWindowHelpers() {
   window.openEditSubjectModal = openEditSubjectModal;
   window.openSubjectDetailModal = openSubjectDetailModal;
   window.focusTodayTarget = focusTodayTarget;
+  window.openEditWeeklyNotes = handleOpenWeeklyNotesModal;
 
   // Visual Schedule Builder Handlers
   window.openAddClassModal = (dayName = 'Thứ 2') => {
@@ -711,15 +715,56 @@ function renderScheduleNotes(notes = []) {
   if (!notesBody) return;
 
   if (!notes || notes.length === 0) {
-    notesBody.innerHTML = `<p style="color: var(--text-muted); font-size: 0.9rem;">Không có ghi chú nào trong tuần này.</p>`;
+    notesBody.innerHTML = `
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.25rem 0;">
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin: 0;">Chưa có lưu ý nào cho tuần này.</p>
+        <button type="button" class="btn-ghost" style="font-size: 0.78rem; padding: 0.25rem 0.65rem;" onclick="window.openEditWeeklyNotes(event)">
+          <i class="fa-solid fa-plus"></i> Thêm lưu ý
+        </button>
+      </div>
+    `;
     return;
   }
 
   notesBody.innerHTML = `
     <ul>
-      ${notes.map(n => `<li>${escapeHtml(n)}</li>`).join('')}
+      ${notes.map(n => `<li>${escapeHtml(n.replace(/^(?:👉|[-*•])\s*/, ''))}</li>`).join('')}
     </ul>
   `;
+}
+
+/**
+ * Xử lý mở Modal Chỉnh Sửa Lưu ý & Ghi Chú Tuần
+ * @param {Event} [e] 
+ */
+export function handleOpenWeeklyNotesModal(e) {
+  if (e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  const currentNotes = state.scheduleData ? (state.scheduleData.notes || []) : [];
+  const currentWeekObj = availableWeeks.find(w => w.filename === currentWeekFile);
+  const weekTitle = currentWeekObj ? (currentWeekObj.description || currentWeekObj.title) : 'Tuần hiện tại';
+
+  openEditWeeklyNotesModal(currentNotes, weekTitle, (updatedNotes) => {
+    if (!state.scheduleData) {
+      state.scheduleData = { title: weekTitle, days: [], notes: [] };
+    }
+    state.scheduleData.notes = updatedNotes;
+    persistCurrentSchedule();
+    renderScheduleNotes(updatedNotes);
+  });
+}
+
+/**
+ * Khởi tạo sự kiện cho các nút mở Chỉnh sửa Ghi chú tuần
+ */
+function initWeeklyNotesEditor() {
+  const editBtn = document.getElementById('btn-edit-weekly-notes');
+  const quickEditBottomBtn = document.getElementById('btn-quick-edit-notes-bottom');
+
+  if (editBtn) editBtn.onclick = handleOpenWeeklyNotesModal;
+  if (quickEditBottomBtn) quickEditBottomBtn.onclick = handleOpenWeeklyNotesModal;
 }
 
 /**

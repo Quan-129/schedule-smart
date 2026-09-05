@@ -4,6 +4,29 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 00:05] - Thêm Tính Năng Chỉnh Sửa "Lưu Ý & Ghi Chú Tuần" (Edit Weekly Notes Modal) 📝
+
+- **🎯 Mục tiêu**:
+  - Bổ sung tính năng cho phép người dùng trực tiếp chỉnh sửa, thêm, xóa các mục trong phần **"Lưu ý & Ghi chú Tuần"** ngay trên giao diện Thời khóa biểu.
+  - Hỗ trợ cả 2 chế độ soạn thảo: Chỉnh sửa từng dòng thẻ ghi chú độc lập và Nhập nhanh hàng loạt qua Textarea đa dòng.
+  - Tích hợp kho mẫu gợi ý ghi chú thông dụng (lịch thi, deadline đồ án, nghỉ lễ...) giúp sinh viên tạo nhanh chỉ với 1 chạm.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Component Modal]` Tạo mới [`src/1.Frontend/components/modals/EditWeeklyNotesModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/EditWeeklyNotesModal.js):
+    - Đóng gói đầy đủ template HTML, controller `openEditWeeklyNotesModal`, xử lý render danh sách các dòng input, thêm/xóa dòng và đồng bộ từ Textarea đa dòng.
+    - Cung cấp các mẫu gợi ý nhắc nhở sinh viên thường gặp (`NOTE_PRESET_TEMPLATES`).
+  - `[Frontend / App Shell DOM]` Cập nhật [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html):
+    - Thêm nút `#btn-edit-weekly-notes` (`.btn-edit-notes-pill`) trên thanh tiêu đề Accordion Ghi chú tuần.
+    - Thêm nút hành động nhanh `#btn-quick-edit-notes-bottom` (`.btn-notes-action-pill`) dưới nội dung ghi chú.
+  - `[Frontend / Main Logic]` Cập nhật [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    - Khởi tạo DOM và lắng nghe sự kiện mở modal chỉnh sửa ghi chú qua `initWeeklyNotesEditor()`.
+    - Tự động lưu `notes` vào `state.scheduleData`, gọi `persistCurrentSchedule()` để đồng bộ Markdown vào LocalStorage và cập nhật `renderScheduleNotes()`.
+  - `[Frontend / CSS Modals & Grid]` Cập nhật [`src/1.Frontend/styles/3.timetable-grid.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/3.timetable-grid.css) & [`src/1.Frontend/styles/6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css):
+    - Styling nút sửa tone vàng cam neon `#f59e0b`, danh sách input thẻ ghi chú, chi tiết textarea đa dòng và các pill mẫu gợi ý.
+  - `[Performance / Service Worker]` Thêm asset mới và nâng `CACHE_NAME` lên `smart-schedule-modular-v57` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 23:55] - Tính Năng Tự Động Gợi Ý Logo / Biểu Tượng Thông Minh Khi Gõ Tên Môn Học 🪄
 
 - **🎯 Mục tiêu**:
