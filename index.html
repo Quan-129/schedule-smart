@@ -387,15 +387,15 @@
   <!-- Toast Notification Container -->
   <div id="toast-container" class="toast-container"></div>
 
-  <!-- MODAL 1: Edit Google Drive Link Modal (Modal dán link Drive cho môn học) -->
+  <!-- MODAL 1: Edit Subject & Grade Breakdown Modal (Chỉnh sửa thông số môn học, Drive & Tỉ lệ điểm) -->
   <div id="edit-drive-modal" class="modal-backdrop hidden">
-    <div class="modal-card modal-card-sm">
+    <div class="modal-card modal-card-md">
       <div class="modal-header">
         <div class="modal-title-group">
-          <i class="fa-brands fa-google-drive" style="color: #34a853; font-size: 1.3rem;"></i>
+          <i class="fa-solid fa-sliders" style="color: var(--accent-primary); font-size: 1.3rem;"></i>
           <div>
-            <h4 id="edit-drive-modal-title">Gắn Link Google Drive</h4>
-            <span id="edit-drive-modal-sub" style="font-size: 0.78rem; color: var(--text-muted);">Mở nhanh chỉ với 1 cú chạm</span>
+            <h4 id="edit-drive-modal-title">Chỉnh Sửa Môn Học</h4>
+            <span id="edit-drive-modal-sub" style="font-size: 0.78rem; color: var(--text-muted);">Tùy chỉnh Google Drive và Tỉ lệ điểm thành phần</span>
           </div>
         </div>
         <button id="edit-drive-close-btn" class="btn-modal-action btn-close" title="Đóng"><i class="fa-solid fa-xmark"></i></button>
@@ -403,17 +403,55 @@
       <form id="edit-drive-form" class="modal-form">
         <input type="hidden" id="edit-drive-subject-code" value="">
 
-        <div class="form-group">
-          <label for="edit-drive-url-input">Đường dẫn Google Drive của môn *</label>
-          <input type="url" id="edit-drive-url-input" placeholder="https://drive.google.com/drive/folders/..." required autofocus>
+        <!-- Section: Google Drive Link -->
+        <div class="form-section">
+          <div class="form-section-title">
+            <i class="fa-brands fa-google-drive" style="color: #34a853;"></i>
+            <span>Google Drive Tài Liệu</span>
+          </div>
+          <div class="form-group">
+            <input type="url" id="edit-drive-url-input" placeholder="https://drive.google.com/drive/folders/... (Tùy chọn)">
+          </div>
+        </div>
+
+        <!-- Section: Grade Weight Breakdown Editor -->
+        <div class="form-section">
+          <div class="form-section-header">
+            <div class="form-section-title">
+              <i class="fa-solid fa-chart-pie" style="color: var(--accent-primary);"></i>
+              <span>Tỉ Lệ Điểm Thành Phần (%)</span>
+            </div>
+            <div id="edit-grade-total-badge" class="badge-grade-total valid">Tổng: 100%</div>
+          </div>
+          
+          <p class="form-section-hint">Tùy biến các cột điểm và trọng số theo đề cương lớp học của bạn:</p>
+
+          <div id="grade-items-editor-container" class="grade-editor-container">
+            <!-- Dynamic Grade Item Rows -->
+          </div>
+
+          <button type="button" id="btn-add-grade-item" class="btn-action-small btn-add-grade-item">
+            <i class="fa-solid fa-plus"></i> Thêm Cột Điểm
+          </button>
+        </div>
+
+        <!-- Optional: Notes / Quy chế môn học -->
+        <div class="form-section">
+          <div class="form-section-title">
+            <i class="fa-solid fa-circle-info" style="color: #06b6d4;"></i>
+            <span>Lưu Ý / Quy Chế Môn Học</span>
+          </div>
+          <div class="form-group">
+            <input type="text" id="edit-subject-notes-input" placeholder="Ví dụ: Nộp bài trễ trừ 2đ/ngày, vắng thuyết trình 0đ...">
+          </div>
         </div>
 
         <div class="modal-footer">
-          <button type="button" id="edit-drive-delete-btn" class="btn-action-small" style="margin-right: auto; color: #ef4444;" title="Xóa liên kết Drive môn này">
-            <i class="fa-regular fa-trash-can"></i> Xóa link
+          <button type="button" id="edit-drive-delete-btn" class="btn-action-small" style="margin-right: auto; color: #ef4444;" title="Xóa môn này khỏi Chiếc Cặp">
+            <i class="fa-regular fa-trash-can"></i> Xóa môn
           </button>
           <button type="button" id="edit-drive-cancel-btn" class="btn-action-small">Hủy</button>
-          <button type="submit" class="btn-primary-small"><i class="fa-solid fa-check"></i> Lưu Link</button>
+          <button type="submit" class="btn-primary-small"><i class="fa-solid fa-check"></i> Lưu Thay Đổi</button>
         </div>
       </form>
     </div>

@@ -4,7 +4,7 @@
  * ==========================================================================
  */
 
-const CACHE_NAME = 'smart-schedule-backpack-v2';
+const CACHE_NAME = 'smart-schedule-backpack-v3';
 const STATIC_ASSETS = [
   './',
   './index.html',

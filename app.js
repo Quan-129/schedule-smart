@@ -67,17 +67,19 @@ const SUBJECT_COLORS = [
   { border: '#3b82f6', bg: 'rgba(59, 130, 246, 0.12)', text: '#60a5fa' }
 ];
 
-// Grade Schemes parsed from official Course Syllabi
-const GRADE_SCHEMES = [
+// Unified Clean Subject List with Dynamic Grade Schemes & Speed-Dial Drive Launcher
+const INITIAL_SUBJECT_DRIVE = [
   {
-    id: 'co3117',
+    code: 'CO3117',
     name: 'Học máy',
     englishName: 'Machine Learning',
-    code: 'CO3117',
     credits: 3,
     lecturers: 'Lê Thành Sách, Trương Vĩnh Lân, Nguyễn Đức Dũng, Lê Hồng Trang, Võ Thanh Hùng, Nguyễn An Khương',
     department: 'Khoa Khoa học & Kỹ thuật Máy tính (CSE)',
-    items: [
+    icon: 'fa-solid fa-robot',
+    color: '#6366f1',
+    driveUrl: '',
+    gradeItems: [
       { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 60, type: 'Tự luận', duration: '90 phút', color: '#6366f1', note: 'Từ chương 6 đến chương 10' },
       { id: 'item-gk', name: 'Kiểm tra giữa kỳ (Midterm Exam)', weight: 30, type: 'Tự luận', duration: '60 phút', color: '#ec4899', note: 'Đến hết chương 5' },
       { id: 'item-btl', name: 'Bài tập lớn (Group Assignment)', weight: 10, type: 'Project nhóm thực hành', duration: '45 tiết', color: '#10b981', note: 'Triển khai mô hình bài toán thực tế' }
@@ -85,14 +87,16 @@ const GRADE_SCHEMES = [
     notes: 'Quy định AI: Chỉ cho phép dùng hỗ trợ tìm kiếm tài liệu. Nghiêm cấm nộp sản phẩm hoàn toàn do AI tạo ra.'
   },
   {
-    id: 'im1025',
+    code: 'IM1025',
     name: 'Quản lý Dự án cho Kỹ sư',
     englishName: 'Project Management for Engineers',
-    code: 'IM1025',
     credits: 3,
     lecturers: 'Huỳnh Thị Phương Lan, Nguyễn Thùy Trang, Nguyễn Thị Đức Nguyên, Nguyễn Bắc Nguyên, Đường Võ Hùng, Lê Phước Luông',
     department: 'Khoa Quản Lý Công Nghiệp (SIM)',
-    items: [
+    icon: 'fa-solid fa-diagram-project',
+    color: '#f59e0b',
+    driveUrl: '',
+    gradeItems: [
       { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 40, type: 'Trắc nghiệm chấm máy', duration: '70 phút', color: '#6366f1', note: 'Bắt buộc tham gia >= 80% số giờ học' },
       { id: 'item-gk', name: 'Kiểm tra giữa kỳ (Midterm Exam)', weight: 30, type: 'Trắc nghiệm chấm máy', duration: '50 phút', color: '#f59e0b', note: 'Đánh giá kiến thức nửa đầu học kỳ' },
       { id: 'item-cn', name: 'Bài tập cá nhân (Individual)', weight: 15, type: 'Bài tập về nhà & Phản tư', duration: '--', color: '#06b6d4', note: 'Đánh giá nhận thức cá nhân' },
@@ -101,14 +105,16 @@ const GRADE_SCHEMES = [
     notes: 'Nộp bài trễ trên LMS bị trừ 2 điểm/ngày. Tham dự tối thiểu 80% số giờ học là điều kiện bắt buộc.'
   },
   {
-    id: 'im1019',
+    code: 'IM1019',
     name: 'Tiếp thị Căn bản',
     englishName: 'Principle of Marketing',
-    code: 'IM1019',
     credits: 3,
     lecturers: 'Bùi Huy Hải Bích, Phạm Ngọc Trâm Anh, Mai Thị Mỹ Quyên, Nguyễn Văn Tuấn, Dương Thị Ngọc Liên, Lê Nguyễn Hậu',
     department: 'Khoa Quản Lý Công Nghiệp (SIM)',
-    items: [
+    icon: 'fa-solid fa-chart-line',
+    color: '#ec4899',
+    driveUrl: '',
+    gradeItems: [
       { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Trắc nghiệm', duration: '60 phút', color: '#6366f1', note: 'Thi tập trung theo lịch chung' },
       { id: 'item-btl', name: 'Bài tập lớn (Group Project)', weight: 30, type: 'Dự án nhóm & Thuyết trình', duration: 'Nhóm 6-7 SV', color: '#ec4899', note: 'Vắng thuyết trình BTL bị 0 điểm BTL' },
       { id: 'item-tx', name: 'Đánh giá thường xuyên (Formative)', weight: 20, type: 'Bài tập trên lớp / Online', duration: '--', color: '#10b981', note: 'Vắng bài tập nào bị 0 điểm bài đó' }
@@ -116,14 +122,16 @@ const GRADE_SCHEMES = [
     notes: 'Sinh viên làm việc nhóm 6-7 người. Vắng buổi thuyết trình BTL bị 0 điểm BTL.'
   },
   {
-    id: 'co3061',
+    code: 'CO3061',
     name: 'Nhập môn Trí tuệ Nhân tạo',
     englishName: 'Introduction to Artificial Intelligence',
-    code: 'CO3061',
     credits: 3,
     lecturers: 'Bộ môn Khoa học Máy tính',
     department: 'Khoa Khoa học và Kỹ thuật Máy tính (CSE)',
-    items: [
+    icon: 'fa-solid fa-brain',
+    color: '#06b6d4',
+    driveUrl: '',
+    gradeItems: [
       { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Tự luận / Trắc nghiệm', duration: '90 phút', color: '#6366f1', note: 'Đánh giá toàn diện các chủ đề AI' },
       { id: 'item-gk', name: 'Kiểm tra giữa kỳ (Midterm Exam)', weight: 30, type: 'Tự luận / Trắc nghiệm', duration: '60 phút', color: '#f59e0b', note: 'Thuật toán tìm kiếm, Logic, CSP' },
       { id: 'item-btl', name: 'Bài tập lớn / Thực hành', weight: 20, type: 'Project lập trình AI theo nhóm', duration: 'Hạn: 30/11', color: '#10b981', note: 'Cài đặt thuật toán & nộp báo cáo' }
@@ -131,42 +139,48 @@ const GRADE_SCHEMES = [
     notes: 'Deadline nộp Bài tập lớn vào Thứ 2 (30/11/2026).'
   },
   {
-    id: 'sp1035',
+    code: 'SP1035',
     name: 'Tư tưởng Hồ Chí Minh',
     englishName: 'Ho Chi Minh Ideology',
-    code: 'SP1035',
     credits: 2,
     lecturers: 'Bộ môn Lý luận Chính trị',
     department: 'Khoa Khoa học Ứng dụng',
-    items: [
+    icon: 'fa-solid fa-landmark',
+    color: '#10b981',
+    driveUrl: '',
+    gradeItems: [
       { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Trắc nghiệm / Tự luận', duration: '60 phút', color: '#6366f1', note: 'Thi tập trung cuối kỳ' },
       { id: 'item-qt', name: 'Đánh giá quá trình (Quá trình & GK)', weight: 50, type: 'Chuyên cần & Trắc nghiệm online', duration: '--', color: '#ec4899', note: 'Bài tập trên hệ thống BKEL' }
     ],
     notes: 'Tuần 47 là tuần học cuối môn.'
   },
   {
-    id: 'sp1039',
+    code: 'SP1039',
     name: 'Pháp luật Việt Nam Đại cương',
     englishName: 'General Vietnamese Law',
-    code: 'SP1039',
     credits: 2,
     lecturers: 'Bộ môn Khoa học Xã hội',
     department: 'Khoa Khoa học Ứng dụng',
-    items: [
+    icon: 'fa-solid fa-scale-balanced',
+    color: '#8b5cf6',
+    driveUrl: '',
+    gradeItems: [
       { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 70, type: 'Trắc nghiệm', duration: '60 phút', color: '#6366f1', note: 'Thi tập trung cuối kỳ' },
       { id: 'item-qt', name: 'Đánh giá quá trình (Giữa kỳ & Thảo luận)', weight: 30, type: 'Trắc nghiệm online / Bài tập lớp', duration: '--', color: '#f59e0b', note: 'Kiểm tra trên hệ thống BKEL' }
     ],
     notes: 'Tuần 47 là tuần học cuối môn.'
   },
   {
-    id: 'jp1007',
+    code: 'JP1007',
     name: 'Tiếng Nhật 7',
     englishName: 'Japanese 7',
-    code: 'JP1007',
     credits: 4,
     lecturers: 'Giảng viên Bộ môn Ngoại ngữ',
     department: 'Văn phòng Đào tạo Quốc tế (OISP)',
-    items: [
+    icon: 'fa-solid fa-torii-gate',
+    color: '#14b8a6',
+    driveUrl: '',
+    gradeItems: [
       { id: 'item-ck', name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Nghe, Đọc, Viết & Kaiwa', duration: '90 phút', color: '#6366f1', note: 'Đánh giá toàn diện 4 kỹ năng' },
       { id: 'item-qt', name: 'Đánh giá quá trình (Quá trình & GK)', weight: 50, type: 'Kiểm tra từ vựng, Kaiwa, Chuyên cần', duration: '--', color: '#10b981', note: 'Kiểm tra định kỳ theo từng tuần học' }
     ],
@@ -174,16 +188,8 @@ const GRADE_SCHEMES = [
   }
 ];
 
-// Initial Clean Subject List for Speed-Dial Drive Launcher
-const INITIAL_SUBJECT_DRIVE = [
-  { code: 'CO3117', name: 'Học máy', icon: 'fa-solid fa-robot', color: '#6366f1', driveUrl: '' },
-  { code: 'IM1025', name: 'Quản lý Dự án', icon: 'fa-solid fa-diagram-project', color: '#f59e0b', driveUrl: '' },
-  { code: 'IM1019', name: 'Tiếp thị Căn bản', icon: 'fa-solid fa-chart-line', color: '#ec4899', driveUrl: '' },
-  { code: 'CO3061', name: 'Nhập môn AI', icon: 'fa-solid fa-brain', color: '#06b6d4', driveUrl: '' },
-  { code: 'SP1035', name: 'Tư tưởng HCM', icon: 'fa-solid fa-landmark', color: '#10b981', driveUrl: '' },
-  { code: 'SP1039', name: 'Pháp luật VN', icon: 'fa-solid fa-scale-balanced', color: '#8b5cf6', driveUrl: '' },
-  { code: 'JP1007', name: 'Tiếng Nhật 7', icon: 'fa-solid fa-torii-gate', color: '#14b8a6', driveUrl: '' }
-];
+// Fallback constant for backwards compatibility
+const GRADE_SCHEMES = INITIAL_SUBJECT_DRIVE;
 
 // Firebase Project Configuration
 const firebaseConfig = {
@@ -276,7 +282,7 @@ const elements = {
   backpackSearchInput: document.getElementById('backpack-search-input'),
   bpClearSearchBtn: document.getElementById('bp-clear-search-btn'),
   
-  // Edit Drive Modal
+  // Edit Subject & Grade Modal
   editDriveModal: document.getElementById('edit-drive-modal'),
   editDriveForm: document.getElementById('edit-drive-form'),
   editDriveSubjectCode: document.getElementById('edit-drive-subject-code'),
@@ -286,6 +292,10 @@ const elements = {
   editDriveDeleteBtn: document.getElementById('edit-drive-delete-btn'),
   editDriveCloseBtn: document.getElementById('edit-drive-close-btn'),
   editDriveCancelBtn: document.getElementById('edit-drive-cancel-btn'),
+  editGradeTotalBadge: document.getElementById('edit-grade-total-badge'),
+  gradeItemsEditorContainer: document.getElementById('grade-items-editor-container'),
+  btnAddGradeItem: document.getElementById('btn-add-grade-item'),
+  editSubjectNotesInput: document.getElementById('edit-subject-notes-input'),
   
   // Add Subject Modal
   addSubjectModal: document.getElementById('add-subject-modal'),
@@ -433,6 +443,7 @@ function attachFirestoreListener(uid) {
       if (Array.isArray(data.driveSubjects)) {
         state.driveSubjects = data.driveSubjects;
         renderBackpackView();
+        renderGradesView(state.gradesSearchQuery || '');
       }
     } else {
       // Upload existing local state to initialize user document
@@ -777,30 +788,46 @@ function renderTodayView(days, currentDayOfWeek) {
 }
 
 /* ==========================================================================
-   GRADE SCHEMES & DONUT PIE CHARTS
+   GRADE SCHEMES & DONUT PIE CHARTS (DYNAMIC FROM SUBJECT HUB)
    ========================================================================== */
 
-function generateDonutChartSvg(items, schemeCode, totalWeight = 100) {
+function generateDonutChartSvg(items = [], schemeCode = '') {
   const radius = 46;
   const circumference = 2 * Math.PI * radius;
-  let cumulative = 0;
+  const totalWeight = items.reduce((sum, item) => sum + (Number(item.weight) || 0), 0);
 
+  if (!items || items.length === 0 || totalWeight === 0) {
+    return `
+      <div class="donut-chart-wrapper" id="donut-wrapper-${schemeCode}">
+        <svg class="donut-svg" viewBox="0 0 140 140">
+          <circle cx="70" cy="70" r="${radius}" fill="none" stroke="var(--border-color)" stroke-width="20" opacity="0.3" />
+        </svg>
+        <div class="donut-center-info" id="donut-center-${schemeCode}">
+          <span class="donut-center-val" style="font-size: 0.9rem;">0%</span>
+          <span class="donut-center-label">Chưa có %</span>
+        </div>
+      </div>
+    `;
+  }
+
+  let cumulative = 0;
   const slices = items.map((item, idx) => {
-    const strokeDash = (item.weight / totalWeight) * circumference;
+    const weightNum = Number(item.weight) || 0;
+    const strokeDash = (weightNum / totalWeight) * circumference;
     const strokeOffset = -(cumulative / totalWeight) * circumference;
-    cumulative += item.weight;
+    cumulative += weightNum;
 
     return `
       <circle class="donut-slice" 
         cx="70" cy="70" r="${radius}" 
-        stroke="${item.color}" 
+        stroke="${item.color || '#6366f1'}" 
         stroke-dasharray="${strokeDash} ${circumference}" 
         stroke-dashoffset="${strokeOffset}"
         data-scheme="${schemeCode}"
-        data-weight="${item.weight}%"
-        data-name="${escapeHtml(item.name)}"
-        title="${escapeHtml(item.name)}: ${item.weight}%"
-        onclick="highlightGradeSlice('${schemeCode}', '${idx}', '${escapeHtml(item.name)}', '${item.weight}%')"
+        data-weight="${weightNum}%"
+        data-name="${escapeHtml(item.name || '')}"
+        title="${escapeHtml(item.name || '')}: ${weightNum}%"
+        onclick="highlightGradeSlice('${schemeCode}', '${idx}', '${escapeHtml(item.name || '')}', '${weightNum}%')"
       />
     `;
   }).join('');
@@ -812,7 +839,7 @@ function generateDonutChartSvg(items, schemeCode, totalWeight = 100) {
         ${slices}
       </svg>
       <div class="donut-center-info" id="donut-center-${schemeCode}">
-        <span class="donut-center-val">100%</span>
+        <span class="donut-center-val">${totalWeight}%</span>
         <span class="donut-center-label">Tổng điểm</span>
       </div>
     </div>
@@ -835,13 +862,13 @@ function renderGradesView(filterQuery = '') {
   elements.gradesGrid.innerHTML = '';
 
   const q = filterQuery.toLowerCase().trim();
-  const filteredSchemes = GRADE_SCHEMES.filter(s => 
+  const filteredSchemes = (state.driveSubjects || []).filter(s => 
     !q || 
-    s.name.toLowerCase().includes(q) ||
-    s.englishName.toLowerCase().includes(q) ||
-    s.code.toLowerCase().includes(q) ||
-    s.department.toLowerCase().includes(q) ||
-    s.lecturers.toLowerCase().includes(q)
+    (s.name && s.name.toLowerCase().includes(q)) ||
+    (s.englishName && s.englishName.toLowerCase().includes(q)) ||
+    (s.code && s.code.toLowerCase().includes(q)) ||
+    (s.department && s.department.toLowerCase().includes(q)) ||
+    (s.lecturers && s.lecturers.toLowerCase().includes(q))
   );
 
   if (filteredSchemes.length === 0) {
@@ -849,7 +876,7 @@ function renderGradesView(filterQuery = '') {
       <div class="day-off-card" style="grid-column: 1 / -1; padding: 3rem 1rem;">
         <div class="day-off-icon" style="font-size: 3rem;"><i class="fa-solid fa-magnifying-glass"></i></div>
         <h3>Không tìm thấy môn học</h3>
-        <p>Thử tìm kiếm với từ khóa khác như "Học máy", "Quản lý", "CO3117", "IM1025"...</p>
+        <p>Thử tìm kiếm với từ khóa khác như "Học máy", "Quản lý", "CO3117", "IM1025"... hoặc thêm môn mới trong Chiếc Cặp.</p>
       </div>
     `;
     return;
@@ -860,40 +887,48 @@ function renderGradesView(filterQuery = '') {
     card.className = 'grade-card';
     card.id = `grade-card-${scheme.code.toLowerCase()}`;
 
-    const chartSvg = generateDonutChartSvg(scheme.items, scheme.code.toLowerCase());
+    const gradeItems = scheme.gradeItems || [];
+    const chartSvg = generateDonutChartSvg(gradeItems, scheme.code.toLowerCase());
 
-    const breakdownHtml = scheme.items.map((item, idx) => `
-      <div class="breakdown-item" style="border-left-color: ${item.color}; cursor: pointer;" onclick="highlightGradeSlice('${scheme.code.toLowerCase()}', '${idx}', '${escapeHtml(item.name)}', '${item.weight}%')">
+    const breakdownHtml = gradeItems.length > 0 ? gradeItems.map((item, idx) => `
+      <div class="breakdown-item" style="border-left-color: ${item.color || '#6366f1'}; cursor: pointer;" onclick="highlightGradeSlice('${scheme.code.toLowerCase()}', '${idx}', '${escapeHtml(item.name)}', '${item.weight}%')">
         <div class="breakdown-row">
           <span class="breakdown-name">
-            <span class="breakdown-color-dot" style="background-color: ${item.color};"></span>
+            <span class="breakdown-color-dot" style="background-color: ${item.color || '#6366f1'};"></span>
             ${escapeHtml(item.name)}
           </span>
-          <span class="breakdown-weight" style="color: ${item.color};">${item.weight}%</span>
+          <span class="breakdown-weight" style="color: ${item.color || '#6366f1'};">${item.weight}%</span>
         </div>
         <div class="breakdown-detail">
-          <span class="breakdown-type"><i class="fa-regular fa-file-lines"></i> ${escapeHtml(item.type)}</span>
+          <span class="breakdown-type"><i class="fa-regular fa-file-lines"></i> ${escapeHtml(item.type || 'Đánh giá')}</span>
           ${item.duration && item.duration !== '--' ? `<span><i class="fa-regular fa-clock"></i> ${escapeHtml(item.duration)}</span>` : ''}
         </div>
         <div class="breakdown-bar">
-          <div class="breakdown-bar-fill" style="width: ${item.weight}%; background-color: ${item.color};"></div>
+          <div class="breakdown-bar-fill" style="width: ${item.weight}%; background-color: ${item.color || '#6366f1'};"></div>
         </div>
       </div>
-    `).join('');
+    `).join('') : `
+      <div style="padding: 1rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+        Chưa có tỉ lệ điểm. Bấm "Sửa Tỉ Lệ" để thiết lập.
+      </div>
+    `;
 
     card.innerHTML = `
       <div class="grade-card-header">
         <div class="grade-title-group">
           <h3 class="grade-subject-title">
-            <i class="fa-solid fa-book-bookmark" style="color: var(--accent-primary); font-size: 0.95rem;"></i>
+            <i class="${scheme.icon || 'fa-solid fa-book-bookmark'}" style="color: var(--accent-primary); font-size: 0.95rem;"></i>
             ${escapeHtml(scheme.name)}
           </h3>
-          <span class="grade-subject-en">${escapeHtml(scheme.englishName)}</span>
-          <span class="grade-department"><i class="fa-solid fa-building-columns"></i> ${escapeHtml(scheme.department)}</span>
+          ${scheme.englishName ? `<span class="grade-subject-en">${escapeHtml(scheme.englishName)}</span>` : ''}
+          ${scheme.department ? `<span class="grade-department"><i class="fa-solid fa-building-columns"></i> ${escapeHtml(scheme.department)}</span>` : ''}
         </div>
         <div class="grade-badges">
           <span class="badge-code">${escapeHtml(scheme.code)}</span>
-          <span class="badge-credits">${scheme.credits} Tín chỉ</span>
+          ${scheme.credits ? `<span class="badge-credits">${scheme.credits} Tín chỉ</span>` : ''}
+          <button class="btn-edit-grade-scheme" title="Chỉnh sửa thông số & tỉ lệ điểm môn ${escapeHtml(scheme.name)}" onclick="editSubjectGradeScheme('${escapeHtml(scheme.code)}', event)">
+            <i class="fa-solid fa-pen-to-square"></i> Sửa Tỉ Lệ
+          </button>
         </div>
       </div>
 
@@ -916,6 +951,11 @@ function renderGradesView(filterQuery = '') {
   });
 }
 
+window.editSubjectGradeScheme = function(subjectCode, event) {
+  if (event) event.stopPropagation();
+  openEditDriveModal(subjectCode);
+};
+
 window.viewSubjectGrade = function(subjectName) {
   switchView('grades');
   if (elements.gradesSearchInput) {
@@ -924,9 +964,10 @@ window.viewSubjectGrade = function(subjectName) {
   }
   
   setTimeout(() => {
-    const matchingScheme = GRADE_SCHEMES.find(s => 
+    const matchingScheme = state.driveSubjects.find(s => 
       s.name.toLowerCase().includes(subjectName.toLowerCase()) || 
-      subjectName.toLowerCase().includes(s.name.toLowerCase())
+      subjectName.toLowerCase().includes(s.name.toLowerCase()) ||
+      s.code.toLowerCase().includes(subjectName.toLowerCase())
     );
     if (matchingScheme) {
       const cardElem = document.getElementById(`grade-card-${matchingScheme.code.toLowerCase()}`);
@@ -944,7 +985,7 @@ window.viewSubjectGrade = function(subjectName) {
 };
 
 /* ==========================================================================
-   SPEED-DIAL 1-CHẠM GOOGLE DRIVE & iOS JIGGLE DELETE
+   SPEED-DIAL 1-CHẠM GOOGLE DRIVE, DYNAMIC GRADE EDITOR & iOS JIGGLE
    ========================================================================== */
 
 function loadDriveData() {
@@ -953,7 +994,24 @@ function loadDriveData() {
     if (saved) {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        state.driveSubjects = parsed;
+        // Merge with initial defaults to ensure full schema (gradeItems, englishName, etc.)
+        state.driveSubjects = parsed.map(item => {
+          const defaultItem = INITIAL_SUBJECT_DRIVE.find(d => d.code === item.code);
+          if (!item.gradeItems || !Array.isArray(item.gradeItems) || item.gradeItems.length === 0) {
+            return {
+              ...(defaultItem || {}),
+              ...item,
+              gradeItems: defaultItem ? JSON.parse(JSON.stringify(defaultItem.gradeItems)) : [
+                { id: 'item-ck', name: 'Thi cuối kỳ', weight: 50, type: 'Tự luận', color: '#6366f1' },
+                { id: 'item-qt', name: 'Quá trình / GK', weight: 50, type: 'Kiểm tra', color: '#ec4899' }
+              ]
+            };
+          }
+          return {
+            ...(defaultItem || {}),
+            ...item
+          };
+        });
         return;
       }
     }
@@ -979,6 +1037,141 @@ function saveDriveData() {
       console.warn('Could not sync to Firestore:', err);
     });
   }
+}
+
+/**
+ * Dynamic Grade Breakdown Editor Helpers
+ */
+function renderGradeEditorRows(gradeItems = []) {
+  if (!elements.gradeItemsEditorContainer) return;
+  elements.gradeItemsEditorContainer.innerHTML = '';
+
+  const palette = ['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#8b5cf6', '#14b8a6', '#f97316'];
+
+  gradeItems.forEach((item, index) => {
+    const color = item.color || palette[index % palette.length];
+    const row = document.createElement('div');
+    row.className = 'grade-item-row';
+    row.innerHTML = `
+      <div class="grade-row-name">
+        <input type="text" class="input-grade-name" placeholder="Tên cột (VD: Cuối kỳ, GK...)" value="${escapeHtml(item.name || '')}" required>
+      </div>
+      <div class="grade-row-weight">
+        <input type="number" class="input-grade-weight" min="0" max="100" step="1" value="${item.weight !== undefined ? item.weight : 0}" required>
+        <span class="weight-unit">%</span>
+      </div>
+      <div class="grade-row-type">
+        <input type="text" class="input-grade-type" placeholder="Loại (Tự luận, BTL...)" value="${escapeHtml(item.type || '')}">
+      </div>
+      <div class="grade-row-color">
+        <input type="color" class="input-grade-color" value="${color}" title="Chọn màu nhận diện">
+      </div>
+      <button type="button" class="btn-delete-grade-row" title="Xóa cột điểm này">
+        <i class="fa-solid fa-minus"></i>
+      </button>
+    `;
+
+    const weightInput = row.querySelector('.input-grade-weight');
+    weightInput.addEventListener('input', calculateGradeTotal);
+
+    const deleteBtn = row.querySelector('.btn-delete-grade-row');
+    deleteBtn.addEventListener('click', () => {
+      row.remove();
+      calculateGradeTotal();
+    });
+
+    elements.gradeItemsEditorContainer.appendChild(row);
+  });
+
+  calculateGradeTotal();
+}
+
+function addGradeEditorRow(item = {}) {
+  if (!elements.gradeItemsEditorContainer) return;
+
+  const palette = ['#6366f1', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#8b5cf6', '#14b8a6', '#f97316'];
+  const currentIndex = elements.gradeItemsEditorContainer.querySelectorAll('.grade-item-row').length;
+  const color = item.color || palette[currentIndex % palette.length];
+
+  const row = document.createElement('div');
+  row.className = 'grade-item-row';
+  row.innerHTML = `
+    <div class="grade-row-name">
+      <input type="text" class="input-grade-name" placeholder="Tên cột (VD: Chuyên cần, Quiz...)" value="${escapeHtml(item.name || '')}" required>
+    </div>
+    <div class="grade-row-weight">
+      <input type="number" class="input-grade-weight" min="0" max="100" step="1" value="${item.weight !== undefined ? item.weight : 10}" required>
+      <span class="weight-unit">%</span>
+    </div>
+    <div class="grade-row-type">
+      <input type="text" class="input-grade-type" placeholder="Loại (Tự luận, BTL...)" value="${escapeHtml(item.type || '')}">
+    </div>
+    <div class="grade-row-color">
+      <input type="color" class="input-grade-color" value="${color}" title="Chọn màu nhận diện">
+    </div>
+    <button type="button" class="btn-delete-grade-row" title="Xóa cột điểm này">
+      <i class="fa-solid fa-minus"></i>
+    </button>
+  `;
+
+  const weightInput = row.querySelector('.input-grade-weight');
+  weightInput.addEventListener('input', calculateGradeTotal);
+
+  const deleteBtn = row.querySelector('.btn-delete-grade-row');
+  deleteBtn.addEventListener('click', () => {
+    row.remove();
+    calculateGradeTotal();
+  });
+
+  elements.gradeItemsEditorContainer.appendChild(row);
+  row.querySelector('.input-grade-name').focus();
+  calculateGradeTotal();
+}
+
+function calculateGradeTotal() {
+  if (!elements.gradeItemsEditorContainer || !elements.editGradeTotalBadge) return 0;
+
+  const rows = elements.gradeItemsEditorContainer.querySelectorAll('.grade-item-row');
+  let total = 0;
+  rows.forEach(r => {
+    const w = parseFloat(r.querySelector('.input-grade-weight')?.value) || 0;
+    total += w;
+  });
+
+  elements.editGradeTotalBadge.classList.remove('valid', 'invalid', 'overflow');
+
+  if (total === 100) {
+    elements.editGradeTotalBadge.classList.add('valid');
+    elements.editGradeTotalBadge.innerHTML = `<i class="fa-solid fa-check"></i> Tổng: 100% (Chuẩn)`;
+  } else if (total > 100) {
+    elements.editGradeTotalBadge.classList.add('overflow');
+    elements.editGradeTotalBadge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Tổng: ${total}% (Thừa ${total - 100}%)`;
+  } else {
+    elements.editGradeTotalBadge.classList.add('invalid');
+    elements.editGradeTotalBadge.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Tổng: ${total}% (Thiếu ${100 - total}%)`;
+  }
+
+  return total;
+}
+
+function getGradeEditorData() {
+  if (!elements.gradeItemsEditorContainer) return [];
+  const rows = elements.gradeItemsEditorContainer.querySelectorAll('.grade-item-row');
+  const items = [];
+  rows.forEach((r, idx) => {
+    const name = r.querySelector('.input-grade-name')?.value.trim() || `Cột ${idx + 1}`;
+    const weight = parseFloat(r.querySelector('.input-grade-weight')?.value) || 0;
+    const type = r.querySelector('.input-grade-type')?.value.trim() || 'Đánh giá';
+    const color = r.querySelector('.input-grade-color')?.value || '#6366f1';
+    items.push({
+      id: `item-${idx + 1}-${Date.now()}`,
+      name: name,
+      weight: weight,
+      type: type,
+      color: color
+    });
+  });
+  return items;
 }
 
 /**
@@ -1026,12 +1219,13 @@ window.deleteSubjectCard = function(subjectCode, event) {
     state.driveSubjects = state.driveSubjects.filter(s => s.code !== subjectCode);
     saveDriveData();
     renderBackpackView();
+    renderGradesView(state.gradesSearchQuery || '');
     showToast(`Đã xóa môn ${subject.name}!`);
   }
 };
 
 /**
- * Render square App Launcher buttons in Backpack
+ * Render square App Launcher buttons in Backpack with Mini Grade Bar
  */
 function renderBackpackView() {
   if (!elements.backpackLauncherGrid) return;
@@ -1041,7 +1235,7 @@ function renderBackpackView() {
 
   const filteredSubjects = state.driveSubjects.filter(s => {
     if (!q) return true;
-    return s.name.toLowerCase().includes(q) || s.code.toLowerCase().includes(q);
+    return (s.name && s.name.toLowerCase().includes(q)) || (s.code && s.code.toLowerCase().includes(q));
   });
 
   filteredSubjects.forEach(subject => {
@@ -1101,11 +1295,32 @@ function renderBackpackView() {
       </button>
     ` : '';
 
+    // Mini Grade Breakdown Progress Bar & Pills
+    const gradeItems = subject.gradeItems || [];
+    const totalW = gradeItems.reduce((acc, cur) => acc + (Number(cur.weight) || 0), 0);
+    
+    const gradeBarHtml = totalW > 0 ? `
+      <div class="bp-app-grade-bar">
+        ${gradeItems.map(g => `
+          <div class="bp-grade-segment" style="width: ${(Number(g.weight) / totalW) * 100}%; background-color: ${g.color || '#6366f1'};" title="${escapeHtml(g.name)}: ${g.weight}%"></div>
+        `).join('')}
+      </div>
+    ` : '';
+
+    const gradePillsHtml = gradeItems.length > 0 ? `
+      <div class="bp-grade-pill-row">
+        ${gradeItems.slice(0, 3).map(g => {
+          const shortName = g.name.split('(')[0].trim().replace('Kiểm tra ', '').replace('Thi ', '');
+          return `<span class="bp-grade-mini-tag" style="--tag-color: ${g.color || '#6366f1'};">${escapeHtml(shortName)} ${g.weight}%</span>`;
+        }).join('')}
+      </div>
+    ` : '';
+
     btn.innerHTML = `
       ${deleteBadgeHtml}
       <div class="bp-app-top">
         <span class="bp-app-code">${escapeHtml(subject.code)}</span>
-        <button class="btn-edit-node-pencil" title="Chỉnh sửa link Google Drive" onclick="editSubjectDriveLink('${escapeHtml(subject.code)}', event)">
+        <button class="btn-edit-node-pencil" title="Chỉnh sửa link Google Drive & Tỉ lệ điểm môn ${escapeHtml(subject.name)}" onclick="editSubjectDriveLink('${escapeHtml(subject.code)}', event)">
           <i class="fa-solid fa-pen"></i>
         </button>
       </div>
@@ -1119,6 +1334,8 @@ function renderBackpackView() {
         <span class="bp-app-drive-status ${hasDrive ? '' : 'not-set'}">
           ${hasDrive ? '<i class="fa-brands fa-google-drive"></i> Drive ↗' : '<i class="fa-solid fa-link-slash"></i> Chưa gắn'}
         </span>
+        ${gradeBarHtml}
+        ${gradePillsHtml}
       </div>
     `;
 
@@ -1156,7 +1373,7 @@ window.handleSubjectClick = function(subjectCode) {
 };
 
 /**
- * Open Modal to edit/attach Drive Link
+ * Open Modal to edit/attach Drive Link and Grade Breakdown
  */
 window.editSubjectDriveLink = function(subjectCode, event) {
   if (event) {
@@ -1170,15 +1387,19 @@ function openEditDriveModal(subjectCode) {
   if (!subject) return;
 
   elements.editDriveSubjectCode.value = subjectCode;
-  elements.editDriveModalTitle.textContent = `Gắn Link Google Drive - ${subject.name}`;
+  elements.editDriveModalTitle.textContent = `Chỉnh Sửa Môn Học - ${subject.name}`;
   elements.editDriveModalSub.textContent = `Mã môn: ${subject.code}`;
   elements.editDriveUrlInput.value = subject.driveUrl || '';
+  if (elements.editSubjectNotesInput) {
+    elements.editSubjectNotesInput.value = subject.notes || '';
+  }
 
-  // Show or hide Delete Link button
-  if (subject.driveUrl) {
+  // Populate dynamic Grade breakdown items
+  renderGradeEditorRows(subject.gradeItems || []);
+
+  // Show or hide Delete Subject button
+  if (elements.editDriveDeleteBtn) {
     elements.editDriveDeleteBtn.style.display = 'inline-flex';
-  } else {
-    elements.editDriveDeleteBtn.style.display = 'none';
   }
 
   elements.editDriveModal.classList.remove('hidden');
@@ -1200,7 +1421,8 @@ window.openAddSubjectModal = function() {
 window.viewSubjectBackpack = function(subjectName) {
   const matched = state.driveSubjects.find(s => 
     s.name.toLowerCase().includes(subjectName.toLowerCase()) || 
-    subjectName.toLowerCase().includes(s.name.toLowerCase())
+    subjectName.toLowerCase().includes(s.name.toLowerCase()) ||
+    s.code.toLowerCase().includes(subjectName.toLowerCase())
   );
 
   if (matched && matched.driveUrl) {
@@ -1498,6 +1720,13 @@ function setupEventListeners() {
     elements.bpDoneJiggleBtn.addEventListener('click', exitJiggleMode);
   }
 
+  // Dynamic Grade Editor Add Row Trigger
+  if (elements.btnAddGradeItem) {
+    elements.btnAddGradeItem.addEventListener('click', () => {
+      addGradeEditorRow();
+    });
+  }
+
   // Add Subject Triggers
   if (elements.bpAddSubjectBtn) {
     elements.bpAddSubjectBtn.addEventListener('click', openAddSubjectModal);
@@ -1525,19 +1754,29 @@ function setupEventListeners() {
       state.driveSubjects.push({
         code: code,
         name: name,
+        englishName: '',
+        credits: 3,
+        lecturers: '',
+        department: '',
         icon: 'fa-solid fa-book-bookmark',
         color: chosenColor,
-        driveUrl: driveUrl
+        driveUrl: driveUrl,
+        gradeItems: [
+          { id: `item-ck-${Date.now()}`, name: 'Thi cuối kỳ (Final Exam)', weight: 50, type: 'Tự luận', color: '#6366f1' },
+          { id: `item-qt-${Date.now()}`, name: 'Quá trình & Giữa kỳ', weight: 50, type: 'Kiểm tra', color: '#ec4899' }
+        ],
+        notes: ''
       });
 
       saveDriveData();
       renderBackpackView();
+      renderGradesView(state.gradesSearchQuery || '');
       elements.addSubjectModal.classList.add('hidden');
       showToast(`Đã tạo môn học mới: ${name} (${code})!`);
     });
   }
 
-  // Edit Drive Modal Triggers
+  // Edit Subject & Grade Modal Triggers
   if (elements.editDriveCloseBtn) {
     elements.editDriveCloseBtn.addEventListener('click', () => elements.editDriveModal.classList.add('hidden'));
   }
@@ -1549,12 +1788,13 @@ function setupEventListeners() {
     elements.editDriveDeleteBtn.addEventListener('click', () => {
       const subjectCode = elements.editDriveSubjectCode.value;
       const subject = state.driveSubjects.find(s => s.code === subjectCode);
-      if (subject) {
-        subject.driveUrl = '';
+      if (subject && confirm(`Bạn có chắc muốn xóa môn "${subject.name}" (${subject.code}) khỏi Chiếc Cặp và bảng Điểm?`)) {
+        state.driveSubjects = state.driveSubjects.filter(s => s.code !== subjectCode);
         saveDriveData();
         renderBackpackView();
+        renderGradesView(state.gradesSearchQuery || '');
         elements.editDriveModal.classList.add('hidden');
-        showToast(`Đã gỡ link Google Drive của môn ${subject.name}`);
+        showToast(`Đã xóa môn ${subject.name}!`);
       }
     });
   }
@@ -1564,13 +1804,18 @@ function setupEventListeners() {
       e.preventDefault();
       const subjectCode = elements.editDriveSubjectCode.value;
       const url = elements.editDriveUrlInput.value.trim();
+      const notes = elements.editSubjectNotesInput ? elements.editSubjectNotesInput.value.trim() : '';
+      const updatedGradeItems = getGradeEditorData();
 
       const subject = state.driveSubjects.find(s => s.code === subjectCode);
       if (subject) {
         subject.driveUrl = url;
+        subject.notes = notes;
+        subject.gradeItems = updatedGradeItems;
         saveDriveData();
         renderBackpackView();
-        showToast(`Đã lưu link Google Drive cho môn ${subject.name}!`);
+        renderGradesView(state.gradesSearchQuery || '');
+        showToast(`Đã cập nhật thông tin và tỉ lệ điểm môn ${subject.name}!`);
       }
 
       elements.editDriveModal.classList.add('hidden');
