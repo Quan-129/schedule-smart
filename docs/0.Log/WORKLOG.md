@@ -4,6 +4,20 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 22:05] - Loại Bỏ Hoàn Toàn Footer & Hướng Dẫn Git Dưới Chân Trang
+
+- **🎯 Mục tiêu**:
+  - Xóa bỏ khối Footer và Accordion hướng dẫn Git (`.git-guide-section`) dưới chân trang theo yêu cầu của người dùng để giao diện đạt độ sạch sẽ, hiện đại và không có chi tiết thừa.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / HTML DOM]` Cập nhật [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html):
+    - Xóa bỏ thẻ `<footer class="footer">...</footer>` chứa Accordion Git Guide và text footer.
+  - `[Frontend / CSS Timetable Grid]` Cập nhật [`src/1.Frontend/styles/3.timetable-grid.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/3.timetable-grid.css):
+    - Dọn dẹp toàn bộ các class CSS liên quan `.git-guide-section`, `.guide-accordion`, `.guide-step`, `.footer`.
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v41` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 22:00] - Tối Giản Hóa Tuyệt Đối: Chỉ Giữ Lại Duy Nhất Thanh Navbar Điều Hướng
 
 - **🎯 Mục tiêu**:
