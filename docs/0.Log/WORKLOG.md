@@ -4,6 +4,19 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 21:35] - Khắc Phục Lỗi ReferenceError: ensureAddSubjectModalDom & Tối Ưu Import Modals
+
+- **🎯 Mục tiêu**:
+  - Sửa lỗi `ReferenceError: ensureAddSubjectModalDom is not defined` do thiếu import component [`AddSubjectModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddSubjectModal.js).
+  - Loại bỏ hoàn toàn định nghĩa hàm `initAddSubjectModal` cũ trong `main.js` để đảm bảo 100% mô-đun hóa độc lập.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Fix Import]` Bổ sung `import { ensureAddSubjectModalDom, openAddSubjectModal, initAddSubjectModal } from './components/modals/AddSubjectModal.js';` vào [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js).
+  - `[Frontend / Clean Code]` Xóa bỏ hàm `initAddSubjectModal` cũ trùng lặp trong [`main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js).
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v34` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 21:30] - Sửa Lỗi Cú Pháp Trùng Lặp Khai Báo initAddWeekModal & Đồng Bộ AddWeekModal Component
 
 - **🎯 Mục tiêu**:

@@ -13,6 +13,7 @@ import { renderBackpackView, enterJiggleMode, exitJiggleMode } from './views/Bac
 import { renderGradesView, highlightGradeSlice } from './views/GradesView.js';
 import { renderTimetableGrid, renderTodayView, getSubjectColor } from './views/TimetableGrid.js';
 import { ensureEditSubjectModalDom, openEditSubjectModal, openEditDriveModal } from './components/modals/EditSubjectModal.js';
+import { ensureAddSubjectModalDom, openAddSubjectModal, initAddSubjectModal } from './components/modals/AddSubjectModal.js';
 import { ensureAddWeekModalDom, openAddWeekModal, initAddWeekModal } from './components/modals/AddWeekModal.js';
 import { ensureDeleteWeekModalDom, openDeleteWeekModal } from './components/modals/DeleteWeekModal.js';
 import { ensureSubjectDetailModalDom, openSubjectDetailModal } from './components/modals/SubjectDetailModal.js';
@@ -916,74 +917,7 @@ function persistCurrentSchedule() {
   renderSubjectFilters(state.scheduleData.subjects || []);
 }
 
-/**
- * Khởi tạo Modal Thêm Môn Học
- */
-function initAddSubjectModal() {
-  const addModal = document.getElementById('add-subject-modal');
-  const closeBtn = document.getElementById('add-subject-close-btn');
-  const cancelBtn = document.getElementById('add-subject-cancel-btn');
-  const form = document.getElementById('add-subject-form');
 
-  const closeModal = () => {
-    if (addModal) {
-      addModal.classList.remove('active');
-      addModal.classList.add('hidden');
-      addModal.style.display = 'none';
-    }
-    if (form) form.reset();
-  };
-
-  if (closeBtn) closeBtn.onclick = closeModal;
-  if (cancelBtn) cancelBtn.onclick = closeModal;
-
-  if (form) {
-    form.onsubmit = (e) => {
-      e.preventDefault();
-      const nameInput = document.getElementById('new-subj-name-input');
-      const codeInput = document.getElementById('new-subj-code-input');
-      const driveInput = document.getElementById('new-subj-drive-input');
-
-      const name = nameInput ? nameInput.value.trim() : '';
-      const code = codeInput ? codeInput.value.trim().toUpperCase() : '';
-      const driveUrl = driveInput ? formatSafeUrl(driveInput.value.trim()) : '';
-
-      if (!name || !code) {
-        showToast('Vui lòng nhập tên và mã môn học');
-        return;
-      }
-
-      if (state.driveSubjects.some(s => s.code === code)) {
-        showToast(`Môn "${code}" đã tồn tại!`);
-        return;
-      }
-
-      state.driveSubjects.push({
-        code,
-        name,
-        englishName: name,
-        credits: 3,
-        lecturers: '',
-        icon: 'fa-solid fa-book',
-        color: '#6366f1',
-        driveUrl,
-        gradeItems: [
-          { id: 'item-gk', name: 'Giữa kỳ (GK)', weight: 30, color: '#3b82f6' },
-          { id: 'item-ck', name: 'Cuối kỳ (CK)', weight: 50, color: '#ec4899' },
-          { id: 'item-btl', name: 'Bài tập lớn (BTL)', weight: 20, color: '#10b981' }
-        ],
-        notes: ''
-      });
-
-      persistDriveSubjects();
-      syncDriveSubjectsToCloud();
-      closeModal();
-      renderBackpackView();
-      renderGradesView();
-      showToast(`Đã thêm môn "${name}" vào Chiếc Cặp!`);
-    };
-  }
-}
 
 /**
  * Khởi tạo Đổi Theme Sáng/Tối
