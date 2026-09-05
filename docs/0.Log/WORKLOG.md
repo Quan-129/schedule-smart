@@ -4,6 +4,31 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 14:52] - Fix Triệt Để Lỗi Lệch Khung Điểm & Tràn Khung HK1 Trên Mobile
+
+- **🎯 Mục tiêu**:
+  - Khắc phục triệt để hiện tượng Header và Rows của bảng tỉ lệ điểm (`grade-table-header` vs `grade-item-row`) bị lệch số cột và xô lệch không khớp trên điện thoại.
+  - Xử lý triệt để hiện tượng khung tên HK1 (`badge-git`, `brand-info`) và thanh điều hướng tuần trên Navbar bị chật chội, tràn lòi ra khỏi màn hình mobile.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Grade Table]` Đồng bộ hóa tuyệt đối cấu trúc 4 cột trên Mobile (`grid-template-columns: 1fr 70px 32px 32px !important`) cho cả `.grade-table-header` và `.grade-item-row`:
+    + Ẩn hoàn toàn cột kéo thả (`col-handle`, `grade-row-handle`) và cột hình thức thi (`col-type`, `grade-row-type`) trên màn hình <= 640px.
+    + Đảm bảo từng cột (Tên cột, Trọng số %, Màu nhận diện, Nút xóa) khớp nhau 100% từng pixel.
+  - `[Frontend / Navbar & HK1]` Tinh chỉnh Navbar trên Mobile (< 600px):
+    + Giới hạn chiều rộng `.nav-left` và `.nav-right` ở mức 50%, text `h1` và `badge-git` tự động co gọn hoặc ẩn bớt phần thừa, không gây tràn ngang (Horizontal Overflow).
+    + Co gọn nút tuần học, nút theme và nút login thành icon tròn chuẩn touch.
+  - `[Frontend / Edit Modal Tabs]` Chuyển `.modal-nav-tabs` trên Mobile sang dạng cột gọn gàng (Icon trên, chữ dưới), hiển thị trọn vẹn 3 tab không bị rớt dòng méo mó.
+  - `[Performance / PWA]` Nâng cấp `CACHE_NAME` lên `smart-schedule-modular-v16` trong `sw.js`.
+
+- **💡 Quyết định Kỹ thuật & Kiến trúc**:
+  - Sử dụng quy tắc đồng bộ đối xứng giữa thẻ Header và Dynamic Rows, loại bỏ chênh lệch cột con.
+
+- **📌 Trạng thái hiện tại & Kế hoạch tiếp theo (Next Steps)**:
+  - [x] Đã kiểm tra và khớp 100% các cột bảng điểm và navbar trên thiết bị di động.
+  - [x] Đã sẵn sàng commit và push lên GitHub.
+
+---
+
 ## 📅 [2026-09-05 14:40] - Tối Ưu Hóa Responsive Layout Toàn Diện Cho Modal, Form & Controls Trên Mobile/Tablet
 
 - **🎯 Mục tiêu**:
