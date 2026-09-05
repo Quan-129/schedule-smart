@@ -159,8 +159,8 @@ function setupWindowHelpers() {
     }
   };
 
-  window.deleteClassFromDay = (dayName, classIndex) => {
-    handleDeleteClass(dayName, classIndex);
+  window.deleteClassFromDay = (dayName, classIndex, classData = null) => {
+    handleDeleteClass(dayName, classIndex, classData);
   };
 }
 
@@ -817,25 +817,50 @@ function handleSaveClass({ dayName, classData, isEdit, classIndex, oldDayName })
 /**
  * Xóa một tiết học khỏi ngày
  */
-function handleDeleteClass(dayName, classIndex, skipConfirm = false) {
+function handleDeleteClass(dayName, classIndex, classData = null) {
   if (!state.scheduleData || !state.scheduleData.days) return;
 
-  const day = state.scheduleData.days.find(d => d.name === dayName);
-  if (!day || !day.classes || !day.classes[classIndex]) return;
+  // 1. Tìm ngày linh hoạt (khớp chính xác hoặc khớp tương đối)
+  let day = state.scheduleData.days.find(d => 
+    d.name === dayName || 
+    (d.name && dayName && (d.name.toLowerCase() === dayName.toLowerCase() || d.name.includes(dayName) || dayName.includes(d.name)))
+  );
 
-  const subjectName = day.classes[classIndex]?.subject || '';
-  if (!skipConfirm && !confirm(`Bạn có chắc muốn xóa tiết "${subjectName}" trong ${day.name}?`)) {
+  if (!day || !day.classes || day.classes.length === 0) {
+    showToast('Không tìm thấy ngày cần xóa!');
     return;
   }
 
-  const removed = day.classes.splice(classIndex, 1)[0];
+  let removed = null;
 
+  // 2. Ưu tiên tìm theo đối tượng classData nếu có
+  if (classData && classData.subject) {
+    const idx = day.classes.findIndex(c => 
+      c.subject === classData.subject && 
+      (c.timeRange === classData.timeRange || c.startTime === classData.startTime)
+    );
+    if (idx !== -1) {
+      removed = day.classes.splice(idx, 1)[0];
+    }
+  }
+
+  // 3. Fallback theo classIndex
+  if (!removed && classIndex !== null && classIndex !== undefined && day.classes[classIndex]) {
+    removed = day.classes.splice(classIndex, 1)[0];
+  }
+
+  if (!removed) {
+    showToast('Không tìm thấy tiết học cần xóa!');
+    return;
+  }
+
+  // 4. Nếu ngày hết tiết, chuyển sang trạng thái nghỉ
   if (day.classes.length === 0) {
     day.isDayOff = true;
     day.dayOffText = (day.name.includes('7') || day.name.includes('Chủ Nhật')) ? 'Nghỉ ngơi cuối tuần' : 'Nghỉ';
   }
 
-  showToast(`Đã xóa tiết "${removed?.subject || ''}"`);
+  showToast(`Đã xóa tiết "${removed.subject}" (${day.name}) 🗑️`);
   persistCurrentSchedule();
 }
 

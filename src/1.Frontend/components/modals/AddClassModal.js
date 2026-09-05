@@ -268,12 +268,14 @@ function bindAddClassModalEvents() {
   if (deleteBtn) {
     deleteBtn.onclick = () => {
       if (!currentEditingClass) return;
-      if (confirm(`Bạn có chắc muốn xóa tiết "${currentEditingClass.classData.subject}"?`)) {
-        if (onDeleteCallback) {
-          onDeleteCallback(currentEditingClass.dayName, currentEditingClass.classIndex, true);
-        }
-        closeModal();
+      if (onDeleteCallback) {
+        onDeleteCallback(
+          currentEditingClass.dayName, 
+          currentEditingClass.classIndex, 
+          currentEditingClass.classData
+        );
       }
+      closeModal();
     };
   }
 

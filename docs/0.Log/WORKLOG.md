@@ -12,6 +12,9 @@
   - Cho phép Chỉnh sửa ✏️, Xóa 🗑️ hoặc Di chuyển thứ của từng tiết học trực tiếp trên Ma trận ngày và tự động serialize ngược ra Markdown chuẩn.
 
 - **✅ Công việc đã hoàn thành**:
+  - `[Fix Logic / Delete Class]` Nâng cấp toàn diện tính năng Xóa Tiết Học:
+    - Loại bỏ dialog `confirm()` chặn luồng trình duyệt để nút Xóa 🗑️ trên thẻ tiết học và nút "Xóa tiết này" trong modal hoạt động tức thì 100%.
+    - Cải tiến hàm `handleDeleteClass` tìm kiếm ngày và tiết linh hoạt theo cả đối tượng `classData` lẫn chỉ số `classIndex`, tự động chuyển ngày sang trạng thái Nghỉ khi hết tiết và đồng bộ serialize Markdown ngay lập tức.
   - `[UI / Redesign]` Tái thiết kế toàn diện giao diện Modal Thêm / Chỉnh Sửa Tiết Học ([`AddClassModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddClassModal.js) & [`6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css)):
     - Khắc phục lỗi icon trôi nổi ra ngoài bằng cách nhúng icon lọt vào bên trong ô input (`.input-with-icon`).
     - Gom nhóm bố cục 2 cột cân đối cho Giờ học & Tiết học, Thứ trong tuần & Phòng học.

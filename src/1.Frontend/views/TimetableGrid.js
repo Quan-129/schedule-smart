@@ -158,8 +158,10 @@ export function renderTimetableGrid(days = []) {
       e.stopPropagation();
       const dayName = btn.dataset.day;
       const idx = parseInt(btn.dataset.idx, 10);
+      const day = (days || []).find(d => d.name === dayName);
+      const cls = day && day.classes ? day.classes[idx] : null;
       if (window.deleteClassFromDay) {
-        window.deleteClassFromDay(dayName, idx);
+        window.deleteClassFromDay(dayName, idx, cls);
       }
     };
   });
