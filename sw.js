@@ -4,7 +4,7 @@
  * ==========================================================================
  */
 
-const CACHE_NAME = 'smart-schedule-modular-v8';
+const CACHE_NAME = 'smart-schedule-modular-v9';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -21,6 +21,7 @@ const STATIC_ASSETS = [
   './src/2.Backend/services/TimetableParser.js',
   './src/2.Backend/utils/dateHelpers.js',
   './src/3.Database/state.js',
+  './src/3.Database/auth/FirebaseAuthService.js',
   './src/3.Database/storage/LocalStorageEngine.js',
   './src/3.Database/storage/SeedData.js',
   './src/4.Security/sanitizer.js',

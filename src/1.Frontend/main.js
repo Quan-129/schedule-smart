@@ -16,6 +16,7 @@ import { showToast, initToastContainer } from './components/Toast.js';
 import { initPWA, promptPWAInstall } from '../5.Performance/pwaManager.js';
 import { initVisibilityOptimizer } from '../5.Performance/visibilityOptimizer.js';
 import { formatSafeUrl } from '../4.Security/urlValidator.js';
+import { initFirebaseAuth, syncDriveSubjectsToCloud } from '../3.Database/auth/FirebaseAuthService.js';
 
 // DOM Elements
 const elements = {
@@ -45,6 +46,14 @@ function initApp() {
   // 1. Nạp State trung tâm
   initApplicationState();
   initToastContainer();
+
+  // 2. Khởi tạo Firebase Auth & Google Login
+  initFirebaseAuth((user) => {
+    if (user) {
+      renderBackpackView();
+      renderGradesView();
+    }
+  });
 
   // 2. Hiển thị ngày tháng hiện tại
   if (elements.currentDateText) {

@@ -6,6 +6,24 @@
 
 ---
 
+## 📅 [2026-09-05 11:30] - Đóng Gói Module `FirebaseAuthService` & Kết Nối Cổng Đăng Nhập Google
+
+- **🎯 Mục tiêu**:
+  - Khắc phục lỗi bấm nút Đăng nhập bằng Google không phản hồi sau khi tái cấu trúc mô-đun.
+  - Tách logic xác thực thành module độc lập `src/3.Database/auth/FirebaseAuthService.js`.
+  - Nạp lại Firebase SDKs tương thích và kết nối điều hướng tự động giữa Màn hình Đăng nhập và Màn hình Chính.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Auth]` Xây dựng `src/3.Database/auth/FirebaseAuthService.js` xử lý `handleGoogleLogin()`, `handleLogout()`, `updateAuthUI()`, và lắng nghe đồng bộ Realtime Firestore.
+  - `[Frontend]` Thêm lại Firebase SDK scripts vào `index.html` và gọi `initFirebaseAuth()` trong `main.js`.
+  - `[Config / DevOps]` Cập nhật Service Worker lên `smart-schedule-modular-v9`.
+
+- **📌 Trạng thái hiện tại & Kế hoạch tiếp theo (Next Steps)**:
+  - [x] Đăng nhập Google hoạt động mượt mà, tự động mở ứng dụng sau khi đăng nhập.
+  - [x] Đã thử nghiệm chế độ fallback offline an toàn.
+
+---
+
 ## 📅 [2026-09-05 11:23] - Thiết Lập Skill `9-more-archiver` & Quản Lý Tập Trung Tài Liệu Bổ Sung Trong `docs/9.More/`
 
 - **🎯 Mục tiêu**:
