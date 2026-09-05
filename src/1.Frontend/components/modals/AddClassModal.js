@@ -1,7 +1,8 @@
 /**
  * @file AddClassModal.js
  * @description Component Modal Thêm / Chỉnh Sửa Tiết Học Nhanh vào từng Ngày trên Lịch Học
- *              Tích hợp cơ chế chọn giờ Con Lăn 3D chuẩn Báo Thức iPhone (iOS Alarm Drum Roller Wheel)
+ *              Tích hợp cơ chế chọn giờ Con Lăn 3D chuẩn Báo Thức iPhone (iOS Alarm Drum Roller Wheel),
+ *              Bộ Chọn Logo/Icon Môn Học (~120 Icon Tiêu Biểu Theo Ngành),
  *              và Tự Động Đồng Bộ Link Google Drive từ Chiếc Cặp & Lưu Môn Mới vào Chiếc Cặp
  * @module 1.Frontend/components/modals/AddClassModal
  */
@@ -15,10 +16,11 @@ import { state, persistDriveSubjects } from '../../../3.Database/state.js';
 import { showToast } from '../Toast.js';
 
 // ============================================================================
-// 2. CONSTANTS & STATE
+// 2. CONSTANTS, ICON LIBRARY & STATE
 // ============================================================================
 const MODAL_ID = 'add-class-modal';
 const PICKER_MODAL_ID = 'ios-wheel-picker-modal';
+const ICON_PICKER_MODAL_ID = 'subject-icon-picker-modal';
 const ITEM_HEIGHT = 44; // Chiều cao mỗi nấc con lăn (chuẩn iOS)
 
 let currentEditingClass = null; // { dayName, classIndex, classData }
@@ -26,13 +28,151 @@ let onSaveCallback = null;
 let onDeleteCallback = null;
 let isEventsBound = false;
 let isPickerEventsBound = false;
+let isIconPickerEventsBound = false;
 
-// Trạng thái giờ được chọn
+// Trạng thái modal
 const pickerState = {
   startTime: '07:00',
   endTime: '08:50',
-  activeTarget: 'start' // 'start' | 'end'
+  activeTarget: 'start', // 'start' | 'end'
+  selectedIcon: 'fa-solid fa-book',
+  activeIconCategory: 'all'
 };
+
+/**
+ * Danh sách ~120 Icons tiêu biểu chia theo 5 nhóm ngành học & đời sống sinh viên
+ */
+export const POPULAR_SUBJECT_ICONS = [
+  // 🤖 1. Công nghệ, Lập trình & CNTT (24 icons)
+  { icon: 'fa-solid fa-robot', label: 'Robot / AI', category: 'tech' },
+  { icon: 'fa-solid fa-code', label: 'Code / Lập trình', category: 'tech' },
+  { icon: 'fa-solid fa-laptop-code', label: 'Laptop Code', category: 'tech' },
+  { icon: 'fa-solid fa-terminal', label: 'Terminal / CLI', category: 'tech' },
+  { icon: 'fa-solid fa-microchip', label: 'Vi mạch / Phần cứng', category: 'tech' },
+  { icon: 'fa-solid fa-brain', label: 'Trí tuệ / Trí não', category: 'tech' },
+  { icon: 'fa-solid fa-database', label: 'Cơ sở dữ liệu', category: 'tech' },
+  { icon: 'fa-solid fa-server', label: 'Server / Máy chủ', category: 'tech' },
+  { icon: 'fa-solid fa-network-wired', label: 'Mạng máy tính', category: 'tech' },
+  { icon: 'fa-solid fa-cloud', label: 'Điện toán đám mây', category: 'tech' },
+  { icon: 'fa-solid fa-shield-halved', label: 'An ninh mạng / Security', category: 'tech' },
+  { icon: 'fa-solid fa-bug', label: 'Kiểm thử / Debug', category: 'tech' },
+  { icon: 'fa-solid fa-mobile-screen', label: 'App di động', category: 'tech' },
+  { icon: 'fa-solid fa-globe', label: 'Web / Internet', category: 'tech' },
+  { icon: 'fa-solid fa-wifi', label: 'IoT / Không dây', category: 'tech' },
+  { icon: 'fa-solid fa-satellite-dish', label: 'Viễn thông', category: 'tech' },
+  { icon: 'fa-solid fa-gamepad', label: 'Lập trình Game', category: 'tech' },
+  { icon: 'fa-solid fa-vr-cardboard', label: 'VR / Thực tế ảo', category: 'tech' },
+  { icon: 'fa-solid fa-gears', label: 'Hệ thống / Kỹ thuật', category: 'tech' },
+  { icon: 'fa-solid fa-file-code', label: 'Mã nguồn / Script', category: 'tech' },
+  { icon: 'fa-solid fa-sitemap', label: 'Cấu trúc giải thuật', category: 'tech' },
+  { icon: 'fa-solid fa-cubes', label: 'Kiến trúc Module', category: 'tech' },
+  { icon: 'fa-solid fa-key', label: 'Mật mã học / Crypto', category: 'tech' },
+  { icon: 'fa-solid fa-tower-broadcast', label: 'Truyền thông phát thanh', category: 'tech' },
+
+  // 📐 2. Khoa học Tự nhiên, Toán & Kỹ thuật (24 icons)
+  { icon: 'fa-solid fa-atom', label: 'Vật lý nguyên tử', category: 'science' },
+  { icon: 'fa-solid fa-flask', label: 'Hóa học / Thí nghiệm', category: 'science' },
+  { icon: 'fa-solid fa-dna', label: 'Sinh học / Di truyền', category: 'science' },
+  { icon: 'fa-solid fa-calculator', label: 'Toán cao cấp', category: 'science' },
+  { icon: 'fa-solid fa-square-root-variable', label: 'Giải tích / Đại số', category: 'science' },
+  { icon: 'fa-solid fa-magnet', label: 'Điện từ trường', category: 'science' },
+  { icon: 'fa-solid fa-bolt', label: 'Kỹ thuật Điện', category: 'science' },
+  { icon: 'fa-solid fa-compass-drafting', label: 'Vẽ kỹ thuật / CAD', category: 'science' },
+  { icon: 'fa-solid fa-microscope', label: 'Kính hiển vi / Nghiên cứu', category: 'science' },
+  { icon: 'fa-solid fa-lightbulb', label: 'Sáng tạo / Ý tưởng', category: 'science' },
+  { icon: 'fa-solid fa-rocket', label: 'Hàng không vũ trụ', category: 'science' },
+  { icon: 'fa-solid fa-satellite', label: 'Vệ tinh nhân tạo', category: 'science' },
+  { icon: 'fa-solid fa-chart-area', label: 'Xác suất thống kê', category: 'science' },
+  { icon: 'fa-solid fa-wave-square', label: 'Tín hiệu & Hệ thống', category: 'science' },
+  { icon: 'fa-solid fa-vial', label: 'Hóa nghiệm sinh', category: 'science' },
+  { icon: 'fa-solid fa-temperature-high', label: 'Nhiệt động lực học', category: 'science' },
+  { icon: 'fa-solid fa-bridge', label: 'Kỹ thuật Xây dựng', category: 'science' },
+  { icon: 'fa-solid fa-car', label: 'Kỹ thuật Ô tô', category: 'science' },
+  { icon: 'fa-solid fa-oil-well', label: 'Dầu khí / Mỏ', category: 'science' },
+  { icon: 'fa-solid fa-water', label: 'Thủy lực / Thủy văn', category: 'science' },
+  { icon: 'fa-solid fa-ruler-combined', label: 'Đo lường / Trắc địa', category: 'science' },
+  { icon: 'fa-solid fa-screwdriver-wrench', label: 'Cơ khí chế tạo', category: 'science' },
+  { icon: 'fa-solid fa-circle-nodes', label: 'Lý thuyết đồ thị', category: 'science' },
+  { icon: 'fa-solid fa-shapes', label: 'Hình học không gian', category: 'science' },
+
+  // 🏛️ 3. Kinh tế, Quản trị, Xã hội & Luật (24 icons)
+  { icon: 'fa-solid fa-chart-line', label: 'Kinh tế học / Chứng khoán', category: 'business' },
+  { icon: 'fa-solid fa-chart-pie', label: 'Phân tích số liệu', category: 'business' },
+  { icon: 'fa-solid fa-diagram-project', label: 'Quản lý dự án', category: 'business' },
+  { icon: 'fa-solid fa-scale-balanced', label: 'Pháp luật / Công lý', category: 'business' },
+  { icon: 'fa-solid fa-building-columns', label: 'Tài chính Ngân hàng', category: 'business' },
+  { icon: 'fa-solid fa-coins', label: 'Tiền tệ / Kế toán', category: 'business' },
+  { icon: 'fa-solid fa-handshake', label: 'Đàm phán thương mại', category: 'business' },
+  { icon: 'fa-solid fa-gavel', label: 'Luật học / Tố tụng', category: 'business' },
+  { icon: 'fa-solid fa-landmark', label: 'Chính trị / Lịch sử', category: 'business' },
+  { icon: 'fa-solid fa-briefcase', label: 'Quản trị kinh doanh', category: 'business' },
+  { icon: 'fa-solid fa-bullhorn', label: 'Marketing / Quảng cáo', category: 'business' },
+  { icon: 'fa-solid fa-users', label: 'Nhân sự / Teamwork', category: 'business' },
+  { icon: 'fa-solid fa-user-tie', label: 'Lãnh đạo / Khởi nghiệp', category: 'business' },
+  { icon: 'fa-solid fa-money-bill-trend-up', label: 'Đầu tư phát triển', category: 'business' },
+  { icon: 'fa-solid fa-shop', label: 'Thương mại điện tử', category: 'business' },
+  { icon: 'fa-solid fa-truck-fast', label: 'Logistics / Kho vận', category: 'business' },
+  { icon: 'fa-solid fa-passport', label: 'Quan hệ quốc tế', category: 'business' },
+  { icon: 'fa-solid fa-newspaper', label: 'Báo chí truyền thông', category: 'business' },
+  { icon: 'fa-solid fa-book-journal-whills', label: 'Triết học Mác - Lênin', category: 'business' },
+  { icon: 'fa-solid fa-monument', label: 'Tư tưởng Hồ Chí Minh', category: 'business' },
+  { icon: 'fa-solid fa-hand-holding-dollar', label: 'Thuế & Kiểm toán', category: 'business' },
+  { icon: 'fa-solid fa-boxes-stacked', label: 'Quản lý chuỗi cung ứng', category: 'business' },
+  { icon: 'fa-solid fa-clipboard-check', label: 'Quản lý chất lượng', category: 'business' },
+  { icon: 'fa-solid fa-ranking-star', label: 'Thương hiệu / Brand', category: 'business' },
+
+  // 🎨 4. Ngoại ngữ, Văn học & Nghệ thuật (24 icons)
+  { icon: 'fa-solid fa-language', label: 'Ngoại ngữ / Dịch thuật', category: 'arts' },
+  { icon: 'fa-solid fa-earth-asia', label: 'Tiếng Nhật / Tiếng Hàn', category: 'arts' },
+  { icon: 'fa-solid fa-torii-gate', label: 'Tiếng Nhật / Văn hóa', category: 'arts' },
+  { icon: 'fa-solid fa-book-open', label: 'Đọc hiểu / Giáo trình', category: 'arts' },
+  { icon: 'fa-solid fa-book-bookmark', label: 'Tài liệu học tập', category: 'arts' },
+  { icon: 'fa-solid fa-palette', label: 'Mỹ thuật / Hội họa', category: 'arts' },
+  { icon: 'fa-solid fa-paintbrush', label: 'Thiết kế mỹ thuật', category: 'arts' },
+  { icon: 'fa-solid fa-music', label: 'Âm nhạc / Nghệ thuật', category: 'arts' },
+  { icon: 'fa-solid fa-camera', label: 'Nhiếp ảnh', category: 'arts' },
+  { icon: 'fa-solid fa-film', label: 'Điện ảnh / Video', category: 'arts' },
+  { icon: 'fa-solid fa-pen-nib', label: 'Sáng tác / Viết văn', category: 'arts' },
+  { icon: 'fa-solid fa-feather-pointed', label: 'Văn học cổ điển', category: 'arts' },
+  { icon: 'fa-solid fa-spell-check', label: 'Ngữ pháp / Chính tả', category: 'arts' },
+  { icon: 'fa-solid fa-font', label: 'Typography / Chữ viết', category: 'arts' },
+  { icon: 'fa-solid fa-microphone', label: 'Thuyết trình / Hùng biện', category: 'arts' },
+  { icon: 'fa-solid fa-headphones', label: 'Luyện nghe ngoại ngữ', category: 'arts' },
+  { icon: 'fa-solid fa-masks-theater', label: 'Kịch nghệ / Sân khấu', category: 'arts' },
+  { icon: 'fa-solid fa-icons', label: 'Biểu tượng / Ký hiệu', category: 'arts' },
+  { icon: 'fa-solid fa-scroll', label: 'Lịch sử / Cổ thư', category: 'arts' },
+  { icon: 'fa-solid fa-quote-left', label: 'Trích dẫn văn chương', category: 'arts' },
+  { icon: 'fa-solid fa-signature', label: 'Chữ ký / Bút tích', category: 'arts' },
+  { icon: 'fa-solid fa-vector-square', label: 'Thiết kế đồ họa vector', category: 'arts' },
+  { icon: 'fa-solid fa-image', label: 'Hình ảnh truyền thông', category: 'arts' },
+  { icon: 'fa-solid fa-earth-americas', label: 'Tiếng Anh quốc tế', category: 'arts' },
+
+  // ⭐ 5. Kỹ năng, Thể chất & Đời sống Sinh viên (24 icons)
+  { icon: 'fa-solid fa-graduation-cap', label: 'Tốt nghiệp / Đại học', category: 'life' },
+  { icon: 'fa-solid fa-trophy', label: 'Thành tích / Giải thưởng', category: 'life' },
+  { icon: 'fa-solid fa-medal', label: 'Huy chương / Thi đua', category: 'life' },
+  { icon: 'fa-solid fa-crown', label: 'Xuất sắc / Thủ khoa', category: 'life' },
+  { icon: 'fa-solid fa-award', label: 'Chứng chỉ / Bằng cấp', category: 'life' },
+  { icon: 'fa-solid fa-star', label: 'Ngôi sao / Yêu thích', category: 'life' },
+  { icon: 'fa-solid fa-heart-pulse', label: 'Y tế / Sức khỏe', category: 'life' },
+  { icon: 'fa-solid fa-dumbbell', label: 'Thể dục / Thể thao', category: 'life' },
+  { icon: 'fa-solid fa-person-running', label: 'Điền kinh / Chạy bộ', category: 'life' },
+  { icon: 'fa-solid fa-futbol', label: 'Bóng đá', category: 'life' },
+  { icon: 'fa-solid fa-basketball', label: 'Bóng rổ', category: 'life' },
+  { icon: 'fa-solid fa-volleyball', label: 'Bóng chuyền', category: 'life' },
+  { icon: 'fa-solid fa-person-swimming', label: 'Bơi lội', category: 'life' },
+  { icon: 'fa-solid fa-mug-hot', label: 'Cà phê / Học đêm', category: 'life' },
+  { icon: 'fa-solid fa-fire', label: 'Nhiệt huyết / Deadline', category: 'life' },
+  { icon: 'fa-solid fa-flag', label: 'Hoạt động Đoàn - Hội', category: 'life' },
+  { icon: 'fa-solid fa-hand-holding-heart', label: 'Tình nguyện / Mùa hè xanh', category: 'life' },
+  { icon: 'fa-solid fa-tree', label: 'Môi trường / Sinh thái', category: 'life' },
+  { icon: 'fa-solid fa-seedling', label: 'Phát triển bản thân', category: 'life' },
+  { icon: 'fa-solid fa-compass', label: 'Định hướng tương lai', category: 'life' },
+  { icon: 'fa-solid fa-map-location-dot', label: 'Dã ngoại / Thực tập', category: 'life' },
+  { icon: 'fa-solid fa-calendar-check', label: 'Lập kế hoạch học tập', category: 'life' },
+  { icon: 'fa-solid fa-clock', label: 'Quản lý thời gian', category: 'life' },
+  { icon: 'fa-solid fa-gem', label: 'Kỹ năng vàng', category: 'life' }
+];
 
 const TIME_PRESETS = [
   { time: '07:00 - 08:50', period: 'Tiết 2 - 3', label: 'Sáng: Tiết 2-3 (7h-8h50)' },
@@ -142,7 +282,7 @@ export function ensureAddClassModalDom() {
           </div>
           <div>
             <h3 id="add-class-modal-title" class="modal-title">Thêm Tiết Học</h3>
-            <span id="add-class-modal-subtitle" class="modal-subj-sub">Chọn môn từ Chiếc Cặp và ca học nhanh</span>
+            <span id="add-class-modal-subtitle" class="modal-subj-sub">Chọn môn từ Chiếc Cặp, gắn logo và ca học</span>
           </div>
         </div>
         <button type="button" id="btn-close-add-class" class="btn-modal-close" title="Đóng (ESC)">
@@ -150,20 +290,32 @@ export function ensureAddClassModalDom() {
         </button>
       </div>
 
-      <form id="add-class-form" class="modal-form" style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; overflow-y: auto; max-height: 540px;">
+      <form id="add-class-form" class="modal-form" style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; overflow-y: auto; max-height: 550px;">
         
-        <!-- SECTION 1: MÔN HỌC -->
+        <!-- SECTION 1: MÔN HỌC & CHỌN LOGO ICON -->
         <div class="form-group-styled">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <label for="class-subject-input"><i class="fa-solid fa-graduation-cap"></i> Tên môn học: <span class="required-star">*</span></label>
+            <label for="class-subject-input"><i class="fa-solid fa-graduation-cap"></i> Tên môn học & Logo: <span class="required-star">*</span></label>
             <span style="font-size: 0.72rem; color: var(--text-muted);">Gợi ý từ Chiếc Cặp:</span>
           </div>
           <div class="subject-chips-picker" id="subject-chips-picker">
             <!-- Render danh sách chip môn học -->
           </div>
-          <div class="input-with-icon">
-            <i class="fa-solid fa-book-open input-icon"></i>
-            <input type="text" id="class-subject-input" class="form-input-styled" placeholder="Nhập tên môn học (VD: Học máy, Tiếng Nhật 7...)" required autocomplete="off">
+          
+          <div class="subject-input-with-icon-picker" style="display: flex; gap: 0.5rem; align-items: center;">
+            <!-- Nút Mở Bộ Chọn Logo / Icon Môn Học -->
+            <button type="button" id="btn-open-icon-picker" class="btn-subject-icon-trigger" title="Bấm để đổi Logo / Icon đại diện môn học (~120 icons tiêu biểu)">
+              <div class="subject-icon-preview-box">
+                <i id="display-subject-icon" class="fa-solid fa-book"></i>
+              </div>
+              <span class="icon-picker-badge-caret"><i class="fa-solid fa-caret-down"></i></span>
+            </button>
+
+            <!-- Ô Nhập Tên Môn Học -->
+            <div class="input-with-icon" style="flex: 1;">
+              <i class="fa-solid fa-book-open input-icon"></i>
+              <input type="text" id="class-subject-input" class="form-input-styled" placeholder="Nhập tên môn học (VD: Học máy, Tiếng Nhật 7...)" required autocomplete="off">
+            </div>
           </div>
         </div>
 
@@ -289,6 +441,7 @@ export function ensureAddClassModalDom() {
 
   modalRoot.appendChild(modalWrapper);
   ensureIosWheelPickerDom();
+  ensureSubjectIconPickerDom();
   bindAddClassModalEvents();
 }
 
@@ -296,7 +449,6 @@ export function ensureAddClassModalDom() {
  * Đảm bảo Modal Con Lăn 3D Kiểu Báo Thức iOS (Alarm Drum Roller Picker) đã tồn tại trong DOM
  */
 function ensureIosWheelPickerDom() {
-  const PICKER_MODAL_ID = 'ios-wheel-picker-modal';
   if (document.getElementById(PICKER_MODAL_ID)) return;
 
   const modalRoot = document.getElementById('modal-root') || document.body;
@@ -363,6 +515,209 @@ function ensureIosWheelPickerDom() {
 }
 
 /**
+ * Đảm bảo Modal Chọn Logo Icon (~120 Icon Tiêu Biểu) đã tồn tại trong DOM
+ */
+function ensureSubjectIconPickerDom() {
+  if (document.getElementById(ICON_PICKER_MODAL_ID)) return;
+
+  const modalRoot = document.getElementById('modal-root') || document.body;
+  const iconPickerWrapper = document.createElement('div');
+  iconPickerWrapper.id = ICON_PICKER_MODAL_ID;
+  iconPickerWrapper.className = 'icon-picker-backdrop hidden';
+  iconPickerWrapper.innerHTML = `
+    <div class="icon-picker-sheet" role="dialog" aria-modal="true">
+      <!-- HEADER -->
+      <div class="icon-picker-header">
+        <div class="icon-picker-title-group">
+          <div class="icon-preview-current-badge">
+            <i id="icon-picker-active-badge-icon" class="fa-solid fa-book"></i>
+          </div>
+          <div>
+            <h4 class="icon-picker-title">Chọn Logo Môn Học</h4>
+            <span class="icon-picker-subtitle">~120 biểu tượng tiêu biểu theo ngành</span>
+          </div>
+        </div>
+        <button type="button" id="btn-close-icon-picker" class="btn-modal-close" title="Đóng">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- SEARCH BAR -->
+      <div class="icon-picker-search-wrap">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="icon-picker-search-input" placeholder="Tìm nhanh icon (VD: robot, code, toán, book, star...)" autocomplete="off">
+      </div>
+
+      <!-- CATEGORY TABS -->
+      <div class="icon-picker-tabs-row" id="icon-picker-tabs-row">
+        <button type="button" class="icon-tab-btn active" data-cat="all">Tất cả (120)</button>
+        <button type="button" class="icon-tab-btn" data-cat="tech">🤖 CNTT & AI</button>
+        <button type="button" class="icon-tab-btn" data-cat="science">📐 Kỹ thuật</button>
+        <button type="button" class="icon-tab-btn" data-cat="business">🏛️ Kinh tế</button>
+        <button type="button" class="icon-tab-btn" data-cat="arts">🎨 Ngoại ngữ</button>
+        <button type="button" class="icon-tab-btn" data-cat="life">⭐ Kỹ năng</button>
+      </div>
+
+      <!-- ICON GRID -->
+      <div class="icon-picker-grid-container" id="icon-picker-grid-container">
+        <!-- Render động 120 icons -->
+      </div>
+
+      <!-- FOOTER -->
+      <div class="icon-picker-footer">
+        <span class="icon-picker-hint">💡 Bấm vào biểu tượng để áp dụng ngay</span>
+        <button type="button" id="btn-confirm-icon-picker" class="btn-primary-gradient" style="padding: 0.45rem 1.1rem; font-size: 0.85rem;">
+          <i class="fa-solid fa-check"></i> Xong
+        </button>
+      </div>
+    </div>
+  `;
+
+  modalRoot.appendChild(iconPickerWrapper);
+  renderIconPickerGrid();
+  bindSubjectIconPickerEvents();
+}
+
+/**
+ * Render lưới các icon trong Icon Picker Modal theo từ khóa và danh mục
+ * @param {string} query 
+ * @param {string} category 
+ */
+function renderIconPickerGrid(query = '', category = 'all') {
+  const container = document.getElementById('icon-picker-grid-container');
+  if (!container) return;
+
+  const q = (query || '').toLowerCase().trim();
+  const filtered = POPULAR_SUBJECT_ICONS.filter(item => {
+    const matchCat = category === 'all' || item.category === category;
+    const matchQuery = !q || item.icon.toLowerCase().includes(q) || item.label.toLowerCase().includes(q);
+    return matchCat && matchQuery;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; padding: 2rem 1rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+        <i class="fa-solid fa-face-meh" style="font-size: 1.8rem; margin-bottom: 0.5rem; display: block; opacity: 0.6;"></i>
+        Không tìm thấy icon nào khớp với "${escapeHtml(q)}"
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = filtered.map(item => {
+    const isSelected = item.icon === pickerState.selectedIcon;
+    return `
+      <button type="button" class="icon-grid-item ${isSelected ? 'active' : ''}" data-icon="${escapeHtml(item.icon)}" title="${escapeHtml(item.label)}">
+        <i class="${item.icon}"></i>
+        <span class="icon-item-label">${escapeHtml(item.label)}</span>
+      </button>
+    `;
+  }).join('');
+
+  // Gắn sự kiện click icon -> Chọn ngay
+  container.querySelectorAll('.icon-grid-item').forEach(btn => {
+    btn.onclick = () => {
+      container.querySelectorAll('.icon-grid-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const iconClass = btn.dataset.icon;
+      setSelectedSubjectIcon(iconClass);
+      closeSubjectIconPicker();
+    };
+  });
+}
+
+/**
+ * Cập nhật icon môn học đang chọn lên nút trigger và badge
+ * @param {string} iconClass 
+ */
+function setSelectedSubjectIcon(iconClass = 'fa-solid fa-book') {
+  pickerState.selectedIcon = iconClass || 'fa-solid fa-book';
+  
+  const displayIcon = document.getElementById('display-subject-icon');
+  const badgeIcon = document.getElementById('icon-picker-active-badge-icon');
+  
+  if (displayIcon) {
+    displayIcon.className = pickerState.selectedIcon;
+  }
+  if (badgeIcon) {
+    badgeIcon.className = pickerState.selectedIcon;
+  }
+}
+
+/**
+ * Mở modal chọn Logo Icon
+ */
+export function openSubjectIconPicker() {
+  ensureSubjectIconPickerDom();
+  const modal = document.getElementById(ICON_PICKER_MODAL_ID);
+  if (!modal) return;
+
+  renderIconPickerGrid('', pickerState.activeIconCategory || 'all');
+  setSelectedSubjectIcon(pickerState.selectedIcon);
+
+  modal.classList.remove('hidden');
+  const searchInput = document.getElementById('icon-picker-search-input');
+  if (searchInput) {
+    searchInput.value = '';
+    setTimeout(() => searchInput.focus(), 80);
+  }
+}
+
+/**
+ * Đóng modal chọn Logo Icon
+ */
+export function closeSubjectIconPicker() {
+  const modal = document.getElementById(ICON_PICKER_MODAL_ID);
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+}
+
+/**
+ * Gắn các sự kiện cho Modal Chọn Icon
+ */
+function bindSubjectIconPickerEvents() {
+  if (isIconPickerEventsBound) return;
+  const modal = document.getElementById(ICON_PICKER_MODAL_ID);
+  const closeBtn = document.getElementById('btn-close-icon-picker');
+  const confirmBtn = document.getElementById('btn-confirm-icon-picker');
+  const searchInput = document.getElementById('icon-picker-search-input');
+  const tabsRow = document.getElementById('icon-picker-tabs-row');
+
+  if (!modal) return;
+
+  if (closeBtn) closeBtn.onclick = closeSubjectIconPicker;
+  if (confirmBtn) confirmBtn.onclick = closeSubjectIconPicker;
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeSubjectIconPicker();
+  });
+
+  // Tìm kiếm icon theo từ khóa
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value.trim();
+      renderIconPickerGrid(q, pickerState.activeIconCategory || 'all');
+    });
+  }
+
+  // Chuyển tab danh mục
+  if (tabsRow) {
+    tabsRow.querySelectorAll('.icon-tab-btn').forEach(tabBtn => {
+      tabBtn.onclick = () => {
+        tabsRow.querySelectorAll('.icon-tab-btn').forEach(b => b.classList.remove('active'));
+        tabBtn.classList.add('active');
+        pickerState.activeIconCategory = tabBtn.dataset.cat || 'all';
+        const q = searchInput ? searchInput.value.trim() : '';
+        renderIconPickerGrid(q, pickerState.activeIconCategory);
+      };
+    });
+  }
+
+  isIconPickerEventsBound = true;
+}
+
+/**
  * Cập nhật giao diện ô nhập link Google Drive, badge và nút xem trước
  * @param {string} url 
  * @param {boolean} fromBackpack 
@@ -410,6 +765,7 @@ function renderSubjectChips(selectedSubjectName = '') {
       <button type="button" class="subject-chip-btn ${isSelected ? 'active' : ''}" 
         style="--chip-color: ${color};"
         data-name="${escapeHtml(s.name)}" 
+        data-icon="${escapeHtml(s.icon || 'fa-solid fa-book')}"
         data-code="${escapeHtml(s.code)}">
         <i class="${s.icon || 'fa-solid fa-book'}"></i>
         <span>${escapeHtml(s.name)}</span>
@@ -417,17 +773,22 @@ function renderSubjectChips(selectedSubjectName = '') {
     `;
   }).join('');
 
-  // Gắn sự kiện click chip -> Tự động nạp tên và link Drive từ Chiếc Cặp
+  // Gắn sự kiện click chip -> Tự động nạp tên, Icon logo và link Drive từ Chiếc Cặp
   container.querySelectorAll('.subject-chip-btn').forEach(btn => {
     btn.onclick = () => {
       container.querySelectorAll('.subject-chip-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const nameInput = document.getElementById('class-subject-input');
       const sName = btn.dataset.name;
+      const sIcon = btn.dataset.icon || 'fa-solid fa-book';
+
       if (nameInput) {
         nameInput.value = sName;
         nameInput.focus();
       }
+
+      // Tự động nạp Icon logo của môn
+      setSelectedSubjectIcon(sIcon);
 
       // Tự động tìm và điền link Drive của môn này từ Chiếc Cặp
       const matched = (state.driveSubjects || []).find(s => s.name.toLowerCase() === sName.toLowerCase());
@@ -866,6 +1227,7 @@ function bindAddClassModalEvents() {
   
   const pickStartBtn = document.getElementById('btn-pick-start-time');
   const pickEndBtn = document.getElementById('btn-pick-end-time');
+  const iconTriggerBtn = document.getElementById('btn-open-icon-picker');
   const subjectInput = document.getElementById('class-subject-input');
   const driveInput = document.getElementById('class-drive-url-input');
 
@@ -878,6 +1240,7 @@ function bindAddClassModalEvents() {
     currentEditingClass = null;
     form.reset();
     updateDriveUrlUi('', false);
+    setSelectedSubjectIcon('fa-solid fa-book');
   };
 
   if (closeBtn) closeBtn.onclick = closeModal;
@@ -889,8 +1252,12 @@ function bindAddClassModalEvents() {
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-      const pickerModal = document.getElementById(PICKER_MODAL_ID);
-      if (pickerModal && !pickerModal.classList.contains('hidden')) {
+      const iconPickerModal = document.getElementById(ICON_PICKER_MODAL_ID);
+      const wheelModal = document.getElementById(PICKER_MODAL_ID);
+
+      if (iconPickerModal && !iconPickerModal.classList.contains('hidden')) {
+        closeSubjectIconPicker();
+      } else if (wheelModal && !wheelModal.classList.contains('hidden')) {
         closeIosWheelPicker();
       } else {
         closeModal();
@@ -898,13 +1265,22 @@ function bindAddClassModalEvents() {
     }
   });
 
+  // Mở bộ chọn Logo Icon Môn Học
+  if (iconTriggerBtn) {
+    iconTriggerBtn.onclick = (e) => {
+      e.preventDefault();
+      openSubjectIconPicker();
+    };
+  }
+
   // Tự động nhận diện môn có sẵn trong Chiếc Cặp khi gõ tên môn
   if (subjectInput) {
     subjectInput.addEventListener('input', () => {
       const val = subjectInput.value.trim();
       const matched = (state.driveSubjects || []).find(s => s.name.toLowerCase() === val.toLowerCase());
-      if (matched && matched.driveUrl) {
-        updateDriveUrlUi(matched.driveUrl, true);
+      if (matched) {
+        if (matched.icon) setSelectedSubjectIcon(matched.icon);
+        if (matched.driveUrl) updateDriveUrlUi(matched.driveUrl, true);
       } else {
         const syncBadge = document.getElementById('drive-sync-badge');
         if (syncBadge) syncBadge.classList.add('hidden');
@@ -1025,6 +1401,7 @@ function bindAddClassModalEvents() {
     const timeRange = getCurrentTimeRangeString();
     const period = getPeriodFromTimeRange(timeRange);
     const room = roomInput ? roomInput.value.trim() : 'Chưa xếp phòng';
+    const icon = pickerState.selectedIcon || 'fa-solid fa-book';
     
     const rawDriveUrl = driveUrlInput ? driveUrlInput.value.trim() : '';
     const safeDriveUrl = rawDriveUrl ? formatSafeUrl(rawDriveUrl) : '';
@@ -1038,20 +1415,20 @@ function bindAddClassModalEvents() {
     }
 
     // ========================================================================
-    // TỰ ĐỘNG LƯU / ĐỒNG BỘ MÔN HỌC VÀO CHIẾC CẶP GOOGLE DRIVE
+    // TỰ ĐỘNG LƯU / ĐỒNG BỘ MÔN HỌC & ICON VÀO CHIẾC CẶP GOOGLE DRIVE
     // ========================================================================
     const subjectTrim = subject.trim();
     let subjectInBackpack = (state.driveSubjects || []).find(s => s.name.toLowerCase() === subjectTrim.toLowerCase());
 
     if (!subjectInBackpack) {
-      // Tự động tạo môn mới trong Chiếc Cặp (dù có link Drive hay link trống "")
+      // Tự động tạo môn mới trong Chiếc Cặp kèm Icon logo đã chọn
       const cleanCode = subjectTrim.toUpperCase().replace(/[^A-Z0-9]/g, '-').slice(0, 10) || 'MON-HOC';
       const newSubject = {
         name: subjectTrim,
         code: cleanCode,
         credits: 3,
         color: '#6366f1',
-        icon: 'fa-solid fa-book',
+        icon: icon,
         driveUrl: safeDriveUrl,
         notes: `Được tạo tự động khi thêm tiết học vào lịch (${dayName})`,
         components: [
@@ -1065,12 +1442,22 @@ function bindAddClassModalEvents() {
       if (typeof window.renderBackpackView === 'function') {
         window.renderBackpackView();
       }
-    } else if (!subjectInBackpack.driveUrl && safeDriveUrl) {
-      // Nếu môn đã có trong Chiếc Cặp nhưng chưa có link Drive và người dùng vừa điền link mới
-      subjectInBackpack.driveUrl = safeDriveUrl;
-      persistDriveSubjects();
-      if (typeof window.renderBackpackView === 'function') {
-        window.renderBackpackView();
+    } else {
+      // Nếu môn đã có: Cập nhật link Drive & Icon nếu có thay đổi
+      let updated = false;
+      if (!subjectInBackpack.driveUrl && safeDriveUrl) {
+        subjectInBackpack.driveUrl = safeDriveUrl;
+        updated = true;
+      }
+      if (icon && icon !== 'fa-solid fa-book' && subjectInBackpack.icon !== icon) {
+        subjectInBackpack.icon = icon;
+        updated = true;
+      }
+      if (updated) {
+        persistDriveSubjects();
+        if (typeof window.renderBackpackView === 'function') {
+          window.renderBackpackView();
+        }
       }
     }
 
@@ -1081,7 +1468,8 @@ function bindAddClassModalEvents() {
       room,
       startTime,
       endTime,
-      driveUrl: safeDriveUrl
+      driveUrl: safeDriveUrl,
+      icon
     };
 
     if (onSaveCallback) {
@@ -1124,7 +1512,7 @@ export function openAddClassModal(targetDayName = 'Thứ 2', onSave) {
   const saveText = document.getElementById('btn-save-class-text');
 
   if (titleEl) titleEl.textContent = `Thêm Tiết Học (${targetDayName})`;
-  if (subEl) subEl.textContent = 'Chọn môn từ Chiếc Cặp và ca học nhanh';
+  if (subEl) subEl.textContent = 'Chọn môn từ Chiếc Cặp, gắn logo và ca học';
   if (daySelect) daySelect.value = targetDayName;
   if (deleteBtn) deleteBtn.style.display = 'none';
   if (saveText) saveText.textContent = 'Thêm Tiết Học';
@@ -1135,11 +1523,13 @@ export function openAddClassModal(targetDayName = 'Thứ 2', onSave) {
   renderTimePresets('07:00 - 08:50');
   renderRoomPresets('B1-305 (CS1)');
 
-  // Reset form inputs & drive preview
+  // Reset form inputs, icon & drive preview
   const subjectInput = document.getElementById('class-subject-input');
   const roomInput = document.getElementById('class-room-input');
   if (subjectInput) subjectInput.value = '';
   if (roomInput) roomInput.value = 'B1-305 (CS1)';
+  
+  setSelectedSubjectIcon('fa-solid fa-book');
   updateDriveUrlUi('', false);
 
   modal.classList.remove('hidden');
@@ -1185,8 +1575,12 @@ export function openEditClassModal(dayName, classIndex, classData, onSave, onDel
   if (subjectInput) subjectInput.value = classData.subject || '';
   if (roomInput) roomInput.value = classData.room || '';
 
-  // Nạp link Drive từ tiết học hoặc từ Chiếc Cặp
+  // Nạp Icon của môn
   const matched = (state.driveSubjects || []).find(s => s.name.toLowerCase() === (classData.subject || '').toLowerCase());
+  const iconToUse = classData.icon || (matched ? matched.icon : 'fa-solid fa-book');
+  setSelectedSubjectIcon(iconToUse);
+
+  // Nạp link Drive từ tiết học hoặc từ Chiếc Cặp
   const urlToUse = classData.driveUrl || (matched ? matched.driveUrl : '');
   updateDriveUrlUi(urlToUse, Boolean(matched && matched.driveUrl && matched.driveUrl === urlToUse));
 

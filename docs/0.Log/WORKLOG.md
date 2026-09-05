@@ -4,6 +4,32 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 23:20] - Tích Hợp Bộ Chọn Logo / Icon Môn Học (~120 Icon Tiêu Biểu Theo Ngành)
+
+- **🎯 Mục tiêu**:
+  - Thêm mục chọn Logo / Icon đại diện cho môn học ngay cạnh ô nhập Tên Môn Học trên Modal Thêm/Chỉnh sửa tiết học (`AddClassModal.js`).
+  - Xây dựng kho **~120 icons tiêu biểu** chia thành 5 nhóm danh mục:
+    1. 🤖 *CNTT, AI & Lập trình* (24 icons: robot, code, laptop, terminal, brain, database, cloud, cyber security, game...).
+    2. 📐 *Khoa học Tự nhiên & Kỹ thuật* (24 icons: atom, flask, dna, calculator, square-root, bolt, magnet, microscope, rocket, CAD...).
+    3. 🏛️ *Kinh tế, Quản trị, Xã hội & Luật* (24 icons: chart-line, scale-balanced, building-columns, handshake, briefcase, bullhorn, logistics, triết học...).
+    4. 🎨 *Ngoại ngữ, Văn học & Nghệ thuật* (24 icons: language, book-open, palette, music, camera, pen-nib, speech, headphones, theater...).
+    5. ⭐ *Kỹ năng, Thể chất & Đời sống Sinh viên* (24 icons: graduation-cap, trophy, medal, star, dumbbell, running, coffee/deadline, volunteer, compass...).
+  - Hỗ trợ thanh tìm kiếm nhanh theo từ khóa (tiếng Anh / tiếng Việt) và bộ lọc theo Tabs danh mục.
+  - Tự động nạp Icon của môn khi chọn chip môn từ Chiếc Cặp và tự động lưu Icon mới vào Chiếc Cặp khi thêm môn.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Component Modal]` Cập nhật [`src/1.Frontend/components/modals/AddClassModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddClassModal.js):
+    - Khởi tạo thư viện `POPULAR_SUBJECT_ICONS` gồm 120 icons có nhãn và phân loại nhóm chi tiết.
+    - Xây dựng DOM `#subject-icon-picker-modal` với Header Preview Badge, Ô tìm kiếm, Tabs danh mục và Lưới Grid Icon tương tác trực tiếp.
+    - Tích hợp nút trigger `#btn-open-icon-picker` hiển thị Icon hiện tại + caret dropdown cạnh ô Tên môn học.
+    - Bổ sung hàm `openSubjectIconPicker()`, `closeSubjectIconPicker()`, `renderIconPickerGrid()`, `setSelectedSubjectIcon()` và bind event listeners.
+    - Cập nhật logic submit form: Lưu icon đại diện vào dữ liệu tiết học và tự động đồng bộ vào môn học trong `state.driveSubjects`.
+  - `[Frontend / CSS Modals]` Cập nhật [`src/1.Frontend/styles/6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css):
+    - Thêm styling cho `.btn-subject-icon-trigger`, `.icon-picker-backdrop` (`z-index: 100000;`), `.icon-picker-sheet`, `.icon-picker-search-wrap`, `.icon-picker-tabs-row`, `.icon-picker-grid-container` và `.icon-grid-item` chuẩn Tone Tím Than Neon Glassmorphism.
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v53` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 23:14] - Tích Hợp Ô Link Google Drive & Tự Động Đồng Bộ 2 Chiều Với Chiếc Cặp
 
 - **🎯 Mục tiêu**:
