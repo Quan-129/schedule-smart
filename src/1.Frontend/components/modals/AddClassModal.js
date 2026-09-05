@@ -152,20 +152,42 @@ export function ensureAddClassModalDom() {
             <!-- Render động từ TIME_PRESETS + Custom Presets -->
           </div>
           
-          <!-- Hàng Dual Input: Khung giờ & Tiết học + Nút Lưu Ca Mẫu -->
-          <div class="input-row-preset-creator" style="display: flex; gap: 0.45rem; align-items: stretch; margin-top: 0.35rem;">
-            <div class="input-with-icon" style="flex: 1.2;">
-              <i class="fa-regular fa-clock input-icon"></i>
-              <input type="text" id="class-time-input" class="form-input-styled" placeholder="07:00 - 08:50 (VD: 17:00 - 19:30)" required>
+          <!-- Hàng Chọn Giờ Kiểu Báo Thức iOS (Bắt đầu ➔ Kết thúc) + Tiết học + Nút Lưu Ca Mẫu -->
+          <div class="ios-time-picker-row">
+            <div class="ios-time-range-capsules">
+              <!-- Capsule Bắt đầu -->
+              <div class="ios-capsule-box" title="Chọn giờ bắt đầu">
+                <span class="ios-capsule-label">Bắt đầu</span>
+                <div class="ios-capsule-input-wrap">
+                  <i class="fa-regular fa-clock"></i>
+                  <input type="time" id="class-start-time" class="ios-time-picker-input" value="07:00" required>
+                </div>
+              </div>
+
+              <div class="ios-time-arrow">
+                <i class="fa-solid fa-arrow-right-long"></i>
+              </div>
+
+              <!-- Capsule Kết thúc -->
+              <div class="ios-capsule-box" title="Chọn giờ kết thúc">
+                <span class="ios-capsule-label">Kết thúc</span>
+                <div class="ios-capsule-input-wrap">
+                  <i class="fa-regular fa-clock"></i>
+                  <input type="time" id="class-end-time" class="ios-time-picker-input" value="08:50" required>
+                </div>
+              </div>
             </div>
-            <div class="input-with-icon" style="flex: 1;">
-              <i class="fa-solid fa-list-ol input-icon"></i>
-              <input type="text" id="class-period-input" class="form-input-styled" placeholder="Tiết 2 - 3 (VD: Tiết 12-14)">
+
+            <div class="ios-period-box-wrap">
+              <div class="input-with-icon" style="flex: 1;">
+                <i class="fa-solid fa-list-ol input-icon"></i>
+                <input type="text" id="class-period-input" class="form-input-styled" placeholder="Tiết 2 - 3">
+              </div>
+              <button type="button" id="btn-save-custom-preset" class="btn-save-custom-preset" title="Lưu khung giờ & tiết này lên danh sách mẫu ở trên">
+                <i class="fa-solid fa-plus"></i>
+                <span>Lưu ca mẫu</span>
+              </button>
             </div>
-            <button type="button" id="btn-save-custom-preset" class="btn-save-custom-preset" title="Lưu khung giờ & tiết này lên danh sách mẫu ở trên để dùng lại">
-              <i class="fa-solid fa-plus"></i>
-              <span>Lưu mẫu</span>
-            </button>
           </div>
         </div>
 
@@ -271,6 +293,54 @@ function renderSubjectChips(selectedSubjectName = '') {
 }
 
 /**
+ * Lấy chuỗi khung giờ học từ 2 ô Bắt đầu và Kết thúc (VD: '07:00 - 08:50')
+ * @returns {string}
+ */
+export function getCurrentTimeRangeString() {
+  const startInput = document.getElementById('class-start-time');
+  const endInput = document.getElementById('class-end-time');
+  const start = startInput && startInput.value ? startInput.value : '07:00';
+  const end = endInput && endInput.value ? endInput.value : '08:50';
+  return `${start} - ${end}`;
+}
+
+/**
+ * Đồng bộ 2 ô chọn giờ Bắt đầu và Kết thúc từ chuỗi timeRange
+ * @param {string} timeRangeString 
+ */
+export function syncTimeInputsFromRange(timeRangeString = '07:00 - 08:50') {
+  const startInput = document.getElementById('class-start-time');
+  const endInput = document.getElementById('class-end-time');
+  if (!startInput || !endInput) return;
+
+  const parts = (timeRangeString || '').split('-').map(s => s.trim());
+  if (parts[0]) startInput.value = parts[0];
+  if (parts[1]) endInput.value = parts[1];
+}
+
+/**
+ * Tự động tìm và gợi ý Tiết học nếu khung giờ khớp với các ca học chuẩn
+ */
+function autoDetectPeriodFromTime() {
+  const currentRange = getCurrentTimeRangeString();
+  const allPresets = [...TIME_PRESETS, ...getCustomTimePresets()];
+  const matched = allPresets.find(p => p.time.trim() === currentRange.trim());
+  const periodInput = document.getElementById('class-period-input');
+  
+  if (matched && periodInput && (!periodInput.value || periodInput.value.startsWith('Tiết') || periodInput.value === 'Tự chọn')) {
+    periodInput.value = matched.period || '';
+  }
+
+  // Highlight preset tương ứng nếu khớp
+  const container = document.getElementById('time-presets-grid');
+  if (container) {
+    container.querySelectorAll('.btn-time-preset').forEach(b => {
+      b.classList.toggle('active', b.dataset.time === currentRange.trim());
+    });
+  }
+}
+
+/**
  * Render danh sách Ca học mẫu (Chuẩn ĐHBK + Ca Tùy Chỉnh do người dùng tạo)
  * @param {string} activeTime - Thời gian đang được chọn
  */
@@ -311,10 +381,9 @@ function renderTimePresets(activeTime = '') {
     btn.onclick = () => {
       container.querySelectorAll('.btn-time-preset').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      const timeInput = document.getElementById('class-time-input');
+      syncTimeInputsFromRange(btn.dataset.time);
       const periodInput = document.getElementById('class-period-input');
-      if (timeInput) timeInput.value = btn.dataset.time;
-      if (periodInput) periodInput.value = btn.dataset.period;
+      if (periodInput) periodInput.value = btn.dataset.period || '';
     };
   });
 
@@ -327,8 +396,7 @@ function renderTimePresets(activeTime = '') {
       if (currentList[customIdx]) {
         const removed = currentList.splice(customIdx, 1)[0];
         saveCustomTimePresets(currentList);
-        const timeInput = document.getElementById('class-time-input');
-        renderTimePresets(timeInput ? timeInput.value : '');
+        renderTimePresets(getCurrentTimeRangeString());
         showToast(`Đã xóa ca mẫu "${removed.time}" 🗑️`);
       }
     };
@@ -416,6 +484,9 @@ function bindAddClassModalEvents() {
   const deleteBtn = document.getElementById('btn-delete-class');
   const savePresetBtn = document.getElementById('btn-save-custom-preset');
   const saveRoomBtn = document.getElementById('btn-save-custom-room');
+  const startTimeInput = document.getElementById('class-start-time');
+  const endTimeInput = document.getElementById('class-end-time');
+
   if (!modal || !form) return;
 
   // Đóng modal
@@ -439,19 +510,27 @@ function bindAddClassModalEvents() {
     }
   });
 
+  // Gắn sự kiện thay đổi giờ trên 2 ô Bắt đầu và Kết thúc (iOS Picker)
+  if (startTimeInput) {
+    startTimeInput.addEventListener('input', autoDetectPeriodFromTime);
+    startTimeInput.addEventListener('change', autoDetectPeriodFromTime);
+  }
+  if (endTimeInput) {
+    endTimeInput.addEventListener('input', autoDetectPeriodFromTime);
+    endTimeInput.addEventListener('change', autoDetectPeriodFromTime);
+  }
+
   // Gắn sự kiện Lưu Ca Học Mẫu Mới
   if (savePresetBtn) {
     savePresetBtn.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      const timeInput = document.getElementById('class-time-input');
+      const timeVal = getCurrentTimeRangeString();
       const periodInput = document.getElementById('class-period-input');
-      const timeVal = timeInput ? timeInput.value.trim() : '';
       const periodVal = periodInput ? periodInput.value.trim() : '';
 
       if (!timeVal) {
-        showToast('Vui lòng nhập khung giờ học trước (VD: 17:00 - 19:30)!');
-        if (timeInput) timeInput.focus();
+        showToast('Vui lòng chọn khung giờ học trước!');
         return;
       }
 
@@ -527,15 +606,19 @@ function bindAddClassModalEvents() {
     e.preventDefault();
     const daySelect = document.getElementById('class-day-select');
     const subjectInput = document.getElementById('class-subject-input');
-    const timeInput = document.getElementById('class-time-input');
     const periodInput = document.getElementById('class-period-input');
     const roomInput = document.getElementById('class-room-input');
 
     const dayName = daySelect ? daySelect.value : 'Thứ 2';
     const subject = subjectInput ? subjectInput.value.trim() : '';
-    const timeRange = timeInput ? timeInput.value.trim() : '';
+    const timeRange = getCurrentTimeRangeString();
     const period = periodInput ? periodInput.value.trim() : '';
     const room = roomInput ? roomInput.value.trim() : 'Chưa xếp phòng';
+
+    const startInput = document.getElementById('class-start-time');
+    const endInput = document.getElementById('class-end-time');
+    const startTime = startInput && startInput.value ? startInput.value : (timeRange.split('-')[0] || '').trim();
+    const endTime = endInput && endInput.value ? endInput.value : (timeRange.split('-')[1] || '').trim();
 
     if (!subject || !timeRange) {
       showToast('Vui lòng nhập tên môn và khung giờ học!');
@@ -547,8 +630,8 @@ function bindAddClassModalEvents() {
       timeRange,
       period,
       room,
-      startTime: timeRange.split('-')[0] ? timeRange.split('-')[0].trim() : '',
-      endTime: timeRange.split('-')[1] ? timeRange.split('-')[1].trim() : ''
+      startTime,
+      endTime
     };
 
     if (onSaveCallback) {
@@ -598,16 +681,15 @@ export function openAddClassModal(targetDayName = 'Thứ 2', onSave) {
 
   // Render chips, time presets & room presets
   renderSubjectChips('');
+  syncTimeInputsFromRange('07:00 - 08:50');
   renderTimePresets('07:00 - 08:50');
   renderRoomPresets('B1-305 (CS1)');
 
   // Reset form inputs
   const subjectInput = document.getElementById('class-subject-input');
-  const timeInput = document.getElementById('class-time-input');
   const periodInput = document.getElementById('class-period-input');
   const roomInput = document.getElementById('class-room-input');
   if (subjectInput) subjectInput.value = '';
-  if (timeInput) timeInput.value = '07:00 - 08:50';
   if (periodInput) periodInput.value = 'Tiết 2 - 3';
   if (roomInput) roomInput.value = 'B1-305 (CS1)';
 
@@ -644,16 +726,15 @@ export function openEditClassModal(dayName, classIndex, classData, onSave, onDel
 
   // Render chips, time presets & room presets
   renderSubjectChips(classData.subject);
+  syncTimeInputsFromRange(classData.timeRange || '07:00 - 08:50');
   renderTimePresets(classData.timeRange || '');
   renderRoomPresets(classData.room || '');
 
   // Fill values
   const subjectInput = document.getElementById('class-subject-input');
-  const timeInput = document.getElementById('class-time-input');
   const periodInput = document.getElementById('class-period-input');
   const roomInput = document.getElementById('class-room-input');
   if (subjectInput) subjectInput.value = classData.subject || '';
-  if (timeInput) timeInput.value = classData.timeRange || '';
   if (periodInput) periodInput.value = classData.period || '';
   if (roomInput) roomInput.value = classData.room || '';
 

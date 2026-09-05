@@ -1405,20 +1405,106 @@ body.theme-light .form-group-styled textarea:hover {
   transform: scale(0.96);
 }
 
-@media (max-width: 500px) {
-  .input-row-preset-creator {
-    flex-wrap: wrap;
+/* ==========================================================================
+   iOS STYLE TIME PICKER CAPSULES (BÁO THỨC iPHONE VẬT LÝ)
+   ========================================================================== */
+.ios-time-picker-row {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 0.4rem;
+}
+
+.ios-time-range-capsules {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex: 1.25;
+  min-width: 250px;
+}
+
+.ios-capsule-box {
+  background: rgba(30, 41, 59, 0.75);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 0.35rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  flex: 1;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.ios-capsule-box:hover,
+.ios-capsule-box:focus-within {
+  border-color: #818cf8;
+  background: rgba(99, 102, 241, 0.12);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25), 0 4px 14px rgba(99, 102, 241, 0.2);
+  transform: translateY(-1px);
+}
+
+.ios-capsule-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.04em;
+  user-select: none;
+}
+
+.ios-capsule-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #818cf8;
+}
+
+.ios-capsule-input-wrap i {
+  font-size: 0.82rem;
+  opacity: 0.9;
+}
+
+.ios-time-picker-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  width: 100%;
+  color-scheme: dark;
+}
+
+.ios-time-arrow {
+  color: #818cf8;
+  font-size: 0.92rem;
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+
+.ios-period-box-wrap {
+  display: flex;
+  gap: 0.45rem;
+  align-items: center;
+  flex: 1;
+  min-width: 220px;
+}
+
+@media (max-width: 580px) {
+  .ios-time-picker-row {
+    flex-direction: column;
+    align-items: stretch;
   }
-  .input-row-preset-creator .input-time-box {
-    flex: 1 1 100% !important;
+  .ios-time-range-capsules {
+    width: 100%;
   }
-  .input-row-preset-creator .input-period-box {
-    flex: 1 1 calc(50% - 0.25rem) !important;
-  }
-  .btn-save-custom-preset {
-    flex: 1 1 calc(50% - 0.25rem) !important;
-    justify-content: center;
-    padding: 0.6rem;
+  .ios-period-box-wrap {
+    width: 100%;
   }
 }
 

@@ -4,6 +4,24 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 22:42] - Nâng Cấp Bộ Chọn Giờ Kiểu Báo Thức iOS (Capsule Range Time Picker)
+
+- **🎯 Mục tiêu**:
+  - Chuyển đổi ô nhập thời gian đơn thành **Bộ đôi Capsule thời gian iOS Bắt đầu ➔ Kết thúc**: Bấm vào mở ngay con lăn thời gian (iOS/Native Drum Picker) để cuộn chọn giờ và phút nhanh chóng.
+  - Tự động đồng bộ 2 chiều giữa các thẻ Ca học mẫu và bộ đôi capsule thời gian.
+  - Tự động nhận diện và điền tên Tiết học tương ứng khi thay đổi giờ bắt đầu và kết thúc.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Component Modal]` Cập nhật [`src/1.Frontend/components/modals/AddClassModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddClassModal.js):
+    - Tách thành 2 capsule `#class-start-time` và `#class-end-time` (`type="time"`).
+    - Thêm các hàm helper: `getCurrentTimeRangeString()`, `syncTimeInputsFromRange()` và `autoDetectPeriodFromTime()`.
+    - Đồng bộ mượt mà khi chọn preset mẫu hoặc khi tự điều chỉnh con lăn thời gian.
+  - `[Frontend / CSS Modals]` Cập nhật [`src/1.Frontend/styles/6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css):
+    - Thiết kế UI `.ios-time-picker-row` với capsule kính mờ Dark Glassmorphism, font JetBrains Mono 1rem số to rõ ràng và mũi tên kết nối phát sáng neon.
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v47` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 22:38] - Tinh Chỉnh Bố Cục Modal: Thu Gọn Ô Thứ (135px) & Mở Rộng Ô Phòng Học
 
 - **🎯 Mục tiêu**:
