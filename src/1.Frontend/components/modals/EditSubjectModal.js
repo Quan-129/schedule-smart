@@ -13,6 +13,7 @@ import { formatSafeUrl } from '../../../4.Security/urlValidator.js';
 import { state, persistDriveSubjects } from '../../../3.Database/state.js';
 import { showToast } from '../Toast.js';
 import { syncDriveSubjectsToCloud } from '../../../3.Database/auth/FirebaseAuthService.js';
+import { openSubjectIconPicker } from './AddClassModal.js';
 
 let currentEditingSubject = null;
 let modalEventsInitialized = false;
@@ -29,10 +30,13 @@ export function ensureEditSubjectModalDom() {
     <div id="edit-drive-modal" class="modal-backdrop hidden">
       <div class="modal-card modal-card-lg">
         <div class="modal-header">
-          <div class="modal-title-group">
-            <div class="modal-icon-glow" style="background: linear-gradient(135deg, #34a853 0%, #1e7e34 100%);">
-              <i class="fa-solid fa-pen-to-square"></i>
-            </div>
+          <div class="modal-title-group" style="align-items: center;">
+            <button type="button" id="btn-edit-subj-icon-trigger" class="btn-subject-icon-trigger" style="height: 48px; padding: 0 0.65rem 0 0.45rem;" title="Bấm để đổi Logo / Icon môn học (560+ icons)">
+              <div class="subject-icon-preview-box" style="width: 34px; height: 34px; font-size: 1.15rem;">
+                <i id="edit-drive-modal-icon" class="fa-solid fa-book"></i>
+              </div>
+              <span class="icon-picker-badge-caret"><i class="fa-solid fa-caret-down"></i></span>
+            </button>
             <div>
               <h3 id="edit-drive-modal-title" class="modal-title">Chỉnh Sửa Môn Học</h3>
               <div class="modal-badges-row">
@@ -197,6 +201,7 @@ export function openEditDriveModal(subjectCode, initialTab = 'tab-drive') {
   const driveInput = document.getElementById('edit-drive-url-input');
   const notesInput = document.getElementById('edit-subject-notes-input');
   const deleteBtn = document.getElementById('edit-drive-delete-btn');
+  const iconDisplayEl = document.getElementById('edit-drive-modal-icon');
 
   if (codeInput) codeInput.value = subjectCode;
   if (titleEl) titleEl.textContent = subject.name;
@@ -205,6 +210,7 @@ export function openEditDriveModal(subjectCode, initialTab = 'tab-drive') {
   if (driveInput) driveInput.value = subject.driveUrl || '';
   if (notesInput) notesInput.value = subject.notes || '';
   if (deleteBtn) deleteBtn.style.display = 'inline-flex';
+  if (iconDisplayEl) iconDisplayEl.className = subject.icon || 'fa-solid fa-book';
 
   renderGradeEditorRows(subject.gradeItems || []);
   initModalInteractions();
@@ -254,6 +260,26 @@ export function switchModalTab(tabId) {
 function initModalInteractions() {
   if (modalEventsInitialized) return;
   modalEventsInitialized = true;
+
+  // Nút mở bộ chọn đổi Logo / Icon môn học
+  const editIconBtn = document.getElementById('btn-edit-subj-icon-trigger');
+  if (editIconBtn) {
+    editIconBtn.onclick = (e) => {
+      e.preventDefault();
+      if (!currentEditingSubject) return;
+      openSubjectIconPicker(currentEditingSubject.icon || 'fa-solid fa-book', (newIcon) => {
+        currentEditingSubject.icon = newIcon;
+        const iconDisplayEl = document.getElementById('edit-drive-modal-icon');
+        if (iconDisplayEl) iconDisplayEl.className = newIcon;
+        
+        persistDriveSubjects();
+        syncDriveSubjectsToCloud();
+        if (typeof window.renderBackpackView === 'function') window.renderBackpackView();
+        if (typeof window.renderTimetableGrid === 'function') window.renderTimetableGrid();
+        showToast(`Đã đổi biểu tượng môn thành công! ✨`);
+      });
+    };
+  }
 
   document.querySelectorAll('.modal-tab-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {

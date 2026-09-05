@@ -4,6 +4,26 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 23:28] - Tích Hợp Bộ Chọn Logo / Icon Môn Học Vào Modal Thêm & Chỉnh Sửa Môn Học Trong Chiếc Cặp
+
+- **🎯 Mục tiêu**:
+  - Tích hợp tính năng chọn Logo / Icon môn học (~560+ biểu tượng) vào Modal **"Thêm Môn Học Mới"** (`AddSubjectModal.js`).
+  - Tích hợp nút đổi Logo / Icon môn học ngay trên Header của Modal **"Chỉnh Sửa Môn Học"** (`EditSubjectModal.js`).
+  - Cho phép người dùng tùy chọn biểu tượng đại diện ngay từ khi tạo môn trong Chiếc Cặp hoặc đổi biểu tượng bất cứ lúc nào.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Component Modal]` Cập nhật [`src/1.Frontend/components/modals/AddSubjectModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddSubjectModal.js):
+    - Thêm nút trigger `#btn-open-new-subj-icon-picker` cạnh ô nhập Tên môn học.
+    - Kết nối hàm `openSubjectIconPicker` để chọn icon và lưu thuộc tính `icon` vào đối tượng môn học mới trong `state.driveSubjects`.
+  - `[Frontend / Component Modal]` Cập nhật [`src/1.Frontend/components/modals/EditSubjectModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/EditSubjectModal.js):
+    - Đổi icon tĩnh ở Header thành nút `#btn-edit-subj-icon-trigger` có thể bấm vào để chọn / đổi icon môn học.
+    - Tự động cập nhật `currentEditingSubject.icon`, lưu vào `state.driveSubjects`, `persistDriveSubjects()` và cập nhật giao diện Chiếc Cặp và Thời khóa biểu ngay lập tức.
+  - `[Frontend / Component Modal]` Cập nhật [`src/1.Frontend/components/modals/AddClassModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddClassModal.js):
+    - Cải tiến hàm `openSubjectIconPicker(initialIcon, onSelect)` hỗ trợ callback linh hoạt cho mọi modal trong toàn hệ thống.
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v55` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 23:26] - Mở Rộng Kho 560+ Icons Đa Ngành & Khắc Phục Lỗi Cuộn Ngang / Bị Che Dải Tab
 
 - **🎯 Mục tiêu**:

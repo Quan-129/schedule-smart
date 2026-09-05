@@ -29,6 +29,7 @@ let onDeleteCallback = null;
 let isEventsBound = false;
 let isPickerEventsBound = false;
 let isIconPickerEventsBound = false;
+let onIconSelectCallback = null;
 
 // Trạng thái modal
 const pickerState = {
@@ -1111,6 +1112,9 @@ function renderIconPickerGrid(query = '', category = 'all') {
       btn.classList.add('active');
       const iconClass = btn.dataset.icon;
       setSelectedSubjectIcon(iconClass);
+      if (typeof onIconSelectCallback === 'function') {
+        onIconSelectCallback(iconClass);
+      }
       closeSubjectIconPicker();
     };
   });
@@ -1136,9 +1140,14 @@ function setSelectedSubjectIcon(iconClass = 'fa-solid fa-book') {
 
 /**
  * Mở modal chọn Logo Icon
+ * @param {string} [initialIcon='fa-solid fa-book'] - Icon ban đầu đang chọn
+ * @param {Function} [onSelect=null] - Callback được gọi khi người dùng chọn một icon
  */
-export function openSubjectIconPicker() {
+export function openSubjectIconPicker(initialIcon = 'fa-solid fa-book', onSelect = null) {
   ensureSubjectIconPickerDom();
+  onIconSelectCallback = onSelect;
+  pickerState.selectedIcon = initialIcon || 'fa-solid fa-book';
+
   const modal = document.getElementById(ICON_PICKER_MODAL_ID);
   if (!modal) return;
 

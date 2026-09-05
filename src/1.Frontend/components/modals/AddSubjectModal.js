@@ -8,8 +8,10 @@ import { state, persistDriveSubjects } from '../../../3.Database/state.js';
 import { formatSafeUrl } from '../../../4.Security/urlValidator.js';
 import { showToast } from '../Toast.js';
 import { syncDriveSubjectsToCloud } from '../../../3.Database/auth/FirebaseAuthService.js';
+import { openSubjectIconPicker } from './AddClassModal.js';
 
 let modalInitialized = false;
+let currentSelectedIcon = 'fa-solid fa-book';
 
 /**
  * Render template HTML của Modal vào DOM nếu chưa tồn tại
@@ -36,19 +38,40 @@ export function ensureAddSubjectModalDom() {
         </div>
         <form id="add-subject-form" class="modal-form">
           <div style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+            
+            <!-- TÊN MÔN HỌC & CHỌN LOGO ICON -->
             <div class="form-group-styled">
-              <label for="new-subj-name-input"><i class="fa-solid fa-book-open"></i> Tên môn học <span class="required-star">*</span></label>
-              <input type="text" id="new-subj-name-input" placeholder="Ví dụ: Giải tích 1, Vật lý đại cương..." required autofocus>
+              <label for="new-subj-name-input"><i class="fa-solid fa-book-open"></i> Tên môn học & Logo <span class="required-star">*</span></label>
+              <div class="subject-input-with-icon-picker" style="display: flex; gap: 0.5rem; align-items: center;">
+                <button type="button" id="btn-open-new-subj-icon-picker" class="btn-subject-icon-trigger" title="Chọn Logo / Icon đại diện môn học (hơn 560+ icons)">
+                  <div class="subject-icon-preview-box">
+                    <i id="display-new-subj-icon" class="fa-solid fa-book"></i>
+                  </div>
+                  <span class="icon-picker-badge-caret"><i class="fa-solid fa-caret-down"></i></span>
+                </button>
+                <div class="input-with-icon" style="flex: 1;">
+                  <i class="fa-solid fa-book-open input-icon"></i>
+                  <input type="text" id="new-subj-name-input" placeholder="Ví dụ: Giải tích 1, Vật lý đại cương..." required autofocus autocomplete="off">
+                </div>
+              </div>
             </div>
 
+            <!-- MÃ MÔN HỌC -->
             <div class="form-group-styled">
               <label for="new-subj-code-input"><i class="fa-solid fa-barcode"></i> Mã môn học <span class="required-star">*</span></label>
-              <input type="text" id="new-subj-code-input" placeholder="Ví dụ: MT1003, PH1003, CO2001..." required style="text-transform: uppercase; font-family: var(--font-mono);">
+              <div class="input-with-icon">
+                <i class="fa-solid fa-barcode input-icon"></i>
+                <input type="text" id="new-subj-code-input" placeholder="Ví dụ: MT1003, PH1003, CO2001..." required style="text-transform: uppercase; font-family: var(--font-mono);" autocomplete="off">
+              </div>
             </div>
 
+            <!-- LINK GOOGLE DRIVE -->
             <div class="form-group-styled">
               <label for="new-subj-drive-input"><i class="fa-brands fa-google-drive" style="color: #34a853;"></i> Link Google Drive (Tùy chọn)</label>
-              <input type="url" id="new-subj-drive-input" placeholder="https://drive.google.com/drive/folders/...">
+              <div class="input-with-icon">
+                <i class="fa-solid fa-link input-icon" style="color: #34a853;"></i>
+                <input type="url" id="new-subj-drive-input" placeholder="https://drive.google.com/drive/folders/..." autocomplete="off">
+              </div>
             </div>
           </div>
 
@@ -67,6 +90,10 @@ export function openAddSubjectModal() {
   ensureAddSubjectModalDom();
   initAddSubjectModal();
 
+  currentSelectedIcon = 'fa-solid fa-book';
+  const displayIcon = document.getElementById('display-new-subj-icon');
+  if (displayIcon) displayIcon.className = currentSelectedIcon;
+
   const modal = document.getElementById('add-subject-modal');
   if (modal) {
     modal.classList.remove('hidden');
@@ -84,6 +111,7 @@ export function closeAddSubjectModal() {
     modal.style.display = 'none';
   }
   if (form) form.reset();
+  currentSelectedIcon = 'fa-solid fa-book';
 }
 
 export function initAddSubjectModal() {
@@ -94,9 +122,21 @@ export function initAddSubjectModal() {
   const closeBtn = document.getElementById('add-subject-close-btn');
   const cancelBtn = document.getElementById('add-subject-cancel-btn');
   const form = document.getElementById('add-subject-form');
+  const iconTriggerBtn = document.getElementById('btn-open-new-subj-icon-picker');
 
   if (closeBtn) closeBtn.onclick = closeAddSubjectModal;
   if (cancelBtn) cancelBtn.onclick = closeAddSubjectModal;
+
+  if (iconTriggerBtn) {
+    iconTriggerBtn.onclick = (e) => {
+      e.preventDefault();
+      openSubjectIconPicker(currentSelectedIcon, (newIcon) => {
+        currentSelectedIcon = newIcon;
+        const displayIcon = document.getElementById('display-new-subj-icon');
+        if (displayIcon) displayIcon.className = newIcon;
+      });
+    };
+  }
 
   if (form) {
     form.onsubmit = (e) => {
@@ -129,6 +169,7 @@ export function initAddSubjectModal() {
         credits: 3,
         driveUrl: driveUrl ? formatSafeUrl(driveUrl) : '',
         color: randomColor,
+        icon: currentSelectedIcon || 'fa-solid fa-book',
         notes: '',
         gradeItems: [
           { id: 'item-gk', name: 'Kiểm tra giữa kỳ', weight: 30, type: 'Tự luận', color: '#ec4899' },
@@ -146,7 +187,8 @@ export function initAddSubjectModal() {
       if (window.renderBackpackView) window.renderBackpackView();
       if (window.renderGradesView) window.renderGradesView();
 
-      showToast(`Đã thêm môn "${name}" (${code}) vào hệ thống!`);
+      showToast(`Đã thêm môn "${name}" (${code}) kèm biểu tượng thành công! 🎉`);
     };
   }
 }
+
