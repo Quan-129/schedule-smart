@@ -110,14 +110,12 @@
     <!-- Navigation & Header Bar -->
     <header class="navbar">
       <div class="nav-left">
-        <div class="logo-group">
-          <div class="logo-icon-wrapper">
-            <i class="fa-solid fa-graduation-cap logo-icon"></i>
-          </div>
-          <div class="logo-text">
-            <h1 class="app-title">Schedule<span class="highlight">Smart</span></h1>
-            <span class="app-subtitle">Học Kỳ 1 • 2026-2027</span>
-          </div>
+        <div class="brand-logo">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div class="brand-info">
+          <h1>Schedule<span style="color: var(--accent-primary);">Smart</span></h1>
+          <div class="badge-git"><i class="fa-brands fa-github"></i> HK1 2026-2027</div>
         </div>
       </div>
 
@@ -140,27 +138,24 @@
       </div>
 
       <div class="nav-right">
-        <!-- Week Selector Dropdown -->
-        <div class="week-dropdown-wrapper">
-          <button id="prev-week-btn" class="btn-icon" title="Tuần trước"><i class="fa-solid fa-chevron-left"></i></button>
-          <div class="select-container">
-            <i class="fa-regular fa-calendar select-icon"></i>
-            <select id="week-select" class="week-select" title="Chọn tuần học">
+        <!-- Week Selector Nav -->
+        <div class="week-navigation">
+          <button id="prev-week-btn" class="btn-nav" title="Tuần trước"><i class="fa-solid fa-chevron-left"></i></button>
+          <div class="week-dropdown-wrapper">
+            <i class="fa-regular fa-calendar"></i>
+            <select id="week-select" title="Chọn tuần học">
               <!-- Loaded dynamically from index.json -->
             </select>
           </div>
-          <button id="next-week-btn" class="btn-icon" title="Tuần sau"><i class="fa-solid fa-chevron-right"></i></button>
+          <button id="next-week-btn" class="btn-nav" title="Tuần sau"><i class="fa-solid fa-chevron-right"></i></button>
         </div>
 
-        <!-- Print & Theme Toggles -->
-        <div class="action-buttons">
-          <button id="print-schedule-btn" class="btn-icon btn-print" title="In thời khóa biểu"><i class="fa-solid fa-print"></i></button>
-          <button id="theme-toggle-btn" class="btn-icon btn-theme" title="Đổi giao diện Sáng / Tối"><i class="fa-solid fa-sun"></i></button>
-        </div>
+        <!-- Theme Toggle -->
+        <button id="theme-toggle-btn" class="btn-icon" title="Đổi giao diện Sáng / Tối"><i class="fa-solid fa-sun"></i></button>
 
         <!-- User Auth & Cloud Sync Widget -->
         <div class="user-auth-group">
-          <button id="auth-login-btn" class="btn-auth-login" title="Đăng nhập Google để đồng bộ dữ liệu đa thiết bị" style="display: inline-flex;">
+          <button id="auth-login-btn" class="btn-auth-login" title="Đăng nhập Google để đồng bộ dữ liệu đa thiết bị">
             <i class="fa-brands fa-google"></i>
             <span>Đăng nhập</span>
           </button>
@@ -180,28 +175,27 @@
       <section id="grid-view-container" class="view-panel active">
         <!-- Hero Information Banner -->
         <div class="hero-banner">
-          <div class="hero-info">
-            <div class="badge-status"><span class="pulse-dot"></span> Đang diễn ra</div>
-            <h2 id="schedule-title" class="hero-title">Lịch học</h2>
-            <p id="schedule-subtitle" class="hero-subtitle">Đang tải dữ liệu thời khóa biểu...</p>
+          <div class="hero-left">
+            <div class="date-badge" id="current-date-badge"><i class="fa-regular fa-calendar"></i> <span id="current-date-text">--</span></div>
+            <h2 id="schedule-title" class="schedule-main-title">Lịch học</h2>
+            <p id="schedule-subtitle" class="schedule-subtitle">Đang tải dữ liệu thời khóa biểu...</p>
           </div>
-          <div class="hero-stats">
-            <div class="stat-card">
-              <span class="stat-label">Hôm nay</span>
-              <span id="current-date-text" class="stat-value">--</span>
+          <div class="hero-right">
+            <div class="next-class-card" id="next-class-card">
+              <div class="card-status-dot"></div>
+              <div class="next-class-content">
+                <div class="next-label">Tiết tiếp theo</div>
+                <h4 id="next-class-name">Không có tiết học tiếp theo</h4>
+                <div class="next-class-detail" id="next-class-detail">
+                  <span><i class="fa-regular fa-clock"></i> --</span>
+                  <span><i class="fa-solid fa-door-open"></i> --</span>
+                </div>
+              </div>
             </div>
-            <div class="stat-card highlight">
-              <span class="stat-label">Tiết tiếp theo</span>
-              <span id="next-class-name" class="stat-value">--</span>
-              <span id="next-class-detail" class="stat-sub">--</span>
-            </div>
-            <div class="stat-card">
-              <span class="stat-label">Tổng tiết tuần này</span>
-              <span id="stat-total-classes" class="stat-value">--</span>
-            </div>
-            <div class="stat-card">
-              <span class="stat-label">Tổng số môn</span>
-              <span id="stat-total-subjects" class="stat-value">--</span>
+            <div class="stats-row">
+              <div class="stat-pill"><i class="fa-solid fa-graduation-cap"></i> <span id="stat-total-subjects">-- môn</span></div>
+              <div class="stat-pill"><i class="fa-solid fa-book-open"></i> <span id="stat-total-classes">-- tiết tuần này</span></div>
+              <button class="stat-pill btn-print" id="print-schedule-btn" title="In thời khóa biểu"><i class="fa-solid fa-print"></i> In lịch</button>
             </div>
           </div>
         </div>
@@ -210,7 +204,7 @@
         <div class="filter-bar">
           <div class="search-box">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" id="search-input" placeholder="Tìm môn học, phòng học, ca học hoặc thứ (VD: Thứ 2, 2/9, B1-305, Học máy)..." autocomplete="off">
+            <input type="text" id="search-input" placeholder="Tìm môn học, phòng học, ca học hoặc thứ (VD: Thứ 2, B1-305, Học máy)..." autocomplete="off">
             <button id="clear-search-btn" class="btn-clear hidden" title="Xóa tìm kiếm"><i class="fa-solid fa-xmark"></i></button>
           </div>
           <div class="filter-tags" id="subject-filter-tags">
@@ -244,12 +238,12 @@
 
       <!-- VIEW 2: Today Focus View -->
       <section id="today-view-container" class="view-panel">
-        <div class="today-focus-card">
+        <div class="today-timeline-wrapper">
           <div class="today-header">
-            <div class="today-badge" id="today-title-badge"><i class="fa-solid fa-clock"></i> Lịch Học Hôm Nay</div>
-            <h2 class="today-main-date" id="today-summary-text">Hôm nay</h2>
+            <div class="today-badge-large"><i class="fa-solid fa-clock"></i> Lịch Học Hôm Nay</div>
+            <p id="today-summary-text">Hôm nay</p>
           </div>
-          <div class="today-timeline" id="today-timeline-list">
+          <div class="timeline-list" id="today-timeline-list">
             <!-- Dynamically populated today's classes -->
           </div>
         </div>
@@ -280,7 +274,7 @@
           <div class="backpack-header-info">
             <div class="badge-backpack"><i class="fa-brands fa-google-drive"></i> Chiếc Cặp Google Drive 🎒</div>
             <h2 class="backpack-main-title">Phím Tắt Google Drive Môn Học</h2>
-            <p class="backpack-subtitle">Mỗi nút vuông là một môn học. Bấm trực tiếp để mở Google Drive 1-chạm. Bấm icon cây bút ✏️ ở góc để chỉnh sửa đường dẫn.</p>
+            <p class="backpack-subtitle">Mỗi nút tròn là một môn học kèm vòng % điểm. Bấm trực tiếp để mở Google Drive 1-chạm. Nhấn giữ để chỉnh sửa hoặc xóa.</p>
           </div>
           <div class="backpack-header-actions">
             <div class="backpack-filter-box">
@@ -288,20 +282,15 @@
               <input type="text" id="backpack-search-input" placeholder="Tìm môn học..." autocomplete="off">
               <button id="bp-clear-search-btn" class="btn-clear hidden" title="Xóa tìm kiếm"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <button id="bp-done-jiggle-btn" class="btn-bp-action btn-bp-done hidden" title="Hoàn tất xóa môn học">
-              <i class="fa-solid fa-check"></i> <span>Xong</span>
-            </button>
             <button id="bp-add-subject-btn" class="btn-bp-action btn-bp-primary" title="Tạo thêm môn học mới">
               <i class="fa-solid fa-plus"></i> <span>Thêm Môn</span>
             </button>
           </div>
         </div>
 
-        <p class="bp-hint-text"><i class="fa-solid fa-hand-pointer"></i> <em>Mẹo: <strong>Nhấn giữ ô tròn</strong> để bật chế độ chỉnh sửa (hiện nút cây bút ✏️ và nút xóa -).</em></p>
-
-        <!-- App Launcher Grid: Lưới các nút vuông môn học -->
+        <!-- App Launcher Grid: Lưới các nút môn học -->
         <div class="bp-launcher-grid" id="backpack-launcher-grid">
-          <!-- Dynamically rendered square subject app buttons -->
+          <!-- Dynamically rendered circular subject app buttons -->
         </div>
       </section>
 
@@ -337,50 +326,38 @@
     <footer class="footer">
       <div class="git-guide-section">
         <details class="guide-accordion">
-          <summary class="guide-summary">
-            <div class="guide-summary-left">
-              <i class="fa-brands fa-git-alt guide-icon"></i>
-              <div class="guide-summary-text">
-                <span class="guide-title">Hướng dẫn cập nhật & thêm lịch tuần mới qua Git</span>
-                <span class="guide-subtitle">Bấm để xem các lệnh Git chuẩn để đẩy lịch học lên GitHub Pages</span>
-              </div>
-            </div>
-            <i class="fa-solid fa-chevron-down chevron-icon"></i>
+          <summary>
+            <span><i class="fa-brands fa-git-alt"></i> Hướng dẫn cập nhật & thêm lịch tuần mới qua Git</span>
+            <i class="fa-solid fa-chevron-down arrow-icon"></i>
           </summary>
           <div class="guide-content">
-            <div class="guide-steps-grid">
-              <div class="guide-step-card">
-                <div class="step-badge">Bước 1</div>
-                <h4>Tạo tệp Markdown tuần mới</h4>
-                <p>Sao chép file <code>schedules/tuan-35.md</code> thành <code>schedules/tuan-36.md</code> và chỉnh sửa lịch học theo cú pháp Markdown.</p>
+            <div class="guide-steps">
+              <div class="guide-step">
+                <div class="step-num">1</div>
+                <div class="step-text">
+                  <h4>Tạo file Markdown</h4>
+                  <p>Sao chép <code>schedules/tuan-35.md</code> thành <code>schedules/tuan-36.md</code> và sửa nội dung.</p>
+                </div>
               </div>
-              <div class="guide-step-card">
-                <div class="step-badge">Bước 2</div>
-                <h4>Khai báo trong index.json</h4>
-                <p>Thêm dòng định danh tuần mới vào <code>schedules/index.json</code> để dropdown tự động nhận diện tuần mới.</p>
+              <div class="guide-step">
+                <div class="step-num">2</div>
+                <div class="step-text">
+                  <h4>Khai báo index.json</h4>
+                  <p>Thêm thông tin tuần mới vào file <code>schedules/index.json</code>.</p>
+                </div>
               </div>
-              <div class="guide-step-card">
-                <div class="step-badge">Bước 3</div>
-                <h4>Đẩy lên GitHub</h4>
-                <div class="code-snippet-box">
-                  <code>git add .<br>git commit -m "Them lich tuan 36"<br>git push origin main</code>
+              <div class="guide-step">
+                <div class="step-num">3</div>
+                <div class="step-text">
+                  <h4>Đẩy lên GitHub</h4>
+                  <p><code>git add . && git commit -m "Them tuan 36" && git push</code></p>
                 </div>
               </div>
             </div>
           </div>
         </details>
       </div>
-
-      <div class="footer-bottom">
-        <div class="footer-left">
-          <span>⚡ Lịch Học Thông Minh & Google Drive Hub</span>
-          <span class="dot-separator">•</span>
-          <span>Deploy tự động với GitHub Actions & Pages</span>
-        </div>
-        <div class="footer-right">
-          <span>Dành cho sinh viên Bách Khoa TP.HCM (HCMUT)</span>
-        </div>
-      </div>
+      <p style="margin-top: 1.5rem;">⚡ Lịch Học Thông Minh & Google Drive Hub • Tự động hóa với GitHub Pages • HCMUT</p>
     </footer>
   </div>
 

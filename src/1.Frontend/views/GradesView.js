@@ -1,134 +1,198 @@
 /**
  * ==========================================================================
- * FRONTEND VIEW - GRADES VIEW & TARGET CALCULATOR
+ * FRONTEND VIEW - GRADES VIEW (ĐỀ CƯƠNG HỌC PHẦN, BIỂU ĐỒ DONUT & TỈ LỆ ĐIỂM)
+ * Khôi phục 100% giao diện Glassmorphism & Donut Pie Chart chuẩn style.css
  * ==========================================================================
  */
 
-import { state, persistGrades } from '../../3.Database/state.js';
+import { state } from '../../3.Database/state.js';
 import { escapeHtml } from '../../4.Security/sanitizer.js';
-import { calculateGradeTotalWeight, solveRequiredFinalExamScore } from '../../2.Backend/services/GradeSolverService.js';
 import { openEditSubjectModal } from '../components/EditModal.js';
 import { showToast } from '../components/Toast.js';
 
 /**
- * Render toàn bộ giao diện Bảng Điểm & Bộ Tính Điểm Mục Tiêu
+ * Tạo SVG Donut Chart cho từng môn học
  */
-export function renderGradesView() {
-  const container = document.getElementById('grades-grid') || document.getElementById('grades-container');
-  if (!container) return;
+function generateDonutChartSvg(items = [], schemeCode = '') {
+  const radius = 46;
+  const circumference = 2 * Math.PI * radius;
+  const totalWeight = items.reduce((sum, item) => sum + (Number(item.weight) || 0), 0);
 
-  container.innerHTML = '';
-
-  state.driveSubjects.forEach((subject) => {
-    const card = document.createElement('div');
-    card.className = 'grade-subject-card';
-    card.style.setProperty('--card-color', subject.color || '#6366f1');
-
-    const gradeItems = Array.isArray(subject.gradeItems) ? subject.gradeItems : [];
-    const totalW = calculateGradeTotalWeight(gradeItems);
-    const scores = state.studentGrades[subject.code] || {};
-    const selectedTarget = scores.targetLetter || 'A';
-
-    // Tính điểm thi cuối kỳ cần đạt
-    const solveResult = solveRequiredFinalExamScore(gradeItems, scores, selectedTarget);
-
-    let rowsHtml = '';
-    gradeItems.forEach(item => {
-      const currentVal = scores[item.id] !== undefined ? scores[item.id] : '';
-      rowsHtml += `
-        <div class="grade-item-row">
-          <div class="grade-item-info">
-            <span class="grade-item-name" style="color: ${item.color || '#6366f1'}">${escapeHtml(item.name)}</span>
-            <span class="grade-item-pct">${item.weight}%</span>
-          </div>
-          <div class="grade-item-input-wrap">
-            <input 
-              type="number" 
-              class="form-input grade-input-score" 
-              data-subject="${escapeHtml(subject.code)}" 
-              data-item-id="${escapeHtml(item.id)}" 
-              placeholder="0.0" 
-              min="0" max="10" step="0.1" 
-              value="${currentVal}" 
-            />
-          </div>
-        </div>
-      `;
-    });
-
-    card.innerHTML = `
-      <div class="grade-card-header">
-        <div>
-          <h3 class="grade-card-title">${escapeHtml(subject.name)} (${escapeHtml(subject.code)})</h3>
-          <span class="grade-card-credits">${subject.credits || 3} Tín chỉ • Tổng tỉ lệ: ${totalW}%</span>
-        </div>
-        <button class="btn btn-secondary btn-sm btn-edit-scheme" data-code="${escapeHtml(subject.code)}">
-          <i class="fa-solid fa-pen-ruler"></i> Sửa tỉ lệ
-        </button>
-      </div>
-
-      <div class="grade-items-list">
-        ${rowsHtml}
-      </div>
-
-      <div class="grade-target-solver-box">
-        <div class="target-select-row">
-          <span>Mục tiêu điểm chữ:</span>
-          <select class="form-select target-grade-select" data-subject="${escapeHtml(subject.code)}">
-            <option value="A" ${selectedTarget === 'A' ? 'selected' : ''}>Điểm A (>= 8.5)</option>
-            <option value="B+" ${selectedTarget === 'B+' ? 'selected' : ''}>Điểm B+ (>= 8.0)</option>
-            <option value="B" ${selectedTarget === 'B' ? 'selected' : ''}>Điểm B (>= 7.0)</option>
-            <option value="C+" ${selectedTarget === 'C+' ? 'selected' : ''}>Điểm C+ (>= 6.5)</option>
-            <option value="C" ${selectedTarget === 'C' ? 'selected' : ''}>Điểm C (>= 5.5)</option>
-            <option value="D" ${selectedTarget === 'D' ? 'selected' : ''}>Điểm D - Qua môn (>= 4.0)</option>
-          </select>
-        </div>
-        <div class="solver-result-msg ${solveResult.status}">
-          ${solveResult.message}
+  if (!items || items.length === 0 || totalWeight === 0) {
+    return `
+      <div class="donut-chart-wrapper" id="donut-wrapper-${schemeCode}">
+        <svg class="donut-svg" viewBox="0 0 140 140">
+          <circle cx="70" cy="70" r="${radius}" fill="none" stroke="var(--border-color)" stroke-width="20" opacity="0.3" />
+        </svg>
+        <div class="donut-center-info" id="donut-center-${schemeCode}">
+          <span class="donut-center-val" style="font-size: 0.9rem;">0%</span>
+          <span class="donut-center-label">Chưa có %</span>
         </div>
       </div>
     `;
+  }
 
-    // Sự kiện sửa tỉ lệ
-    const editBtn = card.querySelector('.btn-edit-scheme');
+  let cumulative = 0;
+  const slices = items.map((item, idx) => {
+    const weightNum = Number(item.weight) || 0;
+    const strokeDash = (weightNum / totalWeight) * circumference;
+    const strokeOffset = -(cumulative / totalWeight) * circumference;
+    cumulative += weightNum;
+
+    return `
+      <circle class="donut-slice" 
+        cx="70" cy="70" r="${radius}" 
+        stroke="${item.color || '#6366f1'}" 
+        stroke-dasharray="${strokeDash} ${circumference}" 
+        stroke-dashoffset="${strokeOffset}"
+        data-scheme="${schemeCode}"
+        data-weight="${weightNum}%"
+        data-name="${escapeHtml(item.name || '')}"
+        title="${escapeHtml(item.name || '')}: ${weightNum}%"
+      />
+    `;
+  }).join('');
+
+  return `
+    <div class="donut-chart-wrapper" id="donut-wrapper-${schemeCode}">
+      <svg class="donut-svg" viewBox="0 0 140 140">
+        <circle cx="70" cy="70" r="${radius}" fill="none" stroke="var(--border-color)" stroke-width="20" opacity="0.3" />
+        ${slices}
+      </svg>
+      <div class="donut-center-info" id="donut-center-${schemeCode}">
+        <span class="donut-center-val">${totalWeight}%</span>
+        <span class="donut-center-label">Tổng điểm</span>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Highlight lát cắt điểm số khi click
+ */
+export function highlightGradeSlice(schemeCode, itemIdx, itemName, itemWeight) {
+  const centerElem = document.getElementById(`donut-center-${schemeCode}`);
+  if (centerElem) {
+    centerElem.innerHTML = `
+      <span class="donut-center-val" style="font-size: 0.95rem; color: var(--accent-primary);">${itemWeight}</span>
+      <span class="donut-center-label" style="font-size: 0.58rem; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${itemName}</span>
+    `;
+  }
+  showToast(`${itemName}: ${itemWeight}`);
+}
+
+/**
+ * Render toàn bộ danh sách thẻ môn học & tỉ lệ điểm chuẩn style.css
+ * @param {string} filterQuery 
+ */
+export function renderGradesView(filterQuery = '') {
+  const gradesGrid = document.getElementById('grades-grid');
+  if (!gradesGrid) return;
+
+  gradesGrid.innerHTML = '';
+
+  const q = filterQuery.toLowerCase().trim();
+  const filteredSchemes = (state.driveSubjects || []).filter(s => 
+    !q || 
+    (s.name && s.name.toLowerCase().includes(q)) ||
+    (s.englishName && s.englishName.toLowerCase().includes(q)) ||
+    (s.code && s.code.toLowerCase().includes(q)) ||
+    (s.department && s.department.toLowerCase().includes(q)) ||
+    (s.lecturers && s.lecturers.toLowerCase().includes(q))
+  );
+
+  if (filteredSchemes.length === 0) {
+    gradesGrid.innerHTML = `
+      <div class="day-off-card" style="grid-column: 1 / -1; padding: 3rem 1rem;">
+        <div class="day-off-icon" style="font-size: 3rem;"><i class="fa-solid fa-magnifying-glass"></i></div>
+        <h3>Không tìm thấy môn học</h3>
+        <p>Thử tìm kiếm với từ khóa khác hoặc thêm môn mới trong Chiếc Cặp.</p>
+      </div>
+    `;
+    return;
+  }
+
+  filteredSchemes.forEach(scheme => {
+    const card = document.createElement('div');
+    card.className = 'grade-card';
+    card.id = `grade-card-${scheme.code.toLowerCase()}`;
+
+    const gradeItems = scheme.gradeItems || [];
+    const chartSvg = generateDonutChartSvg(gradeItems, scheme.code.toLowerCase());
+
+    const breakdownHtml = gradeItems.length > 0 ? gradeItems.map((item, idx) => `
+      <div class="breakdown-item" style="border-left-color: ${item.color || '#6366f1'}; cursor: pointer;" data-scheme="${scheme.code.toLowerCase()}" data-idx="${idx}" data-name="${escapeHtml(item.name)}" data-weight="${item.weight}%">
+        <div class="breakdown-row">
+          <span class="breakdown-name">
+            <span class="breakdown-color-dot" style="background-color: ${item.color || '#6366f1'};"></span>
+            ${escapeHtml(item.name)}
+          </span>
+          <span class="breakdown-weight" style="color: ${item.color || '#6366f1'};">${item.weight}%</span>
+        </div>
+        <div class="breakdown-detail">
+          <span class="breakdown-type"><i class="fa-regular fa-file-lines"></i> ${escapeHtml(item.type || 'Đánh giá')}</span>
+          ${item.duration && item.duration !== '--' ? `<span><i class="fa-regular fa-clock"></i> ${escapeHtml(item.duration)}</span>` : ''}
+        </div>
+        <div class="breakdown-bar">
+          <div class="breakdown-bar-fill" style="width: ${item.weight}%; background-color: ${item.color || '#6366f1'};"></div>
+        </div>
+      </div>
+    `).join('') : `
+      <div style="padding: 1rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
+        Chưa có tỉ lệ điểm. Bấm "Sửa Tỉ Lệ" để thiết lập.
+      </div>
+    `;
+
+    card.innerHTML = `
+      <div class="grade-card-header">
+        <div class="grade-title-group">
+          <h3 class="grade-subject-title">
+            <i class="${scheme.icon || 'fa-solid fa-book-bookmark'}" style="color: var(--accent-primary); font-size: 0.95rem;"></i>
+            ${escapeHtml(scheme.name)}
+          </h3>
+          ${scheme.englishName ? `<span class="grade-subject-en">${escapeHtml(scheme.englishName)}</span>` : ''}
+          ${scheme.department ? `<span class="grade-department"><i class="fa-solid fa-building-columns"></i> ${escapeHtml(scheme.department)}</span>` : ''}
+        </div>
+        <div class="grade-badges">
+          <span class="badge-code">${escapeHtml(scheme.code)}</span>
+          ${scheme.credits ? `<span class="badge-credits">${scheme.credits} Tín chỉ</span>` : ''}
+          <button class="btn-edit-grade-scheme" title="Chỉnh sửa thông số & tỉ lệ điểm môn ${escapeHtml(scheme.name)}" data-code="${escapeHtml(scheme.code)}">
+            <i class="fa-solid fa-pen-to-square"></i> Sửa Tỉ Lệ
+          </button>
+        </div>
+      </div>
+
+      <div class="grade-card-body">
+        ${chartSvg}
+        <div class="grade-breakdown-list">
+          ${breakdownHtml}
+        </div>
+      </div>
+
+      ${scheme.notes ? `
+        <div class="grade-card-footer">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>${escapeHtml(scheme.notes)}</span>
+        </div>
+      ` : ''}
+    `;
+
+    // Gắn sự kiện sửa tỉ lệ
+    const editBtn = card.querySelector('.btn-edit-grade-scheme');
     if (editBtn) {
-      editBtn.onclick = () => {
-        openEditSubjectModal(subject.code, () => renderGradesView());
+      editBtn.onclick = (e) => {
+        e.stopPropagation();
+        openEditSubjectModal(scheme.code, () => renderGradesView(filterQuery));
       };
     }
 
-    // Sự kiện nhập điểm
-    const inputs = card.querySelectorAll('.grade-input-score');
-    inputs.forEach(input => {
-      input.oninput = (e) => {
-        const code = e.target.dataset.subject;
-        const itemId = e.target.dataset.itemId;
-        if (!state.studentGrades[code]) state.studentGrades[code] = {};
-        state.studentGrades[code][itemId] = e.target.value;
-        persistGrades();
-        
-        // Cập nhật lại thông báo mục tiêu trong card
-        const updatedSolve = solveRequiredFinalExamScore(gradeItems, state.studentGrades[code], state.studentGrades[code].targetLetter || 'A');
-        const msgEl = card.querySelector('.solver-result-msg');
-        if (msgEl) {
-          msgEl.className = `solver-result-msg ${updatedSolve.status}`;
-          msgEl.textContent = updatedSolve.message;
-        }
+    // Gắn sự kiện click vào breakdown item
+    card.querySelectorAll('.breakdown-item').forEach(el => {
+      el.onclick = () => {
+        highlightGradeSlice(el.dataset.scheme, el.dataset.idx, el.dataset.name, el.dataset.weight);
       };
     });
 
-    // Sự kiện chọn mục tiêu A/B/C
-    const targetSelect = card.querySelector('.target-grade-select');
-    if (targetSelect) {
-      targetSelect.onchange = (e) => {
-        const code = e.target.dataset.subject;
-        if (!state.studentGrades[code]) state.studentGrades[code] = {};
-        state.studentGrades[code].targetLetter = e.target.value;
-        persistGrades();
-        renderGradesView();
-      };
-    }
-
-    container.appendChild(card);
+    gradesGrid.appendChild(card);
   });
 }

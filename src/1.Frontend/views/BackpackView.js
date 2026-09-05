@@ -6,7 +6,7 @@
 
 import { state, persistDriveSubjects } from '../../3.Database/state.js';
 import { renderCircularNodeHtml } from '../components/CircularNode.js';
-import { openEditSubjectModal } from '../components/EditModal.js';
+import { openEditDriveModal } from '../components/EditModal.js';
 import { showToast } from '../components/Toast.js';
 
 let longPressTimer = null;
@@ -118,7 +118,7 @@ function attachNodeEvents(btn, subject) {
     const editBtn = e.target.closest('[data-action="edit"]');
     if (editBtn) {
       e.stopPropagation();
-      openEditSubjectModal(subject.code, () => renderBackpackView());
+      openEditDriveModal(subject.code);
       return;
     }
 
@@ -135,7 +135,7 @@ function attachNodeEvents(btn, subject) {
       window.open(subject.driveUrl.trim(), '_blank');
     } else {
       showToast(`Môn ${subject.name} chưa gắn link Google Drive. Hãy nhấn giữ để chỉnh sửa!`);
-      openEditSubjectModal(subject.code, () => renderBackpackView());
+      openEditDriveModal(subject.code);
     }
   });
 }

@@ -6,6 +6,26 @@
 
 ---
 
+## 📅 [2026-09-05 11:58] - Khôi Phục 100% Giao Diện CSS, Donut Charts & Đồng Bộ Markup Chuẩn `style.css`
+
+- **🎯 Mục tiêu**:
+  - Khắc phục triệt để lỗi mất định dạng CSS (lưới lịch học và bảng điểm bị vỡ, mất biểu đồ Donut và thanh thống kê) sau khi tách mô-đun 5 tầng.
+  - Đồng bộ 100% cấu trúc HTML (`index.html`) và JavaScript DOM Generators (`TimetableGrid.js`, `GradesView.js`, `main.js`) khớp chuẩn với 2882 dòng CSS trong `style.css`.
+  - Khôi phục đầy đủ các tính năng: Thẻ Hero Banner có đèn nhấp nháy, đếm số môn/tiết, bộ lọc tag màu môn học, chọn tuần, tìm kiếm trực tiếp và trình sửa Markdown.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend/HTML]` Cập nhật `index.html`: Khôi phục cấu trúc `.hero-left`, `.schedule-main-title`, `.next-class-card`, `.stats-row`, `.stat-pill`, `.brand-logo`, `.brand-info`, `.week-navigation`, `.today-timeline-wrapper`.
+  - `[Frontend/Views]` Xây dựng lại `TimetableGrid.js` và `GradesView.js` với toàn bộ thẻ CSS gốc (`.day-card`, `.classes-list`, `.class-item`, `.grade-card`, `generateDonutChartSvg`, `.breakdown-item`, `.breakdown-bar`, `.breakdown-bar-fill`).
+  - `[Frontend/Core]` Hoàn thiện `main.js`: Khởi tạo `initWeekSelector()` từ `schedules/index.json`, tính toán `updateNextClassBadge()`, `updateHeroStats()`, `renderSubjectFilters()`, `initSearchAndFilters()`, `initRawMarkdownEditor()`.
+  - `[Config / DevOps]` Nâng cấp Service Worker Cache lên `smart-schedule-modular-v10` trong `sw.js`.
+
+- **💡 Quyết định Kỹ thuật & Kiến trúc**:
+  - *Pixel-Perfect Consistency*: Giữ nguyên `style.css` gốc nguyên bản 2882 dòng và điều chỉnh toàn bộ mã nguồn JavaScript để xuất đúng từng selector CSS $\rightarrow$ Giao diện kính mờ Glassmorphism, hiệu ứng nảy nút và biểu đồ Donut hoạt động hoàn hảo.
+
+- **📌 Trạng thái hiện tại & Kế hoạch tiếp theo (Next Steps)**:
+  - [x] Giao diện CSS và hiệu ứng khôi phục 100% rực rỡ, chuẩn phong cách hiện đại.
+  - [x] Các tính năng lọc, tìm kiếm, chỉnh sửa môn học và chuyển tab hoạt động trơn tru.
+
 ## 📅 [2026-09-05 11:30] - Đóng Gói Module `FirebaseAuthService` & Kết Nối Cổng Đăng Nhập Google
 
 - **🎯 Mục tiêu**:
