@@ -22,6 +22,7 @@ import { escapeHtml } from '../4.Security/sanitizer.js';
 
 let availableWeeks = [];
 let currentRawMarkdown = '';
+let currentWeekFile = '';
 
 /**
  * Khởi động ứng dụng
@@ -72,8 +73,9 @@ async function initApp() {
   renderBackpackView();
   renderGradesView();
 
-  // 10. Gắn các sự kiện Modal Thêm Môn, Theme, Print, Raw Editor
+  // 10. Gắn các sự kiện Modal Thêm Môn, Thêm Tuần, Theme, Print, Raw Editor
   initAddSubjectModal();
+  initAddWeekModal();
   initThemeToggle();
   initPrintButton();
   initRawMarkdownEditor();
@@ -108,7 +110,6 @@ function setupWindowHelpers() {
     const bpSearchInput = document.getElementById('backpack-search-input');
     if (bpSearchInput) {
       bpSearchInput.value = subjectName;
-      // Filter backpack
     }
   };
 
@@ -204,6 +205,7 @@ async function initWeekSelector() {
   const weekSelect = document.getElementById('week-select');
   const prevBtn = document.getElementById('prev-week-btn');
   const nextBtn = document.getElementById('next-week-btn');
+  const addWeekNavBtn = document.getElementById('btn-add-week-modal');
 
   try {
     const res = await fetch('schedules/index.json');
@@ -221,13 +223,34 @@ async function initWeekSelector() {
     ];
   }
 
-  if (weekSelect) {
-    weekSelect.innerHTML = availableWeeks.map(w => `
-      <option value="${w.filename}">${escapeHtml(w.title)}</option>
-    `).join('');
+  // Nạp thêm các tuần do người dùng tự tạo từ LocalStorage
+  const customWeeksRaw = localStorage.getItem('smart_schedule_custom_weeks');
+  if (customWeeksRaw) {
+    try {
+      const customWeeks = JSON.parse(customWeeksRaw);
+      if (Array.isArray(customWeeks)) {
+        customWeeks.forEach(cw => {
+          if (!availableWeeks.some(w => w.filename === cw.filename || w.id === cw.id)) {
+            availableWeeks.push(cw);
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Lỗi khi nạp custom weeks:', err);
+    }
+  }
 
+  renderWeekDropdownOptions();
+
+  if (weekSelect) {
     weekSelect.onchange = () => {
-      loadWeekSchedule(weekSelect.value);
+      if (weekSelect.value === '__ADD_NEW_WEEK__') {
+        openAddWeekModal();
+        // Trả lại giá trị trước đó
+        weekSelect.value = currentWeekFile || availableWeeks[0].filename;
+      } else {
+        loadWeekSchedule(weekSelect.value);
+      }
     };
   }
 
@@ -248,18 +271,38 @@ async function initWeekSelector() {
     nextBtn.onclick = () => {
       if (!weekSelect) return;
       const currentIdx = weekSelect.selectedIndex;
-      if (currentIdx < weekSelect.options.length - 1) {
+      const maxIdx = availableWeeks.length - 1;
+      if (currentIdx < maxIdx) {
         weekSelect.selectedIndex = currentIdx + 1;
         loadWeekSchedule(weekSelect.value);
       } else {
-        showToast('Đã ở tuần cuối cùng trong học kỳ');
+        showToast('Đã ở tuần cuối cùng trong danh sách');
       }
     };
   }
 
-  // Tải tuần 35 mặc định
+  if (addWeekNavBtn) {
+    addWeekNavBtn.onclick = () => {
+      openAddWeekModal();
+    };
+  }
+
+  // Tải tuần 35 mặc định hoặc tuần đầu tiên
   const defaultWeek = availableWeeks[0] ? availableWeeks[0].filename : 'schedules/tuan-35.md';
   await loadWeekSchedule(defaultWeek);
+}
+
+function renderWeekDropdownOptions(selectedFilename) {
+  const weekSelect = document.getElementById('week-select');
+  if (!weekSelect) return;
+
+  const target = selectedFilename || currentWeekFile || (availableWeeks[0] ? availableWeeks[0].filename : '');
+
+  weekSelect.innerHTML = availableWeeks.map(w => `
+    <option value="${w.filename}" ${w.filename === target ? 'selected' : ''}>${escapeHtml(w.title)}</option>
+  `).join('') + `
+    <option value="__ADD_NEW_WEEK__" style="color: #10b981; font-weight: 700;">➕ Thêm tuần mới...</option>
+  `;
 }
 
 /**
@@ -267,22 +310,36 @@ async function initWeekSelector() {
  * @param {string} filepath 
  */
 async function loadWeekSchedule(filepath) {
+  currentWeekFile = filepath;
   let mdText = '';
-  try {
-    const res = await fetch(filepath);
-    if (res.ok) {
-      mdText = await res.text();
-    } else {
-      mdText = filepath.includes('36') ? DEFAULT_WEEK_36_MD : DEFAULT_WEEK_35_MD;
+
+  // 1. Kiểm tra trong LocalStorage nếu là tuần tự tạo
+  const customMd = localStorage.getItem(`smart_schedule_custom_md_${filepath}`);
+  if (customMd) {
+    mdText = customMd;
+  } else {
+    try {
+      const res = await fetch(filepath);
+      if (res.ok) {
+        mdText = await res.text();
+      } else {
+        mdText = filepath.includes('36') ? DEFAULT_WEEK_36_MD : DEFAULT_WEEK_35_MD;
+      }
+    } catch (err) {
+      console.warn('[Schedule] Dùng fallback markdown cục bộ:', err);
+      mdText = DEFAULT_WEEK_35_MD;
     }
-  } catch (err) {
-    console.warn('[Schedule] Dùng fallback markdown cục bộ:', err);
-    mdText = DEFAULT_WEEK_35_MD;
   }
 
   currentRawMarkdown = mdText;
   const parsed = parseScheduleMarkdown(mdText);
   state.scheduleData = parsed;
+
+  // Cập nhật giá trị đang chọn trong dropdown
+  const weekSelect = document.getElementById('week-select');
+  if (weekSelect && weekSelect.value !== filepath) {
+    weekSelect.value = filepath;
+  }
 
   // 1. Cập nhật Hero Banner
   const titleEl = document.getElementById('schedule-title');
@@ -527,6 +584,174 @@ function initSearchAndFilters() {
       });
     };
   }
+}
+
+/**
+ * Khởi tạo Modal Thêm Tuần Học Mới
+ */
+function initAddWeekModal() {
+  const modal = document.getElementById('add-week-modal');
+  const closeBtn = document.getElementById('add-week-close-btn');
+  const cancelBtn = document.getElementById('add-week-cancel-btn');
+  const form = document.getElementById('add-week-form');
+  const copyBtn = document.getElementById('btn-copy-template-md');
+
+  const closeModal = () => {
+    if (modal) {
+      modal.classList.remove('active');
+      modal.classList.add('hidden');
+      modal.style.display = 'none';
+    }
+    if (form) form.reset();
+  };
+
+  if (closeBtn) closeBtn.onclick = closeModal;
+  if (cancelBtn) cancelBtn.onclick = closeModal;
+
+  if (copyBtn) {
+    copyBtn.onclick = () => {
+      const textarea = document.getElementById('new-week-md-content');
+      if (textarea && currentRawMarkdown) {
+        textarea.value = currentRawMarkdown;
+        showToast('Đã sao chép lịch học từ tuần hiện tại!');
+      }
+    };
+  }
+
+  if (form) {
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const titleInput = document.getElementById('new-week-title-input');
+      const idInput = document.getElementById('new-week-id-input');
+      const dateInput = document.getElementById('new-week-date-input');
+      const descInput = document.getElementById('new-week-desc-input');
+      const mdInput = document.getElementById('new-week-md-content');
+
+      const title = titleInput ? titleInput.value.trim() : '';
+      let id = idInput ? idInput.value.trim().toLowerCase().replace(/\s+/g, '-') : '';
+      const startDate = dateInput ? dateInput.value : '';
+      const desc = descInput ? descInput.value.trim() : title;
+      const mdContent = mdInput && mdInput.value.trim() ? mdInput.value.trim() : generateDefaultWeekMarkdown(title);
+
+      if (!title || !id) {
+        showToast('Vui lòng nhập tên và mã định danh tuần!');
+        return;
+      }
+
+      if (!id.startsWith('tuan-')) {
+        id = `tuan-${id}`;
+      }
+
+      const filename = `custom_${id}.md`;
+
+      // Kiểm tra trùng mã
+      if (availableWeeks.some(w => w.id === id || w.filename === filename)) {
+        showToast(`Tuần "${id}" đã tồn tại! Vui lòng chọn mã khác.`);
+        return;
+      }
+
+      const newWeekObj = {
+        id,
+        title,
+        startDate: startDate || new Date().toISOString().split('T')[0],
+        filename,
+        description: desc,
+        isCustom: true
+      };
+
+      // 1. Lưu Markdown vào LocalStorage
+      localStorage.setItem(`smart_schedule_custom_md_${filename}`, mdContent);
+
+      // 2. Lưu danh sách Custom Weeks vào LocalStorage
+      const customWeeksRaw = localStorage.getItem('smart_schedule_custom_weeks');
+      let customWeeks = [];
+      if (customWeeksRaw) {
+        try { customWeeks = JSON.parse(customWeeksRaw); } catch(e){}
+      }
+      customWeeks.push(newWeekObj);
+      localStorage.setItem('smart_schedule_custom_weeks', JSON.stringify(customWeeks));
+
+      // 3. Thêm vào availableWeeks trong memory
+      availableWeeks.push(newWeekObj);
+
+      // 4. Render lại dropdown và tải tuần vừa tạo
+      renderWeekDropdownOptions(filename);
+      closeModal();
+      loadWeekSchedule(filename);
+      switchTab('grid');
+
+      showToast(`Đã tạo "${title}" thành công! 🎉`);
+    };
+  }
+}
+
+function openAddWeekModal() {
+  const modal = document.getElementById('add-week-modal');
+  if (!modal) return;
+
+  const titleInput = document.getElementById('new-week-title-input');
+  const idInput = document.getElementById('new-week-id-input');
+  const dateInput = document.getElementById('new-week-date-input');
+  const descInput = document.getElementById('new-week-desc-input');
+  const mdInput = document.getElementById('new-week-md-content');
+
+  // Tính số tuần tiếp theo
+  let maxWeekNum = 50;
+  availableWeeks.forEach(w => {
+    const match = (w.title || w.id || '').match(/(\d+)/);
+    if (match) {
+      const num = parseInt(match[1], 10);
+      if (num > maxWeekNum) maxWeekNum = num;
+    }
+  });
+
+  const nextWeekNum = maxWeekNum + 1;
+  const suggestedTitle = `Tuần ${nextWeekNum}`;
+  const suggestedId = `tuan-${nextWeekNum}`;
+
+  if (titleInput) titleInput.value = suggestedTitle;
+  if (idInput) idInput.value = suggestedId;
+  if (descInput) descInput.value = `Lịch học ${suggestedTitle}`;
+  if (dateInput) {
+    const today = new Date();
+    dateInput.value = today.toISOString().split('T')[0];
+  }
+
+  if (mdInput) {
+    mdInput.value = currentRawMarkdown || generateDefaultWeekMarkdown(suggestedTitle);
+  }
+
+  modal.classList.remove('hidden');
+  modal.classList.add('active');
+  modal.style.display = 'flex';
+  if (titleInput) titleInput.focus();
+}
+
+function generateDefaultWeekMarkdown(weekTitle) {
+  return `# Lịch học ${weekTitle}
+
+## Thứ 2
+- 07:00 - 08:50 | Tiết 1 - 2 | Nhập môn AI | Phòng: B4-301
+- 09:00 - 11:50 | Tiết 4 - 6 | Tiếng Nhật 7 | Phòng: B9-202
+
+## Thứ 3
+- 07:00 - 08:50 | Tiết 1 - 2 | Quản lý Dự án | Phòng: B1-212
+
+## Thứ 4
+- 13:00 - 15:50 | Tiết 8 - 10 | Học máy | Phòng: B4-505
+
+## Thứ 5
+- Nghỉ
+
+## Thứ 6
+- 09:00 - 11:50 | Tiết 4 - 6 | Tiếng Nhật 7 | Phòng: B9-202
+
+## Thứ 7 & Chủ Nhật
+- Nghỉ ngơi cuối tuần
+
+## Lưu ý
+- Tự động đồng bộ từ Lịch Học Thông Minh.
+`;
 }
 
 /**

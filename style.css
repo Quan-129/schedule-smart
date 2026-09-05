@@ -221,6 +221,20 @@ body.theme-light .bg-glow {
   color: var(--text-primary);
 }
 
+.btn-add-week-nav {
+  color: var(--accent-primary) !important;
+  background: var(--accent-subtle) !important;
+  margin-left: 0.15rem;
+  border: 1px solid rgba(99, 102, 241, 0.25) !important;
+}
+
+.btn-add-week-nav:hover {
+  background: var(--accent-primary) !important;
+  color: #ffffff !important;
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+}
+
 .week-dropdown-wrapper {
   display: flex;
   align-items: center;

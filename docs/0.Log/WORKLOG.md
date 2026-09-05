@@ -6,6 +6,27 @@
 
 ---
 
+## 📅 [2026-09-05 13:59] - Tích Hợp Nút (+) & Modal Tạo Tuần Học Mới Ngay Trên Giao Diện
+
+- **🎯 Mục tiêu**:
+  - Bổ sung nút (+) trên thanh chọn tuần và tùy chọn `➕ Thêm tuần mới...` ở cuối dropdown tuần học để người dùng có thể dễ dàng tạo thêm tuần học mới bất kỳ lúc nào.
+  - Tự động gợi ý tên tuần tiếp theo (VD: Tuần 51), ngày bắt đầu, và tự sinh khung lịch Markdown mẫu 7 ngày.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend/HTML]` Thêm nút `#btn-add-week-modal` vào `.week-navigation` và tạo Modal `#add-week-modal` trong `index.html`.
+  - `[Frontend/CSS]` Cập nhật `style.css`: Thêm kiểu dáng phát sáng `.btn-add-week-nav` và giao diện Form thêm tuần học.
+  - `[Frontend/Logic]` Nâng cấp `main.js`: Xây dựng `initAddWeekModal()`, tự tính toán số tuần tiếp theo, hỗ trợ sao chép Markdown từ tuần trước, lưu trữ `smart_schedule_custom_weeks` và `smart_schedule_custom_md_*` vào LocalStorage và nạp tuần mới vào dropdown.
+  - `[Config / DevOps]` Nâng cấp Service Worker Cache lên `smart-schedule-modular-v13` trong `sw.js`.
+
+- **💡 Quyết định Kỹ thuật & Kiến trúc**:
+  - *Dynamic Weeks Storage*: Kết hợp danh sách tĩnh từ `schedules/index.json` và các tuần tùy biến từ `LocalStorage` giúp ứng dụng hoàn toàn linh hoạt mà vẫn duy trì cơ chế chạy Offline Zero-backend.
+
+- **📌 Trạng thái hiện tại & Kế hoạch tiếp theo (Next Steps)**:
+  - [x] Tính năng Thêm Tuần mới hoạt động mượt mà, lưu trữ bền vững trên trình duyệt.
+  - [x] Đã đồng bộ và đẩy lên GitHub Pages.
+
+---
+
 ## 📅 [2026-09-05 13:36] - Thiết Kế Lại Modal Chỉnh Sửa Môn Học Thành 3 Phần Chuyên Nghiệp (Segmented Tab Bar)
 
 - **🎯 Mục tiêu**:
