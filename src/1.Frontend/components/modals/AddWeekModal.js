@@ -5,7 +5,7 @@
  */
 
 import { showToast } from '../Toast.js';
-import { generateEmptyWeekMarkdown } from '../../2.Backend/services/TimetableParser.js';
+import { generateEmptyWeekMarkdown } from '../../../2.Backend/services/TimetableParser.js';
 
 let modalInitialized = false;
 
