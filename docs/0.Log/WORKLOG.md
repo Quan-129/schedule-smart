@@ -4,6 +4,28 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 15:12] - Thu Gọn Hitbox Nhấn Giữ Khít Node Tròn & Tăng Thời Gian Giữ (750ms)
+
+- **🎯 Mục tiêu**:
+  - Khắc phục tình trạng hitbox nhấn giữ bị quá lớn (bao phủ cả phần tên môn học và thẻ pill bên dưới), khiến người dùng dễ bị kích hoạt nhầm chế độ rung lắc/xóa/sửa khi lướt web.
+  - Tăng thời gian nhấn giữ và bổ sung cơ chế hủy kích hoạt khi đang cuộn màn hình.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Circular Node]` Giới hạn phạm vi gắn sự kiện nhấn giữ (`mousedown`, `touchstart`) **chỉ nằm trọn trong khối hình tròn `.bp-circle-wrapper`** (khít đúng kích thước Node), phần tên môn học và chi tiết bên dưới không còn kích hoạt long-press.
+  - `[Frontend / Long-press Engine]` Tăng thời gian giữ kích hoạt từ `450ms` lên `750ms` giúp thao tác chủ động và chắc chắn hơn.
+  - `[Frontend / Gesture Detection]` Bổ sung kiểm tra `touchmove`: tự động hủy timer khi ngón tay di chuyển > 8px (người dùng đang vuốt cuộn màn hình), ngăn chặn 100% việc kích hoạt nhầm.
+  - `[Frontend / Badges]` Đảm bảo nút xóa dấu trừ `[-]` màu đỏ và nút bút chì `[✏️]` màu vàng hiển thị ôm sát viền trên của vòng tròn, hỗ trợ `touch-action: manipulation` không bị delay thao tác.
+  - `[Performance / PWA]` Nâng cấp `CACHE_NAME` lên `smart-schedule-modular-v18` trong `sw.js`.
+
+- **💡 Quyết định Kỹ thuật & Kiến trúc**:
+  - Isolated Circular Hitbox Binding: Tách biệt hoàn toàn vùng điều khiển vòng tròn và vùng mô tả văn bản bên dưới.
+
+- **📌 Trạng thái hiện tại & Kế hoạch tiếp theo (Next Steps)**:
+  - [x] Đã hoàn thành tinh chỉnh hitbox và thời gian giữ.
+  - [x] Đã sẵn sàng commit và push lên GitHub.
+
+---
+
 ## 📅 [2026-09-05 15:03] - Tái Cấu Trúc Navbar 3 Tầng & Triệt Tiêu Hoàn Toàn Lỗi Tràn Ngang (Horizontal Overflow) Trên Mobile
 
 - **🎯 Mục tiêu**:

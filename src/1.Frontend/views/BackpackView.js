@@ -88,13 +88,23 @@ export function renderBackpackView() {
  * @param {Object} subject 
  */
 function attachNodeEvents(btn, subject) {
-  const startLongPress = () => {
+  const circleWrapper = btn.querySelector('.bp-circle-wrapper');
+  if (!circleWrapper) return;
+
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  const startLongPress = (e) => {
     isLongPressTriggered = false;
+    if (e.touches && e.touches[0]) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }
     longPressTimer = setTimeout(() => {
       isLongPressTriggered = true;
       enterJiggleMode();
       if (navigator.vibrate) navigator.vibrate(60);
-    }, 450);
+    }, 750); // Giữ lâu hơn (750ms) mới hiện chế độ xóa & bút chì
   };
 
   const cancelLongPress = () => {
@@ -104,14 +114,26 @@ function attachNodeEvents(btn, subject) {
     }
   };
 
-  btn.addEventListener('mousedown', startLongPress);
-  btn.addEventListener('touchstart', startLongPress, { passive: true });
-  btn.addEventListener('mouseup', cancelLongPress);
-  btn.addEventListener('mouseleave', cancelLongPress);
-  btn.addEventListener('touchend', cancelLongPress);
-  btn.addEventListener('touchcancel', cancelLongPress);
+  const checkTouchMove = (e) => {
+    if (!longPressTimer || !e.touches || !e.touches[0]) return;
+    const moveX = Math.abs(e.touches[0].clientX - touchStartX);
+    const moveY = Math.abs(e.touches[0].clientY - touchStartY);
+    // Nếu di chuyển ngón tay quá 8px (đang cuộn màn hình), hủy ngay nhấn giữ
+    if (moveX > 8 || moveY > 8) {
+      cancelLongPress();
+    }
+  };
 
-  btn.addEventListener('contextmenu', (e) => {
+  // CHỈ GẮN SỰ KIỆN NHẤN GIỮ VÀO HÌNH TRÒN NODE (KHÍT ĐÚNG KÍCH THƯỚC VÒNG TRÒN)
+  circleWrapper.addEventListener('mousedown', startLongPress);
+  circleWrapper.addEventListener('touchstart', startLongPress, { passive: true });
+  circleWrapper.addEventListener('touchmove', checkTouchMove, { passive: true });
+  circleWrapper.addEventListener('mouseup', cancelLongPress);
+  circleWrapper.addEventListener('mouseleave', cancelLongPress);
+  circleWrapper.addEventListener('touchend', cancelLongPress);
+  circleWrapper.addEventListener('touchcancel', cancelLongPress);
+
+  circleWrapper.addEventListener('contextmenu', (e) => {
     e.preventDefault();
     enterJiggleMode();
   });
@@ -150,7 +172,7 @@ function attachNodeEvents(btn, subject) {
     if (subject.driveUrl && subject.driveUrl.trim()) {
       window.open(subject.driveUrl.trim(), '_blank');
     } else {
-      showToast(`Môn "${subject.name}" chưa gắn link Google Drive. Nhấn giữ để chỉnh sửa!`);
+      showToast(`Môn "${subject.name}" chưa gắn link Google Drive. Nhấn giữ node để chỉnh sửa!`);
       openEditDriveModal(subject.code);
     }
   });
