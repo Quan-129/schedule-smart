@@ -6,6 +6,19 @@
 
 ---
 
+## 📅 [2026-09-05 10:48] - Khắc Phục Lỗi Hiển Thị Nút Cây Bút ✏️ Trong Chế Độ Jiggle Mode
+
+- **🎯 Mục tiêu**:
+  - Sửa triệt để lỗi nút cây bút vàng (✏️) không xuất hiện khi người dùng kích hoạt chế độ nhấn giữ (Jiggle Mode).
+  - Tối ưu hóa vị trí hiển thị song song của 2 nút: Nút Đỏ Xóa `(-)` (góc trên-trái) và Nút Vàng Sửa `(✏️)` (góc trên-phải) trên ô tròn môn học.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Bugfix]` Loại bỏ quy tắc CSS cũ `.is-jiggle-mode .btn-edit-node-pencil { display: none !important; }` trong `style.css`.
+  - `[UI/UX]` Cập nhật style nổi bật cho `.btn-edit-node-pencil` với gradient vàng hổ phách, hiệu ứng nảy `badgePopIn` và `display: flex !important;` khi ở Jiggle Mode.
+  - `[Config / DevOps]` Tăng phiên bản bộ đệm Service Worker lên `smart-schedule-backpack-v7` trong `sw.js`.
+
+---
+
 ## 📅 [2026-09-05 10:25] - Nâng Cấp Circular Node Donut Ring & Chế Độ Jiggle Mode Tinh Gọn
 
 - **🎯 Mục tiêu**:

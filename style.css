@@ -2009,62 +2009,7 @@ body.theme-light .bg-glow {
   line-height: 1;
 }
 
-/* Pencil Button in Circular Orbit (Top-Right) */
-.btn-edit-node-pencil {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.72rem;
-  cursor: pointer;
-  z-index: 5;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  animation: badgePopIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  transition: transform 0.2s ease, background 0.2s ease;
-}
-
-.btn-edit-node-pencil:hover {
-  background: #f59e0b;
-  color: #ffffff;
-  border-color: #f59e0b;
-  transform: scale(1.15);
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.5);
-}
-
-/* Delete badge in Circular Orbit (Top-Left) */
-.btn-delete-node-badge {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 26px;
-  height: 26px;
-  background: #ef4444;
-  color: #ffffff;
-  border: 2px solid var(--bg-secondary);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.68rem;
-  cursor: pointer;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5);
-  animation: badgePopIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  transition: transform 0.15s ease, background 0.15s ease;
-}
-
-.btn-delete-node-badge:hover {
-  transform: scale(1.2);
-  background: #dc2626;
-}
+/* Badges are configured in Jiggle Mode section below */
 
 /* Circular Add Subject Button */
 .bp-circle-add-core {
@@ -2188,35 +2133,71 @@ body.theme-light .bg-glow {
   animation-delay: 0.08s;
 }
 
-.is-jiggle-mode .btn-edit-node-pencil {
-  display: none !important;
+/* Both Delete Badge & Edit Pencil in Jiggle Mode */
+.is-jiggle-mode .btn-edit-node-pencil,
+.is-jiggle-mode .btn-delete-node-badge {
+  display: flex !important;
+}
+
+.btn-edit-node-pencil {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  border: 2px solid var(--bg-primary);
+  color: #1e1b4b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 12;
+  box-shadow: 0 3px 10px rgba(245, 158, 11, 0.55);
+  animation: badgePopIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-edit-node-pencil:hover {
+  transform: scale(1.25);
+  background: #f59e0b;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.8);
+}
+
+.btn-edit-node-pencil:active {
+  transform: scale(0.95);
 }
 
 /* Red Circular Delete Badge (iOS Style) */
 .btn-delete-node-badge {
   position: absolute;
-  top: 6px;
-  left: 6px;
-  width: 24px;
-  height: 24px;
-  background: #ef4444;
+  top: -2px;
+  left: -2px;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
   color: #ffffff;
-  border: 2px solid var(--bg-card);
+  border: 2px solid var(--bg-primary);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
+  font-weight: bold;
   cursor: pointer;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5);
-  animation: badgePopIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  transition: transform 0.15s ease, background 0.15s ease;
+  z-index: 12;
+  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.55);
+  animation: badgePopIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .btn-delete-node-badge:hover {
   transform: scale(1.25);
   background: #dc2626;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.8);
 }
 
 .btn-delete-node-badge:active {
