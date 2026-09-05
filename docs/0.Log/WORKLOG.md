@@ -4,6 +4,27 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 22:30] - Thêm Tính Năng Tạo & Lưu Sẵn Ca Học Mẫu Tùy Chỉnh (Giờ + Tiết)
+
+- **🎯 Mục tiêu**:
+  - Cho phép người dùng nhập khung giờ và tiết học bất kỳ (ví dụ ca học tối, ca bù 17:00 - 19:30, tiết 12-14...) rồi bấm `+ Lưu ca mẫu` để lưu sẵn lên danh sách preset ca học ở trên.
+  - Tự động ghi nhớ vĩnh viễn các ca mẫu tùy chỉnh vào `LocalStorage` (`smart_schedule_custom_time_presets`) để tái sử dụng nhanh chóng 1-chạm ở bất kỳ ngày học nào.
+  - Hỗ trợ nút xóa `×` nhanh trên từng thẻ ca mẫu tự tạo để dễ dàng quản lý.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Component Modal]` Cập nhật [`src/1.Frontend/components/modals/AddClassModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddClassModal.js):
+    - Tích hợp hàm `getCustomTimePresets()`, `saveCustomTimePresets()` và `renderTimePresets(activeTime)`.
+    - Thêm nút `#btn-save-custom-preset` (`+ Lưu ca mẫu`) bên cạnh hàng ô nhập khung giờ & tiết học.
+    - Render động danh sách ca học kết hợp giữa Ca chuẩn ĐHBK TP.HCM và các Ca tùy chỉnh do sinh viên tạo.
+    - Thêm nút xóa `×` mini trên từng thẻ ca tự tạo để người dùng linh hoạt quản lý.
+  - `[Frontend / CSS Modals]` Cập nhật [`src/1.Frontend/styles/6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css):
+    - Định dạng thẻ ca tùy chỉnh viền nét đứt tím ngọc `.time-preset-wrapper.is-custom`.
+    - Nút xóa `×` đỏ nổi bật ở góc trên bên phải thẻ.
+    - Nút `+ Lưu ca mẫu` gradient phát sáng sang trọng, responsive trên điện thoại.
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v44` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 22:20] - Thêm Chức Năng Chọn Kiểu Hiển Thị: 1 Ngày (Hôm nay) / 3 Ngày (Trước - Nay - Sau) / 7 Ngày (Tuần)
 
 - **🎯 Mục tiêu**:

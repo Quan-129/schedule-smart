@@ -32,6 +32,36 @@ const TIME_PRESETS = [
 ];
 
 const ROOM_PRESETS = ['B1-305 (CS1)', 'B4-505 (CS1)', 'B9-202 (CS1)', 'C4-402 (CS1)', 'B4-301 (CS1)', 'B1-212 (CS1)', 'B4-303 (CS1)'];
+const CUSTOM_TIME_PRESETS_KEY = 'smart_schedule_custom_time_presets';
+
+/**
+ * Đọc danh sách ca học tùy chỉnh do người dùng lưu
+ * @returns {Array<Object>}
+ */
+function getCustomTimePresets() {
+  try {
+    const raw = localStorage.getItem(CUSTOM_TIME_PRESETS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (e) {
+    console.error('Lỗi đọc custom time presets:', e);
+  }
+  return [];
+}
+
+/**
+ * Lưu danh sách ca học tùy chỉnh vào LocalStorage
+ * @param {Array<Object>} presets 
+ */
+function saveCustomTimePresets(presets) {
+  try {
+    localStorage.setItem(CUSTOM_TIME_PRESETS_KEY, JSON.stringify(presets));
+  } catch (e) {
+    console.error('Lỗi lưu custom time presets:', e);
+  }
+}
 
 // ============================================================================
 // 3. COMPONENT TEMPLATE / DOM GENERATION
@@ -82,28 +112,30 @@ export function ensureAddClassModalDom() {
           </div>
         </div>
 
-        <!-- SECTION 2: KHUNG GIỜ & CA HỌC CHUẨN ĐHBK -->
+        <!-- SECTION 2: KHUNG GIỜ & CA HỌC CHUẨN ĐHBK & TỰ TẠO -->
         <div class="form-group-styled">
-          <label><i class="fa-solid fa-clock"></i> Ca học chuẩn ĐHBK TP.HCM:</label>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label><i class="fa-solid fa-clock"></i> Ca học mẫu (Chuẩn ĐHBK & Tự tạo):</label>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Bấm để chọn nhanh</span>
+          </div>
           <div class="preset-buttons-grid" id="time-presets-grid">
-            ${TIME_PRESETS.map(p => `
-              <button type="button" class="btn-time-preset" data-time="${escapeHtml(p.time)}" data-period="${escapeHtml(p.period)}">
-                <span class="preset-time-title">${escapeHtml(p.time)}</span>
-                <span class="preset-time-period">${escapeHtml(p.period)}</span>
-              </button>
-            `).join('')}
+            <!-- Render động từ TIME_PRESETS + Custom Presets -->
           </div>
           
-          <!-- Hàng Dual Input: Khung giờ & Tiết học -->
-          <div class="input-row-dual" style="margin-top: 0.35rem;">
-            <div class="input-with-icon">
+          <!-- Hàng Dual Input: Khung giờ & Tiết học + Nút Lưu Ca Mẫu -->
+          <div class="input-row-preset-creator" style="display: flex; gap: 0.45rem; align-items: stretch; margin-top: 0.35rem;">
+            <div class="input-with-icon" style="flex: 1.2;">
               <i class="fa-regular fa-clock input-icon"></i>
-              <input type="text" id="class-time-input" class="form-input-styled" placeholder="07:00 - 08:50" required>
+              <input type="text" id="class-time-input" class="form-input-styled" placeholder="07:00 - 08:50 (VD: 17:00 - 19:30)" required>
             </div>
-            <div class="input-with-icon">
+            <div class="input-with-icon" style="flex: 1;">
               <i class="fa-solid fa-list-ol input-icon"></i>
-              <input type="text" id="class-period-input" class="form-input-styled" placeholder="Tiết 2 - 3">
+              <input type="text" id="class-period-input" class="form-input-styled" placeholder="Tiết 2 - 3 (VD: Tiết 12-14)">
             </div>
+            <button type="button" id="btn-save-custom-preset" class="btn-save-custom-preset" title="Lưu khung giờ & tiết này lên danh sách mẫu ở trên để dùng lại">
+              <i class="fa-solid fa-plus"></i>
+              <span>Lưu mẫu</span>
+            </button>
           </div>
         </div>
 
@@ -205,6 +237,71 @@ function renderSubjectChips(selectedSubjectName = '') {
   });
 }
 
+/**
+ * Render danh sách Ca học mẫu (Chuẩn ĐHBK + Ca Tùy Chỉnh do người dùng tạo)
+ * @param {string} activeTime - Thời gian đang được chọn
+ */
+function renderTimePresets(activeTime = '') {
+  const container = document.getElementById('time-presets-grid');
+  if (!container) return;
+
+  const customPresets = getCustomTimePresets();
+  const allPresets = [
+    ...TIME_PRESETS.map(p => ({ ...p, isCustom: false })),
+    ...customPresets.map(p => ({ ...p, isCustom: true }))
+  ];
+
+  container.innerHTML = allPresets.map((p, idx) => {
+    const isCustom = p.isCustom;
+    const customIdx = isCustom ? (idx - TIME_PRESETS.length) : -1;
+    const isActive = activeTime && (p.time.trim() === activeTime.trim());
+    return `
+      <div class="time-preset-wrapper ${isCustom ? 'is-custom' : ''}">
+        <button type="button" class="btn-time-preset ${isActive ? 'active' : ''}" 
+          data-time="${escapeHtml(p.time)}" 
+          data-period="${escapeHtml(p.period || '')}"
+          title="${escapeHtml(p.label || p.time)}">
+          <span class="preset-time-title">${escapeHtml(p.time)}</span>
+          <span class="preset-time-period">${escapeHtml(p.period || 'Tự chọn')}</span>
+        </button>
+        ${isCustom ? `
+          <button type="button" class="btn-delete-custom-preset" data-custom-idx="${customIdx}" title="Xóa ca mẫu tự tạo này">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+
+  // Gắn sự kiện click chọn ca học mẫu
+  container.querySelectorAll('.btn-time-preset').forEach(btn => {
+    btn.onclick = () => {
+      container.querySelectorAll('.btn-time-preset').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const timeInput = document.getElementById('class-time-input');
+      const periodInput = document.getElementById('class-period-input');
+      if (timeInput) timeInput.value = btn.dataset.time;
+      if (periodInput) periodInput.value = btn.dataset.period;
+    };
+  });
+
+  // Gắn sự kiện xóa ca tự tạo
+  container.querySelectorAll('.btn-delete-custom-preset').forEach(delBtn => {
+    delBtn.onclick = (e) => {
+      e.stopPropagation();
+      const customIdx = parseInt(delBtn.dataset.customIdx, 10);
+      const currentList = getCustomTimePresets();
+      if (currentList[customIdx]) {
+        const removed = currentList.splice(customIdx, 1)[0];
+        saveCustomTimePresets(currentList);
+        const timeInput = document.getElementById('class-time-input');
+        renderTimePresets(timeInput ? timeInput.value : '');
+        showToast(`Đã xóa ca mẫu "${removed.time}" 🗑️`);
+      }
+    };
+  });
+}
+
 // ============================================================================
 // 4. EVENT HANDLERS & DOM BINDING
 // ============================================================================
@@ -219,6 +316,7 @@ function bindAddClassModalEvents() {
   const closeBtn = document.getElementById('btn-close-add-class');
   const cancelBtn = document.getElementById('btn-cancel-add-class');
   const deleteBtn = document.getElementById('btn-delete-class');
+  const savePresetBtn = document.getElementById('btn-save-custom-preset');
   if (!modal || !form) return;
 
   // Đóng modal
@@ -242,17 +340,43 @@ function bindAddClassModalEvents() {
     }
   });
 
-  // Gắn sự kiện presets ca học
-  modal.querySelectorAll('.btn-time-preset').forEach(btn => {
-    btn.onclick = () => {
-      modal.querySelectorAll('.btn-time-preset').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+  // Gắn sự kiện Lưu Ca Học Mẫu Mới
+  if (savePresetBtn) {
+    savePresetBtn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       const timeInput = document.getElementById('class-time-input');
       const periodInput = document.getElementById('class-period-input');
-      if (timeInput) timeInput.value = btn.dataset.time;
-      if (periodInput) periodInput.value = btn.dataset.period;
+      const timeVal = timeInput ? timeInput.value.trim() : '';
+      const periodVal = periodInput ? periodInput.value.trim() : '';
+
+      if (!timeVal) {
+        showToast('Vui lòng nhập khung giờ học trước (VD: 17:00 - 19:30)!');
+        if (timeInput) timeInput.focus();
+        return;
+      }
+
+      const customList = getCustomTimePresets();
+      const isDuplicate = TIME_PRESETS.some(p => p.time.trim() === timeVal) ||
+                          customList.some(p => p.time.trim() === timeVal && p.period.trim() === (periodVal || 'Tự chọn'));
+      if (isDuplicate) {
+        showToast('Ca học này đã có sẵn trong danh sách mẫu!');
+        renderTimePresets(timeVal);
+        return;
+      }
+
+      const newPreset = {
+        time: timeVal,
+        period: periodVal || 'Tự chọn',
+        label: `Tùy chỉnh: ${timeVal} (${periodVal || 'Tự chọn'})`
+      };
+
+      customList.push(newPreset);
+      saveCustomTimePresets(customList);
+      renderTimePresets(timeVal);
+      showToast(`Đã lưu ca mẫu: ${timeVal} (${newPreset.period}) 🎉`);
     };
-  });
+  }
 
   // Gắn sự kiện presets phòng học
   modal.querySelectorAll('.btn-room-preset').forEach(btn => {
@@ -354,8 +478,9 @@ export function openAddClassModal(targetDayName = 'Thứ 2', onSave) {
   if (deleteBtn) deleteBtn.style.display = 'none';
   if (saveText) saveText.textContent = 'Thêm Tiết Học';
 
-  // Render chips
+  // Render chips & time presets
   renderSubjectChips('');
+  renderTimePresets('07:00 - 08:50');
 
   // Reset form inputs
   const subjectInput = document.getElementById('class-subject-input');
@@ -366,11 +491,6 @@ export function openAddClassModal(targetDayName = 'Thứ 2', onSave) {
   if (timeInput) timeInput.value = '07:00 - 08:50';
   if (periodInput) periodInput.value = 'Tiết 2 - 3';
   if (roomInput) roomInput.value = 'B1-305 (CS1)';
-
-  // Sync active preset
-  modal.querySelectorAll('.btn-time-preset').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.time === '07:00 - 08:50');
-  });
 
   modal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
@@ -403,8 +523,9 @@ export function openEditClassModal(dayName, classIndex, classData, onSave, onDel
   if (deleteBtn) deleteBtn.style.display = 'inline-flex';
   if (saveText) saveText.textContent = 'Cập Nhật Tiết Học';
 
-  // Render chips
+  // Render chips & time presets
   renderSubjectChips(classData.subject);
+  renderTimePresets(classData.timeRange || '');
 
   // Fill values
   const subjectInput = document.getElementById('class-subject-input');
@@ -415,11 +536,6 @@ export function openEditClassModal(dayName, classIndex, classData, onSave, onDel
   if (timeInput) timeInput.value = classData.timeRange || '';
   if (periodInput) periodInput.value = classData.period || '';
   if (roomInput) roomInput.value = classData.room || '';
-
-  // Sync active preset
-  modal.querySelectorAll('.btn-time-preset').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.time === (classData.timeRange || '').trim());
-  });
 
   modal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
