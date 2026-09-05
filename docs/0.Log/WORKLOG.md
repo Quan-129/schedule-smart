@@ -4,6 +4,26 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 21:55] - Tối Ưu Cụm Header (Navbar + Hero Banner + Search Bar) Siêu Nhỏ Gọn & Tiết Kiệm 50% Diện Tích Dọc
+
+- **🎯 Mục tiêu**:
+  - Tối ưu chiều cao của 3 thanh công cụ trên cùng (`.navbar`, `.hero-banner.is-collapsed`, `.filter-bar`), giảm 50% khoảng cách thừa để ưu tiên tối đa diện tích hiển thị cho Ma trận Thời khóa biểu.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / CSS Variables]` Cập nhật [`src/1.Frontend/styles/1.variables.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/1.variables.css):
+    - Giảm padding của `.app-wrapper` từ `1.25rem` xuống `0.65rem 1rem 2rem`, gap giữa các khối từ `1.75rem` xuống `0.55rem`.
+  - `[Frontend / CSS Navbar]` Cập nhật [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css):
+    - Giảm padding Navbar xuống `0.35rem 0.85rem` (chiều cao thon gọn ~44px).
+    - Tinh gọn Brand logo (32px), User profile (avatar 24px), View toggles dock (buttons 30px) và Week selector (buttons 26px, select font 0.84rem).
+    - Tinh gọn Search box: padding `0.22rem 0.35rem 0.22rem 0.75rem`, font `0.82rem`, các chips filter/ping target nhỏ gọn thanh thoát.
+  - `[Frontend / CSS Hero Banner]` Cập nhật [`src/1.Frontend/styles/3.timetable-grid.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/3.timetable-grid.css):
+    - Thu nhỏ `.hero-banner.is-collapsed` xuống thanh tiện ích siêu mỏng (padding `0.25rem 0.75rem`, title `0.92rem`, date badge `0.72rem`, nút In lịch / Chi tiết `0.72rem`).
+  - `[Frontend / CSS Responsive]` Cập nhật [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css):
+    - Tối ưu layout trên màn hình điện thoại di động mượt mà, thon gọn, không chiếm chỗ.
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v39` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 21:52] - Tối Ưu Thẻ Thứ (Day Card) & Thẻ Môn Học Siêu Đẹp, Nhỏ Gọn & Khoa Học
 
 - **🎯 Mục tiêu**:
