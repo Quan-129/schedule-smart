@@ -4,6 +4,32 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 16:15] - Phát Triển Trang Chi Tiết Môn Học (Subject Hub Modal) Khi Bấm Vào Node
+
+- **🎯 Mục tiêu**:
+  - Chuyển đổi trải nghiệm tương tác: Khi click vào Node môn học trong Chiếc Cặp hoặc từ Thời khóa biểu, thay vì nhảy link Google Drive trực tiếp, hiển thị **Trang Chi Tiết Môn Học (Subject Hub)**.
+  - Trang chi tiết bao gồm: 
+    1. **Tỷ lệ thành phần điểm** (Donut Chart SVG & danh sách breakdown từng đầu điểm, %, hình thức thi, thời lượng).
+    2. **Ghi chú & Lưu ý học phần** (Ghi chú giảng viên, quy định, tips học tập).
+    3. **Nút CTA mở Google Drive** (Nút lớn nổi bật với icon Drive, mở tab mới hoặc hỗ trợ gắn link nếu chưa có).
+    4. **Nút Chỉnh sửa môn học** (Kết nối trực tiếp tới `EditSubjectModal`).
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Component]` Tạo mới component [`SubjectDetailModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/SubjectDetailModal.js):
+    - Đóng gói toàn bộ logic render Donut Chart SVG, breakdown điểm, box ghi chú và liên kết Drive.
+    - Hỗ trợ đóng mở mượt mà qua ESC, click backdrop hoặc nút X.
+  - `[Frontend / CSS]` Thêm toàn bộ styles Glassmorphism Dark Mode cho Subject Detail Hub trong [`6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css).
+  - `[Frontend / Views]` Cập nhật [`BackpackView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/BackpackView.js):
+    - Khi click vào Node môn học: Mở `openSubjectDetailModal(subject.code)`.
+    - Nhấn giữ lâu (> 750ms): Vẫn kích hoạt Jiggle Mode để hiện nút xóa (-) và nút bút chì (✏️).
+  - `[Frontend / Main]` Khởi tạo DOM và đăng ký `window.openSubjectDetailModal` trong [`main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js).
+  - `[Performance / PWA]` Cập nhật [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js) nâng cache version lên `smart-schedule-modular-v21`.
+
+- **📌 Trạng thái hiện tại & Kế hoạch tiếp theo**:
+  - Tính năng đã hoạt động mượt mà, đúng chuẩn thẩm mỹ và responsive trên mọi kích thước màn hình.
+
+---
+
 ## 📅 [2026-09-05 16:00] - Thiết Lập Bộ Quy Tắc Trình Bày Mã Nguồn & Tiêu Chuẩn Code (Source Code Presentation Rules)
 
 - **🎯 Mục tiêu**:

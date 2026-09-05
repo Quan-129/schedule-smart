@@ -15,6 +15,7 @@ import { renderTimetableGrid, renderTodayView, getSubjectColor } from './views/T
 import { ensureEditSubjectModalDom, openEditSubjectModal, openEditDriveModal } from './components/modals/EditSubjectModal.js';
 import { ensureAddSubjectModalDom, openAddSubjectModal } from './components/modals/AddSubjectModal.js';
 import { ensureAddWeekModalDom } from './components/modals/AddWeekModal.js';
+import { ensureSubjectDetailModalDom, openSubjectDetailModal } from './components/modals/SubjectDetailModal.js';
 import { showToast, initToastContainer } from './components/Toast.js';
 import { initPWA, promptPWAInstall } from '../5.Performance/pwaManager.js';
 import { initVisibilityOptimizer } from '../5.Performance/visibilityOptimizer.js';
@@ -38,6 +39,7 @@ async function initApp() {
   ensureEditSubjectModalDom();
   ensureAddSubjectModalDom();
   ensureAddWeekModalDom();
+  ensureSubjectDetailModalDom();
 
   // 2. Gắn các hàm tiện ích toàn cục vào window để hỗ trợ HTML onclick
   setupWindowHelpers();
@@ -111,10 +113,19 @@ function setupWindowHelpers() {
   };
 
   window.viewSubjectBackpack = (subjectName) => {
-    switchTab('backpack');
-    const bpSearchInput = document.getElementById('backpack-search-input');
-    if (bpSearchInput) {
-      bpSearchInput.value = subjectName;
+    const matchedSubject = (state.driveSubjects || []).find(s => 
+      s.name.toLowerCase() === (subjectName || '').toLowerCase() || 
+      (subjectName || '').toLowerCase().includes(s.name.toLowerCase()) ||
+      s.code.toLowerCase() === (subjectName || '').toLowerCase()
+    );
+    if (matchedSubject) {
+      openSubjectDetailModal(matchedSubject.code);
+    } else {
+      switchTab('backpack');
+      const bpSearchInput = document.getElementById('backpack-search-input');
+      if (bpSearchInput) {
+        bpSearchInput.value = subjectName;
+      }
     }
   };
 
@@ -130,6 +141,7 @@ function setupWindowHelpers() {
   window.highlightGradeSlice = highlightGradeSlice;
   window.openEditDriveModal = openEditDriveModal;
   window.openEditSubjectModal = openEditSubjectModal;
+  window.openSubjectDetailModal = openSubjectDetailModal;
 }
 
 /**

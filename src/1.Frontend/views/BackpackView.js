@@ -12,6 +12,7 @@ import { state, persistDriveSubjects } from '../../3.Database/state.js';
 import { renderCircularNodeHtml } from '../components/CircularNode.js';
 import { openEditDriveModal } from '../components/EditModal.js';
 import { openAddSubjectModal } from '../components/modals/AddSubjectModal.js';
+import { openSubjectDetailModal } from '../components/modals/SubjectDetailModal.js';
 import { showToast } from '../components/Toast.js';
 import { syncDriveSubjectsToCloud } from '../../3.Database/auth/FirebaseAuthService.js';
 
@@ -164,13 +165,8 @@ function attachNodeEvents(btn, subject) {
       return;
     }
 
-    // 5. Mở liên kết Google Drive
-    if (subject.driveUrl && subject.driveUrl.trim()) {
-      window.open(subject.driveUrl.trim(), '_blank');
-    } else {
-      showToast(`Môn "${subject.name}" chưa gắn link Google Drive. Nhấn giữ node để chỉnh sửa!`);
-      openEditDriveModal(subject.code);
-    }
+    // 5. Mở trang Chi Tiết Môn Học (Tỉ lệ điểm, Ghi chú, Nút vào Drive)
+    openSubjectDetailModal(subject.code);
   });
 }
 
