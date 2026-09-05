@@ -4,6 +4,25 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 21:25] - Nâng Cấp Hệ Thống Authentication: Thêm Loading Spinner, Tự Động Fallback & Nút Dùng Thử Ngay Chế Độ Khách
+
+- **🎯 Mục tiêu**:
+  - Khắc phục triệt để hiện tượng bấm nút Đăng nhập Google không phản hồi hoặc bị popup blocker/domain restriction chặn trên GitHub Pages.
+  - Cung cấp nút **"Dùng ngay với tư cách Khách (Lưu Offline)"** trực tiếp trên màn hình Landing để người dùng truy cập ngay lập tức mà không bị chặn cửa sổ.
+  - Bổ sung hiệu ứng Loading Spinner và cơ chế tự động chuyển sang chế độ Khách an toàn khi Firebase gặp lỗi domain chưa cấp phép (`auth/unauthorized-domain`).
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Database / Auth Service]` Nâng cấp toàn diện [`src/3.Database/auth/FirebaseAuthService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js):
+    - Thêm trạng thái Loading Spinner trên nút Đăng nhập trong khi chờ Google phản hồi.
+    - Cấu hình tham số `prompt: 'select_account'` để luôn mở hộp thoại chọn tài khoản Google chuẩn xác.
+    - Bắt lỗi chi tiết: `auth/unauthorized-domain` (tự động fallback vào chế độ Khách), `auth/popup-blocked` (tự động thử lại bằng `signInWithRedirect`), `auth/popup-closed-by-user`.
+    - Hỗ trợ hàm `handleGuestLogin()` lưu `smart_schedule_guest_mode` trong `localStorage` và tự động mở app ở các lần truy cập tiếp theo.
+  - `[Frontend / App Shell & Landing]` Cập nhật [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html), [`LoginScreen.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/layout/LoginScreen.js) và [`1.variables.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/1.variables.css):
+    - Thêm nút `#landing-guest-btn` (`.btn-guest-login-large`) cho phép 1-chạm vào ngay ứng dụng mà không cần tài khoản.
+  - `[Performance / Service Worker]` Nâng cấp `CACHE_NAME` lên `smart-schedule-modular-v32` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 21:20] - Xây Dựng Tính Năng Xóa Tuần Học Trực Quan & Đồng Bộ LocalStorage
 
 - **🎯 Mục tiêu**:

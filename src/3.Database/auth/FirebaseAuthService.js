@@ -43,18 +43,51 @@ export function initFirebaseAuth(onAuthChangedCallback) {
     console.warn('[FirebaseAuth] Lỗi khởi tạo Firebase:', err);
   }
 
+  // Gắn sự kiện click các nút đăng nhập / khách / đăng xuất
+  const landingLoginBtn = document.getElementById('landing-login-btn');
+  const landingGuestBtn = document.getElementById('landing-guest-btn');
+  const authLoginBtn = document.getElementById('auth-login-btn');
+  const authLogoutBtn = document.getElementById('auth-logout-btn');
+
+  if (landingLoginBtn) landingLoginBtn.onclick = handleGoogleLogin;
+  if (landingGuestBtn) landingGuestBtn.onclick = handleGuestLogin;
+  if (authLoginBtn) authLoginBtn.onclick = handleGoogleLogin;
+  if (authLogoutBtn) authLogoutBtn.onclick = handleLogout;
+
   if (auth) {
+    // 1. Kiểm tra kết quả Redirect nếu trình duyệt vừa quay lại từ Google Login
+    auth.getRedirectResult().then((result) => {
+      if (result && result.user) {
+        currentUser = result.user;
+        localStorage.removeItem('smart_schedule_guest_mode');
+        updateAuthUI(result.user);
+        showToast(`Đăng nhập thành công! Xin chào ${result.user.displayName || 'bạn'}.`);
+      }
+    }).catch((err) => {
+      console.warn('[FirebaseAuth] getRedirectResult error:', err);
+    });
+
+    // 2. Lắng nghe trạng thái đăng nhập
     auth.onAuthStateChanged((user) => {
       currentUser = user;
-      updateAuthUI(user);
 
       if (user) {
+        localStorage.removeItem('smart_schedule_guest_mode');
+        updateAuthUI(user);
         attachFirestoreListener(user.uid, onAuthChangedCallback);
         showToast(`Xin chào, ${user.displayName || 'bạn'}! Đã kết nối Cloud.`);
       } else {
         if (firestoreUnsubscribe) {
           firestoreUnsubscribe();
           firestoreUnsubscribe = null;
+        }
+
+        // Nếu đã từng chọn chế độ khách trước đó, tự động mở app
+        const isGuest = localStorage.getItem('smart_schedule_guest_mode') === 'true';
+        if (isGuest) {
+          updateAuthUI({ displayName: 'Khách (Offline)', isAnonymous: true });
+        } else {
+          updateAuthUI(null);
         }
       }
 
@@ -63,60 +96,111 @@ export function initFirebaseAuth(onAuthChangedCallback) {
       }
     });
   } else {
-    // Nếu không có Firebase SDK (offline/cục bộ), mở thẳng app cho người dùng
+    // Không có kết nối Firebase SDK -> Chạy chế độ Offline LocalStorage
     console.log('[FirebaseAuth] Chạy chế độ Offline LocalStorage');
     updateAuthUI({ displayName: 'Khách', isAnonymous: true });
     if (typeof onAuthChangedCallback === 'function') {
       onAuthChangedCallback(null);
     }
   }
-
-  // Gắn sự kiện click nút đăng nhập
-  const landingLoginBtn = document.getElementById('landing-login-btn');
-  const authLoginBtn = document.getElementById('auth-login-btn');
-  const authLogoutBtn = document.getElementById('auth-logout-btn');
-
-  if (landingLoginBtn) {
-    landingLoginBtn.onclick = handleGoogleLogin;
-  }
-  if (authLoginBtn) {
-    authLoginBtn.onclick = handleGoogleLogin;
-  }
-  if (authLogoutBtn) {
-    authLogoutBtn.onclick = handleLogout;
-  }
 }
 
 /**
- * Thực hiện đăng nhập Google bằng Popup
+ * Thực hiện đăng nhập Google bằng Popup / Redirect với xử lý lỗi toàn diện
  */
 export async function handleGoogleLogin() {
+  const landingBtn = document.getElementById('landing-login-btn');
+  const authBtn = document.getElementById('auth-login-btn');
+  const originalLandingHtml = landingBtn ? landingBtn.innerHTML : '';
+  const originalAuthHtml = authBtn ? authBtn.innerHTML : '';
+
+  // 1. Hiển thị trạng thái Loading trên nút
+  if (landingBtn) {
+    landingBtn.disabled = true;
+    landingBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin" style="font-size: 1.2rem; color: #4285f4;"></i> <span style="margin-left: 0.5rem;">Đang kết nối Google...</span>`;
+  }
+  if (authBtn) {
+    authBtn.disabled = true;
+    authBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Đang kết nối...</span>`;
+  }
+
+  showToast('Đang mở cửa sổ đăng nhập Google...');
+
   if (!auth) {
     // Fallback nếu không có mạng / SDK lỗi
-    updateAuthUI({ displayName: 'Sinh viên' });
-    showToast('Đang chạy ở chế độ cục bộ Offline');
+    handleGuestLogin();
+    showToast('Firebase chưa sẵn sàng. Đã chuyển sang chế độ Khách Offline.');
+    resetLoginButtons(landingBtn, authBtn, originalLandingHtml, originalAuthHtml);
     return;
   }
 
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
     await auth.signInWithPopup(provider);
   } catch (err) {
     console.error('[FirebaseAuth] Lỗi đăng nhập Google:', err);
-    showToast('Lỗi đăng nhập: ' + (err.message || 'Vui lòng kiểm tra lại'));
+    
+    if (err.code === 'auth/unauthorized-domain') {
+      showToast('⚠️ Domain GitHub Pages chưa thêm vào Firebase Console! Đang tự động mở app ở chế độ Khách...');
+      handleGuestLogin();
+    } else if (err.code === 'auth/popup-blocked') {
+      showToast('Cửa sổ Popup bị chặn! Đang thử chuyển hướng đăng nhập...');
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await auth.signInWithRedirect(provider);
+      } catch (redirectErr) {
+        console.error('[FirebaseAuth] Lỗi redirect:', redirectErr);
+        handleGuestLogin();
+      }
+    } else if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+      showToast('Bạn đã đóng cửa sổ đăng nhập Google.');
+    } else {
+      showToast('Lỗi đăng nhập: ' + (err.message || 'Vui lòng kiểm tra lại kết nối mạng.'));
+    }
+  } finally {
+    resetLoginButtons(landingBtn, authBtn, originalLandingHtml, originalAuthHtml);
   }
 }
+
+/**
+ * Khôi phục trạng thái nút đăng nhập
+ */
+function resetLoginButtons(landingBtn, authBtn, originalLandingHtml, originalAuthHtml) {
+  if (landingBtn) {
+    landingBtn.disabled = false;
+    landingBtn.innerHTML = originalLandingHtml;
+  }
+  if (authBtn) {
+    authBtn.disabled = false;
+    authBtn.innerHTML = originalAuthHtml;
+  }
+}
+
+/**
+ * Cho phép người dùng truy cập trực tiếp dưới tư cách Khách
+ */
+export function handleGuestLogin() {
+  localStorage.setItem('smart_schedule_guest_mode', 'true');
+  updateAuthUI({ displayName: 'Khách (Offline)', isAnonymous: true });
+  showToast('Đã vào ứng dụng với tư cách Khách! Dữ liệu lưu an toàn trên máy.');
+}
+
+// Alias hỗ trợ tương thích ngược
+export const loginWithGoogle = handleGoogleLogin;
 
 /**
  * Thực hiện đăng xuất tài khoản
  */
 export async function handleLogout() {
+  localStorage.removeItem('smart_schedule_guest_mode');
   if (!auth) {
     updateAuthUI(null);
     return;
   }
   try {
     await auth.signOut();
+    updateAuthUI(null);
     showToast('Đã đăng xuất tài khoản');
   } catch (err) {
     console.error('[FirebaseAuth] Lỗi đăng xuất:', err);

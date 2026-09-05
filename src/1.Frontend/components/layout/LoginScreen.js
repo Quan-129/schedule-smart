@@ -4,7 +4,7 @@
  * ==========================================================================
  */
 
-import { loginWithGoogle } from '../../../3.Database/auth/FirebaseAuthService.js';
+import { handleGoogleLogin, handleGuestLogin } from '../../../3.Database/auth/FirebaseAuthService.js';
 
 /**
  * Render Màn hình Đăng nhập (Auth Landing Screen)
@@ -78,7 +78,12 @@ export function renderLoginScreen(containerEl) {
               <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
               <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
             </svg>
-            <span>Đăng nhập bằng tài khoản Google</span>
+            <span class="btn-login-text">Đăng nhập bằng tài khoản Google</span>
+          </button>
+
+          <button type="button" id="landing-guest-btn" class="btn-guest-login-large" title="Vào xem và chỉnh sửa thời khóa biểu ngay không cần tài khoản">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            <span>Dùng ngay với tư cách Khách (Lưu Offline)</span>
           </button>
         </div>
 
@@ -89,8 +94,8 @@ export function renderLoginScreen(containerEl) {
     </div>
   `;
 
-  const btn = containerEl.querySelector('#landing-login-btn');
-  if (btn) {
-    btn.onclick = loginWithGoogle;
-  }
+  const loginBtn = containerEl.querySelector('#landing-login-btn');
+  const guestBtn = containerEl.querySelector('#landing-guest-btn');
+  if (loginBtn) loginBtn.onclick = handleGoogleLogin;
+  if (guestBtn) guestBtn.onclick = handleGuestLogin;
 }

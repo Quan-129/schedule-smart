@@ -300,6 +300,32 @@ body.theme-light .bg-glow {
   transform: scale(0.98);
 }
 
+.btn-guest-login-large {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.25rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  border-radius: var(--radius-lg);
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: var(--font-main);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  margin-top: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.btn-guest-login-large:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-color: var(--border-highlight);
+  transform: translateY(-1px);
+}
+
 .login-footer-note {
   font-size: 0.75rem;
   color: var(--text-muted);
