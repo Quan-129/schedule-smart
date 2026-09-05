@@ -4,6 +4,28 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 21:45] - Tái Thiết Kế Giao Diện Khoa Học, Thẩm Mỹ Cao & Khắc Phục Triệt Để Lỗi Vỡ Layout Thanh Tìm Kiếm
+
+- **🎯 Mục tiêu**:
+  - Khắc phục lỗi hiển thị nút `[🎯 Hôm nay]` bị rớt xuống dòng dưới và đè lên viền trái của ô tìm kiếm `.search-box`.
+  - Nâng cấp thẩm mỹ toàn diện theo phong cách Glassmorphism Dark Mode cao cấp: Căn chỉnh thẳng hàng, khoa học, các card nổi khối 3D mềm mại, hiệu ứng viền phát sáng neon cực quang và responsive hoàn hảo trên mọi kích thước màn hình.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / CSS Navbar & Search Toolbar]` Tối ưu [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css):
+    - Tái cấu trúc `.search-box` thành Flexbox Container mượt mà (`display: flex; align-items: center;`), tích hợp sẵn icon kính lúp bên trái, input trong suốt co giãn ở giữa, nút Clear và nút Radar Chip `[🎯 Hôm nay]` nằm gọn gàng bên phải trong cùng một hàng.
+    - Tạo hiệu ứng viền phát sáng khi focus (`box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2), 0 8px 24px rgba(99, 102, 241, 0.15)`).
+    - Tinh chỉnh các Subject Filter Tags (`.tag-btn`) dạng capsule kính mờ, hover nhấc nhẹ nổi khối và có chấm tròn màu môn học phát sáng tương ứng.
+  - `[Frontend / CSS Hero Banner & Day Cards]` Tối ưu [`src/1.Frontend/styles/3.timetable-grid.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/3.timetable-grid.css):
+    - Hoàn thiện trạng thái Thu gọn (Collapsed State) của `.hero-banner` thành Control Dock sang trọng: Date Badge tương tác, Tiêu đề tuần gradient nổi bật, Quick Tags thống kê số môn/tiết gọn gàng và các nút In lịch / Chi tiết cân đối.
+    - Tinh chỉnh thẻ ngày `.day-card`: Viền kính mờ, thẻ ngày hôm nay (`.day-card.is-today`) có viền neon Indigo/Violet và ánh sáng cực quang lung linh.
+    - Tinh chỉnh thẻ môn học `.class-item`: Card nổi 3D nhẹ, phân cấp thông tin rõ ràng (thời gian, phòng học, mã môn), nút Sửa/Xóa/Xem Điểm/Drive/Copy bo tròn nhỏ gọn và có màu hover đặc trưng.
+    - Nâng cấp `@keyframes pingTargetPulse` tạo hiệu ứng 3 đợt sóng radar cực quang tỏa rộng thu hút ánh nhìn.
+  - `[Frontend / Responsive CSS]` Tối ưu [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css):
+    - Đảm bảo `.search-box` trên mobile (< 600px) co giãn linh hoạt 100%, nút `[🎯 Hôm nay]` không bao giờ bị tràn hoặc che khuất text input.
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v37` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 21:40] - Xây Dựng Tính Năng Ping Target Focus Hôm Nay Trên Thời Khóa Biểu (Mục 1)
 
 - **🎯 Mục tiêu**:
