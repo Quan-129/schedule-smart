@@ -1377,20 +1377,22 @@ body.theme-light .form-group-styled textarea:hover {
 /* Nút Lưu Ca Mẫu Tùy Chỉnh */
 .btn-save-custom-preset {
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.16) 0%, rgba(168, 85, 247, 0.16) 100%);
-  border: 1px solid rgba(99, 102, 241, 0.35);
-  border-radius: var(--radius-md);
+  border: 1.5px solid rgba(99, 102, 241, 0.35);
+  border-radius: 12px;
   color: #a5b4fc;
   font-family: var(--font-main);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 700;
-  padding: 0 0.85rem;
+  padding: 0 1rem;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  justify-content: center;
+  gap: 0.4rem;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   flex-shrink: 0;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 .btn-save-custom-preset:hover {
@@ -1411,8 +1413,7 @@ body.theme-light .form-group-styled textarea:hover {
 .ios-time-picker-row {
   display: flex;
   gap: 0.75rem;
-  align-items: center;
-  flex-wrap: wrap;
+  align-items: stretch;
   margin-top: 0.4rem;
 }
 
@@ -1420,8 +1421,8 @@ body.theme-light .form-group-styled textarea:hover {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  flex: 1.25;
-  min-width: 250px;
+  flex: 1;
+  min-width: 240px;
 }
 
 /* Nút Capsule chọn Giờ (Bắt đầu / Kết thúc) */
@@ -1488,14 +1489,6 @@ body.theme-light .form-group-styled textarea:hover {
   flex-shrink: 0;
 }
 
-.ios-period-box-wrap {
-  display: flex;
-  gap: 0.45rem;
-  align-items: center;
-  flex: 1;
-  min-width: 220px;
-}
-
 @media (max-width: 580px) {
   .ios-time-picker-row {
     flex-direction: column;
@@ -1504,8 +1497,8 @@ body.theme-light .form-group-styled textarea:hover {
   .ios-time-range-capsules {
     width: 100%;
   }
-  .ios-period-box-wrap {
-    width: 100%;
+  .btn-save-custom-preset {
+    height: 42px;
   }
 }
 

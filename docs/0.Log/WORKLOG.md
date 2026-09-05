@@ -4,6 +4,25 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 22:58] - Tinh Giản Giao Diện: Loại Bỏ Ô Nhập Tiết Học & Tối Ưu Bố Cục Hàng Giờ Học
+
+- **🎯 Mục tiêu**:
+  - Loại bỏ hoàn toàn ô nhập liệu "Tiết học" (`#class-period-input`) theo yêu cầu người dùng để giao diện form thêm tiết trở nên gọn gàng, tối giản, trực quan.
+  - Tự động nhận diện tiết học ở tầng logic nền (`getPeriodFromTimeRange`) nếu khớp khung giờ chuẩn mà người dùng không cần phải gõ thủ công.
+  - Bố trí hàng chọn giờ gồm **Bộ đôi Capsule Giờ Bắt đầu ➔ Kết thúc** và **Nút + Lưu ca mẫu** nằm cân xứng trên cùng một hàng.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Component Modal]` Cập nhật [`src/1.Frontend/components/modals/AddClassModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddClassModal.js):
+    - Xóa bỏ trường DOM `#class-period-input` và toàn bộ logic gán/đọc thủ công.
+    - Chuyển `period` thành thuộc tính tự động suy diễn từ `timeRange` khi submit form.
+    - Dọn dẹp code sạch sẽ, loại bỏ trùng lặp.
+  - `[Frontend / CSS Modals]` Cập nhật [`src/1.Frontend/styles/6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css):
+    - Xóa class `.ios-period-box-wrap`.
+    - Căn chỉnh `.ios-time-picker-row` với `.ios-time-range-capsules` (flex: 1) và `.btn-save-custom-preset` liền kề gọn gàng.
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v50` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 22:50] - Fix Lỗi Layer: Đưa Modal Con Lăn 3D iOS Lên Trước (z-index 100000)
 
 - **🎯 Mục tiêu**:
