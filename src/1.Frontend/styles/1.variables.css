@@ -127,13 +127,13 @@ body.theme-light .bg-glow {
 .app-wrapper {
   position: relative;
   z-index: 1;
-  max-width: 1400px;
+  max-width: 1440px;
   margin: 0 auto;
-  padding: 0.65rem 1rem 2rem;
+  padding: 1rem 1.25rem 2.5rem;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  gap: 0.55rem;
+  gap: 1.15rem;
 }
 
 /* ==========================================================================
