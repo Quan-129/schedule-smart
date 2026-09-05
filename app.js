@@ -1189,7 +1189,7 @@ function enterJiggleMode() {
     try { navigator.vibrate([40, 30, 40]); } catch (e) {}
   }
   renderBackpackView();
-  showToast('Đang ở chế độ chỉnh sửa: Bấm (-) để xóa môn học!');
+  showToast('Đang ở chế độ chỉnh sửa: Bấm (✏️) để sửa môn, bấm (-) để xóa môn!');
 }
 
 /**
@@ -1345,6 +1345,12 @@ function renderBackpackView() {
       </button>
     ` : '';
 
+    const editBadgeHtml = state.isJiggleMode ? `
+      <button class="btn-edit-node-pencil" title="Chỉnh sửa link Google Drive & Tỉ lệ điểm môn ${escapeHtml(subject.name)}" onclick="editSubjectDriveLink('${escapeHtml(subject.code)}', event)">
+        <i class="fa-solid fa-pen"></i>
+      </button>
+    ` : '';
+
     btn.innerHTML = `
       <div class="bp-circle-wrapper">
         <svg class="bp-circle-ring-svg" viewBox="0 0 110 110">
@@ -1361,9 +1367,7 @@ function renderBackpackView() {
         </div>
 
         ${deleteBadgeHtml}
-        <button class="btn-edit-node-pencil" title="Chỉnh sửa link Google Drive & Tỉ lệ điểm môn ${escapeHtml(subject.name)}" onclick="editSubjectDriveLink('${escapeHtml(subject.code)}', event)">
-          <i class="fa-solid fa-pen"></i>
-        </button>
+        ${editBadgeHtml}
       </div>
 
       <div class="bp-app-details">

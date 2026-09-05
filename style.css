@@ -2027,7 +2027,8 @@ body.theme-light .bg-glow {
   cursor: pointer;
   z-index: 5;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  transition: all 0.2s ease;
+  animation: badgePopIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .btn-edit-node-pencil:hover {
