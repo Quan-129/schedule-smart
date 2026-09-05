@@ -4,6 +4,28 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 15:03] - Tái Cấu Trúc Navbar 3 Tầng & Triệt Tiêu Hoàn Toàn Lỗi Tràn Ngang (Horizontal Overflow) Trên Mobile
+
+- **🎯 Mục tiêu**:
+  - Giải quyết dứt điểm hiện tượng toàn bộ màn hình điện thoại bị lệch sang trái, chữ logo và các phần tử bị cắt mất một nửa do cụm điều hướng tuần (`week-navigation`) và nút tài khoản dồn ép quá tải trên 1 hàng của Navbar.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Architecture & Markup]` Tách Navbar thành 3 phân vùng độc lập rõ ràng:
+    + **Hàng 1 (`navbar-brand-row`)**: Logo thương hiệu `ScheduleSmart` + Huy hiệu `HK1 2026-2027` căn trái đối xứng hoàn hảo với cụm nút `Theme Toggle` và `Avatar Google Login` căn phải.
+    + **Hàng 2 (`nav-right`)**: Thanh điều hướng tuần học `< Tuần 35 (24/08) > [ + ]` trải dài 100% toàn bộ chiều ngang màn hình, chữ rõ nét và các nút bấm to dễ thao tác.
+    + **Hàng 3 (`nav-center`)**: 4 Tab chuyển đổi góc nhìn (Lưới tuần, Hôm nay, Tỉ lệ điểm, Chiếc cặp Google Drive) chia đều tỷ lệ 4 cột đối xứng 25% vừa khít màn hình.
+  - `[Frontend / CSS Viewport]` Thiết lập `max-width: 100vw; overflow-x: hidden` cho `html`, `body`, `.app-wrapper` và `.navbar`, loại bỏ hoàn toàn hiện tượng tràn ngang.
+  - `[Performance / PWA]` Nâng cấp `CACHE_NAME` lên `smart-schedule-modular-v17` trong `sw.js`.
+
+- **💡 Quyết định Kỹ thuật & Kiến trúc**:
+  - Kiến trúc phân tầng Navbar Mobile 3-Deck: Đảm bảo Desktop giữ nguyên 1 hàng tinh gọn, trong khi Mobile/Tablet tự động chuyển sang 3 dải chuyên dụng chống tràn tuyệt đối.
+
+- **📌 Trạng thái hiện tại & Kế hoạch tiếp theo (Next Steps)**:
+  - [x] Toàn bộ lỗi tràn lòi, cắt chữ bên trái và khoảng đen bên phải đã được khắc phục 100%.
+  - [x] Đã commit và push lên GitHub.
+
+---
+
 ## 📅 [2026-09-05 14:52] - Fix Triệt Để Lỗi Lệch Khung Điểm & Tràn Khung HK1 Trên Mobile
 
 - **🎯 Mục tiêu**:

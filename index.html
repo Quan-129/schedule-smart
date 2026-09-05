@@ -109,13 +109,33 @@
   <div id="main-app-wrapper" class="app-wrapper" style="display: none;">
     <!-- Navigation & Header Bar -->
     <header class="navbar">
-      <div class="nav-left">
-        <div class="brand-logo">
-          <i class="fa-solid fa-graduation-cap"></i>
+      <div class="navbar-brand-row">
+        <div class="nav-left">
+          <div class="brand-logo">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div class="brand-info">
+            <h1>Schedule<span style="color: var(--accent-primary);">Smart</span></h1>
+            <div class="badge-git"><i class="fa-brands fa-github"></i> HK1 2026-2027</div>
+          </div>
         </div>
-        <div class="brand-info">
-          <h1>Schedule<span style="color: var(--accent-primary);">Smart</span></h1>
-          <div class="badge-git"><i class="fa-brands fa-github"></i> HK1 2026-2027</div>
+
+        <div class="nav-quick-actions">
+          <!-- Theme Toggle -->
+          <button id="theme-toggle-btn" class="btn-icon" title="Đổi giao diện Sáng / Tối"><i class="fa-solid fa-sun"></i></button>
+
+          <!-- User Auth & Cloud Sync Widget -->
+          <div class="user-auth-group">
+            <button id="auth-login-btn" class="btn-auth-login" title="Đăng nhập Google để đồng bộ dữ liệu đa thiết bị">
+              <i class="fa-brands fa-google"></i>
+              <span>Đăng nhập</span>
+            </button>
+            <div id="user-profile-widget" class="user-profile-widget hidden" style="display: none;">
+              <img id="user-avatar" class="user-avatar" src="" alt="Avatar" referrerpolicy="no-referrer">
+              <span id="user-display-name" class="user-display-name">Sinh viên</span>
+              <button id="auth-logout-btn" class="btn-auth-logout" title="Đăng xuất tài khoản"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -149,22 +169,6 @@
           </div>
           <button id="next-week-btn" class="btn-nav" title="Tuần sau"><i class="fa-solid fa-chevron-right"></i></button>
           <button id="btn-add-week-modal" class="btn-nav btn-add-week-nav" title="Thêm tuần học mới"><i class="fa-solid fa-plus"></i></button>
-        </div>
-
-        <!-- Theme Toggle -->
-        <button id="theme-toggle-btn" class="btn-icon" title="Đổi giao diện Sáng / Tối"><i class="fa-solid fa-sun"></i></button>
-
-        <!-- User Auth & Cloud Sync Widget -->
-        <div class="user-auth-group">
-          <button id="auth-login-btn" class="btn-auth-login" title="Đăng nhập Google để đồng bộ dữ liệu đa thiết bị">
-            <i class="fa-brands fa-google"></i>
-            <span>Đăng nhập</span>
-          </button>
-          <div id="user-profile-widget" class="user-profile-widget hidden" style="display: none;">
-            <img id="user-avatar" class="user-avatar" src="" alt="Avatar" referrerpolicy="no-referrer">
-            <span id="user-display-name" class="user-display-name">Sinh viên</span>
-            <button id="auth-logout-btn" class="btn-auth-logout" title="Đăng xuất tài khoản"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
-          </div>
         </div>
       </div>
     </header>
