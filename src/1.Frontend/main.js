@@ -322,7 +322,7 @@ async function initWeekSelector() {
   if (weekSelect) {
     weekSelect.onchange = () => {
       if (weekSelect.value === '__ADD_NEW_WEEK__') {
-        openAddWeekModal();
+        openAddWeekModal(availableWeeks);
         // Trả lại giá trị trước đó
         weekSelect.value = currentWeekFile || availableWeeks[0].filename;
       } else {
@@ -360,7 +360,7 @@ async function initWeekSelector() {
 
   if (addWeekNavBtn) {
     addWeekNavBtn.onclick = () => {
-      openAddWeekModal();
+      openAddWeekModal(availableWeeks);
     };
   }
 
@@ -779,147 +779,7 @@ function initSearchAndFilters() {
   }
 }
 
-/**
- * Khởi tạo Modal Thêm Tuần Học Mới
- */
-function initAddWeekModal() {
-  const modal = document.getElementById('add-week-modal');
-  const closeBtn = document.getElementById('add-week-close-btn');
-  const cancelBtn = document.getElementById('add-week-cancel-btn');
-  const form = document.getElementById('add-week-form');
-  const copyBtn = document.getElementById('btn-copy-template-md');
 
-  const closeModal = () => {
-    if (modal) {
-      modal.classList.remove('active');
-      modal.classList.add('hidden');
-      modal.style.display = 'none';
-    }
-    if (form) form.reset();
-  };
-
-  if (closeBtn) closeBtn.onclick = closeModal;
-  if (cancelBtn) cancelBtn.onclick = closeModal;
-
-  if (copyBtn) {
-    copyBtn.onclick = () => {
-      const textarea = document.getElementById('new-week-md-content');
-      if (textarea && currentRawMarkdown) {
-        textarea.value = currentRawMarkdown;
-        showToast('Đã sao chép lịch học từ tuần hiện tại!');
-      }
-    };
-  }
-
-  if (form) {
-    form.onsubmit = (e) => {
-      e.preventDefault();
-      const titleInput = document.getElementById('new-week-title-input');
-      const idInput = document.getElementById('new-week-id-input');
-      const dateInput = document.getElementById('new-week-date-input');
-      const descInput = document.getElementById('new-week-desc-input');
-      const mdInput = document.getElementById('new-week-md-content');
-
-      const title = titleInput ? titleInput.value.trim() : '';
-      let id = idInput ? idInput.value.trim().toLowerCase().replace(/\s+/g, '-') : '';
-      const startDate = dateInput ? dateInput.value : '';
-      const desc = descInput ? descInput.value.trim() : title;
-      const mdContent = mdInput && mdInput.value.trim() ? mdInput.value.trim() : generateEmptyWeekMarkdown(title);
-
-      if (!title || !id) {
-        showToast('Vui lòng nhập tên và mã định danh tuần!');
-        return;
-      }
-
-      if (!id.startsWith('tuan-')) {
-        id = `tuan-${id}`;
-      }
-
-      const filename = `custom_${id}.md`;
-
-      // Kiểm tra trùng mã
-      if (availableWeeks.some(w => w.id === id || w.filename === filename)) {
-        showToast(`Tuần "${id}" đã tồn tại! Vui lòng chọn mã khác.`);
-        return;
-      }
-
-      const newWeekObj = {
-        id,
-        title,
-        startDate: startDate || new Date().toISOString().split('T')[0],
-        filename,
-        description: desc,
-        isCustom: true
-      };
-
-      // 1. Lưu Markdown vào LocalStorage
-      localStorage.setItem(`smart_schedule_custom_md_${filename}`, mdContent);
-
-      // 2. Lưu danh sách Custom Weeks vào LocalStorage
-      const customWeeksRaw = localStorage.getItem('smart_schedule_custom_weeks');
-      let customWeeks = [];
-      if (customWeeksRaw) {
-        try { customWeeks = JSON.parse(customWeeksRaw); } catch(e){}
-      }
-      customWeeks.push(newWeekObj);
-      localStorage.setItem('smart_schedule_custom_weeks', JSON.stringify(customWeeks));
-
-      // 3. Thêm vào availableWeeks trong memory
-      availableWeeks.push(newWeekObj);
-
-      // 4. Render lại dropdown và tải tuần vừa tạo
-      renderWeekDropdownOptions(filename);
-      closeModal();
-      loadWeekSchedule(filename);
-      switchTab('grid');
-
-      showToast(`Đã tạo "${title}" thành công! 🎉`);
-    };
-  }
-}
-
-function openAddWeekModal() {
-  const modal = document.getElementById('add-week-modal');
-  if (!modal) return;
-
-  const titleInput = document.getElementById('new-week-title-input');
-  const idInput = document.getElementById('new-week-id-input');
-  const dateInput = document.getElementById('new-week-date-input');
-  const descInput = document.getElementById('new-week-desc-input');
-  const mdInput = document.getElementById('new-week-md-content');
-
-  // Tính số tuần tiếp theo
-  let maxWeekNum = 50;
-  availableWeeks.forEach(w => {
-    const match = (w.title || w.id || '').match(/(\d+)/);
-    if (match) {
-      const num = parseInt(match[1], 10);
-      if (num > maxWeekNum) maxWeekNum = num;
-    }
-  });
-
-  const nextWeekNum = maxWeekNum + 1;
-  const suggestedTitle = `Tuần ${nextWeekNum}`;
-  const suggestedId = `tuan-${nextWeekNum}`;
-
-  if (titleInput) titleInput.value = suggestedTitle;
-  if (idInput) idInput.value = suggestedId;
-  if (descInput) descInput.value = `Lịch học ${suggestedTitle}`;
-  if (dateInput) {
-    const today = new Date();
-    dateInput.value = today.toISOString().split('T')[0];
-  }
-
-  if (mdInput) {
-    // Mặc định tạo 7 ngày trống theo yêu cầu người dùng
-    mdInput.value = generateEmptyWeekMarkdown(suggestedTitle);
-  }
-
-  modal.classList.remove('hidden');
-  modal.classList.add('active');
-  modal.style.display = 'flex';
-  if (titleInput) titleInput.focus();
-}
 
 /**
  * Xử lý thêm mới hoặc chỉnh sửa tiết học từ AddClassModal

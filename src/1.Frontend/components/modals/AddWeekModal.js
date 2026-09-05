@@ -85,9 +85,43 @@ export function ensureAddWeekModalDom() {
   modalRoot.appendChild(modalWrapper.firstElementChild);
 }
 
-export function openAddWeekModal(onCopyTemplate) {
+export function openAddWeekModal(availableWeeks = []) {
   ensureAddWeekModalDom();
-  initAddWeekModal(onCopyTemplate);
+
+  const titleInput = document.getElementById('new-week-title-input');
+  const idInput = document.getElementById('new-week-id-input');
+  const dateInput = document.getElementById('new-week-date-input');
+  const descInput = document.getElementById('new-week-desc-input');
+  const mdInput = document.getElementById('new-week-md-content');
+
+  // Tính số tuần tiếp theo
+  let maxWeekNum = 50;
+  if (Array.isArray(availableWeeks)) {
+    availableWeeks.forEach(w => {
+      const match = (w.title || w.id || '').match(/(\d+)/);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (num > maxWeekNum) maxWeekNum = num;
+      }
+    });
+  }
+
+  const nextWeekNum = maxWeekNum + 1;
+  const suggestedTitle = `Tuần ${nextWeekNum}`;
+  const suggestedId = `tuan-${nextWeekNum}`;
+
+  if (titleInput) titleInput.value = suggestedTitle;
+  if (idInput) idInput.value = suggestedId;
+  if (descInput) descInput.value = `Lịch học ${suggestedTitle}`;
+  if (dateInput) {
+    const today = new Date();
+    dateInput.value = today.toISOString().split('T')[0];
+  }
+
+  if (mdInput) {
+    // Mặc định tạo 7 ngày trống độc lập
+    mdInput.value = generateEmptyWeekMarkdown(suggestedTitle);
+  }
 
   const modal = document.getElementById('add-week-modal');
   if (modal) {
@@ -95,6 +129,7 @@ export function openAddWeekModal(onCopyTemplate) {
     modal.classList.add('active');
     modal.style.display = 'flex';
   }
+  if (titleInput) titleInput.focus();
 }
 
 export function closeAddWeekModal() {

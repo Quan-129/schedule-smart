@@ -4,6 +4,20 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 21:30] - Sửa Lỗi Cú Pháp Trùng Lặp Khai Báo initAddWeekModal & Đồng Bộ AddWeekModal Component
+
+- **🎯 Mục tiêu**:
+  - Khắc phục triệt để lỗi runtime `SyntaxError: Identifier 'initAddWeekModal' has already been declared` khiến toàn bộ JavaScript ngừng thực thi trên trình duyệt.
+  - Hoàn thiện việc đóng gói mô-đun hóa cho [`AddWeekModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddWeekModal.js).
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Fix Syntax / Module Cleanup]`:
+    - Xóa bỏ định nghĩa hàm `function initAddWeekModal() { ... }` và `function openAddWeekModal() { ... }` cũ còn sót lại trong [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js).
+    - Cải tiến [`src/1.Frontend/components/modals/AddWeekModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddWeekModal.js) nhận `availableWeeks` để tự động gợi ý `Tuần [N+1]` và nạp sẵn 7 khung ngày trống (`generateEmptyWeekMarkdown`).
+  - `[Performance / Service Worker]`: Nâng `CACHE_NAME` lên `smart-schedule-modular-v33` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 21:25] - Nâng Cấp Hệ Thống Authentication: Thêm Loading Spinner, Tự Động Fallback & Nút Dùng Thử Ngay Chế Độ Khách
 
 - **🎯 Mục tiêu**:
