@@ -4,6 +4,23 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 23:02] - Đồng Bộ Giao Diện: Chuyển Tone Màu Con Lăn iOS Sang Tone Tím Than & Neon Glassmorphism
+
+- **🎯 Mục tiêu**:
+  - Chuyển toàn bộ palette màu của Modal Con Lăn 3D iOS từ phong cách đen xám/vàng cam sang **Tone Tím Than (Deep Indigo/Purple & Neon Glassmorphism)** đồng bộ 100% với giao diện chủ đạo của ứng dụng.
+  - Tăng cường hiệu ứng phát sáng neon tím, thấu kính lens gradient tím hồng và các nút bấm phím tắt mượt mà.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / CSS Modals]` Cập nhật [`src/1.Frontend/styles/6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css):
+    - Background sheet: chuyển sang `linear-gradient(180deg, rgba(30, 27, 75, 0.98) 0%, rgba(15, 23, 42, 0.98) 100%)` với viền tím `#6366f1` mờ.
+    - Header: nút Hủy chuyển sang màu xám bạc dịu mắt `#94a3b8`, nút Lưu chuyển sang tím sáng `#818cf8` / `#a5b4fc`, badge preview chuyển sang tím pastel `#c084fc` phát sáng neon.
+    - Lens thấu kính: viền neon phát sáng `rgba(129, 140, 248, 0.4)` và nền gradient tím mờ.
+    - Item số đang chọn: phát sáng glow tím neon `text-shadow: 0 0 16px rgba(129, 140, 248, 0.8)`.
+    - Dải phím tắt mốc giờ nhanh: chuyển sang pills nền tím trong suốt, hover hiệu ứng gradient tím hồng rực rỡ.
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v51` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 22:58] - Tinh Giản Giao Diện: Loại Bỏ Ô Nhập Tiết Học & Tối Ưu Bố Cục Hàng Giờ Học
 
 - **🎯 Mục tiêu**:

@@ -1503,12 +1503,12 @@ body.theme-light .form-group-styled textarea:hover {
 }
 
 /* ==========================================================================
-   iOS TIME PICKER 3D DRUM ROLLER SHEET (CHUẨN GIAO DIỆN BÁO THỨC iPHONE)
+   iOS TIME PICKER 3D DRUM ROLLER SHEET (TONE TÍM THAN CHỦ ĐẠO & NEON GLASS)
    ========================================================================== */
 .ios-picker-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.78);
+  background: rgba(10, 15, 29, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   z-index: 100000;
@@ -1526,13 +1526,12 @@ body.theme-light .form-group-styled textarea:hover {
 }
 
 .ios-picker-sheet {
-  background: #1c1c1e;
-  background: linear-gradient(180deg, #242426 0%, #161618 100%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(180deg, rgba(30, 27, 75, 0.98) 0%, rgba(15, 23, 42, 0.98) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.3);
   border-radius: 20px;
   width: 100%;
   max-width: 380px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 65px rgba(0, 0, 0, 0.75), 0 0 30px rgba(99, 102, 241, 0.2);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -1550,27 +1549,27 @@ body.theme-light .form-group-styled textarea:hover {
   }
 }
 
-/* Header iOS Picker */
+/* Header iOS Picker Tone Tím Than */
 .ios-picker-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 1.1rem 1.4rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(99, 102, 241, 0.05);
 }
 
 .ios-picker-title-group {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.15rem;
+  gap: 0.2rem;
 }
 
 .ios-picker-title {
   font-size: 0.95rem;
   font-weight: 700;
-  color: #ffffff;
+  color: #f8fafc;
   letter-spacing: -0.01em;
 }
 
@@ -1578,18 +1577,20 @@ body.theme-light .form-group-styled textarea:hover {
   font-family: var(--font-mono);
   font-size: 0.8rem;
   font-weight: 700;
-  color: #eab308;
-  background: rgba(234, 179, 8, 0.12);
-  padding: 0.08rem 0.5rem;
+  color: #c084fc;
+  background: rgba(168, 85, 247, 0.18);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  padding: 0.08rem 0.6rem;
   border-radius: 6px;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.2);
 }
 
 .ios-picker-btn-cancel {
   background: transparent;
   border: none;
-  color: #f59e0b;
-  font-size: 0.98rem;
-  font-weight: 500;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
   padding: 0.3rem 0.5rem;
   border-radius: 6px;
@@ -1597,16 +1598,16 @@ body.theme-light .form-group-styled textarea:hover {
 }
 
 .ios-picker-btn-cancel:hover {
-  background: rgba(245, 158, 11, 0.12);
-  color: #fbbf24;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
 }
 
 .ios-picker-btn-save {
   background: transparent;
   border: none;
-  color: #f59e0b;
+  color: #818cf8;
   font-size: 0.98rem;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
   padding: 0.3rem 0.5rem;
   border-radius: 6px;
@@ -1614,8 +1615,9 @@ body.theme-light .form-group-styled textarea:hover {
 }
 
 .ios-picker-btn-save:hover {
-  background: rgba(245, 158, 11, 0.12);
-  color: #fbbf24;
+  background: rgba(99, 102, 241, 0.18);
+  color: #a5b4fc;
+  text-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
 }
 
 /* DRUM ROLLER WHEEL CONTAINER */
@@ -1626,25 +1628,25 @@ body.theme-light .form-group-styled textarea:hover {
   justify-content: center;
   height: 220px;
   perspective: 600px;
-  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.02) 0%, transparent 70%);
+  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.08) 0%, transparent 75%);
   user-select: none;
   overflow: hidden;
 }
 
-/* Thấu kính Lens chọn ở giữa */
+/* Thấu kính Lens chọn ở giữa Tone Tím Neon */
 .ios-wheel-lens {
   position: absolute;
   top: 88px;
   left: 1.5rem;
   right: 1.5rem;
   height: 44px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.14) 0%, rgba(168, 85, 247, 0.2) 50%, rgba(99, 102, 241, 0.14) 100%);
+  border-radius: 12px;
+  border-top: 1.5px solid rgba(129, 140, 248, 0.4);
+  border-bottom: 1.5px solid rgba(129, 140, 248, 0.4);
   pointer-events: none;
   z-index: 2;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.25), inset 0 0 15px rgba(168, 85, 247, 0.15);
 }
 
 /* Cột Con Lăn */
@@ -1688,7 +1690,7 @@ body.theme-light .form-group-styled textarea:hover {
   font-family: var(--font-mono);
   font-size: 1.45rem;
   font-weight: 500;
-  color: #94a3b8;
+  color: #64748b;
   cursor: pointer;
   transition: color 0.15s ease;
   will-change: transform, opacity;
@@ -1697,14 +1699,15 @@ body.theme-light .form-group-styled textarea:hover {
 .ios-wheel-item.active {
   color: #ffffff;
   font-weight: 800;
-  text-shadow: 0 0 12px rgba(255, 255, 255, 0.35);
+  text-shadow: 0 0 16px rgba(129, 140, 248, 0.8), 0 0 32px rgba(99, 102, 241, 0.5);
 }
 
 .ios-wheel-colon {
   font-family: var(--font-mono);
   font-size: 1.6rem;
   font-weight: 800;
-  color: rgba(255, 255, 255, 0.7);
+  color: #818cf8;
+  text-shadow: 0 0 12px rgba(99, 102, 241, 0.6);
   z-index: 3;
   margin-top: -4px;
 }
@@ -1713,30 +1716,31 @@ body.theme-light .form-group-styled textarea:hover {
 .ios-quick-presets-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
+  gap: 0.45rem;
   padding: 0.85rem 1.25rem 1.25rem 1.25rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(15, 23, 42, 0.6);
   justify-content: center;
 }
 
 .ios-quick-pill {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #cbd5e1;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  color: #c7d2fe;
   font-family: var(--font-mono);
   font-size: 0.72rem;
   font-weight: 600;
-  padding: 0.24rem 0.55rem;
+  padding: 0.26rem 0.58rem;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.18s ease;
 }
 
 .ios-quick-pill:hover {
-  background: rgba(245, 158, 11, 0.18);
-  border-color: rgba(245, 158, 11, 0.45);
-  color: #fbbf24;
+  background: var(--accent-gradient);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 3px 12px rgba(99, 102, 241, 0.45);
   transform: translateY(-1px);
 }
 
