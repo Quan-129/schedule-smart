@@ -6,6 +6,26 @@
 
 ---
 
+## 📅 [2026-09-05 13:28] - Nâng Cấp Bộ Thoát Chế Độ Chỉnh Sửa Jiggle Mode (Nút Xong, Click Ngoài, Phím ESC)
+
+- **🎯 Mục tiêu**:
+  - Khắc phục tình trạng khi nhấn giữ bật chế độ Jiggle Mode (chỉnh sửa/xóa môn học) trong Chiếc Cặp mà không thấy nút thoát hoặc không có cách thoát.
+  - Tích hợp 3 cơ chế thoát Jiggle Mode tiện lợi: Nút "✓ Xong" trên thanh tác vụ, Click vào khoảng trống nền, hoặc Nhấn phím `Escape`.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend/HTML]` Thêm nút `#bp-done-jiggle-btn` chuẩn styling `.btn-bp-done` và gắn ID `#backpack-hint-text` trong `index.html`.
+  - `[Frontend/Views]` Nâng cấp `BackpackView.js`: Tự động bật/tắt hiển thị nút "✓ Xong", đổi text hướng dẫn động, bắt sự kiện click ngoài khoảng trống và lắng nghe sự kiện phím `Escape`.
+  - `[Config / DevOps]` Nâng cấp Service Worker Cache lên `smart-schedule-modular-v11` trong `sw.js`.
+
+- **💡 Quyết định Kỹ thuật & Kiến trúc**:
+  - *Multi-way Exit*: Cho phép người dùng thoát chế độ rung lắc bằng nhiều cử chỉ tự nhiên (chuột, phím, chạm) giúp trải nghiệm mượt mà giống hệt ứng dụng iOS/Android gốc.
+
+- **📌 Trạng thái hiện tại & Kế hoạch tiếp theo (Next Steps)**:
+  - [x] Thoát Jiggle Mode hoạt động nhạy bén và ổn định trên mọi thiết bị.
+  - [x] Đã đồng bộ và đẩy lên GitHub Pages.
+
+---
+
 ## 📅 [2026-09-05 11:58] - Khôi Phục 100% Giao Diện CSS, Donut Charts & Đồng Bộ Markup Chuẩn `style.css`
 
 - **🎯 Mục tiêu**:
