@@ -4,6 +4,26 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 22:48] - Tích Hợp Con Lăn 3D Chuẩn Báo Thức iPhone (iOS Alarm Drum Roller Wheel Time Picker) & Fix Lỗi Đè Chữ
+
+- **🎯 Mục tiêu**:
+  - Khắc phục triệt để lỗi ô nhập `type="time"` của trình duyệt bị định dạng `SA/CH`, icon đồng hồ native Windows chèn lộn xộn và bị ô Tiết học đè lên giao diện.
+  - Xây dựng **Bộ chọn giờ Con Lăn 3D chuẩn Báo Thức trên iPhone (iOS Alarm Drum Roller Wheel Picker)** với 2 cột con lăn Giờ (00–23) và Phút (00–59), hiệu ứng 3D perspective cuộn mượt mà, thấu kính Lens ở giữa, header Hủy/Lưu màu vàng cam Apple.
+  - Tích hợp phím tắt nhanh các mốc giờ chuẩn tiết học ĐHBK (07:00, 08:50, 09:00, 11:50, 13:00, 15:00...).
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Component Modal]` Cập nhật [`src/1.Frontend/components/modals/AddClassModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddClassModal.js):
+    - Loại bỏ hoàn toàn input `<input type="time">`, thay thế bằng 2 Capsule Button hiển thị dạng văn bản `24h` rõ ràng (`07:00` ➔ `08:50`).
+    - Thêm Component DOM `#ios-wheel-picker-modal` chứa 2 con lăn 3D Giờ và Phút với `scroll-snap-type: y mandatory`.
+    - Viết thuật toán tính toán góc nghiêng 3D `rotateX`, `opacity` và `scale` theo độ lệch vị trí cuộn `scrollTop`.
+    - Thêm cơ chế mở/đóng, chọn nhanh qua phím tắt pill, đồng bộ 2 chiều với các ca mẫu và tự động nhận diện tiết học.
+  - `[Frontend / CSS Modals]` Cập nhật [`src/1.Frontend/styles/6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css):
+    - Thiết kế giao diện Dark Mode chuẩn iOS Sheet với background mờ `backdrop-filter: blur(16px)`, vạch Lens Glassmorphism `top: 88px; height: 44px;`, nút Hủy/Lưu vàng cam `#f59e0b`.
+    - Bố cục form tách biệt giữa Hàng Giờ Bắt đầu/Kết thúc và Hàng Tiết học/Lưu ca mẫu, không bao giờ bị đè layout.
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v48` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 22:42] - Nâng Cấp Bộ Chọn Giờ Kiểu Báo Thức iOS (Capsule Range Time Picker)
 
 - **🎯 Mục tiêu**:

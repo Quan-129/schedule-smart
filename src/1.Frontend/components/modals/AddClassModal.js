@@ -1,6 +1,7 @@
 /**
  * @file AddClassModal.js
  * @description Component Modal Thêm / Chỉnh Sửa Tiết Học Nhanh vào từng Ngày trên Lịch Học
+ *              Tích hợp cơ chế chọn giờ Con Lăn 3D chuẩn Báo Thức iPhone (iOS Alarm Drum Roller Wheel)
  * @module 1.Frontend/components/modals/AddClassModal
  */
 
@@ -12,13 +13,26 @@ import { state } from '../../../3.Database/state.js';
 import { showToast } from '../Toast.js';
 
 // ============================================================================
-// 2. CONSTANTS & DOM SELECTORS
+// 2. CONSTANTS & STATE
 // ============================================================================
 const MODAL_ID = 'add-class-modal';
+const PICKER_MODAL_ID = 'ios-wheel-picker-modal';
+const ITEM_HEIGHT = 44; // Chiều cao mỗi nấc con lăn (chuẩn iOS)
+
 let currentEditingClass = null; // { dayName, classIndex, classData }
 let onSaveCallback = null;
 let onDeleteCallback = null;
 let isEventsBound = false;
+let isPickerEventsBound = false;
+
+// Trạng thái giờ được chọn
+const pickerState = {
+  startTime: '07:00',
+  endTime: '08:50',
+  activeTarget: 'start', // 'start' | 'end'
+  currentHour: 7,
+  currentMinute: 0
+};
 
 const TIME_PRESETS = [
   { time: '07:00 - 08:50', period: 'Tiết 2 - 3', label: 'Sáng: Tiết 2-3 (7h-8h50)' },
@@ -152,32 +166,33 @@ export function ensureAddClassModalDom() {
             <!-- Render động từ TIME_PRESETS + Custom Presets -->
           </div>
           
-          <!-- Hàng Chọn Giờ Kiểu Báo Thức iOS (Bắt đầu ➔ Kết thúc) + Tiết học + Nút Lưu Ca Mẫu -->
+          <!-- Hàng Chọn Giờ Con Lăn 3D Chuẩn iOS Alarm + Tiết học + Nút Lưu Ca Mẫu -->
           <div class="ios-time-picker-row">
             <div class="ios-time-range-capsules">
               <!-- Capsule Bắt đầu -->
-              <div class="ios-capsule-box" title="Chọn giờ bắt đầu">
-                <span class="ios-capsule-label">Bắt đầu</span>
+              <button type="button" id="btn-pick-start-time" class="ios-capsule-box" title="Bấm để mở con lăn iOS chọn giờ bắt đầu">
+                <span class="ios-capsule-label">BẮT ĐẦU</span>
                 <div class="ios-capsule-input-wrap">
                   <i class="fa-regular fa-clock"></i>
-                  <input type="time" id="class-start-time" class="ios-time-picker-input" value="07:00" required>
+                  <span id="display-start-time" class="ios-capsule-time-text">07:00</span>
                 </div>
-              </div>
+              </button>
 
               <div class="ios-time-arrow">
                 <i class="fa-solid fa-arrow-right-long"></i>
               </div>
 
               <!-- Capsule Kết thúc -->
-              <div class="ios-capsule-box" title="Chọn giờ kết thúc">
-                <span class="ios-capsule-label">Kết thúc</span>
+              <button type="button" id="btn-pick-end-time" class="ios-capsule-box" title="Bấm để mở con lăn iOS chọn giờ kết thúc">
+                <span class="ios-capsule-label">KẾT THÚC</span>
                 <div class="ios-capsule-input-wrap">
                   <i class="fa-regular fa-clock"></i>
-                  <input type="time" id="class-end-time" class="ios-time-picker-input" value="08:50" required>
+                  <span id="display-end-time" class="ios-capsule-time-text">08:50</span>
                 </div>
-              </div>
+              </button>
             </div>
 
+            <!-- Ô Tiết học & Lưu ca mẫu -->
             <div class="ios-period-box-wrap">
               <div class="input-with-icon" style="flex: 1;">
                 <i class="fa-solid fa-list-ol input-icon"></i>
@@ -248,7 +263,77 @@ export function ensureAddClassModalDom() {
   `;
 
   modalRoot.appendChild(modalWrapper);
+  ensureIosWheelPickerDom();
   bindAddClassModalEvents();
+}
+
+/**
+ * Đảm bảo Modal Con Lăn 3D Kiểu Báo Thức iOS (Alarm Drum Roller Picker) đã tồn tại trong DOM
+ */
+function ensureIosWheelPickerDom() {
+  if (document.getElementById(PICKER_MODAL_ID)) return;
+
+  const modalRoot = document.getElementById('modal-root') || document.body;
+  const pickerWrapper = document.createElement('div');
+  pickerWrapper.id = PICKER_MODAL_ID;
+  pickerWrapper.className = 'ios-picker-backdrop hidden';
+  pickerWrapper.innerHTML = `
+    <div class="ios-picker-sheet" role="dialog" aria-modal="true">
+      <!-- HEADER CHUẨN iPHONE BÁO THỨC -->
+      <div class="ios-picker-header">
+        <button type="button" id="btn-ios-picker-cancel" class="ios-picker-btn-cancel">Hủy</button>
+        <div class="ios-picker-title-group">
+          <span id="ios-picker-title" class="ios-picker-title">Chọn Giờ Bắt Đầu</span>
+          <span id="ios-picker-subpreview" class="ios-picker-subpreview">07 : 00</span>
+        </div>
+        <button type="button" id="btn-ios-picker-save" class="ios-picker-btn-save">Lưu</button>
+      </div>
+
+      <!-- DRUM ROLLER WHEEL 3D CONTAINER -->
+      <div class="ios-wheel-roller-container">
+        <!-- Vạch thấu kính chọn chính giữa -->
+        <div class="ios-wheel-lens"></div>
+
+        <!-- CỘT CON LĂN GIỜ (00 - 23) -->
+        <div class="ios-wheel-col" id="ios-wheel-hours-col" data-unit="hours">
+          <div class="ios-wheel-scroller" id="ios-wheel-hours-scroller">
+            ${Array.from({ length: 24 }, (_, i) => {
+              const val = String(i).padStart(2, '0');
+              return `<div class="ios-wheel-item" data-val="${i}">${val}</div>`;
+            }).join('')}
+          </div>
+        </div>
+
+        <!-- DẤU HAI CHẤM -->
+        <div class="ios-wheel-colon">:</div>
+
+        <!-- CỘT CON LĂN PHÚT (00 - 59) -->
+        <div class="ios-wheel-col" id="ios-wheel-minutes-col" data-unit="minutes">
+          <div class="ios-wheel-scroller" id="ios-wheel-minutes-scroller">
+            ${Array.from({ length: 60 }, (_, i) => {
+              const val = String(i).padStart(2, '0');
+              return `<div class="ios-wheel-item" data-val="${i}">${val}</div>`;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- GỢI Ý MỐC GIỜ THÔNG DỤNG CHUẨN TIẾT HỌC ĐHBK -->
+      <div class="ios-quick-presets-bar">
+        <button type="button" class="ios-quick-pill" data-time="07:00">07:00 (Sáng)</button>
+        <button type="button" class="ios-quick-pill" data-time="08:50">08:50</button>
+        <button type="button" class="ios-quick-pill" data-time="09:00">09:00</button>
+        <button type="button" class="ios-quick-pill" data-time="11:50">11:50</button>
+        <button type="button" class="ios-quick-pill" data-time="13:00">13:00 (Chiều)</button>
+        <button type="button" class="ios-quick-pill" data-time="14:50">14:50</button>
+        <button type="button" class="ios-quick-pill" data-time="15:00">15:00</button>
+        <button type="button" class="ios-quick-pill" data-time="16:50">16:50</button>
+      </div>
+    </div>
+  `;
+
+  modalRoot.appendChild(pickerWrapper);
+  bindIosWheelPickerEvents();
 }
 
 /**
@@ -297,10 +382,10 @@ function renderSubjectChips(selectedSubjectName = '') {
  * @returns {string}
  */
 export function getCurrentTimeRangeString() {
-  const startInput = document.getElementById('class-start-time');
-  const endInput = document.getElementById('class-end-time');
-  const start = startInput && startInput.value ? startInput.value : '07:00';
-  const end = endInput && endInput.value ? endInput.value : '08:50';
+  const startEl = document.getElementById('display-start-time');
+  const endEl = document.getElementById('display-end-time');
+  const start = startEl ? startEl.textContent.trim() : (pickerState.startTime || '07:00');
+  const end = endEl ? endEl.textContent.trim() : (pickerState.endTime || '08:50');
   return `${start} - ${end}`;
 }
 
@@ -309,13 +394,17 @@ export function getCurrentTimeRangeString() {
  * @param {string} timeRangeString 
  */
 export function syncTimeInputsFromRange(timeRangeString = '07:00 - 08:50') {
-  const startInput = document.getElementById('class-start-time');
-  const endInput = document.getElementById('class-end-time');
-  if (!startInput || !endInput) return;
-
   const parts = (timeRangeString || '').split('-').map(s => s.trim());
-  if (parts[0]) startInput.value = parts[0];
-  if (parts[1]) endInput.value = parts[1];
+  const startVal = parts[0] || '07:00';
+  const endVal = parts[1] || '08:50';
+  
+  pickerState.startTime = startVal;
+  pickerState.endTime = endVal;
+
+  const startEl = document.getElementById('display-start-time');
+  const endEl = document.getElementById('display-end-time');
+  if (startEl) startEl.textContent = startVal;
+  if (endEl) endEl.textContent = endVal;
 }
 
 /**
@@ -469,11 +558,251 @@ function renderRoomPresets(selectedRoom = '') {
 }
 
 // ============================================================================
-// 4. EVENT HANDLERS & DOM BINDING
+// 4. iOS DRUM ROLLER WHEEL ENGINE & CONTROLLER
 // ============================================================================
 
 /**
- * Gắn các sự kiện cho Modal
+ * Cập nhật hiệu ứng 3D (perspective, rotateX, scale, opacity) cho từng item khi cuộn
+ * @param {HTMLElement} scroller 
+ */
+function updateWheel3DEffect(scroller) {
+  if (!scroller) return;
+  const scrollTop = scroller.scrollTop;
+  const items = scroller.querySelectorAll('.ios-wheel-item');
+  
+  items.forEach((item, idx) => {
+    const itemCenter = idx * ITEM_HEIGHT;
+    const distance = itemCenter - scrollTop;
+    const absDist = Math.abs(distance);
+    
+    // Tính góc xoay rotateX (-65deg đến 65deg)
+    const angle = Math.max(-65, Math.min(65, (distance / ITEM_HEIGHT) * 22));
+    // Tính độ mờ opacity (0.18 đến 1.0)
+    const opacity = Math.max(0.18, 1 - (absDist / (ITEM_HEIGHT * 2.6)));
+    // Tính độ phóng đại
+    const scale = absDist < (ITEM_HEIGHT * 0.5) ? 1.15 : 0.95;
+
+    item.style.transform = `perspective(300px) rotateX(${-angle}deg) scale(${scale})`;
+    item.style.opacity = opacity.toFixed(2);
+
+    if (absDist < (ITEM_HEIGHT * 0.5)) {
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  });
+}
+
+/**
+ * Cuộn con lăn mượt mà tới giờ và phút cụ thể
+ * @param {number} hour 
+ * @param {number} minute 
+ * @param {boolean} smooth 
+ */
+function scrollToTime(hour, minute, smooth = true) {
+  const hoursScroller = document.getElementById('ios-wheel-hours-scroller');
+  const minutesScroller = document.getElementById('ios-wheel-minutes-scroller');
+  const behavior = smooth ? 'smooth' : 'auto';
+
+  const h = Math.max(0, Math.min(23, hour || 0));
+  const m = Math.max(0, Math.min(59, minute || 0));
+
+  if (hoursScroller) {
+    hoursScroller.scrollTo({ top: h * ITEM_HEIGHT, behavior });
+    updateWheel3DEffect(hoursScroller);
+  }
+  if (minutesScroller) {
+    minutesScroller.scrollTo({ top: m * ITEM_HEIGHT, behavior });
+    updateWheel3DEffect(minutesScroller);
+  }
+
+  updatePickerSubpreview(h, m);
+}
+
+/**
+ * Cập nhật số giờ xem trước trên header của picker
+ * @param {number} h 
+ * @param {number} m 
+ */
+function updatePickerSubpreview(h, m) {
+  const subpreview = document.getElementById('ios-picker-subpreview');
+  if (subpreview) {
+    const strH = String(h).padStart(2, '0');
+    const strM = String(m).padStart(2, '0');
+    subpreview.textContent = `${strH} : ${strM}`;
+  }
+}
+
+/**
+ * Lấy giá trị giờ và phút hiện tại từ vị trí cuộn của 2 con lăn
+ * @returns {{ hour: number, minute: number, formatted: string }}
+ */
+function getSelectedWheelTime() {
+  const hoursScroller = document.getElementById('ios-wheel-hours-scroller');
+  const minutesScroller = document.getElementById('ios-wheel-minutes-scroller');
+
+  let h = 7;
+  let m = 0;
+
+  if (hoursScroller) {
+    h = Math.max(0, Math.min(23, Math.round(hoursScroller.scrollTop / ITEM_HEIGHT)));
+  }
+  if (minutesScroller) {
+    m = Math.max(0, Math.min(59, Math.round(minutesScroller.scrollTop / ITEM_HEIGHT)));
+  }
+
+  const strH = String(h).padStart(2, '0');
+  const strM = String(m).padStart(2, '0');
+  return { hour: h, minute: m, formatted: `${strH}:${strM}` };
+}
+
+/**
+ * Mở modal con lăn iOS cho ô Bắt đầu hoặc ô Kết thúc
+ * @param {'start' | 'end'} targetType 
+ */
+export function openIosWheelPicker(targetType = 'start') {
+  ensureIosWheelPickerDom();
+  pickerState.activeTarget = targetType;
+
+  const pickerModal = document.getElementById(PICKER_MODAL_ID);
+  const titleEl = document.getElementById('ios-picker-title');
+
+  const currentVal = targetType === 'start' ? pickerState.startTime : pickerState.endTime;
+  const parts = currentVal.split(':').map(s => parseInt(s, 10));
+  const h = isNaN(parts[0]) ? (targetType === 'start' ? 7 : 8) : parts[0];
+  const m = isNaN(parts[1]) ? (targetType === 'start' ? 0 : 50) : parts[1];
+
+  if (titleEl) {
+    titleEl.textContent = targetType === 'start' ? 'Chọn Giờ Bắt Đầu' : 'Chọn Giờ Kết Thúc';
+  }
+
+  if (pickerModal) {
+    pickerModal.classList.remove('hidden');
+    // Cuộn tới vị trí ngay lập tức khi mở
+    requestAnimationFrame(() => {
+      scrollToTime(h, m, false);
+      // Hiệu ứng mượt sau đó
+      setTimeout(() => {
+        scrollToTime(h, m, true);
+      }, 50);
+    });
+  }
+}
+
+/**
+ * Đóng modal con lăn iOS
+ */
+export function closeIosWheelPicker() {
+  const pickerModal = document.getElementById(PICKER_MODAL_ID);
+  if (pickerModal) {
+    pickerModal.classList.add('hidden');
+  }
+}
+
+/**
+ * Gắn các sự kiện cho Modal Con Lăn iOS
+ */
+function bindIosWheelPickerEvents() {
+  if (isPickerEventsBound) return;
+
+  const pickerModal = document.getElementById(PICKER_MODAL_ID);
+  const cancelBtn = document.getElementById('btn-ios-picker-cancel');
+  const saveBtn = document.getElementById('btn-ios-picker-save');
+  const hoursScroller = document.getElementById('ios-wheel-hours-scroller');
+  const minutesScroller = document.getElementById('ios-wheel-minutes-scroller');
+
+  if (!pickerModal) return;
+
+  // Hủy
+  if (cancelBtn) {
+    cancelBtn.onclick = (e) => {
+      e.preventDefault();
+      closeIosWheelPicker();
+    };
+  }
+
+  // Đóng khi click backdrop
+  pickerModal.addEventListener('click', (e) => {
+    if (e.target === pickerModal) {
+      closeIosWheelPicker();
+    }
+  });
+
+  // Lưu giờ đã chọn
+  if (saveBtn) {
+    saveBtn.onclick = (e) => {
+      e.preventDefault();
+      const selected = getSelectedWheelTime();
+      
+      if (pickerState.activeTarget === 'start') {
+        pickerState.startTime = selected.formatted;
+        const startEl = document.getElementById('display-start-time');
+        if (startEl) startEl.textContent = selected.formatted;
+      } else {
+        pickerState.endTime = selected.formatted;
+        const endEl = document.getElementById('display-end-time');
+        if (endEl) endEl.textContent = selected.formatted;
+      }
+
+      closeIosWheelPicker();
+      autoDetectPeriodFromTime();
+    };
+  }
+
+  // Lắng nghe sự kiện scroll của 2 con lăn để cập nhật 3D effect
+  let hourScrollTimer = null;
+  if (hoursScroller) {
+    hoursScroller.addEventListener('scroll', () => {
+      updateWheel3DEffect(hoursScroller);
+      clearTimeout(hourScrollTimer);
+      hourScrollTimer = setTimeout(() => {
+        const cur = getSelectedWheelTime();
+        updatePickerSubpreview(cur.hour, cur.minute);
+      }, 50);
+    }, { passive: true });
+  }
+
+  let minScrollTimer = null;
+  if (minutesScroller) {
+    minutesScroller.addEventListener('scroll', () => {
+      updateWheel3DEffect(minutesScroller);
+      clearTimeout(minScrollTimer);
+      minScrollTimer = setTimeout(() => {
+        const cur = getSelectedWheelTime();
+        updatePickerSubpreview(cur.hour, cur.minute);
+      }, 50);
+    }, { passive: true });
+  }
+
+  // Gắn sự kiện click trực tiếp vào item số để tự cuộn tới item đó
+  pickerModal.querySelectorAll('.ios-wheel-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const val = parseInt(item.dataset.val, 10);
+      const parentScroller = item.closest('.ios-wheel-scroller');
+      if (parentScroller) {
+        parentScroller.scrollTo({ top: val * ITEM_HEIGHT, behavior: 'smooth' });
+      }
+    });
+  });
+
+  // Gắn sự kiện cho các pill phím tắt nhanh mốc giờ chuẩn
+  pickerModal.querySelectorAll('.ios-quick-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const timeStr = pill.dataset.time || '07:00';
+      const parts = timeStr.split(':').map(s => parseInt(s, 10));
+      scrollToTime(parts[0], parts[1], true);
+    });
+  });
+
+  isPickerEventsBound = true;
+}
+
+// ============================================================================
+// 5. EVENT HANDLERS & DOM BINDING FOR MAIN MODAL
+// ============================================================================
+
+/**
+ * Gắn các sự kiện cho Modal Thêm Tiết Học
  */
 function bindAddClassModalEvents() {
   if (isEventsBound) return;
@@ -484,12 +813,13 @@ function bindAddClassModalEvents() {
   const deleteBtn = document.getElementById('btn-delete-class');
   const savePresetBtn = document.getElementById('btn-save-custom-preset');
   const saveRoomBtn = document.getElementById('btn-save-custom-room');
-  const startTimeInput = document.getElementById('class-start-time');
-  const endTimeInput = document.getElementById('class-end-time');
+  
+  const pickStartBtn = document.getElementById('btn-pick-start-time');
+  const pickEndBtn = document.getElementById('btn-pick-end-time');
 
   if (!modal || !form) return;
 
-  // Đóng modal
+  // Đóng modal chính
   const closeModal = () => {
     modal.classList.add('hidden');
     document.body.style.overflow = '';
@@ -506,18 +836,27 @@ function bindAddClassModalEvents() {
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-      closeModal();
+      const pickerModal = document.getElementById(PICKER_MODAL_ID);
+      if (pickerModal && !pickerModal.classList.contains('hidden')) {
+        closeIosWheelPicker();
+      } else {
+        closeModal();
+      }
     }
   });
 
-  // Gắn sự kiện thay đổi giờ trên 2 ô Bắt đầu và Kết thúc (iOS Picker)
-  if (startTimeInput) {
-    startTimeInput.addEventListener('input', autoDetectPeriodFromTime);
-    startTimeInput.addEventListener('change', autoDetectPeriodFromTime);
+  // Gắn sự kiện click 2 Capsule Bắt Đầu và Kết Thúc -> Mở iOS Roller Wheel
+  if (pickStartBtn) {
+    pickStartBtn.onclick = (e) => {
+      e.preventDefault();
+      openIosWheelPicker('start');
+    };
   }
-  if (endTimeInput) {
-    endTimeInput.addEventListener('input', autoDetectPeriodFromTime);
-    endTimeInput.addEventListener('change', autoDetectPeriodFromTime);
+  if (pickEndBtn) {
+    pickEndBtn.onclick = (e) => {
+      e.preventDefault();
+      openIosWheelPicker('end');
+    };
   }
 
   // Gắn sự kiện Lưu Ca Học Mẫu Mới
@@ -615,10 +954,8 @@ function bindAddClassModalEvents() {
     const period = periodInput ? periodInput.value.trim() : '';
     const room = roomInput ? roomInput.value.trim() : 'Chưa xếp phòng';
 
-    const startInput = document.getElementById('class-start-time');
-    const endInput = document.getElementById('class-end-time');
-    const startTime = startInput && startInput.value ? startInput.value : (timeRange.split('-')[0] || '').trim();
-    const endTime = endInput && endInput.value ? endInput.value : (timeRange.split('-')[1] || '').trim();
+    const startTime = pickerState.startTime || (timeRange.split('-')[0] || '').trim();
+    const endTime = pickerState.endTime || (timeRange.split('-')[1] || '').trim();
 
     if (!subject || !timeRange) {
       showToast('Vui lòng nhập tên môn và khung giờ học!');
@@ -652,7 +989,7 @@ function bindAddClassModalEvents() {
 }
 
 // ============================================================================
-// 5. PUBLIC CONTROLLER / EXPORTS
+// 6. PUBLIC CONTROLLER / EXPORTS
 // ============================================================================
 
 /**
