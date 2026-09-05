@@ -65,14 +65,24 @@ tools_3/
 │   ├── 7.Performance/
 │   │   ├── Optimization_Plan.md  # Kế hoạch tối ưu Core Web Vitals & Caching (Phase 3)
 │   │   └── Deployment_Runbook.md # Hướng dẫn CI/CD và cài đặt ứng dụng PWA
-│   └── 8.Marketing/
-│       ├── MARKETING_INSIGHTS.md # Ngân hàng ý tưởng, kịch bản TikTok/Reels & bài đăng
-│       └── USP_Matrix.md         # Ma trận so sánh điểm độc đáo vượt trội
-├── app.js                        # Xử lý logic nghiệp vụ, SVG Donut Ring & State Management
-├── index.html                    # Cấu trúc giao diện ứng dụng SPA
+│   ├── 8.Marketing/
+│   │   ├── MARKETING_INSIGHTS.md # Ngân hàng ý tưởng, kịch bản TikTok/Reels & bài đăng
+│   │   └── USP_Matrix.md         # Ma trận so sánh điểm độc đáo vượt trội
+│   └── 9.More/
+│       ├── README.md             # Mục lục & báo cáo tổng hợp chi tiết tài liệu bổ sung
+│       ├── implementation_plan.md# Kế hoạch kiến trúc Chiếc Cặp & PWA
+│       └── walkthrough.md        # Báo cáo cổng đăng nhập Authentication Gate
+├── src/                          # 📂 TOÀN BỘ MÃ NGUỒN 5 TẦNG MÔ-ĐUN (ES MODULES)
+│   ├── 1.Frontend/               # Giao diện, Components (CircularNode, EditModal), Views
+│   ├── 2.Backend/                # Thuật toán tính điểm mục tiêu, Parser thời khóa biểu
+│   ├── 3.Database/               # State Management trung tâm, LocalStorage Engine, Seed Data
+│   ├── 4.Security/               # Hàm làm sạch dữ liệu escapeHtml, URL Validators
+│   └── 5.Performance/            # Service Worker PWA Manager, Visibility Optimizer
+├── index.html                    # Cấu trúc giao diện ứng dụng (nạp main.js type="module")
 ├── style.css                     # Thiết kế Glassmorphism, CSS Variables & Jiggle Animation
 ├── manifest.json                 # Cấu hình PWA Web App Manifest
-├── sw.js                         # Service Worker xử lý Cache & Offline First
+├── sw.js                         # Service Worker xử lý Cache & Offline First (v8)
+├── AGENTS.md                     # Nguyên tắc phát triển & style guide toàn dự án
 └── README.md                     # Tài liệu giới thiệu dự án
 ```
 

@@ -6,7 +6,27 @@
 
 ---
 
-## 📅 [2026-09-05 11:10] - Hoàn Tất Tái Cấu Trúc Mã Nguồn Thành Kiến Trúc 5 Tầng Mô-đun (FE, BE, DB, Security, Performance)
+## 📅 [2026-09-05 11:23] - Thiết Lập Skill `9-more-archiver` & Quản Lý Tập Trung Tài Liệu Bổ Sung Trong `docs/9.More/`
+
+- **🎯 Mục tiêu**:
+  - Tạo skill `9-more-archiver` để tự động phát hiện, thu gom các file `.md` phát sinh ở thư mục gốc vào `docs/9.More/`.
+  - Thiết lập file mục lục tổng hợp `docs/9.More/README.md` tóm tắt chi tiết, dễ hiểu mọi tài liệu lưu trữ.
+  - Bổ sung quy tắc bắt buộc vào `.agents/rules/architecture_rules.md` và `AGENTS.md` để toàn bộ Agent luôn tuân thủ việc giữ thư mục gốc tinh gọn.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Skill]` Tạo `.agents/skills/9-more-archiver/SKILL.md` và `.agents/skills/9-more-archiver/resources/MORE_INDEX_TEMPLATE.md`.
+  - `[Docs]` Khởi tạo thư mục `docs/9.More/` kèm file mục lục báo cáo [docs/9.More/README.md](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/docs/9.More/README.md).
+  - `[Archive]` Thu gom an toàn `implementation_plan.md` và `walkthrough.md` từ thư mục gốc vào `docs/9.More/` và dọn dẹp sạch sẽ thư mục gốc.
+  - `[Rules]` Cập nhật quy tắc bắt buộc trong [architecture_rules.md](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/.agents/rules/architecture_rules.md) và [AGENTS.md](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/AGENTS.md).
+
+- **💡 Quyết định Kỹ thuật & Kiến trúc**:
+  - *Clean Root Policy*: Thư mục gốc chỉ lưu giữ `README.md` và `AGENTS.md` giúp cấu trúc repo luôn sạch đẹp, chuyên nghiệp theo chuẩn quốc tế.
+  - *Centralized Docs Index*: File `docs/9.More/README.md` giúp người dùng và Agent tra cứu lại các quyết định, thiết kế cũ trong 3 giây.
+
+- **📌 Trạng thái hiện tại & Kế hoạch tiếp theo (Next Steps)**:
+  - [x] Thiết lập thành công Skill `9-more-archiver` và tích hợp Rule.
+  - [x] Đã dọn dẹp thư mục gốc và khởi tạo `docs/9.More/`.
+  - [ ] Sẵn sàng cho các phiên làm việc phát triển tính năng mới.
 
 - **🎯 Mục tiêu**:
   - Phân rã mã nguồn monolithic thành 5 tầng mô-đun hóa sạch sẽ (`src/1.Frontend/`, `src/2.Backend/`, `src/3.Database/`, `src/4.Security/`, `src/5.Performance/`).

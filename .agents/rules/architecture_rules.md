@@ -29,3 +29,12 @@ Mọi file mã nguồn mới hoặc logic chỉnh sửa phải được đặt �
 
 - Sử dụng chuẩn **Native ES Modules** (`import` / `export`) trực tiếp trên trình duyệt hiện đại (`type="module"`), tuyệt đối không cài thêm các bundler nặng nề để đảm bảo deploy tức thì qua GitHub Pages.
 - Luôn cập nhật [WORKLOG.md](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/docs/0.Log/WORKLOG.md) sau mỗi phiên làm việc.
+
+---
+
+## 📁 4. QUY TẮC THU GOM TÀI LIỆU BỔ SUNG (`docs/9.More/`)
+
+- Thư mục gốc dự án chỉ được chứa **`README.md`** và **`AGENTS.md`**.
+- Mọi tài liệu Markdown phát sinh trong quá trình phát triển (kế hoạch thực thi `implementation_plan.md`, báo cáo `walkthrough.md`, bản vẽ nháp, ghi chú kỹ thuật...) **BẮT BUỘC** phải được gom vào thư mục **`docs/9.More/`** theo skill `9-more-archiver`.
+- File **`docs/9.More/README.md`** phải được tự động cập nhật để liệt kê, tóm tắt và dẫn link chi tiết đến từng tài liệu bên trong.
+

@@ -1,5 +1,10 @@
 # Kế hoạch triển khai: "Chiếc Cặp Thông Minh" (Smart Backpack) & Hỗ trợ Offline PWA
 
+> **Nguồn**: Được lưu trữ từ giai đoạn phát triển tính năng Chiếc Cặp & PWA  
+> **Vị trí lưu trữ**: `docs/9.More/implementation_plan.md`
+
+---
+
 Xây dựng tính năng **"Chiếc cặp thông minh" (Smart Backpack)** – hệ thống quản lý thư mục, tài liệu học tập theo từng môn học độc lập (File Explorer thu nhỏ), tích hợp liên kết Google Drive, lưu trữ offline bằng **IndexedDB** và nâng cấp ứng dụng thành **PWA (Progressive Web App)** có thể cài đặt lên điện thoại.
 
 ---

@@ -1,4 +1,9 @@
-# Màn Hình Đăng Nhập Riêng Biệt (Authentication Gate) 🚪🔒✨
+# Báo Cáo Tính Năng: Màn Hình Đăng Nhập Riêng Biệt (Authentication Gate) 🚪🔒✨
+
+> **Nguồn**: Được lưu trữ từ giai đoạn phát triển Màn hình Đăng nhập & Cloud Sync  
+> **Vị trí lưu trữ**: `docs/9.More/walkthrough.md`
+
+---
 
 Đã xây dựng **Màn Hình Đăng Nhập (Login Landing Screen)** riêng biệt trước khi bước vào giao diện ứng dụng:
 

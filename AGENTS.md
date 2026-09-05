@@ -16,3 +16,5 @@ Toàn bộ AI Agent hoạt động trên repository này phải tuân thủ nghi
    - Trích xuất điểm độc đáo / ý tưởng vào `docs/0.Log/MARKETING_LOG.md` theo skill `update-new-in4`.
    - Khi có thay đổi kiến trúc, cập nhật `docs/` tương ứng.
 4. **Deploy & Static Hosting**: Giữ nguyên cơ chế Zero-Dependency ES Modules để chạy mượt mà trên GitHub Pages.
+5. **Thu gom tài liệu bổ sung (`docs/9.More/`)**: Mọi file `.md` phát sinh ở thư mục cha (trừ `README.md` & `AGENTS.md`) phải được gom vào `docs/9.More/` kèm file mục lục tổng hợp `docs/9.More/README.md` theo skill `9-more-archiver`.
+
