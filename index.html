@@ -29,6 +29,7 @@
   <link rel="stylesheet" href="src/1.Frontend/styles/6.modals.css">
   <link rel="stylesheet" href="src/1.Frontend/styles/7.markdown-editor.css">
   <link rel="stylesheet" href="src/1.Frontend/styles/8.responsive.css">
+  <link rel="stylesheet" href="src/1.Frontend/styles/9.heatmap-view.css">
 </head>
 <body class="theme-dark">
   <!-- Background Glow Accents -->
@@ -158,8 +159,8 @@
           <button id="view-grid-btn" class="toggle-btn active" title="Lưới tuần (Thời khóa biểu)" aria-label="Lưới tuần">
             <i class="fa-solid fa-table-columns"></i>
           </button>
-          <button id="view-today-btn" class="toggle-btn" title="Hôm nay (Tiết học trong ngày)" aria-label="Hôm nay">
-            <i class="fa-solid fa-calendar-day"></i>
+          <button id="view-today-btn" class="toggle-btn" title="Bản Đồ Nhiệt Cường Độ Học Tập (Tuần / Tháng / Quý / Năm)" aria-label="Bản Đồ Nhiệt">
+            <i class="fa-solid fa-fire-flame-curved"></i>
           </button>
           <button id="view-grades-btn" class="toggle-btn" title="Tỉ lệ điểm thành phần" aria-label="Tỉ lệ điểm">
             <i class="fa-solid fa-chart-pie"></i>
@@ -296,17 +297,9 @@
         </section>
       </section>
 
-      <!-- VIEW 2: Today Focus View -->
+      <!-- VIEW 2: Study Intensity Heatmap View (Tuần / Tháng / Quý / Năm) -->
       <section id="today-view-container" class="view-panel">
-        <div class="today-timeline-wrapper">
-          <div class="today-header">
-            <div class="today-badge-large"><i class="fa-solid fa-clock"></i> Lịch Học Hôm Nay</div>
-            <p id="today-summary-text">Hôm nay</p>
-          </div>
-          <div class="timeline-list" id="today-timeline-list">
-            <!-- Dynamically populated today's classes -->
-          </div>
-        </div>
+        <!-- Render động từ HeatmapView.js -->
       </section>
 
       <!-- VIEW 3: Grade Breakdown & Syllabus View -->

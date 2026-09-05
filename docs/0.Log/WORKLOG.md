@@ -4,6 +4,32 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 00:15] - Nâng Cấp Mục 2 Thành "Bản Đồ Nhiệt Cường Độ Học Tập & Năng Suất (Study Intensity Heatmap Matrix)" 🔥
+
+- **🎯 Mục tiêu**:
+  - Chuyển đổi toàn diện Mục 2 thành Bản Đồ Nhiệt Học Tập Đa Khung Thời Gian (Tuần / Tháng / Học Kỳ / Cả Năm), giải quyết triệt để sự trùng lặp của view hôm nay cũ.
+  - Cung cấp các chỉ số KPI trực quan: Số tiết hôm nay, Tổng tiết cả học kỳ, Tuần cao điểm nhất, và Tổng số ngày lên lớp.
+  - Tích hợp 4 chế độ xem phân tích nhiệt:
+    1. **Tuần (Weekly 24h Matrix)**: Ma trận nhiệt 7 ngày x các ca học trong tuần.
+    2. **Tháng (Monthly Calendar Grid)**: Lịch 30/31 ngày trực quan kèm số tiết và mật độ màu nhiệt, hỗ trợ chuyển tháng trước/sau.
+    3. **Học Kỳ / Quý (Semester 16-20 Weeks)**: Thẻ tuần nhiệt trực quan, đánh giá tải học (Nhẹ / Vừa / Cao điểm / Cháy Deadline), bấm 1-chạm chuyển ngay về tuần đó.
+    4. **Cả Năm (Yearly GitHub Matrix)**: 52 tuần x 7 ngày (364 ô vuông) chuẩn GitHub Contribution / Apple Activity kèm tooltip thông minh.
+  - Vẫn giữ nguyên Widget **Tiết học Hôm nay (Today Focus)** ở đầu trang để xem nhanh ca học trong ngày.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / View Module]` Tạo mới [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    - Đóng gói toàn bộ thuật toán tổng hợp dữ liệu học kỳ `aggregateSemesterData()`, tính mức nhiệt `getHeatmapLevel()`, đánh giá tải tuần `evaluateWeekWorkload()`, và render 4 chế độ Tuần / Tháng / Kỳ / Năm.
+  - `[Frontend / CSS Architecture]` Tạo mới [`src/1.Frontend/styles/9.heatmap-view.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/9.heatmap-view.css):
+    - Thiết kế Glassmorphism chuẩn Dark mode tím than neon, gradient thang đo nhiệt độ 5 cấp độ (Level 0 $\rightarrow$ Level 4).
+  - `[Frontend / App Shell DOM]` Cập nhật [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html):
+    - Nạp `9.heatmap-view.css`.
+    - Thay đổi Tab 2 thành icon ngọn lửa `fa-solid fa-fire-flame-curved` và tooltip "Bản Đồ Nhiệt Cường Độ Học Tập".
+  - `[Frontend / Main Controller]` Cập nhật [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    - Kết nối `renderHeatmapView` vào điều hướng tab, cơ chế `switchTab`, và xử lý sự kiện bấm ô nhiệt chuyển về tuần học tương ứng (`handleSelectWeekFromHeatmap`).
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v58` và nạp thêm 2 asset mới vào `STATIC_ASSETS` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-06 00:05] - Thêm Tính Năng Chỉnh Sửa "Lưu Ý & Ghi Chú Tuần" (Edit Weekly Notes Modal) 📝
 
 - **🎯 Mục tiêu**:

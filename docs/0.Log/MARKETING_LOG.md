@@ -5,6 +5,30 @@
 
 ---
 
+## 💎 ENTRY 3: [2026-09-06] - Study Intensity Heatmap: Bản Đồ Nhiệt Cường Độ Học Tập & Năng Suất Đa Khung Thời Gian
+
+### 📌 Phân Loại & Tags:
+`#USP` `#Gamification` `#GitHubStyleHeatmap` `#StudentProductivity` `#DataVisualization`
+
+### 1. 🌟 Nỗi Đau & Giải Pháp Đột Phá (Pain Point vs Solution):
+- **Nỗi đau của sinh viên**: Không nhìn thấy bức tranh tổng thể của học kỳ, dễ bị "ngợp" khi bước vào các tuần cao điểm (cháy deadline, thi giữa kỳ, nộp đồ án dồn dập).
+- **Giải pháp đột phá**: **Study Intensity Heatmap Matrix (Tuần / Tháng / Quý / Năm)** – Lấy cảm hứng từ GitHub Contribution Heatmap và Apple Fitness Activity Rings. Tự động tính toán mật độ tiết học, phát sáng rực rỡ theo 5 cấp độ nhiệt, cảnh báo tuần cao điểm và theo dõi chuỗi học tập (Study Streak).
+
+---
+
+### 2. 🎣 3 Viral Hooks Sắc Bén (Tiêu đề Video / Post):
+
+1. **Gamification & Aesthetic Hook (Thẩm mỹ & Động lực học tập)**:
+   > *"Khi thời khóa biểu sinh viên được biến hóa thành GitHub Contribution Heatmap: Càng chăm đi học, ma trận 52 tuần càng phát sáng tím neon rực rỡ!"*
+
+2. **Student Workload Alert Hook (Cảnh báo tuần cao điểm)**:
+   > *"Biết trước tuần nào 'cháy deadline' và tuần nào 'xả hơi' chỉ bằng một cái liếc mắt trên Bản Đồ Nhiệt Cường Độ Học Tập."*
+
+3. **Multi-Horizon Perspective Hook (Tầm nhìn toàn diện)**:
+   > *"Xem thời khóa biểu theo 4 góc nhìn thời gian: 24h trong tuần $\rightarrow$ 31 ngày trong tháng $\rightarrow$ 20 tuần học kỳ $\rightarrow$ 365 ngày cả năm học!"*
+
+---
+
 ## 💎 ENTRY 2: [2026-09-05] - Visual Schedule Builder: Tạo Tuần Trống & Nhấn Giữ Thêm Môn 1-Chạm
 
 ### 📌 Phân Loại & Tags:

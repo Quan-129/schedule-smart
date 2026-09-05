@@ -12,6 +12,7 @@ import { formatCurrentVietnameseDate } from '../2.Backend/utils/dateHelpers.js';
 import { renderBackpackView, enterJiggleMode, exitJiggleMode } from './views/BackpackView.js';
 import { renderGradesView, highlightGradeSlice } from './views/GradesView.js';
 import { renderTimetableGrid, renderTodayView, getSubjectColor } from './views/TimetableGrid.js';
+import { renderHeatmapView } from './views/HeatmapView.js';
 import { ensureEditSubjectModalDom, openEditSubjectModal, openEditDriveModal } from './components/modals/EditSubjectModal.js';
 import { ensureAddSubjectModalDom, openAddSubjectModal, initAddSubjectModal } from './components/modals/AddSubjectModal.js';
 import { ensureAddWeekModalDom, openAddWeekModal, initAddWeekModal } from './components/modals/AddWeekModal.js';
@@ -174,6 +175,7 @@ function setupWindowHelpers() {
   window.openSubjectDetailModal = openSubjectDetailModal;
   window.focusTodayTarget = focusTodayTarget;
   window.openEditWeeklyNotes = handleOpenWeeklyNotesModal;
+  window.renderHeatmapView = () => renderHeatmapView(availableWeeks, currentWeekFile, handleSelectWeekFromHeatmap);
 
   // Visual Schedule Builder Handlers
   window.openAddClassModal = (dayName = 'Thứ 2') => {
@@ -227,6 +229,20 @@ function initTabNavigation() {
   }
 }
 
+/**
+ * Xử lý khi người dùng bấm vào một tuần / ngày trên Bản Đồ Nhiệt
+ * @param {string} targetFilename 
+ */
+export function handleSelectWeekFromHeatmap(targetFilename) {
+  if (!targetFilename) return;
+  const weekSelect = document.getElementById('week-select');
+  if (weekSelect) weekSelect.value = targetFilename;
+  switchTab('grid');
+  loadWeekSchedule(targetFilename);
+  const targetWeek = availableWeeks.find(w => w.filename === targetFilename);
+  showToast(`Đã chuyển tới ${targetWeek ? targetWeek.title : targetFilename} 📅`);
+}
+
 export function switchTab(tabName) {
   state.currentTab = tabName;
 
@@ -258,10 +274,7 @@ export function switchTab(tabName) {
   } else if (tabName === 'grades') {
     renderGradesView();
   } else if (tabName === 'today') {
-    if (state.scheduleData && state.scheduleData.days) {
-      const isCurrentWeek = checkIsCurrentWeek(currentWeekFile);
-      renderTodayView(state.scheduleData.days, isCurrentWeek);
-    }
+    renderHeatmapView(availableWeeks, currentWeekFile, handleSelectWeekFromHeatmap);
   }
 }
 
@@ -564,10 +577,12 @@ async function loadWeekSchedule(filepath) {
   // 3. Render Tags Lọc Môn Học
   renderSubjectFilters(parsed.subjects || []);
 
-  // 4. Render Grid & Today View
+  // 4. Render Grid & Heatmap View
   const isCurrentWeek = checkIsCurrentWeek(filepath);
   renderTimetableGrid(parsed.days || [], isCurrentWeek);
-  renderTodayView(parsed.days || [], isCurrentWeek);
+  if (state.currentTab === 'today') {
+    renderHeatmapView(availableWeeks, currentWeekFile, handleSelectWeekFromHeatmap);
+  }
 
   // 5. Cập nhật Ghi chú tuần
   renderScheduleNotes(parsed.notes || []);
@@ -973,7 +988,9 @@ function persistCurrentSchedule() {
   // 5. Re-render UI
   const isCurrentWeek = checkIsCurrentWeek(currentWeekFile);
   renderTimetableGrid(state.scheduleData.days || [], isCurrentWeek);
-  renderTodayView(state.scheduleData.days || [], isCurrentWeek);
+  if (state.currentTab === 'today') {
+    renderHeatmapView(availableWeeks, currentWeekFile, handleSelectWeekFromHeatmap);
+  }
   updateHeroStats(state.scheduleData);
   renderSubjectFilters(state.scheduleData.subjects || []);
 }

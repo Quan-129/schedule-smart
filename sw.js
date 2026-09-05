@@ -4,7 +4,7 @@
  * ==========================================================================
  */
 
-const CACHE_NAME = 'smart-schedule-modular-v57';
+const CACHE_NAME = 'smart-schedule-modular-v58';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -17,6 +17,7 @@ const STATIC_ASSETS = [
   './src/1.Frontend/styles/6.modals.css',
   './src/1.Frontend/styles/7.markdown-editor.css',
   './src/1.Frontend/styles/8.responsive.css',
+  './src/1.Frontend/styles/9.heatmap-view.css',
   './manifest.json',
   './src/1.Frontend/main.js',
   './src/1.Frontend/components/CircularNode.js',
@@ -34,6 +35,7 @@ const STATIC_ASSETS = [
   './src/1.Frontend/views/BackpackView.js',
   './src/1.Frontend/views/GradesView.js',
   './src/1.Frontend/views/TimetableGrid.js',
+  './src/1.Frontend/views/HeatmapView.js',
   './src/2.Backend/services/GradeSolverService.js',
   './src/2.Backend/services/TimetableParser.js',
   './src/2.Backend/utils/dateHelpers.js',
