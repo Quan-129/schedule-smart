@@ -181,6 +181,7 @@
             </select>
           </div>
           <button id="next-week-btn" class="btn-nav" title="Tuần sau"><i class="fa-solid fa-chevron-right"></i></button>
+          <button id="btn-focus-today" class="btn-nav btn-today-nav" title="Ping Target: Định vị & Cuộn tới ngày Hôm nay"><i class="fa-solid fa-crosshairs"></i></button>
           <button id="btn-add-week-modal" class="btn-nav btn-add-week-nav" title="Thêm tuần học mới"><i class="fa-solid fa-plus"></i></button>
           <button id="btn-delete-week" class="btn-nav btn-delete-week-nav" title="Xóa tuần học này"><i class="fa-solid fa-trash-can"></i></button>
         </div>
@@ -196,7 +197,7 @@
         <div class="hero-banner is-collapsed" id="hero-banner">
           <div class="hero-left">
             <div class="hero-title-row">
-              <div class="date-badge" id="current-date-badge"><i class="fa-regular fa-calendar"></i> <span id="current-date-text">--</span></div>
+              <div class="date-badge" id="current-date-badge" title="Bấm để định vị nhanh ngày Hôm nay" style="cursor: pointer;"><i class="fa-regular fa-calendar"></i> <span id="current-date-text">--</span></div>
               <h2 id="schedule-title" class="schedule-main-title">Lịch học</h2>
               <div class="hero-quick-tags">
                 <span class="hero-stat-tag"><i class="fa-solid fa-graduation-cap"></i> <span id="stat-total-subjects">-- môn</span></span>
@@ -233,6 +234,9 @@
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
             <input type="text" id="search-input" placeholder="Tìm môn học, phòng học, ca học hoặc thứ (VD: Thứ 2, B1-305, Học máy)..." autocomplete="off">
             <button id="clear-search-btn" class="btn-clear hidden" title="Xóa tìm kiếm"><i class="fa-solid fa-xmark"></i></button>
+            <button type="button" id="btn-ping-today-search" class="btn-ping-target-pill" title="Định vị nhanh ngày Hôm nay (Ping Target)">
+              <i class="fa-solid fa-crosshairs"></i> <span>Hôm nay</span>
+            </button>
           </div>
           <div class="filter-tags" id="subject-filter-tags">
             <!-- Dynamic Subject Filter Tags -->

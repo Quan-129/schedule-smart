@@ -4,6 +4,29 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 21:40] - Xây Dựng Tính Năng Ping Target Focus Hôm Nay Trên Thời Khóa Biểu (Mục 1)
+
+- **🎯 Mục tiêu**:
+  - Bổ sung các nút thao tác nhanh **Ping Target (Định vị Hôm nay)**: Cho phép người dùng bấm 1-chạm để tự động chuyển về tuần hiện tại và cuộn mượt màn hình vào đúng khung ngày hôm nay.
+  - Tích hợp hiệu ứng Radar Ping Pulse phát sáng rực rỡ trên thẻ ngày hôm nay (`.day-card.is-today`).
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / UI & Navbar]` Cập nhật [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html) và [`2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css):
+    - Thêm nút `#btn-focus-today` (`.btn-today-nav`) với icon `fa-crosshairs` xoay phát sáng trên cụm điều hướng tuần Navbar.
+    - Thêm nút chip `#btn-ping-today-search` (`.btn-ping-target-pill`) trong ô tìm kiếm Thời khóa biểu (Mục 1).
+    - Biến Date Badge `#current-date-badge` trên Hero Banner thành nút bấm tương tác nhanh định vị ngày hôm nay.
+  - `[Frontend / Animation CSS]` Cập nhật [`3.timetable-grid.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/3.timetable-grid.css):
+    - Thêm keyframe `@keyframes pingTargetPulse` tạo hiệu ứng sóng radar neon tỏa ra 3 nhịp và phóng to thẻ ngày nhẹ nhàng khi được kích hoạt (`.day-card.ping-target-active`).
+  - `[Frontend / Main Logic]` Cập nhật [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    - Xây dựng hàm `focusTodayTarget()`:
+      * Tự động chuyển về Tab Grid nếu đang ở tab khác.
+      * Tự động kiểm tra và chuyển tuần về đúng tuần hôm nay nếu đang xem tuần khác.
+      * Cuộn mượt màn hình tới thẻ ngày hôm nay (`scrollIntoView({ behavior: 'smooth', block: 'center' })`).
+      * Kích hoạt hiệu ứng `.ping-target-active` và thông báo Toast *"Đã định vị ngày Hôm nay! 🎯"*.
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v35` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 21:35] - Khắc Phục Lỗi ReferenceError: ensureAddSubjectModalDom & Tối Ưu Import Modals
 
 - **🎯 Mục tiêu**:

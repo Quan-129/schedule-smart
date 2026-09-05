@@ -297,6 +297,31 @@
   background: linear-gradient(180deg, var(--accent-subtle) 0%, var(--bg-card) 40%);
 }
 
+/* Hiệu ứng Ping Target khi bấm Focus Hôm Nay */
+@keyframes pingTargetPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.8), 0 0 25px rgba(99, 102, 241, 0.6);
+    border-color: #818cf8;
+  }
+  50% {
+    transform: scale(1.025);
+    box-shadow: 0 0 0 16px rgba(99, 102, 241, 0), 0 0 40px rgba(99, 102, 241, 0.9);
+    border-color: #6366f1;
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0), 0 0 15px rgba(99, 102, 241, 0.3);
+    border-color: var(--accent-primary);
+  }
+}
+
+.day-card.ping-target-active {
+  animation: pingTargetPulse 0.85s cubic-bezier(0.25, 1, 0.5, 1) 3;
+  z-index: 10;
+  position: relative;
+}
+
 .day-header {
   display: flex;
   justify-content: space-between;

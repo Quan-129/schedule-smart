@@ -48,10 +48,14 @@ async function initApp() {
   // 2. Gắn các hàm tiện ích toàn cục vào window để hỗ trợ HTML onclick
   setupWindowHelpers();
 
-  // 3. Hiển thị ngày tháng tiếng Việt
+  // 3. Hiển thị ngày tháng tiếng Việt & gắn click định vị
   const currentDateEl = document.getElementById('current-date-text');
+  const currentDateBadge = document.getElementById('current-date-badge');
   if (currentDateEl) {
     currentDateEl.textContent = formatCurrentVietnameseDate();
+  }
+  if (currentDateBadge) {
+    currentDateBadge.onclick = focusTodayTarget;
   }
 
   // 4. Khởi tạo Firebase Auth & Google Login
@@ -164,6 +168,7 @@ function setupWindowHelpers() {
   window.openEditDriveModal = openEditDriveModal;
   window.openEditSubjectModal = openEditSubjectModal;
   window.openSubjectDetailModal = openSubjectDetailModal;
+  window.focusTodayTarget = focusTodayTarget;
 
   // Visual Schedule Builder Handlers
   window.openAddClassModal = (dayName = 'Thứ 2') => {
@@ -363,6 +368,11 @@ async function initWeekSelector() {
     addWeekNavBtn.onclick = () => {
       openAddWeekModal(availableWeeks);
     };
+  }
+
+  const focusTodayNavBtn = document.getElementById('btn-focus-today');
+  if (focusTodayNavBtn) {
+    focusTodayNavBtn.onclick = focusTodayTarget;
   }
 
   if (deleteWeekNavBtn) {
@@ -742,6 +752,11 @@ function initSearchAndFilters() {
     };
   }
 
+  const pingTodaySearchBtn = document.getElementById('btn-ping-today-search');
+  if (pingTodaySearchBtn) {
+    pingTodaySearchBtn.onclick = focusTodayTarget;
+  }
+
   // 2. Tìm kiếm Tỉ lệ điểm
   const gradesSearch = document.getElementById('grades-search-input');
   if (gradesSearch) {
@@ -915,6 +930,44 @@ function persistCurrentSchedule() {
   renderTodayView(state.scheduleData.days || [], isCurrentWeek);
   updateHeroStats(state.scheduleData);
   renderSubjectFilters(state.scheduleData.subjects || []);
+}
+
+/**
+ * Định vị & Focus vào ngày hôm nay trong Ma trận Thời khóa biểu (Mục 1)
+ */
+export async function focusTodayTarget() {
+  // 1. Chuyển sang Tab Thời khóa biểu nếu đang ở tab khác
+  switchTab('grid');
+
+  // 2. Kiểm tra nếu tuần đang xem không phải tuần hiện tại -> Chuyển về tuần hiện tại
+  const isCurrentWeek = checkIsCurrentWeek(currentWeekFile);
+  if (!isCurrentWeek) {
+    const todayWeekFile = getInitialWeekFilename();
+    if (todayWeekFile && todayWeekFile !== currentWeekFile) {
+      showToast('Đang chuyển về tuần hiện tại...');
+      await loadWeekSchedule(todayWeekFile);
+    }
+  }
+
+  // 3. Định vị và kích hoạt hiệu ứng Ping Target trên thẻ ngày Hôm Nay
+  setTimeout(() => {
+    const todayCard = document.querySelector('.day-card.is-today');
+    if (todayCard) {
+      todayCard.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      todayCard.classList.remove('ping-target-active');
+      // Trigger reflow để kích hoạt lại CSS animation
+      void todayCard.offsetWidth;
+      todayCard.classList.add('ping-target-active');
+
+      setTimeout(() => {
+        todayCard.classList.remove('ping-target-active');
+      }, 2600);
+
+      showToast('Đã định vị ngày Hôm nay! 🎯');
+    } else {
+      showToast('Hôm nay không nằm trong lịch học đang hiển thị.');
+    }
+  }, 120);
 }
 
 

@@ -127,6 +127,52 @@
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
 }
 
+.btn-today-nav {
+  color: var(--accent-primary) !important;
+  background: rgba(99, 102, 241, 0.12) !important;
+  margin-left: 0.2rem;
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+}
+
+.btn-today-nav:hover {
+  background: var(--accent-primary) !important;
+  color: #ffffff !important;
+  transform: scale(1.15) rotate(90deg);
+  box-shadow: 0 0 14px rgba(99, 102, 241, 0.6);
+}
+
+.btn-ping-target-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--accent-subtle);
+  color: var(--accent-primary);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: var(--radius-full);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  margin-left: 0.45rem;
+  white-space: nowrap;
+}
+
+.btn-ping-target-pill:hover {
+  background: var(--accent-primary);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.4);
+}
+
+.btn-ping-target-pill:active {
+  transform: scale(0.96);
+}
+
+.btn-ping-target-pill i {
+  font-size: 0.88rem;
+}
+
 .week-dropdown-wrapper {
   display: flex;
   align-items: center;
