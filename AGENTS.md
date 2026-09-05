@@ -21,9 +21,11 @@ Toàn bộ AI Agent hoạt động trên repository này **BẮT BUỘC PHẢI T
 
 ---
 
-## 🏛 3. KIẾN TRÚC 5 TẦNG MÔ-ĐUN (`src/`)
-Mọi file mã nguồn phải nằm đúng trong 5 tầng và giữ mỗi file < 250 dòng:
+## 🏛 3. KIẾN TRÚC 5 TẦNG MÔ-ĐUN (`src/`) & MODULAR CSS
+Mọi file mã nguồn phải nằm đúng trong 5 tầng và giữ mỗi file < 250–300 dòng:
 - `src/1.Frontend/`: Giao diện, Components, Views, User Event handlers.
+  * **Modular CSS (`src/1.Frontend/styles/`)**: Toàn bộ CSS bắt buộc phải chia nhỏ theo từng Component / View (ví dụ: `1.variables.css`, `2.navbar.css`, `3.timetable-grid.css`, `4.grade-solver.css`, `5.backpack-drive.css`, `6.modals.css`, `7.markdown-editor.css`, `8.responsive.css`).
+  * **Tuyệt đối không dồn CSS vào một file khổng lồ**: Giúp tối ưu token AI (chỉ đọc/sửa đúng file cần thiết ~200 dòng), ngăn ngừa xung đột style và tăng tốc độ tải HTTP/2.
 - `src/2.Backend/`: Thuật toán tính điểm mục tiêu, Parser thời khóa biểu, Date Helpers (Pure Functions).
 - `src/3.Database/`: State Management trung tâm, LocalStorage Engine, Seed Data, Firebase Auth.
 - `src/4.Security/`: Hàm làm sạch dữ liệu `escapeHtml`, URL Validators.

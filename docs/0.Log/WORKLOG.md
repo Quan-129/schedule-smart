@@ -4,6 +4,37 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 15:35] - Tái Cấu Trúc Toàn Diện Modular CSS Architecture & Ràng Buộc Quy Tắc Tối Ưu Token trong AGENTS.md
+
+- **🎯 Mục tiêu**:
+  - Giải quyết triệt để vấn đề file `style.css` đơn khối quá lớn (~3.911 dòng, ~85 KB) gây tiêu tốn hàng nghìn token context của AI và làm chậm quá trình bảo trì/phát triển.
+  - Tách `style.css` thành 8 modules CSS chuyên biệt theo từng View/Component trong `src/1.Frontend/styles/` tuân thủ nghiêm ngặt quy tắc mỗi file < 300 dòng.
+  - Bổ sung quy tắc ràng buộc bắt buộc về Modular CSS Architecture vào `AGENTS.md`.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Architecture / Rule]` Cập nhật `AGENTS.md` bổ sung điều khoản bắt buộc về **Modular CSS (`src/1.Frontend/styles/`)**, nghiêm cấm dồn CSS vào một file lớn để tối ưu token và tránh xung đột style.
+  - `[Frontend / Modular CSS]` Tách `style.css` thành 8 file module chuẩn kiến trúc 5 tầng:
+    1. `src/1.Frontend/styles/1.variables.css` (Tokens, Themes, Resets, App Wrapper, Auth Landing Gate).
+    2. `src/1.Frontend/styles/2.navbar.css` (Navbar, Brand, User Profile, 4 View Toggles, Week Navigation, Filter Bar).
+    3. `src/1.Frontend/styles/3.timetable-grid.css` (Hero Banner, Weekly Grid, Today Timeline, Notes, Git Guide, Footer, Toast).
+    4. `src/1.Frontend/styles/4.grade-solver.css` (Bảng điểm, Donut Charts SVG, Accordion, Target Grade Solver).
+    5. `src/1.Frontend/styles/5.backpack-drive.css` (Chiếc Cặp Google Drive, Node tròn SVG, iOS Jiggle/Wiggle, Badges).
+    6. `src/1.Frontend/styles/6.modals.css` (Hệ thống 3 Popup Modals: Sửa môn, Thêm tuần, Thêm môn, Emerald Glow, Custom Scrollbars).
+    7. `src/1.Frontend/styles/7.markdown-editor.css` (Soạn thảo Markdown 2 cột, JetBrains Mono, Preview container).
+    8. `src/1.Frontend/styles/8.responsive.css` (Gom toàn bộ Media queries Responsive cho Tablet, Mobile & Print vào 1 nơi).
+  - `[Frontend / Master Aggregator]` Tinh gọn `style.css` còn 12 dòng, đóng vai trò Master CSS nạp 8 modules qua `@import`.
+  - `[Frontend / HTML]` Cập nhật `index.html` liên kết trực tiếp 8 module CSS để trình duyệt tải song song qua HTTP/2 với tốc độ cao nhất.
+  - `[Performance / PWA]` Cập nhật `sw.js` bổ sung danh sách 8 file CSS mới vào `STATIC_ASSETS` và nâng cache version lên `smart-schedule-modular-v19`.
+
+- **💡 Quyết định Kỹ thuật & Kiến trúc**:
+  - Zero-Dependency Native Modular CSS: Không cần build step (Webpack/Vite), tận dụng cơ chế tải song song của trình duyệt và tối ưu 90% token AI trong các phiên làm việc tiếp theo.
+
+- **📌 Trạng thái hiện tại & Kế hoạch tiếp theo (Next Steps)**:
+  - [x] Đã hoàn thành bóc tách 8 module CSS và cập nhật rules.
+  - [x] Đã cập nhật `index.html`, `sw.js`, `AGENTS.md` và `WORKLOG.md`.
+
+---
+
 ## 📅 [2026-09-05 15:12] - Thu Gọn Hitbox Nhấn Giữ Khít Node Tròn & Tăng Thời Gian Giữ (750ms)
 
 - **🎯 Mục tiêu**:

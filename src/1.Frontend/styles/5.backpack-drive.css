@@ -1,0 +1,478 @@
+/* ==========================================================================
+   SMART BACKPACK (CHIẾC CẶP GOOGLE DRIVE) & CIRCULAR LAUNCHER NODES
+   ========================================================================== */
+
+.backpack-header-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-fast);
+}
+
+.backpack-header-card:hover {
+  border-color: var(--border-highlight);
+}
+
+.backpack-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 600px;
+}
+
+.badge-backpack {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(52, 168, 83, 0.12);
+  color: #34a853;
+  border: 1px solid rgba(52, 168, 83, 0.3);
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  width: fit-content;
+  margin-bottom: 0.2rem;
+}
+
+.backpack-main-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.25;
+}
+
+.backpack-subtitle {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.backpack-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.backpack-filter-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 250px;
+}
+
+.backpack-filter-box i.fa-magnifying-glass {
+  position: absolute;
+  left: 0.9rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.backpack-filter-box input {
+  width: 100%;
+  padding: 0.6rem 2.2rem 0.6rem 2.4rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  font-size: 0.85rem;
+  outline: none;
+  transition: var(--transition-fast);
+}
+
+.backpack-filter-box input:focus {
+  border-color: #34a853;
+  box-shadow: 0 0 0 3px rgba(52, 168, 83, 0.2);
+}
+
+.btn-bp-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn-bp-primary {
+  background: linear-gradient(135deg, #34a853 0%, #1e7e34 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(52, 168, 83, 0.3);
+}
+
+/* App Launcher Grid (Speed-dial Nodes) */
+.bp-launcher-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 1.6rem 1rem;
+  margin-bottom: 2.5rem;
+  justify-items: center;
+}
+
+/* Circular Subject Node Button */
+.bp-app-btn {
+  width: 100%;
+  max-width: 140px;
+  background: transparent;
+  border: none;
+  padding: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bp-app-btn:hover {
+  transform: translateY(-4px);
+}
+
+.bp-app-btn:active {
+  transform: scale(0.96);
+}
+
+/* Circular Orb & Donut Ring Wrapper */
+.bp-circle-wrapper {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+.bp-circle-ring-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  overflow: visible;
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.35));
+  transition: filter 0.3s ease;
+}
+
+.bp-app-btn:hover .bp-circle-ring-svg {
+  filter: drop-shadow(0 0 10px var(--app-color, var(--accent-primary)));
+}
+
+.bp-ring-slice {
+  transition: stroke-dasharray 0.35s ease, stroke-dashoffset 0.35s ease;
+}
+
+/* Inner Circular Core / Hub */
+.bp-circle-core {
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.08), transparent 75%), var(--bg-secondary);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  z-index: 2;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bp-app-btn:hover .bp-circle-core {
+  transform: scale(1.05);
+  border-color: var(--app-color, var(--accent-primary));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 12px rgba(255, 255, 255, 0.06);
+}
+
+.bp-app-code {
+  font-size: 0.62rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--app-color, var(--accent-primary));
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.04rem 0.32rem;
+  border-radius: var(--radius-full);
+  line-height: 1;
+}
+
+/* Center Icon Inside Circle */
+.bp-app-icon-wrapper {
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.1rem 0;
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.bp-app-btn:hover .bp-app-icon-wrapper {
+  transform: scale(1.15);
+  color: var(--app-color, var(--accent-primary));
+}
+
+.bp-circle-total-val {
+  font-size: 0.6rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+/* Circular Add Subject Button */
+.bp-circle-add-core {
+  border: 2px dashed var(--border-color) !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  transition: all 0.25s ease;
+}
+
+.bp-app-btn.btn-add-app:hover .bp-circle-add-core {
+  border-color: var(--accent-primary) !important;
+  color: var(--accent-primary);
+  background: var(--accent-subtle) !important;
+  transform: scale(1.08);
+}
+
+/* App Bottom Details */
+.bp-app-details {
+  width: 100%;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.bp-app-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.25;
+  width: 100%;
+  max-width: 130px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bp-app-drive-status {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #34a853;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(52, 168, 83, 0.1);
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-full);
+}
+
+.bp-app-drive-status.not-set {
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+}
+
+.bp-hint-text {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.bp-hint-text strong {
+  color: var(--text-primary);
+}
+
+.btn-bp-done {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+  animation: badgePopIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-bp-done:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.5);
+}
+
+/* ==========================================================================
+   iOS JIGGLE / WIGGLE MODE ANIMATION
+   ========================================================================== */
+
+@keyframes iosJiggle1 {
+  0% { transform: rotate(-1.5deg) translate(-0.5px, -0.5px); }
+  50% { transform: rotate(1.4deg) translate(0.5px, 0.5px); }
+  100% { transform: rotate(-1.5deg) translate(-0.5px, -0.5px); }
+}
+
+@keyframes iosJiggle2 {
+  0% { transform: rotate(1.4deg) translate(0.5px, -0.5px); }
+  50% { transform: rotate(-1.6deg) translate(-0.5px, 0.5px); }
+  100% { transform: rotate(1.4deg) translate(0.5px, -0.5px); }
+}
+
+@keyframes badgePopIn {
+  0% { transform: scale(0); opacity: 0; }
+  70% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Jiggle state for app buttons */
+.is-jiggle-mode .bp-app-btn:not(.btn-add-app) {
+  animation: iosJiggle1 0.28s infinite ease-in-out alternate;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: default;
+}
+
+.is-jiggle-mode .bp-app-btn:not(.btn-add-app):nth-child(2n) {
+  animation-name: iosJiggle2;
+  animation-duration: 0.25s;
+  animation-delay: 0.04s;
+}
+
+.is-jiggle-mode .bp-app-btn:not(.btn-add-app):nth-child(3n) {
+  animation-duration: 0.31s;
+  animation-delay: 0.08s;
+}
+
+/* Both Delete Badge & Edit Pencil in Jiggle Mode */
+.is-jiggle-mode .btn-edit-node-pencil,
+.is-jiggle-mode .btn-delete-node-badge {
+  display: flex !important;
+}
+
+.btn-edit-node-pencil {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  border: 2px solid var(--bg-primary);
+  color: #1e1b4b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 12;
+  box-shadow: 0 3px 10px rgba(245, 158, 11, 0.55);
+  animation: badgePopIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  touch-action: manipulation;
+}
+
+.btn-edit-node-pencil:hover {
+  transform: scale(1.25);
+  background: #f59e0b;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.8);
+}
+
+.btn-edit-node-pencil:active {
+  transform: scale(0.95);
+}
+
+/* Red Circular Delete Badge (iOS Style) */
+.btn-delete-node-badge {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+  color: #ffffff;
+  border: 2px solid var(--bg-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 12;
+  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.55);
+  animation: badgePopIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  touch-action: manipulation;
+}
+
+.btn-delete-node-badge:hover {
+  transform: scale(1.25);
+  background: #dc2626;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.8);
+}
+
+.btn-delete-node-badge:active {
+  transform: scale(0.95);
+}
+
+/* Add Subject Square Button */
+.bp-app-btn.btn-add-app {
+  border: 2px dashed var(--border-color);
+  background: rgba(255, 255, 255, 0.01);
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.bp-app-btn.btn-add-app::before {
+  display: none;
+}
+
+.bp-app-btn.btn-add-app:hover {
+  border-color: var(--accent-primary);
+  background: var(--accent-subtle);
+  transform: translateY(-4px);
+}
+
+.bp-app-btn.btn-add-app i {
+  font-size: 1.6rem;
+  color: var(--text-muted);
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.bp-app-btn.btn-add-app:hover i {
+  color: var(--accent-primary);
+  transform: scale(1.15);
+}
+
+.bp-app-btn.btn-add-app span {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}

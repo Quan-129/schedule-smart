@@ -8,7 +8,8 @@ Mọi AI Agent và Lập trình viên khi tham gia phát triển dự án này *
 
 Mọi file mã nguồn mới hoặc logic chỉnh sửa phải được đặt đúng vào 1 trong 5 thư mục chuyên môn tương ứng:
 
-1. **`src/1.Frontend/`**: Chuyên trách toàn bộ giao diện người dùng, DOM Rendering, Component (CircularNode, EditModal, Toast), Views (Timetable, Backpack, Grades) và Stylesheet.
+1. **`src/1.Frontend/`**: Chuyên trách toàn bộ giao diện người dùng, DOM Rendering, Components (`CircularNode.js`, `EditModal.js`, `Toast.js`), Views (`TimetableGrid.js`, `BackpackView.js`, `GradesView.js`) và **Modular CSS (`src/1.Frontend/styles/`)**.
+   - **Bắt buộc chia nhỏ CSS**: Toàn bộ CSS phải phân tách theo từng Component/View (`1.variables.css`, `2.navbar.css`, `3.timetable-grid.css`, `4.grade-solver.css`, `5.backpack-drive.css`, `6.modals.css`, `7.markdown-editor.css`, `8.responsive.css`), giữ mỗi file < 250–300 dòng.
 2. **`src/2.Backend/`**: Chuyên trách các thuật toán nghiệp vụ thuần túy (Pure Functions), bộ giải điểm mục tiêu (`GradeSolverService`), bộ phân tích lịch học (`TimetableParser`) và các tiện ích ngày giờ.
 3. **`src/3.Database/`**: Chuyên trách State Management trung tâm (`state.js`), cấu trúc Model dữ liệu, tầng lưu trữ (`LocalStorageEngine`) và dữ liệu mẫu (`SeedData.js`).
 4. **`src/4.Security/`**: Chuyên trách làm sạch dữ liệu đầu vào (`sanitizer.js` - `escapeHtml`), kiểm tra tính hợp lệ của URL (`urlValidator.js`) và thiết lập bảo vệ chống XSS.
@@ -18,7 +19,8 @@ Mọi file mã nguồn mới hoặc logic chỉnh sửa phải được đặt �
 
 ## 🚫 2. CÁC ĐIỀU CẤM KỴ (STRICT CONSTRAINTS)
 
-- ❌ **CẤM viết dồn code vào 1 file khổng lồ (Monolithic File > 300 dòng)**: Mỗi file chỉ giữ một trách nhiệm duy nhất (Single Responsibility).
+- ❌ **CẤM viết dồn code vào 1 file khổng lồ (Monolithic File > 300 dòng)**: Mọi file JS và CSS đều phải giữ nhỏ gọn, đúng trách nhiệm đơn lẻ (Single Responsibility).
+- ❌ **CẤM dồn toàn bộ CSS vào một file `style.css` duy nhất**: File `style.css` ở thư mục gốc chỉ được dùng làm Master Aggregator (`@import`) hoặc nạp trực tiếp qua `<link>` trong `index.html`.
 - ❌ **CẤM truy cập trực tiếp DOM từ tầng Backend hoặc Database**: Tầng Backend chỉ nhận dữ liệu đầu vào và trả về kết quả thuần túy (Pure Logic), không gọi `document.getElementById()`.
 - ❌ **CẤM hardcode dữ liệu mẫu rải rác**: Mọi dữ liệu mặc định phải nằm trong `src/3.Database/storage/SeedData.js`.
 - ❌ **CẤM inject chuỗi người dùng vào `innerHTML` mà không qua hàm `escapeHtml()`** từ `src/4.Security/sanitizer.js`.

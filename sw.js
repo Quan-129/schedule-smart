@@ -4,11 +4,19 @@
  * ==========================================================================
  */
 
-const CACHE_NAME = 'smart-schedule-modular-v18';
+const CACHE_NAME = 'smart-schedule-modular-v19';
 const STATIC_ASSETS = [
   './',
   './index.html',
   './style.css',
+  './src/1.Frontend/styles/1.variables.css',
+  './src/1.Frontend/styles/2.navbar.css',
+  './src/1.Frontend/styles/3.timetable-grid.css',
+  './src/1.Frontend/styles/4.grade-solver.css',
+  './src/1.Frontend/styles/5.backpack-drive.css',
+  './src/1.Frontend/styles/6.modals.css',
+  './src/1.Frontend/styles/7.markdown-editor.css',
+  './src/1.Frontend/styles/8.responsive.css',
   './manifest.json',
   './src/1.Frontend/main.js',
   './src/1.Frontend/components/CircularNode.js',
