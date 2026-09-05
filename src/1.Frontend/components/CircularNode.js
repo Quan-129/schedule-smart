@@ -67,16 +67,6 @@ export function renderCircularNodeHtml(subject, isJiggleMode = false) {
     `;
   }
 
-  // Mini Grade Tags
-  const gradePillsHtml = gradeItems.length > 0 ? `
-    <div class="bp-grade-pill-row">
-      ${gradeItems.slice(0, 3).map(g => {
-        const shortName = g.name.split('(')[0].trim().replace('Kiểm tra ', '').replace('Thi ', '');
-        return `<span class="bp-grade-mini-tag" style="--tag-color: ${g.color || '#6366f1'};">${escapeHtml(shortName)} ${g.weight}%</span>`;
-      }).join('')}
-    </div>
-  ` : '';
-
   // Nút xóa đỏ (-) và Nút cây bút vàng (✏️) chỉ render khi isJiggleMode = true
   const deleteBadgeHtml = isJiggleMode ? `
     <button class="btn-delete-node-badge" title="Xóa môn ${escapeHtml(subject.name)}" data-action="delete" data-code="${escapeHtml(subject.code)}">
@@ -114,7 +104,6 @@ export function renderCircularNodeHtml(subject, isJiggleMode = false) {
       <span class="bp-app-drive-status ${hasDrive ? '' : 'not-set'}">
         ${hasDrive ? '<i class="fa-brands fa-google-drive"></i> Drive ↗' : '<i class="fa-solid fa-link-slash"></i> Chưa gắn'}
       </span>
-      ${gradePillsHtml}
     </div>
   `;
 }

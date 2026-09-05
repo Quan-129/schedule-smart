@@ -4,6 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 16:20] - Tinh Gọn Bố Cục Subject Hub (Zero Scroll) & Loại Bỏ % Tỉ Lệ Dưới Node Môn Học
+
+- **🎯 Mục tiêu**:
+  - Tinh gọn hóa bố cục Trang Chi Tiết Môn Học (`SubjectDetailModal`) thành kích thước nhỏ gọn vừa vặn khung hình (Compact Fit `max-width: 490px`), triệt tiêu việc phải cuộn chuột (Zero Scroll).
+  - Loại bỏ các tag hiển thị `% tỉ lệ điểm` bên dưới các Node tròn trong Chiếc Cặp (`CircularNode.js`) để giao diện speed-dial sạch sẽ, tối giản và thanh thoát.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Component]` Tinh chỉnh [`CircularNode.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/CircularNode.js):
+    - Gỡ bỏ `gradePillsHtml` dưới chân node, chỉ giữ lại Tên môn học và Trạng thái Google Drive.
+  - `[Frontend / Component]` Thiết kế lại [`SubjectDetailModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/SubjectDetailModal.js):
+    - Chuyển sang bố cục siêu tinh gọn: Compact Header -> CTA Action Bar -> Thanh Segmented Bar đa sắc hiển thị phân bổ điểm + tags % nhỏ gọn -> Box Ghi chú -> Footer meta.
+  - `[Frontend / CSS]` Thay thế styles trong [`6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css) với kích thước `max-width: 490px`, padding thu nhỏ, animation mượt mà.
+  - `[Performance / PWA]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v22` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 16:15] - Phát Triển Trang Chi Tiết Môn Học (Subject Hub Modal) Khi Bấm Vào Node
 
 - **🎯 Mục tiêu**:

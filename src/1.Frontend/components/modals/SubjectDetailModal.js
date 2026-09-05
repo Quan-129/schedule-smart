@@ -1,6 +1,6 @@
 /**
  * @file SubjectDetailModal.js
- * @description Component Modal hiển thị trang chi tiết môn học (Subject Hub): Tỉ lệ thành phần điểm, Ghi chú môn học, và Nút vào Google Drive.
+ * @description Component Modal hiển thị trang chi tiết môn học (Subject Hub) siêu tinh gọn, không cần cuộn chuột
  * @module 1.Frontend/components/modals/SubjectDetailModal
  */
 
@@ -34,7 +34,7 @@ export function ensureSubjectDetailModalDom() {
   modalWrapper.id = MODAL_ID;
   modalWrapper.className = 'modal-backdrop hidden';
   modalWrapper.innerHTML = `
-    <div class="modal-card modal-card-lg subject-detail-card" role="dialog" aria-modal="true">
+    <div class="modal-card subject-detail-card-compact" role="dialog" aria-modal="true">
       <div id="subject-detail-content">
         <!-- Nội dung động được nạp qua renderSubjectDetail() -->
       </div>
@@ -46,64 +46,52 @@ export function ensureSubjectDetailModalDom() {
 }
 
 /**
- * Tạo SVG Donut Chart hiển thị tỉ lệ điểm môn học
+ * Render thanh Segmented Bar phân khúc tỉ lệ điểm
  * @param {Array<Object>} gradeItems 
- * @returns {string} HTML SVG string
+ * @param {string} subjectColor
+ * @returns {string} HTML string
  */
-function renderDonutChartSvg(gradeItems = []) {
-  const radius = 40;
-  const circumference = 2 * Math.PI * radius;
-  const totalWeight = gradeItems.reduce((sum, item) => sum + (Number(item.weight) || 0), 0);
-
-  if (!gradeItems || gradeItems.length === 0 || totalWeight === 0) {
+function renderSegmentedGradeBar(gradeItems = [], subjectColor = '#6366f1') {
+  if (!gradeItems || gradeItems.length === 0) {
     return `
-      <div class="detail-donut-wrapper">
-        <svg class="donut-svg" viewBox="0 0 100 100">
-          <circle cx="50" cy="50" r="${radius}" fill="none" stroke="var(--border-color)" stroke-width="14" opacity="0.3" />
-        </svg>
-        <div class="detail-donut-info">
-          <span class="detail-donut-val">0%</span>
-          <span class="detail-donut-sub">Chưa có %</span>
-        </div>
+      <div class="compact-empty-grades">
+        <span>Chưa có dữ liệu tỉ lệ điểm</span>
       </div>
     `;
   }
 
-  let cumulative = 0;
-  const slices = gradeItems.map((item) => {
-    const weightNum = Number(item.weight) || 0;
-    const strokeDash = (weightNum / totalWeight) * circumference;
-    const strokeOffset = -(cumulative / totalWeight) * circumference;
-    cumulative += weightNum;
+  const totalWeight = gradeItems.reduce((sum, i) => sum + (Number(i.weight) || 0), 0) || 100;
 
+  const barSegments = gradeItems.map(item => {
+    const w = Number(item.weight) || 0;
+    const color = item.color || subjectColor;
+    return `<div class="compact-grade-seg" style="width: ${(w / totalWeight) * 100}%; background-color: ${color};" title="${escapeHtml(item.name)}: ${w}%"></div>`;
+  }).join('');
+
+  const tagsHtml = gradeItems.map(item => {
+    const w = Number(item.weight) || 0;
+    const color = item.color || subjectColor;
     return `
-      <circle class="donut-slice" 
-        cx="50" cy="50" r="${radius}" 
-        stroke="${item.color || '#6366f1'}" 
-        stroke-width="14"
-        stroke-dasharray="${strokeDash} ${circumference}" 
-        stroke-dashoffset="${strokeOffset}"
-        title="${escapeHtml(item.name || '')}: ${weightNum}%"
-      />
+      <div class="compact-grade-tag">
+        <span class="compact-tag-dot" style="background-color: ${color};"></span>
+        <span class="compact-tag-name">${escapeHtml(item.name)}</span>
+        <strong class="compact-tag-val" style="color: ${color};">${w}%</strong>
+      </div>
     `;
   }).join('');
 
   return `
-    <div class="detail-donut-wrapper">
-      <svg class="donut-svg" viewBox="0 0 100 100">
-        <circle cx="50" cy="50" r="${radius}" fill="none" stroke="var(--border-color)" stroke-width="14" opacity="0.3" />
-        ${slices}
-      </svg>
-      <div class="detail-donut-info">
-        <span class="detail-donut-val">${totalWeight}%</span>
-        <span class="detail-donut-sub">Tổng điểm</span>
-      </div>
+    <div class="compact-grade-segmented-bar">
+      ${barSegments}
+    </div>
+    <div class="compact-grade-tags-grid">
+      ${tagsHtml}
     </div>
   `;
 }
 
 /**
- * Render toàn bộ nội dung chi tiết của môn học vào Modal
+ * Render toàn bộ nội dung chi tiết của môn học vào Modal siêu tinh gọn
  * @param {Object} subject 
  */
 function renderSubjectDetail(subject) {
@@ -114,149 +102,89 @@ function renderSubjectDetail(subject) {
   const gradeItems = subject.gradeItems || [];
   const hasDrive = Boolean(subject.driveUrl && subject.driveUrl.trim());
 
-  // Render danh sách breakdown điểm
-  const breakdownHtml = gradeItems.length > 0 ? gradeItems.map((item) => `
-    <div class="detail-grade-row" style="border-left-color: ${item.color || subjectColor};">
-      <div class="detail-grade-info">
-        <div class="detail-grade-name-row">
-          <span class="detail-grade-dot" style="background-color: ${item.color || subjectColor};"></span>
-          <span class="detail-grade-name">${escapeHtml(item.name || 'Thành phần')}</span>
-          <span class="detail-grade-weight" style="color: ${item.color || subjectColor};">${item.weight || 0}%</span>
+  container.innerHTML = `
+    <!-- 1. COMPACT HEADER -->
+    <div class="compact-detail-header" style="--subj-accent: ${subjectColor};">
+      <div class="compact-header-main">
+        <div class="compact-icon-box" style="background: ${subjectColor}20; border-color: ${subjectColor}50; color: ${subjectColor};">
+          <i class="${subject.icon || 'fa-solid fa-book-bookmark'}"></i>
         </div>
-        <div class="detail-grade-meta">
-          <span><i class="fa-regular fa-file-lines"></i> ${escapeHtml(item.type || 'Đánh giá')}</span>
-          ${item.duration && item.duration !== '--' ? `<span><i class="fa-regular fa-clock"></i> ${escapeHtml(item.duration)}</span>` : ''}
-          ${item.note ? `<span class="detail-grade-note"><i class="fa-regular fa-comment-dots"></i> ${escapeHtml(item.note)}</span>` : ''}
+        <div class="compact-header-text">
+          <div class="compact-badges-row">
+            <span class="compact-code-badge">${escapeHtml(subject.code)}</span>
+            ${subject.credits ? `<span class="compact-credits-badge">${subject.credits} Tín chỉ</span>` : ''}
+          </div>
+          <h3 class="compact-subj-name">${escapeHtml(subject.name)}</h3>
+          ${subject.englishName ? `<div class="compact-subj-en">${escapeHtml(subject.englishName)}</div>` : ''}
         </div>
       </div>
-      <div class="detail-grade-bar">
-        <div class="detail-grade-bar-fill" style="width: ${item.weight || 0}%; background-color: ${item.color || subjectColor};"></div>
-      </div>
-    </div>
-  `).join('') : `
-    <div class="detail-empty-grades">
-      <i class="fa-solid fa-chart-pie" style="font-size: 1.5rem; color: var(--text-muted);"></i>
-      <p>Chưa thiết lập tỉ lệ thành phần điểm.</p>
-      <button type="button" class="btn-detail-edit-grades" data-code="${escapeHtml(subject.code)}">
-        <i class="fa-solid fa-plus"></i> Thêm Tỉ Lệ Điểm
+      <button type="button" id="btn-close-subject-detail" class="btn-compact-close" title="Đóng (ESC)">
+        <i class="fa-solid fa-xmark"></i>
       </button>
     </div>
-  `;
 
-  container.innerHTML = `
-    <!-- 1. HERO HEADER -->
-    <div class="detail-hero-header" style="--subj-accent: ${subjectColor};">
-      <div class="detail-header-top">
-        <div class="detail-icon-box" style="background: ${subjectColor}25; border-color: ${subjectColor}50; color: ${subjectColor};">
-          <i class="${subject.icon || 'fa-solid fa-book'}"></i>
-        </div>
-        <div class="detail-header-titles">
-          <div class="detail-badges-bar">
-            <span class="detail-code-badge">${escapeHtml(subject.code)}</span>
-            ${subject.credits ? `<span class="detail-credits-badge">${subject.credits} Tín chỉ</span>` : ''}
-          </div>
-          <h2 class="detail-subject-title">${escapeHtml(subject.name)}</h2>
-          ${subject.englishName ? `<div class="detail-subject-en">${escapeHtml(subject.englishName)}</div>` : ''}
-        </div>
-        <button type="button" id="btn-close-subject-detail" class="btn-modal-close" title="Đóng (ESC)">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-
+    <div class="compact-detail-body">
       <!-- 2. QUICK CTA ACTION BUTTONS -->
-      <div class="detail-cta-bar">
+      <div class="compact-cta-row">
         ${hasDrive ? `
-          <a href="${escapeHtml(subject.driveUrl.trim())}" target="_blank" rel="noopener noreferrer" class="btn-cta-drive btn-cta-drive--active">
-            <div class="btn-cta-drive__icon"><i class="fa-brands fa-google-drive"></i></div>
-            <div class="btn-cta-drive__text">
-              <strong>Mở Thư Mục Google Drive</strong>
-              <span>Truy cập giáo trình, đề thi & tài liệu môn</span>
-            </div>
-            <i class="fa-solid fa-arrow-up-right-from-square btn-cta-drive__arrow"></i>
+          <a href="${escapeHtml(subject.driveUrl.trim())}" target="_blank" rel="noopener noreferrer" class="btn-compact-drive btn-compact-drive--active">
+            <i class="fa-brands fa-google-drive"></i>
+            <span>Mở Thư Mục Google Drive</span>
+            <i class="fa-solid fa-arrow-up-right-from-square compact-arrow-icon"></i>
           </a>
         ` : `
-          <button type="button" class="btn-cta-drive btn-cta-drive--empty" data-action="edit-link" data-code="${escapeHtml(subject.code)}">
-            <div class="btn-cta-drive__icon"><i class="fa-brands fa-google-drive"></i></div>
-            <div class="btn-cta-drive__text">
-              <strong>Chưa Gắn Link Google Drive</strong>
-              <span>Bấm vào đây để thêm đường dẫn thư mục môn học</span>
-            </div>
-            <i class="fa-solid fa-plus btn-cta-drive__arrow"></i>
+          <button type="button" class="btn-compact-drive btn-compact-drive--empty" data-action="edit-link" data-code="${escapeHtml(subject.code)}">
+            <i class="fa-brands fa-google-drive"></i>
+            <span>Chưa gắn link Drive (+ Thêm)</span>
           </button>
         `}
-        <button type="button" class="btn-cta-edit-subject" data-action="edit-subject" data-code="${escapeHtml(subject.code)}" title="Chỉnh sửa thông tin môn học">
+        <button type="button" class="btn-compact-edit" data-action="edit-subject" data-code="${escapeHtml(subject.code)}" title="Chỉnh sửa môn học">
           <i class="fa-solid fa-pen-to-square"></i>
-          <span>Chỉnh Sửa</span>
+          <span>Sửa</span>
         </button>
       </div>
-    </div>
 
-    <!-- 3. BODY CONTENT: TỈ LỆ ĐIỂM + GHI CHÚ + THÔNG TIN -->
-    <div class="detail-body-scrollable">
-      
-      <!-- PHẦN 1: TỈ LỆ THÀNH PHẦN ĐIỂM -->
-      <section class="detail-section-card">
-        <div class="detail-section-title">
-          <div class="detail-sec-icon" style="color: #6366f1;"><i class="fa-solid fa-chart-pie"></i></div>
-          <h3>Tỷ Lệ Thành Phần Điểm</h3>
-          <button type="button" class="btn-sec-action" data-action="edit-grades" data-code="${escapeHtml(subject.code)}">
-            <i class="fa-solid fa-sliders"></i> Sửa Tỉ Lệ
+      <!-- 3. PHẦN TỶ LỆ THÀNH PHẦN ĐIỂM -->
+      <div class="compact-section-box">
+        <div class="compact-box-header">
+          <div class="compact-box-title">
+            <i class="fa-solid fa-chart-pie" style="color: #6366f1;"></i>
+            <span>Tỷ Lệ Thành Phần Điểm</span>
+          </div>
+          <button type="button" class="btn-compact-mini-edit" data-action="edit-grades" data-code="${escapeHtml(subject.code)}">
+            <i class="fa-solid fa-sliders"></i> Sửa
           </button>
         </div>
-        <div class="detail-grades-container">
-          <div class="detail-chart-side">
-            ${renderDonutChartSvg(gradeItems)}
-          </div>
-          <div class="detail-breakdown-side">
-            ${breakdownHtml}
-          </div>
-        </div>
-      </section>
+        ${renderSegmentedGradeBar(gradeItems, subjectColor)}
+      </div>
 
-      <!-- PHẦN 2: GHI CHÚ MÔN HỌC & QUY ĐỊNH -->
-      <section class="detail-section-card">
-        <div class="detail-section-title">
-          <div class="detail-sec-icon" style="color: #f59e0b;"><i class="fa-solid fa-clipboard-list"></i></div>
-          <h3>Ghi Chú & Lưu Ý Học Phần</h3>
-          <button type="button" class="btn-sec-action" data-action="edit-notes" data-code="${escapeHtml(subject.code)}">
-            <i class="fa-solid fa-pen"></i> Sửa Ghi Chú
+      <!-- 4. PHẦN GHI CHÚ MÔN HỌC -->
+      <div class="compact-section-box">
+        <div class="compact-box-header">
+          <div class="compact-box-title">
+            <i class="fa-solid fa-clipboard-list" style="color: #f59e0b;"></i>
+            <span>Ghi Chú & Lưu Ý</span>
+          </div>
+          <button type="button" class="btn-compact-mini-edit" data-action="edit-notes" data-code="${escapeHtml(subject.code)}">
+            <i class="fa-solid fa-pen"></i> Sửa
           </button>
         </div>
-        <div class="detail-notes-box">
+        <div class="compact-notes-content">
           ${subject.notes && subject.notes.trim() ? `
-            <div class="detail-notes-content">
-              <i class="fa-solid fa-quote-left detail-quote-icon"></i>
-              <p>${escapeHtml(subject.notes)}</p>
-            </div>
+            <p>${escapeHtml(subject.notes)}</p>
           ` : `
-            <div class="detail-empty-notes">
-              <p>Chưa có ghi chú nào cho môn học này.</p>
-              <span>Bạn có thể lưu lại quy định thi cử, lưu ý của giảng viên hoặc mục tiêu điểm số.</span>
-            </div>
+            <span class="compact-empty-text">Chưa có ghi chú nào.</span>
           `}
         </div>
-      </section>
+      </div>
 
-      <!-- PHẦN 3: THÔNG TIN BỔ SUNG (GIẢNG VIÊN & KHOA) -->
+      <!-- 5. FOOTER INFO (GIẢNG VIÊN & KHOA) -->
       ${(subject.department || subject.lecturers) ? `
-        <section class="detail-section-card detail-section-card--info">
-          <div class="detail-meta-grid">
-            ${subject.department ? `
-              <div class="detail-meta-item">
-                <div class="meta-item-label"><i class="fa-solid fa-building-columns"></i> Khoa / Bộ Môn:</div>
-                <div class="meta-item-value">${escapeHtml(subject.department)}</div>
-              </div>
-            ` : ''}
-            ${subject.lecturers ? `
-              <div class="detail-meta-item">
-                <div class="meta-item-label"><i class="fa-solid fa-chalkboard-user"></i> Giảng Viên:</div>
-                <div class="meta-item-value">${escapeHtml(subject.lecturers)}</div>
-              </div>
-            ` : ''}
-          </div>
-        </section>
+        <div class="compact-meta-footer">
+          ${subject.department ? `<span><i class="fa-solid fa-building-columns"></i> ${escapeHtml(subject.department)}</span>` : ''}
+          ${subject.lecturers ? `<span><i class="fa-solid fa-chalkboard-user"></i> ${escapeHtml(subject.lecturers)}</span>` : ''}
+        </div>
       ` : ''}
-
     </div>
   `;
 }
@@ -307,7 +235,7 @@ function bindSubjectDetailEvents() {
     }
 
     // Nút chỉnh sửa tỉ lệ điểm
-    const editGradesBtn = e.target.closest('[data-action="edit-grades"]') || e.target.closest('.btn-detail-edit-grades');
+    const editGradesBtn = e.target.closest('[data-action="edit-grades"]');
     if (editGradesBtn) {
       const code = editGradesBtn.dataset.code;
       closeSubjectDetailModal();
@@ -340,7 +268,7 @@ function bindSubjectDetailEvents() {
 // ============================================================================
 
 /**
- * Mở trang chi tiết môn học
+ * Mở trang chi tiết môn học siêu tinh gọn
  * @param {string} subjectCode - Mã môn học cần hiển thị
  */
 export function openSubjectDetailModal(subjectCode) {
