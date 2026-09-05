@@ -2,6 +2,7 @@
  * @file AddClassModal.js
  * @description Component Modal Thêm / Chỉnh Sửa Tiết Học Nhanh vào từng Ngày trên Lịch Học
  *              Tích hợp cơ chế chọn giờ Con Lăn 3D chuẩn Báo Thức iPhone (iOS Alarm Drum Roller Wheel)
+ *              và Tự Động Đồng Bộ Link Google Drive từ Chiếc Cặp & Lưu Môn Mới vào Chiếc Cặp
  * @module 1.Frontend/components/modals/AddClassModal
  */
 
@@ -9,7 +10,8 @@
 // 1. IMPORTS & DEPENDENCIES
 // ============================================================================
 import { escapeHtml } from '../../../4.Security/sanitizer.js';
-import { state } from '../../../3.Database/state.js';
+import { formatSafeUrl } from '../../../4.Security/urlValidator.js';
+import { state, persistDriveSubjects } from '../../../3.Database/state.js';
 import { showToast } from '../Toast.js';
 
 // ============================================================================
@@ -148,7 +150,7 @@ export function ensureAddClassModalDom() {
         </button>
       </div>
 
-      <form id="add-class-form" class="modal-form" style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; overflow-y: auto; max-height: 520px;">
+      <form id="add-class-form" class="modal-form" style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; overflow-y: auto; max-height: 540px;">
         
         <!-- SECTION 1: MÔN HỌC -->
         <div class="form-group-styled">
@@ -162,6 +164,26 @@ export function ensureAddClassModalDom() {
           <div class="input-with-icon">
             <i class="fa-solid fa-book-open input-icon"></i>
             <input type="text" id="class-subject-input" class="form-input-styled" placeholder="Nhập tên môn học (VD: Học máy, Tiếng Nhật 7...)" required autocomplete="off">
+          </div>
+        </div>
+
+        <!-- SECTION 1B: LINK GOOGLE DRIVE / TÀI LIỆU -->
+        <div class="form-group-styled">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label for="class-drive-url-input"><i class="fa-brands fa-google-drive"></i> Link Google Drive / Thư mục:</label>
+            <span id="drive-sync-badge" class="drive-sync-status-badge hidden">
+              <i class="fa-solid fa-link"></i> Đã lấy từ Chiếc Cặp
+            </span>
+          </div>
+          <div class="input-row-preset-creator" style="display: flex; gap: 0.45rem; align-items: stretch;">
+            <div class="input-with-icon" style="flex: 1;">
+              <i class="fa-solid fa-link input-icon" style="color: #818cf8;"></i>
+              <input type="url" id="class-drive-url-input" class="form-input-styled" placeholder="https://drive.google.com/drive/folders/... (Tùy chọn)" autocomplete="off">
+            </div>
+            <a id="btn-open-drive-preview" href="#" target="_blank" rel="noopener noreferrer" class="btn-open-drive-preview hidden" title="Mở thư mục Drive này trong tab mới">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              <span>Mở Drive</span>
+            </a>
           </div>
         </div>
 
@@ -274,6 +296,7 @@ export function ensureAddClassModalDom() {
  * Đảm bảo Modal Con Lăn 3D Kiểu Báo Thức iOS (Alarm Drum Roller Picker) đã tồn tại trong DOM
  */
 function ensureIosWheelPickerDom() {
+  const PICKER_MODAL_ID = 'ios-wheel-picker-modal';
   if (document.getElementById(PICKER_MODAL_ID)) return;
 
   const modalRoot = document.getElementById('modal-root') || document.body;
@@ -282,7 +305,7 @@ function ensureIosWheelPickerDom() {
   pickerWrapper.className = 'ios-picker-backdrop hidden';
   pickerWrapper.innerHTML = `
     <div class="ios-picker-sheet" role="dialog" aria-modal="true">
-      <!-- HEADER CHUẨN iPHONE BÁO THỨC -->
+      <!-- HEADER CHUẨN iPHONE BÁO THỨC TONE TÍM THAN -->
       <div class="ios-picker-header">
         <button type="button" id="btn-ios-picker-cancel" class="ios-picker-btn-cancel">Hủy</button>
         <div class="ios-picker-title-group">
@@ -340,6 +363,34 @@ function ensureIosWheelPickerDom() {
 }
 
 /**
+ * Cập nhật giao diện ô nhập link Google Drive, badge và nút xem trước
+ * @param {string} url 
+ * @param {boolean} fromBackpack 
+ */
+function updateDriveUrlUi(url = '', fromBackpack = false) {
+  const driveInput = document.getElementById('class-drive-url-input');
+  const syncBadge = document.getElementById('drive-sync-badge');
+  const previewBtn = document.getElementById('btn-open-drive-preview');
+
+  if (driveInput && driveInput.value !== url) {
+    driveInput.value = url || '';
+  }
+
+  const safe = url ? formatSafeUrl(url) : '';
+  if (syncBadge) {
+    syncBadge.classList.toggle('hidden', !(fromBackpack && safe));
+  }
+  if (previewBtn) {
+    if (safe && (safe.startsWith('http://') || safe.startsWith('https://'))) {
+      previewBtn.href = safe;
+      previewBtn.classList.remove('hidden');
+    } else {
+      previewBtn.classList.add('hidden');
+    }
+  }
+}
+
+/**
  * Render danh sách Chip môn học từ Chiếc Cặp
  */
 function renderSubjectChips(selectedSubjectName = '') {
@@ -366,15 +417,24 @@ function renderSubjectChips(selectedSubjectName = '') {
     `;
   }).join('');
 
-  // Gắn sự kiện click chip
+  // Gắn sự kiện click chip -> Tự động nạp tên và link Drive từ Chiếc Cặp
   container.querySelectorAll('.subject-chip-btn').forEach(btn => {
     btn.onclick = () => {
       container.querySelectorAll('.subject-chip-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const nameInput = document.getElementById('class-subject-input');
+      const sName = btn.dataset.name;
       if (nameInput) {
-        nameInput.value = btn.dataset.name;
+        nameInput.value = sName;
         nameInput.focus();
+      }
+
+      // Tự động tìm và điền link Drive của môn này từ Chiếc Cặp
+      const matched = (state.driveSubjects || []).find(s => s.name.toLowerCase() === sName.toLowerCase());
+      if (matched && matched.driveUrl) {
+        updateDriveUrlUi(matched.driveUrl, true);
+      } else {
+        updateDriveUrlUi('', false);
       }
     };
   });
@@ -806,6 +866,8 @@ function bindAddClassModalEvents() {
   
   const pickStartBtn = document.getElementById('btn-pick-start-time');
   const pickEndBtn = document.getElementById('btn-pick-end-time');
+  const subjectInput = document.getElementById('class-subject-input');
+  const driveInput = document.getElementById('class-drive-url-input');
 
   if (!modal || !form) return;
 
@@ -815,6 +877,7 @@ function bindAddClassModalEvents() {
     document.body.style.overflow = '';
     currentEditingClass = null;
     form.reset();
+    updateDriveUrlUi('', false);
   };
 
   if (closeBtn) closeBtn.onclick = closeModal;
@@ -834,6 +897,28 @@ function bindAddClassModalEvents() {
       }
     }
   });
+
+  // Tự động nhận diện môn có sẵn trong Chiếc Cặp khi gõ tên môn
+  if (subjectInput) {
+    subjectInput.addEventListener('input', () => {
+      const val = subjectInput.value.trim();
+      const matched = (state.driveSubjects || []).find(s => s.name.toLowerCase() === val.toLowerCase());
+      if (matched && matched.driveUrl) {
+        updateDriveUrlUi(matched.driveUrl, true);
+      } else {
+        const syncBadge = document.getElementById('drive-sync-badge');
+        if (syncBadge) syncBadge.classList.add('hidden');
+      }
+    });
+  }
+
+  // Cập nhật nút xem trước Drive khi người dùng tự nhập link
+  if (driveInput) {
+    driveInput.addEventListener('input', () => {
+      const val = driveInput.value.trim();
+      updateDriveUrlUi(val, false);
+    });
+  }
 
   // Gắn sự kiện click 2 Capsule Bắt Đầu và Kết Thúc -> Mở iOS Roller Wheel
   if (pickStartBtn) {
@@ -928,18 +1013,21 @@ function bindAddClassModalEvents() {
     };
   }
 
-  // Submit Form Lưu Tiết Học
+  // Submit Form Lưu Tiết Học & Tự Động Đồng Bộ Vào Chiếc Cặp
   form.onsubmit = (e) => {
     e.preventDefault();
     const daySelect = document.getElementById('class-day-select');
-    const subjectInput = document.getElementById('class-subject-input');
     const roomInput = document.getElementById('class-room-input');
+    const driveUrlInput = document.getElementById('class-drive-url-input');
 
     const dayName = daySelect ? daySelect.value : 'Thứ 2';
     const subject = subjectInput ? subjectInput.value.trim() : '';
     const timeRange = getCurrentTimeRangeString();
     const period = getPeriodFromTimeRange(timeRange);
     const room = roomInput ? roomInput.value.trim() : 'Chưa xếp phòng';
+    
+    const rawDriveUrl = driveUrlInput ? driveUrlInput.value.trim() : '';
+    const safeDriveUrl = rawDriveUrl ? formatSafeUrl(rawDriveUrl) : '';
 
     const startTime = pickerState.startTime || (timeRange.split('-')[0] || '').trim();
     const endTime = pickerState.endTime || (timeRange.split('-')[1] || '').trim();
@@ -949,13 +1037,51 @@ function bindAddClassModalEvents() {
       return;
     }
 
+    // ========================================================================
+    // TỰ ĐỘNG LƯU / ĐỒNG BỘ MÔN HỌC VÀO CHIẾC CẶP GOOGLE DRIVE
+    // ========================================================================
+    const subjectTrim = subject.trim();
+    let subjectInBackpack = (state.driveSubjects || []).find(s => s.name.toLowerCase() === subjectTrim.toLowerCase());
+
+    if (!subjectInBackpack) {
+      // Tự động tạo môn mới trong Chiếc Cặp (dù có link Drive hay link trống "")
+      const cleanCode = subjectTrim.toUpperCase().replace(/[^A-Z0-9]/g, '-').slice(0, 10) || 'MON-HOC';
+      const newSubject = {
+        name: subjectTrim,
+        code: cleanCode,
+        credits: 3,
+        color: '#6366f1',
+        icon: 'fa-solid fa-book',
+        driveUrl: safeDriveUrl,
+        notes: `Được tạo tự động khi thêm tiết học vào lịch (${dayName})`,
+        components: [
+          { name: 'Quá trình', weight: 50, score: null },
+          { name: 'Cuối kỳ', weight: 50, score: null }
+        ]
+      };
+      state.driveSubjects.push(newSubject);
+      persistDriveSubjects();
+      renderSubjectChips(subjectTrim);
+      if (typeof window.renderBackpackView === 'function') {
+        window.renderBackpackView();
+      }
+    } else if (!subjectInBackpack.driveUrl && safeDriveUrl) {
+      // Nếu môn đã có trong Chiếc Cặp nhưng chưa có link Drive và người dùng vừa điền link mới
+      subjectInBackpack.driveUrl = safeDriveUrl;
+      persistDriveSubjects();
+      if (typeof window.renderBackpackView === 'function') {
+        window.renderBackpackView();
+      }
+    }
+
     const classData = {
-      subject,
+      subject: subjectTrim,
       timeRange,
       period,
       room,
       startTime,
-      endTime
+      endTime,
+      driveUrl: safeDriveUrl
     };
 
     if (onSaveCallback) {
@@ -969,7 +1095,7 @@ function bindAddClassModalEvents() {
     }
 
     closeModal();
-    showToast(`Đã lưu tiết "${subject}" vào ${dayName} 🎉`);
+    showToast(`Đã lưu tiết "${subjectTrim}" vào ${dayName} 🎉`);
   };
 
   isEventsBound = true;
@@ -1009,11 +1135,12 @@ export function openAddClassModal(targetDayName = 'Thứ 2', onSave) {
   renderTimePresets('07:00 - 08:50');
   renderRoomPresets('B1-305 (CS1)');
 
-  // Reset form inputs
+  // Reset form inputs & drive preview
   const subjectInput = document.getElementById('class-subject-input');
   const roomInput = document.getElementById('class-room-input');
   if (subjectInput) subjectInput.value = '';
   if (roomInput) roomInput.value = 'B1-305 (CS1)';
+  updateDriveUrlUi('', false);
 
   modal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
@@ -1057,6 +1184,11 @@ export function openEditClassModal(dayName, classIndex, classData, onSave, onDel
   const roomInput = document.getElementById('class-room-input');
   if (subjectInput) subjectInput.value = classData.subject || '';
   if (roomInput) roomInput.value = classData.room || '';
+
+  // Nạp link Drive từ tiết học hoặc từ Chiếc Cặp
+  const matched = (state.driveSubjects || []).find(s => s.name.toLowerCase() === (classData.subject || '').toLowerCase());
+  const urlToUse = classData.driveUrl || (matched ? matched.driveUrl : '');
+  updateDriveUrlUi(urlToUse, Boolean(matched && matched.driveUrl && matched.driveUrl === urlToUse));
 
   modal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';

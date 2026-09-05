@@ -1403,8 +1403,54 @@ body.theme-light .form-group-styled textarea:hover {
   transform: translateY(-1.5px);
 }
 
-.btn-save-custom-preset:active {
-  transform: scale(0.96);
+/* Badge trạng thái đồng bộ Drive & Nút Mở Drive */
+.drive-sync-status-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #a5b4fc;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 6px;
+  padding: 0.12rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.2);
+}
+
+.drive-sync-status-badge.hidden {
+  display: none !important;
+}
+
+.btn-open-drive-preview {
+  background: rgba(99, 102, 241, 0.14);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  border-radius: 12px;
+  color: #818cf8;
+  font-family: var(--font-main);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+.btn-open-drive-preview:hover {
+  background: var(--accent-gradient);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.45);
+  transform: translateY(-1.5px);
+}
+
+.btn-open-drive-preview.hidden {
+  display: none !important;
 }
 
 /* ==========================================================================

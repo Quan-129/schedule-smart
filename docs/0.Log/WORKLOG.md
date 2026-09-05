@@ -4,6 +4,25 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 23:14] - Tích Hợp Ô Link Google Drive & Tự Động Đồng Bộ 2 Chiều Với Chiếc Cặp
+
+- **🎯 Mục tiêu**:
+  - Thêm ô nhập liệu `Link Google Drive / Thư mục` ngay trên Modal Thêm/Sửa tiết học.
+  - Tự động nạp link Drive từ Chiếc Cặp khi chọn chip môn có sẵn (hoặc khi gõ trùng tên môn).
+  - Tự động tạo môn mới vào **Chiếc Cặp Google Drive** khi nhập tên môn mới (với link Drive nếu có hoặc để trống `""`) để dùng cho các buổi học sau.
+  - Bảo toàn dữ liệu 100%: Xóa tiết học trên Lịch không ảnh hưởng tới danh mục môn và link Drive trong Chiếc Cặp.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / Component Modal]` Cập nhật [`src/1.Frontend/components/modals/AddClassModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddClassModal.js):
+    - Thêm trường DOM `#class-drive-url-input`, `#drive-sync-badge` và nút `#btn-open-drive-preview`.
+    - Viết hàm `updateDriveUrlUi()`, tự động đồng bộ khi click chip môn hoặc gõ tên môn.
+    - Logic `form.onsubmit`: Tự động thêm môn mới vào `state.driveSubjects` (kèm `persistDriveSubjects()` và gọi `window.renderBackpackView()`).
+  - `[Frontend / CSS Modals]` Cập nhật [`src/1.Frontend/styles/6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css):
+    - Thêm styling cho `.drive-sync-status-badge` và `.btn-open-drive-preview` chuẩn tone tím than neon.
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v52` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 23:02] - Đồng Bộ Giao Diện: Chuyển Tone Màu Con Lăn iOS Sang Tone Tím Than & Neon Glassmorphism
 
 - **🎯 Mục tiêu**:
