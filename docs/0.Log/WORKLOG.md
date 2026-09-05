@@ -12,6 +12,11 @@
   - Cho phép Chỉnh sửa ✏️, Xóa 🗑️ hoặc Di chuyển thứ của từng tiết học trực tiếp trên Ma trận ngày và tự động serialize ngược ra Markdown chuẩn.
 
 - **✅ Công việc đã hoàn thành**:
+  - `[Feature / 7 Days Grid]` Tách riêng **Thứ 7** và **Chủ Nhật** thành 2 khung ngày độc lập (chuẩn hóa toàn bộ ma trận thời khóa biểu thành **7 khung ngày riêng biệt**: Thứ 2, Thứ 3, Thứ 4, Thứ 5, Thứ 6, Thứ 7, Chủ Nhật):
+    - Cập nhật [`src/2.Backend/services/TimetableParser.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/TimetableParser.js) tự động chuẩn hóa và tách dữ liệu cũ thành 7 ngày độc lập.
+    - Cập nhật [`src/2.Backend/utils/dateHelpers.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/utils/dateHelpers.js) phân định Thứ 7 (6) và Chủ Nhật (0).
+    - Cập nhật dropdown chọn thứ trong [`src/1.Frontend/components/modals/AddClassModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddClassModal.js) gồm đủ 7 tùy chọn riêng biệt.
+    - Cập nhật `isToday` và `renderTodayView` trong [`src/1.Frontend/views/TimetableGrid.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/TimetableGrid.js) và [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js).
   - `[Fix Logic / Delete Class]` Nâng cấp toàn diện tính năng Xóa Tiết Học:
     - Loại bỏ dialog `confirm()` chặn luồng trình duyệt để nút Xóa 🗑️ trên thẻ tiết học và nút "Xóa tiết này" trong modal hoạt động tức thì 100%.
     - Cải tiến hàm `handleDeleteClass` tìm kiếm ngày và tiết linh hoạt theo cả đối tượng `classData` lẫn chỉ số `classIndex`, tự động chuyển ngày sang trạng thái Nghỉ khi hết tiết và đồng bộ serialize Markdown ngay lập tức.

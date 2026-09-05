@@ -27,7 +27,10 @@ export const DEFAULT_WEEK_35_MD = `# Lịch học Tuần 35
 - 07:00 - 08:50 (Tiết 2 - 3): Học máy | Phòng: B1-305 (CS1)
 - 09:00 - 11:50 (Tiết 4 - 6): Tiếng Nhật 7 | Phòng: B9-202 (CS1)
 
-## Thứ 7 & Chủ Nhật
+## Thứ 7
+- Nghỉ.
+
+## Chủ Nhật
 - Nghỉ.
 
 ## Lưu ý nhỏ:
@@ -47,7 +50,10 @@ export const DEFAULT_WEEK_36_MD = `# Lịch học Tuần 36
 - 07:00 - 08:50 (Tiết 2 - 3): Học máy | Phòng: B1-305 (CS1)
 - 09:00 - 11:50 (Tiết 4 - 6): Tiếng Nhật 7 | Phòng: B9-202 (CS1)
 
-## Thứ 7 & Chủ Nhật
+## Thứ 7
+- Nghỉ.
+
+## Chủ Nhật
 - Nghỉ.
 
 ## Lưu ý nhỏ:

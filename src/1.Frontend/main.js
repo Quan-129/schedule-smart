@@ -452,10 +452,7 @@ function updateNextClassBadge(days = []) {
   let nextClass = null;
 
   // Tìm trong ngày hôm nay
-  const todayDay = days.find(d => 
-    d.dayOfWeekNumber === currentDayOfWeek || 
-    (d.name.includes('Thứ 7 & Chủ Nhật') && (currentDayOfWeek === 6 || currentDayOfWeek === 0))
-  );
+  const todayDay = days.find(d => d.dayOfWeekNumber === currentDayOfWeek);
 
   if (todayDay && todayDay.classes && todayDay.classes.length > 0) {
     for (const c of todayDay.classes) {

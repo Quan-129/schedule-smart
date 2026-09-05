@@ -12,7 +12,8 @@
  */
 export function getDayNumber(dayName) {
   if (!dayName) return -1;
-  const normalized = dayName.toLowerCase();
+  const normalized = dayName.toLowerCase().trim();
+  if (normalized === 'chủ nhật' || (normalized.includes('chủ nhật') && !normalized.includes('thứ 7'))) return 0;
   if (normalized.includes('thứ 2')) return 1;
   if (normalized.includes('thứ 3')) return 2;
   if (normalized.includes('thứ 4')) return 3;

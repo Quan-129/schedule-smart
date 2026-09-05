@@ -53,8 +53,7 @@ export function renderTimetableGrid(days = []) {
       }
     }
 
-    const isToday = (day.dayOfWeekNumber === currentDayOfWeek) || 
-      (day.name.includes('Thứ 7 & Chủ Nhật') && (currentDayOfWeek === 6 || currentDayOfWeek === 0));
+    const isToday = (day.dayOfWeekNumber === currentDayOfWeek);
 
     const dayCard = document.createElement('div');
     dayCard.className = `day-card ${isToday ? 'is-today' : ''}`;
@@ -247,10 +246,7 @@ export function renderTodayView(days = []) {
   todayList.innerHTML = '';
   const currentDayOfWeek = new Date().getDay();
 
-  const todayDay = days.find(d => 
-    d.dayOfWeekNumber === currentDayOfWeek || 
-    (d.name.includes('Thứ 7 & Chủ Nhật') && (currentDayOfWeek === 6 || currentDayOfWeek === 0))
-  );
+  const todayDay = days.find(d => d.dayOfWeekNumber === currentDayOfWeek);
 
   if (!todayDay || todayDay.isDayOff || !todayDay.classes || todayDay.classes.length === 0) {
     if (todaySummary) todaySummary.textContent = `Hôm nay bạn không có lịch học. Tận hưởng thời gian nghỉ ngơi nhé!`;

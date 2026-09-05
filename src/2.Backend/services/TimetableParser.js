@@ -86,11 +86,57 @@ export function parseScheduleMarkdown(markdownText) {
     }
   }
 
+  // Chuẩn hóa 7 ngày độc lập (Đảm bảo có đủ Thứ 2 -> Thứ 7 & Chủ Nhật riêng biệt)
+  const standard7Days = [
+    { name: 'Thứ 2', dayOfWeekNumber: 1 },
+    { name: 'Thứ 3', dayOfWeekNumber: 2 },
+    { name: 'Thứ 4', dayOfWeekNumber: 3 },
+    { name: 'Thứ 5', dayOfWeekNumber: 4 },
+    { name: 'Thứ 6', dayOfWeekNumber: 5 },
+    { name: 'Thứ 7', dayOfWeekNumber: 6 },
+    { name: 'Chủ Nhật', dayOfWeekNumber: 0 }
+  ];
+
+  const normalizedDays = [];
+
+  standard7Days.forEach(std => {
+    // Tìm ngày khớp chính xác
+    let foundDay = result.days.find(d => d.name === std.name);
+    
+    // Nếu chưa có, tìm trong ngày gộp cũ "Thứ 7 & Chủ Nhật"
+    if (!foundDay) {
+      const mergedWeekend = result.days.find(d => d.name.includes('Thứ 7 & Chủ Nhật') || (d.name.includes('Thứ 7') && d.name.includes('Chủ Nhật')));
+      if (mergedWeekend) {
+        foundDay = {
+          name: std.name,
+          dayOfWeekNumber: std.dayOfWeekNumber,
+          classes: std.name === 'Thứ 7' ? [...mergedWeekend.classes] : [],
+          isDayOff: std.name === 'Thứ 7' ? mergedWeekend.isDayOff : true,
+          dayOffText: mergedWeekend.dayOffText || 'Nghỉ.'
+        };
+      }
+    }
+
+    // Nếu vẫn chưa có (ví dụ ngày trống hoàn toàn), tạo ngày nghỉ mặc định
+    if (!foundDay) {
+      foundDay = {
+        name: std.name,
+        dayOfWeekNumber: std.dayOfWeekNumber,
+        classes: [],
+        isDayOff: true,
+        dayOffText: 'Nghỉ.'
+      };
+    }
+
+    normalizedDays.push(foundDay);
+  });
+
+  result.days = normalizedDays;
   return result;
 }
 
 /**
- * Chuyển đổi cấu trúc scheduleData JSON ngược lại thành chuỗi Markdown chuẩn
+ * Chuyển đổi cấu trúc scheduleData JSON ngược lại thành chuỗi Markdown chuẩn 7 ngày
  * @param {Object} scheduleData - { title, days, notes }
  * @returns {string} Markdown string
  */
@@ -99,7 +145,7 @@ export function serializeScheduleToMarkdown(scheduleData) {
   const title = scheduleData.title || 'Lịch học';
   const lines = [`# ${title}`, ''];
 
-  const standardDayNames = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7 & Chủ Nhật'];
+  const standardDayNames = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
   const daysMap = new Map();
   (scheduleData.days || []).forEach(d => {
     daysMap.set(d.name, d);
@@ -107,7 +153,10 @@ export function serializeScheduleToMarkdown(scheduleData) {
 
   standardDayNames.forEach(dayName => {
     lines.push(`## ${dayName}`);
-    const day = daysMap.get(dayName);
+    let day = daysMap.get(dayName);
+    if (!day) {
+      day = (scheduleData.days || []).find(d => d.name && (d.name.includes(dayName) || dayName.includes(d.name)));
+    }
 
     if (!day || day.isDayOff || !day.classes || day.classes.length === 0) {
       lines.push('- Nghỉ.');
@@ -133,7 +182,7 @@ export function serializeScheduleToMarkdown(scheduleData) {
 }
 
 /**
- * Sinh chuỗi Markdown cho một tuần học mới với 7 khung ngày trống
+ * Sinh chuỗi Markdown cho một tuần học mới với 7 khung ngày trống độc lập
  * @param {string} weekTitle - Tên tuần (VD: 'Tuần 37' hoặc 'Lịch học Tuần 37')
  * @returns {string} Markdown string
  */
@@ -156,7 +205,10 @@ export function generateEmptyWeekMarkdown(weekTitle = 'Tuần mới') {
 ## Thứ 6
 - Nghỉ.
 
-## Thứ 7 & Chủ Nhật
+## Thứ 7
+- Nghỉ.
+
+## Chủ Nhật
 - Nghỉ.
 
 ## Lưu ý nhỏ:
