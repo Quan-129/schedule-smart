@@ -4,30 +4,36 @@
  * ==========================================================================
  */
 
-const CACHE_NAME = 'smart-schedule-backpack-v7';
+const CACHE_NAME = 'smart-schedule-modular-v8';
 const STATIC_ASSETS = [
   './',
   './index.html',
   './style.css',
-  './app.js',
   './manifest.json',
+  './src/1.Frontend/main.js',
+  './src/1.Frontend/components/CircularNode.js',
+  './src/1.Frontend/components/EditModal.js',
+  './src/1.Frontend/components/Toast.js',
+  './src/1.Frontend/views/BackpackView.js',
+  './src/1.Frontend/views/GradesView.js',
+  './src/1.Frontend/views/TimetableGrid.js',
+  './src/2.Backend/services/GradeSolverService.js',
+  './src/2.Backend/services/TimetableParser.js',
+  './src/2.Backend/utils/dateHelpers.js',
+  './src/3.Database/state.js',
+  './src/3.Database/storage/LocalStorageEngine.js',
+  './src/3.Database/storage/SeedData.js',
+  './src/4.Security/sanitizer.js',
+  './src/4.Security/urlValidator.js',
+  './src/5.Performance/pwaManager.js',
+  './src/5.Performance/visibilityOptimizer.js',
   './schedules/index.json',
   './schedules/tuan-35.md',
   './schedules/tuan-36.md',
   './schedules/tuan-37.md',
   './schedules/tuan-38.md',
   './schedules/tuan-39.md',
-  './schedules/tuan-40.md',
-  './schedules/tuan-41.md',
-  './schedules/tuan-42.md',
-  './schedules/tuan-43.md',
-  './schedules/tuan-44.md',
-  './schedules/tuan-45.md',
-  './schedules/tuan-46.md',
-  './schedules/tuan-47.md',
-  './schedules/tuan-48.md',
-  './schedules/tuan-49.md',
-  './schedules/tuan-50.md'
+  './schedules/tuan-40.md'
 ];
 
 // Install Event: Cache Core Static Assets

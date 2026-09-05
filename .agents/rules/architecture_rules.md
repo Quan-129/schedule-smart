@@ -1,0 +1,31 @@
+# QUY TẮC KIẾN TRÚC MÃ NGUỒN (5-TIER MODULAR ARCHITECTURE RULES) 📐
+
+Mọi AI Agent và Lập trình viên khi tham gia phát triển dự án này **BẮT BUỘC** phải tuân thủ nghiêm ngặt các quy tắc kiến trúc sau:
+
+---
+
+## 🏛 1. CẤU TRÚC 5 TẦNG MÃ NGUỒN (`src/`)
+
+Mọi file mã nguồn mới hoặc logic chỉnh sửa phải được đặt đúng vào 1 trong 5 thư mục chuyên môn tương ứng:
+
+1. **`src/1.Frontend/`**: Chuyên trách toàn bộ giao diện người dùng, DOM Rendering, Component (CircularNode, EditModal, Toast), Views (Timetable, Backpack, Grades) và Stylesheet.
+2. **`src/2.Backend/`**: Chuyên trách các thuật toán nghiệp vụ thuần túy (Pure Functions), bộ giải điểm mục tiêu (`GradeSolverService`), bộ phân tích lịch học (`TimetableParser`) và các tiện ích ngày giờ.
+3. **`src/3.Database/`**: Chuyên trách State Management trung tâm (`state.js`), cấu trúc Model dữ liệu, tầng lưu trữ (`LocalStorageEngine`) và dữ liệu mẫu (`SeedData.js`).
+4. **`src/4.Security/`**: Chuyên trách làm sạch dữ liệu đầu vào (`sanitizer.js` - `escapeHtml`), kiểm tra tính hợp lệ của URL (`urlValidator.js`) và thiết lập bảo vệ chống XSS.
+5. **`src/5.Performance/`**: Chuyên trách quản lý vòng đời Service Worker PWA (`pwaManager.js`), tối ưu hóa render và quản lý tài nguyên khi ẩn tab (`visibilityOptimizer.js`).
+
+---
+
+## 🚫 2. CÁC ĐIỀU CẤM KỴ (STRICT CONSTRAINTS)
+
+- ❌ **CẤM viết dồn code vào 1 file khổng lồ (Monolithic File > 300 dòng)**: Mỗi file chỉ giữ một trách nhiệm duy nhất (Single Responsibility).
+- ❌ **CẤM truy cập trực tiếp DOM từ tầng Backend hoặc Database**: Tầng Backend chỉ nhận dữ liệu đầu vào và trả về kết quả thuần túy (Pure Logic), không gọi `document.getElementById()`.
+- ❌ **CẤM hardcode dữ liệu mẫu rải rác**: Mọi dữ liệu mặc định phải nằm trong `src/3.Database/storage/SeedData.js`.
+- ❌ **CẤM inject chuỗi người dùng vào `innerHTML` mà không qua hàm `escapeHtml()`** từ `src/4.Security/sanitizer.js`.
+
+---
+
+## ⚡ 3. NGUYÊN TẮC CÔNG NGHỆ
+
+- Sử dụng chuẩn **Native ES Modules** (`import` / `export`) trực tiếp trên trình duyệt hiện đại (`type="module"`), tuyệt đối không cài thêm các bundler nặng nề để đảm bảo deploy tức thì qua GitHub Pages.
+- Luôn cập nhật [WORKLOG.md](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/docs/0.Log/WORKLOG.md) sau mỗi phiên làm việc.

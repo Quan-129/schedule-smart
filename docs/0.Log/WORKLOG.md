@@ -6,7 +6,30 @@
 
 ---
 
-## 📅 [2026-09-05 10:48] - Khắc Phục Lỗi Hiển Thị Nút Cây Bút ✏️ Trong Chế Độ Jiggle Mode
+## 📅 [2026-09-05 11:10] - Hoàn Tất Tái Cấu Trúc Mã Nguồn Thành Kiến Trúc 5 Tầng Mô-đun (FE, BE, DB, Security, Performance)
+
+- **🎯 Mục tiêu**:
+  - Phân rã mã nguồn monolithic thành 5 tầng mô-đun hóa sạch sẽ (`src/1.Frontend/`, `src/2.Backend/`, `src/3.Database/`, `src/4.Security/`, `src/5.Performance/`).
+  - Thiết lập bộ quy tắc bắt buộc `.agents/rules/architecture_rules.md` và `AGENTS.md` để AI Agent luôn tuân thủ cấu trúc này.
+  - Sử dụng Native ES Modules (`type="module"`), không phụ thuộc bundler, deploy tức thì lên GitHub Pages.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Architecture]` Thiết lập thư mục `src/` và phân chia 5 tầng chuyên môn độc lập.
+  - `[Security]` Xây dựng `src/4.Security/sanitizer.js` (`escapeHtml`) và `src/4.Security/urlValidator.js`.
+  - `[Database]` Xây dựng `src/3.Database/state.js` (Reactive State), `src/3.Database/storage/LocalStorageEngine.js` và `src/3.Database/storage/SeedData.js`.
+  - `[Backend]` Xây dựng `src/2.Backend/services/GradeSolverService.js`, `src/2.Backend/services/TimetableParser.js` và `src/2.Backend/utils/dateHelpers.js`.
+  - `[Frontend]` Xây dựng `src/1.Frontend/components/CircularNode.js`, `EditModal.js`, `Toast.js`, `BackpackView.js`, `GradesView.js`, `TimetableGrid.js` và `main.js`.
+  - `[Performance]` Xây dựng `src/5.Performance/pwaManager.js`, `visibilityOptimizer.js` và nâng cấp Service Worker lên `smart-schedule-modular-v8`.
+  - `[Rules]` Thiết lập `.agents/rules/architecture_rules.md` và `AGENTS.md`.
+
+- **💡 Quyết định Kỹ thuật & Kiến trúc**:
+  - *Native ES Modules*: Không sử dụng Webpack/Vite build step phức tạp $\rightarrow$ Git push lên GitHub Pages là chạy ngay lập tức.
+  - *Pure Logic Separation*: Toàn bộ thuật toán tính điểm và phân tích lịch học ở tầng Backend là Pure Functions, không chạm vào DOM $\rightarrow$ dễ dàng test và bảo trì.
+
+- **📌 Trạng thái hiện tại & Kế hoạch tiếp theo (Next Steps)**:
+  - [x] Tái cấu trúc 100% mã nguồn theo kiến trúc 5 tầng.
+  - [x] Kiểm thử toàn bộ giao diện và chức năng.
+  - [ ] Khảo sát mở rộng đồng bộ Google Calendar API.
 
 - **🎯 Mục tiêu**:
   - Sửa triệt để lỗi nút cây bút vàng (✏️) không xuất hiện khi người dùng kích hoạt chế độ nhấn giữ (Jiggle Mode).
