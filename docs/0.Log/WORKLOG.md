@@ -4,6 +4,21 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 22:00] - Tối Giản Hóa Tuyệt Đối: Chỉ Giữ Lại Duy Nhất Thanh Navbar Điều Hướng
+
+- **🎯 Mục tiêu**:
+  - Theo yêu cầu của người dùng, loại bỏ/ẩn toàn bộ các thanh phụ rườm rà (Hero Banner và Filter Toolbar), chỉ giữ lại duy nhất 1 thanh Navbar trên cùng như ảnh chụp.
+  - Mang lại trải nghiệm tối giản (Minimalist UI), hiển thị ngay Ma trận Thời khóa biểu 7 ngày ngay dưới Navbar mà không bị che khuất không gian.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / CSS Timetable Grid]` Cập nhật [`src/1.Frontend/styles/3.timetable-grid.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/3.timetable-grid.css):
+    - Đặt `.hero-banner { display: none !important; }`.
+  - `[Frontend / CSS Navbar]` Cập nhật [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css):
+    - Đặt `.filter-bar { display: none !important; }`.
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v40` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-05 21:55] - Tối Ưu Cụm Header (Navbar + Hero Banner + Search Bar) Siêu Nhỏ Gọn & Tiết Kiệm 50% Diện Tích Dọc
 
 - **🎯 Mục tiêu**:

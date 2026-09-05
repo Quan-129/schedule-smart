@@ -323,16 +323,10 @@
 }
 
 /* ==========================================================================
-   FILTER & SEARCH TOOLBAR (COMPACT FLEXBOX DESIGN)
+   FILTER & SEARCH TOOLBAR - Ẩn hoàn toàn để giữ duy nhất thanh Navbar trên cùng
    ========================================================================== */
 .filter-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-top: 0.1rem;
-  margin-bottom: 0.1rem;
+  display: none !important;
 }
 
 .search-box {
