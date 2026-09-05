@@ -230,7 +230,8 @@ export function switchTab(tabName) {
     renderGradesView();
   } else if (tabName === 'today') {
     if (state.scheduleData && state.scheduleData.days) {
-      renderTodayView(state.scheduleData.days);
+      const isCurrentWeek = checkIsCurrentWeek(currentWeekFile);
+      renderTodayView(state.scheduleData.days, isCurrentWeek);
     }
   }
 }
@@ -324,9 +325,54 @@ async function initWeekSelector() {
     };
   }
 
-  // Tải tuần 35 mặc định hoặc tuần đầu tiên
-  const defaultWeek = availableWeeks[0] ? availableWeeks[0].filename : 'schedules/tuan-35.md';
-  await loadWeekSchedule(defaultWeek);
+  // Tự động nhận diện tuần hiện tại theo ngày thực tế
+  const initialWeek = getInitialWeekFilename();
+  await loadWeekSchedule(initialWeek);
+}
+
+/**
+ * Kiểm tra xem một file tuần học có chứa ngày hôm nay hay không
+ * @param {string} filepath 
+ * @returns {boolean}
+ */
+export function checkIsCurrentWeek(filepath) {
+  const weekObj = availableWeeks.find(w => w.filename === filepath);
+  if (!weekObj || !weekObj.startDate) return false;
+
+  const today = new Date();
+  const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
+  const start = new Date(weekObj.startDate);
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+
+  const startStr = start.getFullYear() + '-' + String(start.getMonth() + 1).padStart(2, '0') + '-' + String(start.getDate()).padStart(2, '0');
+  const endStr = end.getFullYear() + '-' + String(end.getMonth() + 1).padStart(2, '0') + '-' + String(end.getDate()).padStart(2, '0');
+
+  return todayStr >= startStr && todayStr <= endStr;
+}
+
+/**
+ * Tìm file tuần học tương ứng với ngày hôm nay
+ * @returns {string}
+ */
+function getInitialWeekFilename() {
+  const currentWeekObj = availableWeeks.find(w => {
+    if (!w.startDate) return false;
+    const today = new Date();
+    const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
+    const start = new Date(w.startDate);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+
+    const startStr = start.getFullYear() + '-' + String(start.getMonth() + 1).padStart(2, '0') + '-' + String(start.getDate()).padStart(2, '0');
+    const endStr = end.getFullYear() + '-' + String(end.getMonth() + 1).padStart(2, '0') + '-' + String(end.getDate()).padStart(2, '0');
+
+    return todayStr >= startStr && todayStr <= endStr;
+  });
+
+  return currentWeekObj ? currentWeekObj.filename : (availableWeeks[0] ? availableWeeks[0].filename : 'schedules/tuan-35.md');
 }
 
 function renderWeekDropdownOptions(selectedFilename) {
@@ -395,8 +441,9 @@ async function loadWeekSchedule(filepath) {
   renderSubjectFilters(parsed.subjects || []);
 
   // 4. Render Grid & Today View
-  renderTimetableGrid(parsed.days || []);
-  renderTodayView(parsed.days || []);
+  const isCurrentWeek = checkIsCurrentWeek(filepath);
+  renderTimetableGrid(parsed.days || [], isCurrentWeek);
+  renderTodayView(parsed.days || [], isCurrentWeek);
 
   // 5. Cập nhật Ghi chú tuần
   renderScheduleNotes(parsed.notes || []);
@@ -512,7 +559,8 @@ function renderSubjectFilters(subjects = []) {
   allBtn.onclick = () => {
     state.activeFilterSubject = null;
     renderSubjectFilters(subjects);
-    renderTimetableGrid(state.scheduleData.days || []);
+    const isCurrentWeek = checkIsCurrentWeek(currentWeekFile);
+    renderTimetableGrid(state.scheduleData.days || [], isCurrentWeek);
   };
   container.appendChild(allBtn);
 
@@ -528,7 +576,8 @@ function renderSubjectFilters(subjects = []) {
     btn.onclick = () => {
       state.activeFilterSubject = isActive ? null : subjName;
       renderSubjectFilters(subjects);
-      renderTimetableGrid(state.scheduleData.days || []);
+      const isCurrentWeek = checkIsCurrentWeek(currentWeekFile);
+      renderTimetableGrid(state.scheduleData.days || [], isCurrentWeek);
     };
     container.appendChild(btn);
   });
@@ -568,7 +617,8 @@ function initSearchAndFilters() {
         clearSearchBtn.classList.toggle('hidden', !state.searchQuery);
         clearSearchBtn.style.display = state.searchQuery ? 'block' : 'none';
       }
-      renderTimetableGrid(state.scheduleData ? state.scheduleData.days || [] : []);
+      const isCurrentWeek = checkIsCurrentWeek(currentWeekFile);
+      renderTimetableGrid(state.scheduleData ? state.scheduleData.days || [] : [], isCurrentWeek);
     };
   }
 
@@ -578,7 +628,8 @@ function initSearchAndFilters() {
       state.searchQuery = '';
       clearSearchBtn.classList.add('hidden');
       clearSearchBtn.style.display = 'none';
-      renderTimetableGrid(state.scheduleData ? state.scheduleData.days || [] : []);
+      const isCurrentWeek = checkIsCurrentWeek(currentWeekFile);
+      renderTimetableGrid(state.scheduleData ? state.scheduleData.days || [] : [], isCurrentWeek);
     };
   }
 
@@ -890,8 +941,9 @@ function persistCurrentSchedule() {
   state.scheduleData.subjects = Array.from(uniqueSubjects);
 
   // 5. Re-render UI
-  renderTimetableGrid(state.scheduleData.days || []);
-  renderTodayView(state.scheduleData.days || []);
+  const isCurrentWeek = checkIsCurrentWeek(currentWeekFile);
+  renderTimetableGrid(state.scheduleData.days || [], isCurrentWeek);
+  renderTodayView(state.scheduleData.days || [], isCurrentWeek);
   updateHeroStats(state.scheduleData);
   renderSubjectFilters(state.scheduleData.subjects || []);
 }
@@ -1041,8 +1093,9 @@ function initRawMarkdownEditor() {
     applyBtn.onclick = () => {
       const parsed = parseScheduleMarkdown(textarea.value);
       state.scheduleData = parsed;
-      renderTimetableGrid(parsed.days || []);
-      renderTodayView(parsed.days || []);
+      const isCurrentWeek = checkIsCurrentWeek(currentWeekFile);
+      renderTimetableGrid(parsed.days || [], isCurrentWeek);
+      renderTodayView(parsed.days || [], isCurrentWeek);
       updateHeroStats(parsed);
       switchTab('grid');
       showToast('Đã cập nhật giao diện theo Markdown tùy chỉnh!');

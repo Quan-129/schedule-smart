@@ -23,8 +23,9 @@ export function getSubjectColor(subjectName) {
 /**
  * Render ma trận thời khóa biểu 7 ngày x 12 tiết
  * @param {Array<Object>} days 
+ * @param {boolean} isCurrentWeek 
  */
-export function renderTimetableGrid(days = []) {
+export function renderTimetableGrid(days = [], isCurrentWeek = false) {
   const scheduleGrid = document.getElementById('schedule-grid');
   if (!scheduleGrid) return;
 
@@ -53,7 +54,7 @@ export function renderTimetableGrid(days = []) {
       }
     }
 
-    const isToday = (day.dayOfWeekNumber === currentDayOfWeek);
+    const isToday = isCurrentWeek && (day.dayOfWeekNumber === currentDayOfWeek);
 
     const dayCard = document.createElement('div');
     dayCard.className = `day-card ${isToday ? 'is-today' : ''}`;
@@ -237,14 +238,27 @@ function attachDayCardLongPress(dayCard, dayName) {
 /**
  * Render giao diện Focus hôm nay
  * @param {Array<Object>} days 
+ * @param {boolean} isCurrentWeek 
  */
-export function renderTodayView(days = []) {
+export function renderTodayView(days = [], isCurrentWeek = false) {
   const todayList = document.getElementById('today-timeline-list');
   const todaySummary = document.getElementById('today-summary-text');
   if (!todayList) return;
 
   todayList.innerHTML = '';
   const currentDayOfWeek = new Date().getDay();
+
+  if (!isCurrentWeek) {
+    if (todaySummary) todaySummary.textContent = `Bạn đang xem thời khóa biểu của một tuần khác, không phải tuần hiện tại.`;
+    todayList.innerHTML = `
+      <div class="day-off-card" style="padding: 3rem 1rem;">
+        <div class="day-off-icon" style="font-size: 3rem;"><i class="fa-solid fa-calendar-week"></i></div>
+        <h3>Đang xem tuần khác</h3>
+        <p>Để xem các tiết học của hôm nay, vui lòng chuyển về đúng tuần hiện tại.</p>
+      </div>
+    `;
+    return;
+  }
 
   const todayDay = days.find(d => d.dayOfWeekNumber === currentDayOfWeek);
 

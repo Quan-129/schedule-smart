@@ -4,6 +4,26 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 21:10] - Tách Lịch Học 7 Khung Ngày Riêng Biệt & Sửa Triệt Để Lỗi Tự Động Gắn Khung Hôm Nay Ở Thứ 7
+
+- **🎯 Mục tiêu**:
+  - Tách ma trận thời khóa biểu thành đúng **7 khung ngày riêng biệt** (Thứ 2 đến Chủ Nhật), loại bỏ hoàn toàn việc gộp chung Thứ 7 & Chủ Nhật.
+  - Khắc phục triệt để lỗi ô Thứ 7 bị tự động gắn viền sáng và badge `Hôm nay` (`.is-today`) ở tất cả các tuần.
+  - Đảm bảo tính năng Thêm / Sửa / Xóa tiết học trực quan và đồng bộ 2 chiều Markdown hoạt động mượt mà.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Fix Bug / Today Highlight]`:
+    - Tìm ra nguyên nhân gốc rễ: `renderTimetableGrid` và `renderTodayView` trước đây mặc định `isCurrentWeek = true` và các điểm gọi trong [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js) không truyền cờ `isCurrentWeek`. Vì ngày kiểm thử là Thứ 7 (`getDay() === 6`), nên ở bất kỳ tuần nào (kể cả tuần quá khứ hay tương lai), ô Thứ 7 đều bị highlight là hôm nay.
+    - Đổi giá trị mặc định của `isCurrentWeek` thành `false` trong [`src/1.Frontend/views/TimetableGrid.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/TimetableGrid.js).
+    - Cập nhật tất cả các vị trí gọi `renderTimetableGrid` và `renderTodayView` trong [`main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js) (`loadWeekSchedule`, `switchTab`, `renderSubjectFilters`, `initSearchAndFilters`, `persistCurrentSchedule`, `applyBtn`) luôn tính toán chính xác `checkIsCurrentWeek(filepath)` dựa trên `startDate` của tuần so với ngày thực tế.
+  - `[Feature / 7 Days Separation]`:
+    - Chuẩn hóa toàn bộ parser [`src/2.Backend/services/TimetableParser.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/TimetableParser.js) và date helper [`src/2.Backend/utils/dateHelpers.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/utils/dateHelpers.js) phân tách rõ ràng Thứ 7 (6) và Chủ Nhật (0).
+    - Cập nhật toàn bộ các file Markdown tuần mẫu trong `schedules/` (`tuan-35.md`, `tuan-36.md`, `tuan-37.md`, `tuan-38.md`, `tuan-39.md`, `tuan-40.md`) phân tách riêng biệt `## Thứ 7` và `## Chủ Nhật`.
+    - Modal Thêm / Chỉnh sửa môn hỗ trợ chọn đầy đủ 7 ngày độc lập.
+  - `[Performance / Service Worker]`: Nâng cấp `CACHE_NAME` lên `smart-schedule-modular-v30` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js) để trình duyệt tự động làm mới mã nguồn.
+
+---
+
 ## 📅 [2026-09-05 20:25] - Xây Dựng Visual Schedule Builder (Tạo Tuần Trống 7 Ngày, Thêm/Sửa Tiết Trực Quan & Long-press)
 
 - **🎯 Mục tiêu**:
