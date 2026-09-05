@@ -539,33 +539,37 @@
     <div class="modal-card modal-card-sm">
       <div class="modal-header">
         <div class="modal-title-group">
-          <i class="fa-solid fa-book-bookmark" style="color: var(--accent-primary); font-size: 1.3rem;"></i>
+          <div class="modal-icon-glow" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);">
+            <i class="fa-solid fa-book-bookmark"></i>
+          </div>
           <div>
-            <h4>Thêm Môn Học Mới</h4>
-            <span style="font-size: 0.78rem; color: var(--text-muted);">Tạo nút vuông phím tắt cho môn học</span>
+            <h3 class="modal-title" style="font-size: 1.15rem;">Thêm Môn Học Mới</h3>
+            <span class="modal-subj-sub">Tạo phím tắt & chiếc cặp cho môn học</span>
           </div>
         </div>
-        <button id="add-subject-close-btn" class="btn-modal-action btn-close" title="Đóng"><i class="fa-solid fa-xmark"></i></button>
+        <button id="add-subject-close-btn" class="btn-modal-close" title="Đóng modal"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <form id="add-subject-form" class="modal-form">
-        <div class="form-group">
-          <label for="new-subj-name-input">Tên môn học *</label>
-          <input type="text" id="new-subj-name-input" placeholder="Ví dụ: Giải tích 1, Vật lý đại cương..." required autofocus>
-        </div>
+        <div style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+          <div class="form-group-styled">
+            <label for="new-subj-name-input"><i class="fa-solid fa-book-open"></i> Tên môn học <span class="required-star">*</span></label>
+            <input type="text" id="new-subj-name-input" placeholder="Ví dụ: Giải tích 1, Vật lý đại cương..." required autofocus>
+          </div>
 
-        <div class="form-group">
-          <label for="new-subj-code-input">Mã môn học *</label>
-          <input type="text" id="new-subj-code-input" placeholder="Ví dụ: MT1003, PH1003, CO2001..." required style="text-transform: uppercase;">
-        </div>
+          <div class="form-group-styled">
+            <label for="new-subj-code-input"><i class="fa-solid fa-barcode"></i> Mã môn học <span class="required-star">*</span></label>
+            <input type="text" id="new-subj-code-input" placeholder="Ví dụ: MT1003, PH1003, CO2001..." required style="text-transform: uppercase; font-family: var(--font-mono);">
+          </div>
 
-        <div class="form-group">
-          <label for="new-subj-drive-input">Link Google Drive (Tùy chọn)</label>
-          <input type="url" id="new-subj-drive-input" placeholder="https://drive.google.com/drive/folders/...">
+          <div class="form-group-styled">
+            <label for="new-subj-drive-input"><i class="fa-brands fa-google-drive" style="color: #34a853;"></i> Link Google Drive (Tùy chọn)</label>
+            <input type="url" id="new-subj-drive-input" placeholder="https://drive.google.com/drive/folders/...">
+          </div>
         </div>
 
         <div class="modal-footer">
-          <button type="button" id="add-subject-cancel-btn" class="btn-action-small">Hủy</button>
-          <button type="submit" class="btn-primary-small"><i class="fa-solid fa-plus"></i> Tạo Môn</button>
+          <button type="button" id="add-subject-cancel-btn" class="btn-ghost">Hủy</button>
+          <button type="submit" class="btn-primary-gradient"><i class="fa-solid fa-plus"></i> <span>Tạo Môn Học</span></button>
         </div>
       </form>
     </div>
@@ -591,33 +595,33 @@
       </div>
 
       <form id="add-week-form" class="modal-form">
-        <div style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; overflow-y: auto; max-height: 520px;">
+        <div style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1.1rem; overflow-y: auto; max-height: 520px;">
           
           <div class="form-group-styled">
-            <label for="new-week-title-input">Tên tuần hiển thị *</label>
+            <label for="new-week-title-input"><i class="fa-solid fa-heading"></i> Tên tuần hiển thị <span class="required-star">*</span></label>
             <input type="text" id="new-week-title-input" placeholder="Ví dụ: Tuần 51 (14/12)" required autofocus>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem;">
             <div class="form-group-styled">
-              <label for="new-week-id-input">Mã định danh (ID) *</label>
-              <input type="text" id="new-week-id-input" placeholder="tuan-51" required>
+              <label for="new-week-id-input"><i class="fa-solid fa-fingerprint"></i> Mã định danh (ID) <span class="required-star">*</span></label>
+              <input type="text" id="new-week-id-input" placeholder="tuan-51" style="font-family: var(--font-mono);" required>
             </div>
             <div class="form-group-styled">
-              <label for="new-week-date-input">Ngày bắt đầu (Thứ 2)</label>
+              <label for="new-week-date-input"><i class="fa-regular fa-calendar-days"></i> Ngày bắt đầu (Thứ 2)</label>
               <input type="date" id="new-week-date-input">
             </div>
           </div>
 
           <div class="form-group-styled">
-            <label for="new-week-desc-input">Mô tả / Lưu ý tuần này</label>
-            <input type="text" id="new-week-desc-input" placeholder="Ví dụ: Tuần thi cuối kỳ, nộp báo cáo ĐACN...">
+            <label for="new-week-desc-input"><i class="fa-solid fa-align-left"></i> Ghi chú / Tiêu đề tuần</label>
+            <input type="text" id="new-week-desc-input" placeholder="Ví dụ: Lịch học Tuần 51, thi cuối kỳ, nộp đồ án...">
           </div>
 
           <div class="form-group-styled">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <label for="new-week-md-content">Nội dung Markdown Lịch học:</label>
-              <button type="button" id="btn-copy-template-md" class="btn-action-small" style="font-size: 0.75rem; padding: 0.2rem 0.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.1rem;">
+              <label for="new-week-md-content"><i class="fa-brands fa-markdown" style="color: #38bdf8;"></i> Nội dung Markdown Lịch học:</label>
+              <button type="button" id="btn-copy-template-md" class="preset-chip" style="font-size: 0.76rem; padding: 0.25rem 0.65rem; color: #10b981; border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.1);">
                 <i class="fa-regular fa-copy"></i> Sao chép từ tuần trước
               </button>
             </div>
@@ -632,7 +636,7 @@
 
         <div class="modal-footer">
           <button type="button" id="add-week-cancel-btn" class="btn-ghost">Hủy</button>
-          <button type="submit" class="btn-primary-gradient" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+          <button type="submit" class="btn-primary-gradient" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);">
             <i class="fa-solid fa-plus"></i> <span>Tạo Tuần Học</span>
           </button>
         </div>

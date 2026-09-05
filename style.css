@@ -2503,37 +2503,182 @@ body.theme-light .bg-glow {
   gap: 0.75rem;
 }
 
-/* Form Group Styled */
+/* Form Group Styled & Modern Input Controls */
 .form-group-styled {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.45rem;
 }
 
 .form-group-styled label {
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  letter-spacing: 0.01em;
+}
+
+.form-group-styled label i {
+  color: var(--accent-primary);
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.required-star {
+  color: #ef4444;
+  font-weight: 800;
+  margin-left: 2px;
+}
+
+.form-group-styled input[type="text"],
+.form-group-styled input[type="date"],
+.form-group-styled input[type="url"],
+.form-group-styled input[type="number"],
+.form-group-styled input[type="email"],
+.form-group-styled select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  font-size: 0.88rem;
+  font-weight: 500;
+  outline: none;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  color-scheme: dark;
+}
+
+.form-group-styled input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(0.8) brightness(1.2);
+  opacity: 0.75;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.form-group-styled input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.form-group-styled input:hover,
+.form-group-styled select:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(15, 23, 42, 0.75);
+}
+
+.form-group-styled input:focus,
+.form-group-styled select:focus {
+  border-color: #10b981;
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 0 0 3.5px rgba(16, 185, 129, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.form-group-styled input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+  font-weight: 400;
 }
 
 .form-group-styled textarea {
   width: 100%;
   padding: 0.85rem 1rem;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  background: rgba(10, 15, 29, 0.7);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-family: var(--font-main);
-  font-size: 0.88rem;
+  color: #e2e8f0;
+  font-family: var(--font-mono);
+  font-size: 0.84rem;
   line-height: 1.6;
   resize: vertical;
   outline: none;
-  transition: var(--transition-fast);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
+}
+
+.form-group-styled textarea:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(10, 15, 29, 0.85);
 }
 
 .form-group-styled textarea:focus {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  border-color: #10b981;
+  background: rgba(10, 15, 29, 0.95);
+  box-shadow: 0 0 0 3.5px rgba(16, 185, 129, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.form-group-styled textarea::placeholder {
+  color: var(--text-muted);
+  opacity: 0.65;
+  font-family: var(--font-mono);
+}
+
+/* Custom Scrollbar for Textarea and Modals */
+.form-group-styled textarea::-webkit-scrollbar,
+.modal-form div::-webkit-scrollbar,
+.modal-tab-pane::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.form-group-styled textarea::-webkit-scrollbar-track,
+.modal-form div::-webkit-scrollbar-track,
+.modal-tab-pane::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.form-group-styled textarea::-webkit-scrollbar-thumb,
+.modal-form div::-webkit-scrollbar-thumb,
+.modal-tab-pane::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 9999px;
+}
+
+.form-group-styled textarea::-webkit-scrollbar-thumb:hover,
+.modal-form div::-webkit-scrollbar-thumb:hover,
+.modal-tab-pane::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.5);
+}
+
+/* Light Theme Overrides for Form Inputs */
+body.theme-light .form-group-styled input[type="text"],
+body.theme-light .form-group-styled input[type="date"],
+body.theme-light .form-group-styled input[type="url"],
+body.theme-light .form-group-styled input[type="number"],
+body.theme-light .form-group-styled input[type="email"],
+body.theme-light .form-group-styled select {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.14);
+  color: #0f172a;
+  color-scheme: light;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+body.theme-light .form-group-styled input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: none;
+  opacity: 0.65;
+}
+
+body.theme-light .form-group-styled input:hover,
+body.theme-light .form-group-styled select:hover {
+  border-color: rgba(0, 0, 0, 0.28);
+  background: #ffffff;
+}
+
+body.theme-light .form-group-styled textarea {
+  background: #f8fafc;
+  border-color: rgba(0, 0, 0, 0.14);
+  color: #0f172a;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+body.theme-light .form-group-styled textarea:hover {
+  border-color: rgba(0, 0, 0, 0.28);
+  background: #ffffff;
 }
 
 .input-with-action {

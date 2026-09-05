@@ -4,6 +4,26 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-05 14:22] - Nâng Cấp Thẩm Mỹ UI Cao Cấp Cho Toàn Bộ Form & Modal Controls
+
+- **🎯 Mục tiêu**:
+  - Khắc phục triệt để tình trạng các trường nhập liệu (`input[type="text"]`, `input[type="date"]`, `input[type="url"]`, `textarea`) bị vỡ hoặc rơi về style mặc định thô cứng của trình duyệt trong Modal "Thêm Tuần Học Mới" và Modal "Thêm Môn Học Mới".
+  - Mang lại trải nghiệm thị giác cao cấp (Rich Aesthetics), hiện đại với hiệu ứng Emerald Glow, font chữ sắc nét, icon trực quan và thanh cuộn tùy chỉnh siêu mượt.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / CSS System]` Bổ sung hệ thống định dạng `.form-group-styled` toàn diện: nền kính mờ `rgba(15, 23, 42, 0.6)`, bo góc `12px` mềm mại, viền kính siêu mỏng, hiệu ứng hover/focus viền xanh ngọc `emerald` kèm bóng đổ neon glow đa tầng.
+  - `[Frontend / CSS & PWA]` Đồng bộ hóa `color-scheme: dark` và tùy biến biểu tượng lịch cho ô chọn ngày (`<input type="date">`), loại bỏ hoàn toàn các control mặc định xám xịt của trình duyệt.
+  - `[Frontend / Components]` Thiết lập custom scrollbar tinh tế cho ô soạn thảo Markdown (`textarea`) và nội dung modal, sử dụng font `JetBrains Mono` cho mã ID và mã Markdown.
+  - `[Frontend / Markup]` Tinh chỉnh `index.html`: bổ sung icon nhận diện chuyên nghiệp cho từng label, dấu sao bắt buộc `required-star`, nút sao chép tuần học dạng pill-chip trang nhã và nâng cấp nút submit gradient.
+  - `[Performance / PWA]` Nâng cấp `CACHE_NAME` lên `smart-schedule-modular-v14` trong `sw.js` để người dùng nhận ngay giao diện mới nhất.
+
+- **💡 Quyết định Kỹ thuật & Kiến trúc**:
+  - Thiết kế thích ứng kép (Dual Theme Support): hỗ trợ đồng bộ hoàn hảo cho cả Dark Mode (`theme-dark`) và Light Mode (`theme-light`).
+
+- **📌 Trạng thái hiện tại & Kế hoạch tiếp theo (Next Steps)**:
+  - [x] Giao diện modal Thêm tuần học và Thêm môn học đã đạt chuẩn thiết kế cao cấp, đồng bộ và chuyên nghiệp.
+  - [x] Đã cập nhật nhật ký dự án và cache PWA.
+
 ---
 
 ## 📅 [2026-09-05 14:10] - Thiết Lập Bộ Quy Chuẩn Tối Ưu Token & Cơ Chế Tự Động Kích Hoạt Kỹ Năng (Proactive Skill Automation)
