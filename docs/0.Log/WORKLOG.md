@@ -4,6 +4,17 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 09:56] - Khắc Phục Lỗi 404 Relative Import Path Trong OnboardingTour.js 🛠️
+
+- **🎯 Nguyên nhân sự cố**:
+  - File `OnboardingTour.js` nằm trong thư mục con `src/1.Frontend/components/onboarding/` (độ sâu 3 cấp), nhưng đường dẫn import `FirebaseAuthService.js` và `sanitizer.js` chỉ dùng `../../` thay vì `../../../`.
+  - Dẫn đến trình duyệt gửi request tới `src/1.Frontend/3.Database/...` gây lỗi `404 Not Found` và làm gián đoạn tiến trình khởi tạo script đăng nhập.
+- **✅ Giải pháp khắc phục**:
+  - Cập nhật chính xác đường dẫn import thành `../../../3.Database/auth/FirebaseAuthService.js` và `../../../4.Security/sanitizer.js` trong [`OnboardingTour.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/onboarding/OnboardingTour.js).
+  - Nâng `CACHE_NAME` lên `smart-schedule-modular-v69` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-06 09:55] - Triển Khai Tính Năng Interactive Spotlight Onboarding Tour (Hướng Dẫn Tương Tác Rọi Sáng Từng Bước) 🚀✨
 
 - **🎯 Yêu cầu & Mục tiêu**:

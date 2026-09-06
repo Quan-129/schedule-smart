@@ -5,9 +5,9 @@
  * ==========================================================================
  */
 
-import { getCurrentUser, isOwnerUser } from '../../3.Database/auth/FirebaseAuthService.js';
+import { getCurrentUser, isOwnerUser } from '../../../3.Database/auth/FirebaseAuthService.js';
 import { showToast } from '../Toast.js';
-import { escapeHtml } from '../../4.Security/sanitizer.js';
+import { escapeHtml } from '../../../4.Security/sanitizer.js';
 
 const ONBOARDING_ROOT_ID = 'onboarding-tour-root';
 
