@@ -4,6 +4,19 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 11:05] - Bổ Sung Vạch Giờ Hiện Tại Màu Đỏ (Current Time Indicator) & Loại Bỏ Chú Thích Cường Độ Thừa Ở Tab Tuần 🔴✨
+
+- **🎯 Yêu cầu & Tinh chỉnh UX**:
+  - Tích hợp **Vạch đỏ chỉ giờ thời gian thực (`cal-current-time-line`)** chuẩn phong cách Google Calendar với hiệu ứng chấm phát sáng nhấp nháy (`cal-current-time-dot`), nhãn giờ thực tế (`cal-current-time-tag`) và đánh dấu mốc giờ đỏ trên trục thời gian (`cal-current-time-axis-mark`).
+  - Tự động mở rộng dải `startHour` và `endHour` bao trọn mốc thời gian thực khi đang ở tuần hiện tại.
+  - Loại bỏ phần chú thích "Cường độ: Level 0-4" ở footer của Tab Tuần (vì các thẻ môn học đã có màu sắc của môn học và trực quan theo thời gian), thay bằng dòng tóm tắt thông số khung giờ và tổng số giờ học.
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js): Render đường thời gian thực và làm sạch footer tab Tuần.
+  - [`src/1.Frontend/styles/9.heatmap-view.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/9.heatmap-view.css): Định nghĩa keyframe pulse, tag nhãn giờ đỏ sắc nét.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v81`.
+
+---
+
 ## 📅 [2026-09-06 11:00] - Khắc Phục Lỗi Lệch Cột & Tràn Cắt Đáy Bảng Thời Khóa Biểu Tuần (Google Calendar Timeline View) 📐✨
 
 - **🎯 Yêu cầu & Phân tích nguyên nhân**:

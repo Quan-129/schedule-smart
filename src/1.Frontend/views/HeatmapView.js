@@ -349,9 +349,16 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
     return;
   }
 
-  const currentDayOfWeek = new Date().getDay();
+  const now = new Date();
+  const currentDayOfWeek = now.getDay();
+  const currentHours = now.getHours();
+  const currentMinutes = now.getMinutes();
+  const currentTotalMinutes = currentHours * 60 + currentMinutes;
+  const currentTimeStr = `${String(currentHours).padStart(2, '0')}:${String(currentMinutes).padStart(2, '0')}`;
+
   const dayIndexMap = { 'Thứ 2': 1, 'Thứ 3': 2, 'Thứ 4': 3, 'Thứ 5': 4, 'Thứ 6': 5, 'Thứ 7': 6, 'Chủ Nhật': 0 };
   const standardDays = selectedWeek.days || [];
+  const isCurrentOrTodayWeek = selectedWeek.filename === currentWeekFile || !!selectedWeek.isTodayWeek || isWeekContainingToday(selectedWeek);
 
   // 1. TỰ ĐỘNG SCALE THỜI GIAN THEO TUẦN (Dynamic Time Bounds)
   let earliestMin = 24 * 60;
@@ -383,6 +390,13 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
     });
   });
 
+  // Nếu là tuần hiện tại: bao trọn cả mốc thời gian thực để vạch giờ luôn hiển thị rõ ràng
+  if (isCurrentOrTodayWeek) {
+    hasAnyClasses = true;
+    earliestMin = Math.min(earliestMin, currentTotalMinutes - 30);
+    latestMax = Math.max(latestMax, currentTotalMinutes + 30);
+  }
+
   let startHour = 7;
   let endHour = 18;
 
@@ -395,9 +409,11 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
   const HOUR_HEIGHT = 60; // px cho mỗi giờ
   const pxPerMinute = HOUR_HEIGHT / 60;
   const TOP_PADDING = 20; // Khoảng đệm trên đỉnh để mốc giờ đầu tiên không bị che
-  const BOTTOM_PADDING = 24; // Khoảng đệm dưới đáy
+  const BOTTOM_PADDING = 30; // Khoảng đệm dưới đáy
   const totalHours = endHour - startHour;
   const totalTimelineHeight = totalHours * HOUR_HEIGHT + TOP_PADDING + BOTTOM_PADDING;
+
+  const currentLineTop = (currentTotalMinutes - startHour * 60) * pxPerMinute + TOP_PADDING;
 
   const hoursList = [];
   for (let h = startHour; h <= endHour; h++) {
@@ -537,7 +553,7 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
               </div>
               <div class="cal-days-header-grid">
                 ${standardDays.map(d => {
-                  const isToday = dayIndexMap[d.dayName] === currentDayOfWeek && selectedWeek.filename === currentWeekFile;
+                  const isToday = isCurrentOrTodayWeek && dayIndexMap[d.dayName] === currentDayOfWeek;
                   const weekStartDate = selectedWeek.startDate || '';
                   const dateInfo = getDateForDayOfWeek(weekStartDate, dayIndexMap[d.dayName]);
                   const dateLabel = dateInfo ? dateInfo.full : '';
@@ -561,6 +577,11 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
                     <span>${String(h).padStart(2, '0')}:00</span>
                   </div>
                 `).join('')}
+                ${isCurrentOrTodayWeek && currentLineTop >= TOP_PADDING && currentLineTop <= (totalTimelineHeight - BOTTOM_PADDING) ? `
+                  <div class="cal-current-time-axis-mark" style="top: ${currentLineTop}px;">
+                    <span>${currentTimeStr}</span>
+                  </div>
+                ` : ''}
               </div>
 
               <!-- Khung Lưới Timeline chứa vạch ngang và 7 cột -->
@@ -576,10 +597,16 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
                 <div class="cal-days-columns-grid">
                 ${standardDays.map(d => {
                   const dayEvents = layoutDayEvents(d.classes);
-                  const isToday = dayIndexMap[d.dayName] === currentDayOfWeek && selectedWeek.filename === currentWeekFile;
+                  const isToday = isCurrentOrTodayWeek && dayIndexMap[d.dayName] === currentDayOfWeek;
 
                   return `
                     <div class="cal-day-column ${isToday ? 'is-today-cal-column' : ''}">
+                      ${isToday && currentLineTop >= TOP_PADDING && currentLineTop <= (totalTimelineHeight - BOTTOM_PADDING) ? `
+                        <div class="cal-current-time-line" style="top: ${currentLineTop}px;">
+                          <div class="cal-current-time-dot"></div>
+                          <span class="cal-current-time-tag">${currentTimeStr}</span>
+                        </div>
+                      ` : ''}
                       ${dayEvents.map(ev => {
                         const color = getSubjectColor(ev.subject);
                         const tooltipTitle = `${ev.subject} • ${d.dayName}`;
@@ -629,16 +656,10 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
         </div>
       </div>
 
-      <div class="heatmap-card-footer">
-        <div class="heatmap-legend-row" style="font-size: 0.74rem;">
-          <span>Cường độ:</span>
-          <div class="legend-scale-boxes">
-            <div class="legend-box level-0" title="0h (Nghỉ)"></div>
-            <div class="legend-box level-1" title="≤ 2h (Nhẹ)"></div>
-            <div class="legend-box level-2" title="2h - 4h (Vừa)"></div>
-            <div class="legend-box level-3" title="4h - 6.5h (Dày)"></div>
-            <div class="legend-box level-4" title="> 6.5h+ (Cao điểm 🔥)"></div>
-          </div>
+      <div class="heatmap-card-footer" style="justify-content: space-between;">
+        <div class="weekly-cal-footer-info" style="font-size: 0.76rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-regular fa-clock" style="color: #818cf8;"></i>
+          <span>Khung giờ: <strong>${String(startHour).padStart(2, '0')}:00 - ${String(endHour).padStart(2, '0')}:00</strong> • <strong>${selectedWeek.totalHours || 0} giờ học</strong></span>
         </div>
 
         <button type="button" class="btn-ghost btn-open-week-nav" data-week="${escapeHtml(selectedWeek.filename)}" style="font-size: 0.76rem;">
