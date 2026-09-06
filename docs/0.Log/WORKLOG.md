@@ -4,6 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 18:35] - Tích Hợp Skill Tự Động Hóa: `tiktok-script-builder` 🎬📱⚙️
+
+- **🎯 Yêu cầu từ người dùng**: Thêm skill chuyên môn để tự động hóa quy trình dựng kịch bản chèn chữ TikTok, chuẩn hóa bộ ảnh và xuất tài liệu kịch bản hoàn chỉnh.
+- **🔍 Chi tiết Kỹ Năng Mới**:
+  - Đã khởi tạo skill [`.agents/skills/tiktok-script-builder/SKILL.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/.agents/skills/tiktok-script-builder/SKILL.md) với quy trình 4 bước chuẩn:
+    1. *Khám phá & Phân tích Bộ ảnh*: Xác định Story Flow (Hook $\rightarrow$ Features $\rightarrow$ CTA).
+    2. *Đổi tên file ảnh khoa học*: Tự động đặt tiền tố `01_hook_...png`, `02_...png` theo thứ tự kịch bản.
+    3. *Soạn thảo kịch bản Content*: Tạo 3 nhóm Hook đời thường, Text Overlay từng slide, Lời bình Voiceover, Caption và Hashtags chuẩn SEO TikTok.
+    4. *Lưu trữ & Đồng bộ đa tầng*: Tự động tạo `KICH_BAN.md` trong thư mục kịch bản và đồng bộ vào `docs/8.Marketing/` cùng `docs/0.Log/MARKETING_LOG.md`.
+  - Cập nhật [`AGENTS.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/AGENTS.md) để tự động kích hoạt skill này khi xử lý các thư mục kịch bản ảnh tiếp thị.
+- **✅ Chi tiết thay đổi**:
+  - [`.agents/skills/tiktok-script-builder/SKILL.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/.agents/skills/tiktok-script-builder/SKILL.md): Định nghĩa quy trình chuẩn của skill.
+  - [`AGENTS.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/AGENTS.md): Đăng ký skill vào hệ thống tự động hóa.
+
+---
+
 ## 📅 [2026-09-06 18:25] - Xây Dựng Kịch Bản TikTok Chèn Chữ & Đổi Tên Khoa Học Bộ Ảnh `kịch bản 1` 🎬📸🚀
 
 - **🎯 Yêu cầu từ người dùng**: Dựng kịch bản chèn chữ đăng TikTok có Hook hấp dẫn, giữ chân người xem và đổi tên lại toàn bộ ảnh trong thư mục `kịch bản 1` theo đúng mạch nội dung.
