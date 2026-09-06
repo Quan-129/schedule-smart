@@ -4,6 +4,24 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 16:15] - Xử Lý Triệt Để Hiện Tượng Tràn Lề Mép Phải Navbar (Nav-Right Overflow Fix) 📐✨
+
+- **🎯 Yêu cầu từ người dùng**: Khắc phục tình trạng cụm nút bên phải (`.nav-right` gồm Week Navigation, Focus Today 🎯, Thêm Tuần ➕, Xóa Tuần 🗑️) bị lòi/tràn ra ngoài mép bo cong của thanh Navbar.
+- **✅ Chi tiết sửa đổi**:
+  - [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css):
+    + Thu gọn padding thanh Navbar từ `0.75rem 1.35rem` thành `0.45rem 0.85rem` (tiết kiệm ~30px mỗi bên).
+    + Giảm khoảng cách `gap` giữa 3 khối lớn từ `1.25rem` xuống `0.5rem`.
+    + Tinh chỉnh kích thước đồng bộ cho các nút hành động (`btn-today-nav`, `btn-add-week-nav`, `btn-delete-week-nav`, `btn-nav`) thành `28px x 28px` (thay vì 34px).
+    + Thu gọn padding & font-size của `.btn-days-mode` (`padding: 0.26rem 0.52rem; font-size: 0.74rem;`).
+    + Giới hạn chiều rộng của `#week-select` (`max-width: 120px; text-overflow: ellipsis; white-space: nowrap;`).
+    + Tinh gọn kích thước `.brand-logo` (36px), `.brand-info h1` (1.05rem), `.btn-icon` (32px), `.toggle-btn` (32px).
+  - [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css):
+    + Đồng bộ kích thước compact ở breakpoint `< 1360px` để đảm bảo Navbar luôn ôm khít 100% không gian, không bao giờ bị tràn lề trên mọi độ phân giải.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js):
+    + Nâng cache lên `smart-schedule-modular-v107`.
+
+---
+
 ## 📅 [2026-09-06 16:08] - Tinh Chỉnh & Sửa Lỗi Hiển Thị Icon / Bố Cục Nút Không Gian Học Kỳ Trên Navbar 🎨🛠
 
 - **🎯 Yêu cầu từ người dùng**: Sửa lỗi nút Space Selector bị hiển thị chuỗi text class `fa-solid fa-graduation-cap` và phình to đè lấn lên các nút công cụ bên cạnh trên thanh Navbar.
