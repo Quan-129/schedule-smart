@@ -4,6 +4,23 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 11:46] - Sửa Triệt Để Lỗi Sticky Navbar Không Trượt Trên Điện Thoại (iOS Safari & Android Chrome) 📱🚀
+
+- **🎯 Yêu cầu & Phân tích nguyên nhân**:
+  - Người dùng báo cáo: Thanh Navbar trượt cố định (sticky) hoạt động tốt trên PC nhưng **không trượt theo khi cuộn trên điện thoại**.
+  - **Nguyên nhân kỹ thuật**: Trên trình duyệt di động (đặc biệt là iOS Safari và Android WebKit), thuộc tính `overflow-x: hidden` trên `html`, `body` hoặc thẻ cha `.app-wrapper` sẽ vô tình tạo ra một clipping context giả, khiến trình duyệt **vô hiệu hóa hoàn toàn cơ chế `position: sticky`** của các phần tử con bên trong.
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - [`src/1.Frontend/styles/1.variables.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/1.variables.css):
+    - Đổi `overflow-x: hidden` trên `body` sang chuẩn hiện đại `overflow-x: clip;` để chống tràn ngang an toàn mà không phá vỡ dòng cuộn viewport của `position: sticky`.
+  - [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css):
+    - Đổi `overflow-x: hidden` trên `html, body` và `.app-wrapper` sang `overflow-x: clip;`.
+    - Bổ sung tiền tố WebKit `position: -webkit-sticky; position: sticky; top: 0.25rem; z-index: 1000;` cho `.navbar` mobile.
+  - [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css):
+    - Bổ sung `position: -webkit-sticky; position: sticky;` đảm bảo tương thích tuyệt đối mọi phiên bản iOS và Android.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v89`.
+
+---
+
 ## 📅 [2026-09-06 11:42] - Thích Ứng Đa Tầng Cho Mọi Mức Zoom Trình Duyệt (100% - 140%+): Chống Tràn/Lòi Bố Cục 🔍🛡
 
 - **🎯 Yêu cầu & Phân tích nguyên nhân**:
