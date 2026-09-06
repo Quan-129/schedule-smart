@@ -24,7 +24,7 @@ import { showToast, initToastContainer } from './components/Toast.js';
 import { initPWA, promptPWAInstall } from '../5.Performance/pwaManager.js';
 import { initVisibilityOptimizer } from '../5.Performance/visibilityOptimizer.js';
 import { formatSafeUrl } from '../4.Security/urlValidator.js';
-import { initFirebaseAuth, syncDriveSubjectsToCloud } from '../3.Database/auth/FirebaseAuthService.js';
+import { initFirebaseAuth, syncDriveSubjectsToCloud, isOwnerUser, getCurrentUser } from '../3.Database/auth/FirebaseAuthService.js';
 import { escapeHtml } from '../4.Security/sanitizer.js';
 
 let availableWeeks = [];
@@ -61,11 +61,14 @@ async function initApp() {
     currentDateBadge.onclick = focusTodayTarget;
   }
 
-  // 4. Khởi tạo Firebase Auth & Google Login
-  initFirebaseAuth((user) => {
-    if (user) {
-      renderBackpackView();
-      renderGradesView();
+  // 4. Khởi tạo Firebase Auth & Google Login với cơ chế cô lập dữ liệu theo User
+  initFirebaseAuth(async (user) => {
+    initApplicationState(user);
+    await initWeekSelector(user);
+    renderBackpackView();
+    renderGradesView();
+    if (state.currentTab === 'today') {
+      renderHeatmapView(availableWeeks, currentWeekFile, handleSelectWeekFromHeatmap);
     }
   });
 
@@ -81,7 +84,7 @@ async function initApp() {
   // 6. Gắn sự kiện điều hướng Tabs
   initTabNavigation();
 
-  // 7. Nạp danh sách tuần học từ index.json và hiển thị tuần mặc định
+  // 7. Nạp danh sách tuần học theo phạm vi người dùng
   await initWeekSelector();
 
   // 8. Khởi tạo công cụ tìm kiếm và bộ lọc
@@ -96,6 +99,10 @@ async function initApp() {
   initAddWeekModal(
     () => currentRawMarkdown,
     (newWeekData) => {
+      const activeUser = getCurrentUser();
+      const isOwner = isOwnerUser(activeUser);
+      const customWeeksKey = isOwner ? 'smart_schedule_custom_weeks' : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_custom_weeks`;
+
       availableWeeks.push({
         id: newWeekData.id,
         title: newWeekData.title,
@@ -105,7 +112,7 @@ async function initApp() {
       });
       localStorage.setItem(`smart_schedule_custom_md_${newWeekData.filename}`, newWeekData.mdContent);
       const customWeeks = availableWeeks.filter(w => w.filename.startsWith('custom_'));
-      localStorage.setItem('smart_schedule_custom_weeks', JSON.stringify(customWeeks));
+      localStorage.setItem(customWeeksKey, JSON.stringify(customWeeks));
       renderWeekDropdownOptions(newWeekData.filename);
       loadWeekSchedule(newWeekData.filename);
       showToast(`Đã tạo thành công ${newWeekData.title}!`);
@@ -279,42 +286,46 @@ export function switchTab(tabName) {
 }
 
 /**
- * Khởi tạo Dropdown danh sách tuần
+ * Khởi tạo Dropdown danh sách tuần theo phạm vi người dùng (User Scope)
+ * @param {Object|null} user 
  */
-async function initWeekSelector() {
+async function initWeekSelector(user = null) {
   const weekSelect = document.getElementById('week-select');
   const prevBtn = document.getElementById('prev-week-btn');
   const nextBtn = document.getElementById('next-week-btn');
   const addWeekNavBtn = document.getElementById('btn-add-week-modal');
   const deleteWeekNavBtn = document.getElementById('btn-delete-week');
 
+  const activeUser = user || getCurrentUser();
+  const isOwner = isOwnerUser(activeUser);
+
   let deletedWeekIds = [];
+  const deletedKey = isOwner ? 'smart_schedule_deleted_weeks' : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_deleted_weeks`;
   try {
-    const delRaw = localStorage.getItem('smart_schedule_deleted_weeks');
+    const delRaw = localStorage.getItem(deletedKey);
     if (delRaw) deletedWeekIds = JSON.parse(delRaw);
   } catch (e) {}
 
-  try {
-    const res = await fetch('schedules/index.json');
-    if (res.ok) {
-      const fetched = await res.json();
-      if (Array.isArray(fetched)) {
-        availableWeeks = fetched.filter(w => !deletedWeekIds.includes(w.id) && !deletedWeekIds.includes(w.filename));
+  availableWeeks = [];
+
+  // CHỈ NẠP LỊCH GỐC (schedules/index.json) NẾU LÀ TÀI KHOẢN CHỦ SỞ HỮU
+  if (isOwner) {
+    try {
+      const res = await fetch('schedules/index.json');
+      if (res.ok) {
+        const fetched = await res.json();
+        if (Array.isArray(fetched)) {
+          availableWeeks = fetched.filter(w => !deletedWeekIds.includes(w.id) && !deletedWeekIds.includes(w.filename));
+        }
       }
+    } catch (e) {
+      console.warn('[Schedule] Không tải được schedules/index.json:', e);
     }
-  } catch (e) {
-    console.warn('[Schedule] Không tải được schedules/index.json, dùng danh sách dự phòng:', e);
   }
 
-  if (!availableWeeks || availableWeeks.length === 0) {
-    availableWeeks = [
-      { id: 'tuan-35', title: 'Tuần 35 (24/08)', filename: 'schedules/tuan-35.md', description: 'Tuần 35' },
-      { id: 'tuan-36', title: 'Tuần 36 (31/08)', filename: 'schedules/tuan-36.md', description: 'Tuần 36' }
-    ].filter(w => !deletedWeekIds.includes(w.id) && !deletedWeekIds.includes(w.filename));
-  }
-
-  // Nạp thêm các tuần do người dùng tự tạo từ LocalStorage
-  const customWeeksRaw = localStorage.getItem('smart_schedule_custom_weeks');
+  // Nạp thêm các tuần do người dùng tự tạo từ LocalStorage theo User Scope
+  const customWeeksKey = isOwner ? 'smart_schedule_custom_weeks' : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_custom_weeks`;
+  const customWeeksRaw = localStorage.getItem(customWeeksKey);
   if (customWeeksRaw) {
     try {
       const customWeeks = JSON.parse(customWeeksRaw);
@@ -330,15 +341,20 @@ async function initWeekSelector() {
     }
   }
 
+  // NẾU LÀ NGƯỜI DÙNG MỚI (hoặc chưa có tuần nào): Khởi tạo 1 tuần trống tinh khôi (Tuần 1)
   if (availableWeeks.length === 0) {
-    const fallbackWeek = {
-      id: 'tuan-moi',
-      title: 'Tuần học mới (Trống)',
+    const initialCleanWeek = {
+      id: 'tuan-1',
+      title: 'Tuần 1',
       startDate: '',
-      filename: 'custom_tuan-moi.md',
-      description: 'Lịch học trống'
+      filename: 'custom_tuan-1.md',
+      description: 'Tuần học đầu tiên'
     };
-    availableWeeks.push(fallbackWeek);
+    availableWeeks.push(initialCleanWeek);
+    const customMdKey = `smart_schedule_custom_md_${initialCleanWeek.filename}`;
+    if (!localStorage.getItem(customMdKey)) {
+      localStorage.setItem(customMdKey, generateEmptyWeekMarkdown('Tuần 1'));
+    }
   }
 
   renderWeekDropdownOptions();
@@ -413,11 +429,16 @@ async function initWeekSelector() {
 }
 
 /**
- * Xử lý xóa tuần học hiện tại khỏi danh sách và đồng bộ LocalStorage
+ * Xử lý xóa tuần học hiện tại khỏi danh sách và đồng bộ LocalStorage theo User Scope
  * @param {Object} weekObj 
  */
 function handleDeleteCurrentWeek(weekObj) {
   if (!weekObj) return;
+
+  const activeUser = getCurrentUser();
+  const isOwner = isOwnerUser(activeUser);
+  const customWeeksKey = isOwner ? 'smart_schedule_custom_weeks' : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_custom_weeks`;
+  const deletedKey = isOwner ? 'smart_schedule_deleted_weeks' : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_deleted_weeks`;
 
   // 1. Xóa Markdown trong LocalStorage nếu có
   localStorage.removeItem(`smart_schedule_custom_md_${weekObj.filename}`);
@@ -425,21 +446,21 @@ function handleDeleteCurrentWeek(weekObj) {
   // 2. Cập nhật danh sách custom_weeks nếu là tuần tự tạo
   let customWeeks = [];
   try {
-    const raw = localStorage.getItem('smart_schedule_custom_weeks');
+    const raw = localStorage.getItem(customWeeksKey);
     if (raw) customWeeks = JSON.parse(raw);
   } catch (e) {}
   customWeeks = customWeeks.filter(w => w.filename !== weekObj.filename && w.id !== weekObj.id);
-  localStorage.setItem('smart_schedule_custom_weeks', JSON.stringify(customWeeks));
+  localStorage.setItem(customWeeksKey, JSON.stringify(customWeeks));
 
-  // 3. Thêm vào danh sách các tuần đã xóa smart_schedule_deleted_weeks
+  // 3. Thêm vào danh sách các tuần đã xóa
   let deletedWeekIds = [];
   try {
-    const delRaw = localStorage.getItem('smart_schedule_deleted_weeks');
+    const delRaw = localStorage.getItem(deletedKey);
     if (delRaw) deletedWeekIds = JSON.parse(delRaw);
   } catch (e) {}
   if (!deletedWeekIds.includes(weekObj.id)) deletedWeekIds.push(weekObj.id);
   if (!deletedWeekIds.includes(weekObj.filename)) deletedWeekIds.push(weekObj.filename);
-  localStorage.setItem('smart_schedule_deleted_weeks', JSON.stringify(deletedWeekIds));
+  localStorage.setItem(deletedKey, JSON.stringify(deletedWeekIds));
 
   // 4. Cập nhật availableWeeks trong bộ nhớ
   const deletedIndex = availableWeeks.findIndex(w => w.filename === weekObj.filename);

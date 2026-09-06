@@ -5,7 +5,7 @@
  * ==========================================================================
  */
 
-import { state, persistDriveSubjects } from '../state.js';
+import { state, persistDriveSubjects, persistGrades, initApplicationState } from '../state.js';
 import { showToast } from '../../1.Frontend/components/Toast.js';
 
 export const firebaseConfig = {
@@ -18,11 +18,34 @@ export const firebaseConfig = {
   measurementId: "G-9CE6MNZT5Z"
 };
 
+export const OWNER_EMAILS = [
+  'minhquan12092005@gmail.com'
+];
+
 let firebaseApp = null;
 let auth = null;
 let db = null;
 let currentUser = null;
 let firestoreUnsubscribe = null;
+
+/**
+ * Kiểm tra xem tài khoản hiện tại có phải là Chủ Sở Hữu (Admin) hay không
+ * @param {Object|null} user 
+ * @returns {boolean}
+ */
+export function isOwnerUser(user = currentUser) {
+  if (!user || !user.email) return false;
+  const email = user.email.toLowerCase().trim();
+  return OWNER_EMAILS.some(e => e.toLowerCase().trim() === email);
+}
+
+/**
+ * Lấy đối tượng người dùng hiện tại
+ * @returns {Object|null}
+ */
+export function getCurrentUser() {
+  return currentUser;
+}
 
 /**
  * Khởi tạo Firebase Authentication & Firestore Listener
@@ -200,6 +223,7 @@ export async function handleLogout() {
   }
   try {
     await auth.signOut();
+    currentUser = null;
     updateAuthUI(null);
     showToast('Đã đăng xuất tài khoản');
   } catch (err) {
@@ -266,7 +290,7 @@ export function updateAuthUI(user) {
 }
 
 /**
- * Lắng nghe thay đổi dữ liệu thời gian thực từ Cloud Firestore
+ * Lắng nghe thay đổi dữ liệu thời gian thực từ Cloud Firestore theo User Scope
  * @param {string} uid 
  * @param {Function} onSyncCallback 
  */
@@ -277,20 +301,37 @@ function attachFirestoreListener(uid, onSyncCallback) {
   firestoreUnsubscribe = docRef.onSnapshot((doc) => {
     if (doc.exists) {
       const data = doc.data();
-      if (data && data.driveSubjects && Array.isArray(data.driveSubjects) && data.driveSubjects.length > 0) {
-        state.driveSubjects = data.driveSubjects;
-        persistDriveSubjects();
+      if (data) {
+        if (Array.isArray(data.driveSubjects)) {
+          state.driveSubjects = data.driveSubjects;
+          persistDriveSubjects();
+        }
+        if (data.studentGrades && typeof data.studentGrades === 'object') {
+          state.studentGrades = data.studentGrades;
+          persistGrades();
+        }
+        if (Array.isArray(data.customWeeks)) {
+          const customKey = isOwnerUser(currentUser) ? 'smart_schedule_custom_weeks' : `smart_schedule_${currentUser.uid}_custom_weeks`;
+          localStorage.setItem(customKey, JSON.stringify(data.customWeeks));
+        }
+        if (data.customMds && typeof data.customMds === 'object') {
+          Object.keys(data.customMds).forEach(k => {
+            localStorage.setItem(k, data.customMds[k]);
+          });
+        }
         if (typeof onSyncCallback === 'function') onSyncCallback(currentUser);
       }
     } else {
       // Lưu dữ liệu khởi tạo lên Cloud lần đầu
-      docRef.set({
+      const initialDoc = {
         email: currentUser.email,
         displayName: currentUser.displayName,
         photoURL: currentUser.photoURL,
-        driveSubjects: state.driveSubjects,
+        driveSubjects: state.driveSubjects || [],
+        studentGrades: state.studentGrades || {},
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      }, { merge: true });
+      };
+      docRef.set(initialDoc, { merge: true });
     }
   }, (err) => {
     console.warn('[Firestore] Lỗi snapshot:', err);
@@ -298,15 +339,35 @@ function attachFirestoreListener(uid, onSyncCallback) {
 }
 
 /**
- * Đồng bộ danh sách môn học lên Cloud Firestore
+ * Đồng bộ danh sách môn học và dữ liệu lên Cloud Firestore
  */
 export function syncDriveSubjectsToCloud() {
   if (!db || !currentUser) return;
   const docRef = db.collection('users').doc(currentUser.uid);
   docRef.set({
-    driveSubjects: state.driveSubjects,
+    driveSubjects: state.driveSubjects || [],
+    studentGrades: state.studentGrades || {},
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   }, { merge: true }).catch(err => {
     console.warn('[Firestore] Lỗi đồng bộ Cloud:', err);
+  });
+}
+
+/**
+ * Đồng bộ toàn bộ dữ liệu người dùng lên Cloud Firestore
+ * @param {Array} customWeeks 
+ * @param {Object} customMds 
+ */
+export function syncUserDataToCloud(customWeeks = [], customMds = {}) {
+  if (!db || !currentUser) return;
+  const docRef = db.collection('users').doc(currentUser.uid);
+  docRef.set({
+    driveSubjects: state.driveSubjects || [],
+    studentGrades: state.studentGrades || {},
+    customWeeks: customWeeks || [],
+    customMds: customMds || {},
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }, { merge: true }).catch(err => {
+    console.warn('[Firestore] Lỗi đồng bộ toàn bộ dữ liệu:', err);
   });
 }

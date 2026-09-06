@@ -4,6 +4,25 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 09:09] - Triển Khai Kiến Trúc Cô Lập Dữ Liệu Đa Người Dùng (Multi-User Data Isolation & Owner Privileges) 🔐
+
+- **🎯 Yêu cầu & Mục tiêu**:
+  - Dữ liệu lịch học, môn học Drive và điểm số hiện tại là thời khóa biểu cá nhân của Chủ Sở Hữu (`minhquan12092005@gmail.com`).
+  - Khi người khác (khách vãng lai hoặc tài khoản Google khác) truy cập: Nhận một không gian mới hoàn toàn (sạch sẽ, trống rỗng), tự tạo lịch học và môn học của riêng họ mà không nhìn thấy hoặc ảnh hưởng đến dữ liệu của Chủ Sở Hữu.
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - `[Database / Auth]` [`src/3.Database/auth/FirebaseAuthService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js):
+    - Khởi tạo danh sách `OWNER_EMAILS` và hàm `isOwnerUser(user)` để xác thực quyền Chủ Sở Hữu.
+    - Phân tách Cloud Firestore sync theo từng `users/{uid}` độc lập.
+  - `[Database / State]` [`src/3.Database/state.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/state.js):
+    - Xây dựng hàm `getScopedStorageKey(baseKey, user)`: Tự động gắn tiền tố `smart_schedule_${uid}_...` cho người dùng khác / khách, bảo vệ key gốc cho Owner.
+    - `initApplicationState`: Tải bộ môn mẫu đầy đủ nếu là Owner; khởi tạo `driveSubjects: []` và `studentGrades: {}` mới hoàn toàn nếu là User khác.
+  - `[Frontend / Main]` [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    - `initWeekSelector`: Chỉ nạp `schedules/index.json` cho Owner. Người dùng khác nhận `Tuần 1` trống tinh khôi (`custom_tuan-1.md`).
+    - Lắng nghe sự kiện đăng nhập/đăng xuất để tự động switch State và re-render UI theo đúng User đang hoạt động.
+  - `[Performance / PWA]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v64` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-06 09:03] - Khắc Phục Triệt Để Hiện Tượng Che Khuất Mốc Giờ Đầu Tiên & Mở Rộng Trục Thời Gian Timeline 🛠
 
 - **🎯 Nguyên nhân**:
