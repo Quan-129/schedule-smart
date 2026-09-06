@@ -4,6 +4,25 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 16:39] - Tối Ưu Hóa Responsive Mobile Toàn Diện Cho Header/Navbar (Chống Tràn Layout Tuyệt Đối) 📱🛡️
+
+- **🎯 Yêu cầu từ người dùng**: Thực hiện responsive trên điện thoại vì các phần tử đang bị out / tràn khỏi layout của thanh bar.
+- **🔍 Phân tích nguyên nhân**:
+  - Trên các thiết bị di động (< 768px), Hàng 1 của Header chứa quá nhiều thành phần cố định (Logo, chữ Brand "ScheduleSmart", Bộ chuyển Space, Nút Theme, Nút Backup, User Avatar/Login) với tổng chiều rộng vượt quá 420px, làm tràn khỏi màn hình điện thoại (360px - 390px).
+  - Breakpoint mobile trước đây chỉ đặt ở `@media (max-width: 600px)` khiến các thiết bị màn hình từ 601px đến 768px bị rơi vào layout desktop 2 hàng chật chội.
+- **✅ Chi tiết giải pháp**:
+  - [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css):
+    + Mở rộng breakpoint Smartphone bao phủ toàn diện `@media (max-width: 768px)` và bổ sung `@media (max-width: 400px)`.
+    + **Hàng 1**: Ẩn chữ thương hiệu dài trên mobile, co giãn thông minh nút Space Selector (`min-width: 0; text-overflow: ellipsis; max-width: 170px`), thu nhỏ các nút icon Quick Actions (`28px`), đảm bảo vừa khít 100% trong mọi màn hình từ 320px đến 768px.
+    + **Hàng 2**: Dàn đều 4 Tab View Switcher thành hệ thống Grid 4 cột (`repeat(4, 1fr)`) phẳng, đẹp mắt và dễ bấm 1 chạm.
+    + **Hàng 3**: Thiết kế 2 tầng gồm Bộ chọn 3 Chế độ ngày (1 / 3 / 7 Ngày) và Thanh điều hướng tuần (`.week-navigation`) co giãn tự động không bao giờ bị vỡ dòng hay tràn viền.
+  - [`src/1.Frontend/styles/11.space-selector.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/11.space-selector.css):
+    + Tinh chỉnh padding và max-width của Space Selector trên mobile.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js):
+    + Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v112`.
+
+---
+
 ## 📅 [2026-09-06 16:33] - Khắc Phục Lỗi Xê Dịch Nhẹ Sang Phải Khi Chuyển Sang Tab Chiếc Cặp Drive (Scrollbar Gutter Stabilization) 📏🎯
 
 - **🎯 Yêu cầu từ người dùng**: Sửa triệt để hiện tượng 3 Tab đầu rất ổn định nhưng khi bấm Tab cuối cùng (Chiếc cặp Drive) thì thanh tab vẫn bị xê dịch nhẹ sang phải.

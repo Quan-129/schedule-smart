@@ -222,8 +222,10 @@
   }
 }
 
-/* Smartphone (< 600px) */
-@media (max-width: 600px) {
+/* ==========================================================================
+   3. SMARTPHONE & MOBILE SCREENS (< 768px - CHỐNG TRÀN NAVBAR TUYỆT ĐỐI)
+   ========================================================================== */
+@media (max-width: 768px) {
 
   html,
   body {
@@ -232,7 +234,7 @@
   }
 
   .app-wrapper {
-    padding: 0.45rem 0.5rem 2rem;
+    padding: 0.4rem 0.45rem 2rem;
     gap: 0.45rem;
     max-width: 100vw;
     overflow-x: clip;
@@ -242,205 +244,295 @@
   .navbar {
     display: flex;
     flex-direction: column;
-    padding: 0.45rem 0.6rem;
-    gap: 0.45rem;
+    padding: 0.4rem 0.5rem;
+    gap: 0.4rem;
     border-radius: var(--radius-md);
     position: -webkit-sticky;
     position: sticky;
     top: 0.25rem;
     z-index: 1000;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: visible;
   }
 
-  /* Hàng 1: Brand Info bên trái + Nút Theme/User bên phải */
+  /* Hàng 1: Brand Logo + Space Selector (Trái) & Nút Theme/Backup/User (Phải) */
   .navbar-brand-row {
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.5rem;
+    gap: 0.35rem;
+    box-sizing: border-box;
   }
 
   .nav-left {
-    gap: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
     min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
   }
 
   .brand-logo {
-    width: 34px;
-    height: 34px;
-    font-size: 0.95rem;
+    width: 30px;
+    height: 30px;
+    font-size: 0.9rem;
     border-radius: 8px;
     flex-shrink: 0;
   }
 
+  /* Ẩn tên chữ ScheduleSmart trên mobile để nhường không gian cho Học kỳ & Quick Actions */
   .brand-info {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-  }
-
-  .brand-info h1 {
-    font-size: 0.95rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    display: none !important;
   }
 
   .badge-git {
-    font-size: 0.62rem;
-    padding: 0.05rem 0.35rem;
-    margin-top: 0.1rem;
+    display: none !important;
+  }
+
+  .space-selector-wrapper {
+    display: inline-flex;
+    align-items: center;
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 170px;
+  }
+
+  .btn-space-selector {
+    width: 100%;
+    max-width: 100%;
+    padding: 0.24rem 0.45rem;
+    font-size: 0.75rem;
+    justify-content: space-between;
+  }
+
+  .space-btn-name {
+    max-width: 85px;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .space-archived-tag {
+    display: none !important;
+  }
+
+  .space-dropdown-menu {
+    left: 0;
+    right: auto;
+    min-width: 250px;
+    max-width: 280px;
   }
 
   .nav-quick-actions {
     display: flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.25rem;
     flex-shrink: 0;
   }
 
   .btn-icon {
-    width: 32px;
-    height: 32px;
-    font-size: 0.85rem;
+    width: 28px;
+    height: 28px;
+    font-size: 0.78rem;
     border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .theme-palette-dropdown {
+    right: 0;
+    left: auto;
+    min-width: 210px;
+  }
+
+  .user-auth-group {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    flex-shrink: 0;
   }
 
   .user-display-name {
-    display: none;
+    display: none !important;
   }
 
   .btn-auth-login span {
-    display: none;
+    display: none !important;
   }
 
   .btn-auth-login {
-    padding: 0.4rem 0.6rem;
+    padding: 0;
     border-radius: 50%;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
   }
 
   .user-avatar {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
   }
 
   .btn-auth-logout {
-    width: 24px;
-    height: 24px;
-    font-size: 0.7rem;
+    width: 22px;
+    height: 22px;
+    font-size: 0.65rem;
+    flex-shrink: 0;
   }
 
-  /* Hàng 2: 4 Tab chuyển chế độ xem 100% */
+  /* Hàng 2: 4 Tab chuyển chế độ xem dàn đều 100% */
   .nav-center {
-    position: static;
-    transform: none;
-    order: 2;
-    width: 100%;
-    display: flex;
-    margin: 0;
-    z-index: auto;
+    position: static !important;
+    transform: none !important;
+    order: 2 !important;
+    width: 100% !important;
+    display: flex !important;
+    margin: 0 !important;
+    z-index: auto !important;
   }
 
   .view-toggles {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.25rem;
-    padding: 0.25rem 0.35rem;
-    border-radius: var(--radius-md);
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 0.25rem !important;
+    padding: 0.2rem 0.25rem !important;
+    border-radius: var(--radius-md) !important;
+    box-sizing: border-box !important;
   }
 
   .toggle-btn {
-    width: 100%;
-    height: 38px;
-    font-size: 1.05rem;
-    border-radius: var(--radius-sm);
+    width: 100% !important;
+    height: 35px !important;
+    font-size: 1rem !important;
+    border-radius: var(--radius-sm) !important;
+    justify-content: center !important;
   }
 
   /* Hàng 3: Thanh Tuần Học & Chế Độ Ngày (Xếp dọc gọn gàng 100%) */
   .nav-right {
-    order: 3;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  .week-navigation {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.22rem 0.35rem;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-full);
-    overflow: hidden;
-  }
-
-  .btn-nav {
-    width: 28px;
-    height: 28px;
-    font-size: 0.78rem;
-    flex-shrink: 0;
-  }
-
-  .week-dropdown-wrapper {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 0.2rem;
-    min-width: 0;
-    overflow: hidden;
-  }
-
-  .week-dropdown-wrapper i {
-    font-size: 0.72rem;
-    flex-shrink: 0;
-  }
-
-  .week-select {
-    font-size: 0.78rem;
-    font-weight: 700;
-    width: 100%;
-    text-align: center;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-    padding: 0.2rem 0;
-    background: transparent;
-    border: none;
-    color: var(--text-primary);
-  }
-
-  .btn-add-week-nav {
-    width: 28px;
-    height: 28px;
-    font-size: 0.78rem;
-    flex-shrink: 0;
+    order: 3 !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.35rem !important;
+    box-sizing: border-box !important;
   }
 
   .days-mode-selector {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.2rem;
-    padding: 0.2rem 0.3rem;
-    box-sizing: border-box;
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.2rem !important;
+    padding: 0.16rem 0.22rem !important;
+    box-sizing: border-box !important;
   }
 
   .btn-days-mode {
-    justify-content: center;
-    padding: 0.35rem 0.2rem;
-    font-size: 0.72rem;
-    width: 100%;
+    justify-content: center !important;
+    padding: 0.28rem 0.2rem !important;
+    font-size: 0.72rem !important;
+    width: 100% !important;
+    white-space: nowrap !important;
   }
+
+  .week-navigation {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0.18rem 0.3rem !important;
+    gap: 0.15rem !important;
+    background: var(--bg-secondary) !important;
+    border-radius: var(--radius-full) !important;
+    overflow: hidden !important;
+  }
+
+  .btn-nav,
+  .btn-today-nav,
+  .btn-add-week-nav,
+  .btn-delete-week-nav {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 0.72rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  .week-dropdown-wrapper {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 0.15rem !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .week-dropdown-wrapper i {
+    font-size: 0.7rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  .week-dropdown-wrapper select,
+  #week-select {
+    font-size: 0.74rem !important;
+    font-weight: 700 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    text-align: center !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    padding: 0.15rem 0 !important;
+    background: transparent !important;
+    border: none !important;
+    color: var(--text-primary) !important;
+  }
+}
+
+/* ==========================================================================
+   4. EXTRA SMALL PHONES (< 400px - iPhone SE, Galaxy Fold Subscreen)
+   ========================================================================== */
+@media (max-width: 400px) {
+  .navbar {
+    padding: 0.35rem 0.4rem;
+    gap: 0.35rem;
+  }
+
+  .space-selector-wrapper {
+    max-width: 125px;
+  }
+
+  .space-btn-name {
+    max-width: 60px;
+  }
+
+  .btn-days-mode {
+    font-size: 0.66rem !important;
+    padding: 0.22rem 0.1rem !important;
+  }
+
+  .btn-nav,
+  .btn-today-nav,
+  .btn-add-week-nav,
+  .btn-delete-week-nav {
+    width: 24px !important;
+    height: 24px !important;
+    font-size: 0.66rem !important;
+  }
+
+  .week-dropdown-wrapper select,
+  #week-select {
+    font-size: 0.7rem !important;
+  }
+}
 
   /* Hero Banner trên Mobile */
   .hero-banner {
