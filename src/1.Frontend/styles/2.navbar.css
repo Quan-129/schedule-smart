@@ -166,33 +166,35 @@ body.theme-light .navbar.is-scrolled {
 }
 
 .user-profile-widget {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  background: rgba(255, 255, 255, 0.05);
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-full);
-  padding: 0.18rem 0.55rem 0.18rem 0.22rem;
+  padding: 0.15rem 0.35rem 0.15rem 0.15rem;
   box-shadow: var(--shadow-sm);
+  transition: all 0.22s ease;
   animation: badgePopIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+.user-profile-widget:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-primary);
+}
+
 .user-avatar {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   object-fit: cover;
   border: 1.5px solid var(--accent-primary);
+  display: block;
 }
 
+/* Ẩn text tên người dùng để thanh navbar luôn gọn gàng, không bị vỡ bố cục */
 .user-display-name {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  max-width: 110px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: none !important;
 }
 
 .btn-auth-logout {
@@ -212,7 +214,7 @@ body.theme-light .navbar.is-scrolled {
 
 .btn-auth-logout:hover {
   color: #ef4444;
-  background: rgba(239, 68, 68, 0.18);
+  background: rgba(239, 68, 68, 0.2);
   transform: scale(1.15);
 }
 

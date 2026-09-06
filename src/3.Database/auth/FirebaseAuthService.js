@@ -343,10 +343,18 @@ export function updateAuthUI(user) {
     if (userProfileWidget) {
       userProfileWidget.style.display = 'inline-flex';
       userProfileWidget.classList.remove('hidden');
+      const nameText = user.displayName || user.email || 'Sinh viên';
+      userProfileWidget.title = `Tài khoản: ${nameText}${user.email ? ` (${user.email})` : ''} • Nhấn nút đăng xuất để thoát`;
     }
-    if (userAvatar && user.photoURL) {
-      userAvatar.src = user.photoURL;
+    if (userAvatar) {
+      if (user.photoURL) {
+        userAvatar.src = user.photoURL;
+      } else {
+        const initial = (user.displayName || user.email || 'S').charAt(0).toUpperCase();
+        userAvatar.src = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" rx="16" fill="%236366f1"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold" font-size="14">${initial}</text></svg>`;
+      }
       userAvatar.style.display = 'inline-block';
+      userAvatar.title = user.displayName || user.email || 'Sinh viên';
     }
     if (userDisplayName) {
       userDisplayName.textContent = user.displayName || 'Sinh viên';

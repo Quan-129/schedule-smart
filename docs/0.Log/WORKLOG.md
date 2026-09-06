@@ -4,6 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 11:38] - Tối Giản Capsule User Profile: Ẩn Chữ Tên Người Dùng Để Chống Lòi/Vỡ Bố Cục Navbar 👤✨
+
+- **🎯 Yêu cầu & Phân tích hiện tượng**:
+  - Khi đăng nhập bằng tài khoản Google, việc hiển thị cả họ tên đầy đủ (`user-display-name`) khiến widget tài khoản bị dài ra (15–25 ký tự), dồn ép thanh điều hướng và làm lòi/vỡ bố cục Navbar trên desktop và mobile.
+  - Người dùng yêu cầu bỏ hẳn text tên hiển thị trên thanh Navbar để giao diện gọn gàng, tinh tế và không bao giờ bị tràn.
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css):
+    - Đặt `.user-display-name { display: none !important; }` để ẩn hoàn toàn text tên người dùng trên mọi kích thước màn hình.
+    - Thu gọn `.user-profile-widget` thành viên Capsule nhỏ gọn (chỉ gồm Avatar tròn 26px + Nút Đăng xuất tròn 22px) với viền kính mờ và hiệu ứng hover tinh tế.
+  - [`src/3.Database/auth/FirebaseAuthService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js):
+    - Tích hợp tooltip `title` thông minh cho avatar/widget: hiển thị tên và email khi người dùng rê chuột (hover) vào avatar mà không cần tốn diện tích giao diện.
+    - Xử lý fallback Avatar SVG gradient sắc nét khi tài khoản chưa có ảnh đại diện.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v87`.
+
+---
+
 ## 📅 [2026-09-06 11:35] - Triển Khai Thanh Điều Hướng Sticky Floating Navbar Lơ Lửng Đỉnh Màn Hình Khi Cuộn Trang 🧭✨
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:
