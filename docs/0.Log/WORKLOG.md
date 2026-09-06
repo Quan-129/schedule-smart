@@ -4,6 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 10:44] - Sửa Lỗi Định Vị Chế Độ Học Kỳ: Tính Toán Tuần Thực Tế Theo `startDate` & Fallback Chuẩn Xác 🎯🛠️
+
+- **🎯 Nguyên nhân sự cố**:
+  - Ở chế độ Học kỳ (Semester Matrix), cờ `isToday` trước đó bị phụ thuộc vào `currentWeekFile` (file tuần đang chọn trên dropdown). Nếu người dùng đang chọn xem tuần khác (ví dụ Tuần 36) trong khi hôm nay thuộc Tuần 35, cờ `isToday` bị gán `false` cho toàn bộ các ô, dẫn đến hàm `focusHeatmapTodayTarget` fallback nhầm vào ô Thứ Hai đầu tiên của tuần đang active thay vì ngày Hôm Nay thực tế.
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    - Thêm hàm trợ giúp chuẩn `isWeekContainingToday(week)` kiểm tra xem ngày hôm nay (`todayStr`) có nằm trong khoảng `[startDate, startDate + 6 ngày]` hay không.
+    - Cập nhật `aggregateSemesterData` bổ sung thuộc tính `isTodayWeek`.
+    - Viết lại logic `renderSemesterMatrixView` và `renderYearlyMatrixView`: Tìm chính xác tuần thực tế chứa ngày hôm nay (`actualTodayWeek`), từ đó xác định chính xác ô ngày hôm nay (`dayIndexMap[d.dayName] === currentDayOfWeek`) mà không bị ảnh hưởng bởi tuần đang chọn.
+    - Tối ưu `focusHeatmapTodayTarget()` với fallback 2 tầng theo đúng Thứ hôm nay và hiển thị Toast đầy đủ số tuần ("*🎯 Đã định vị Ô Thứ X (Tuần Y) Hôm nay!*").
+  - [`src/1.Frontend/styles/9.heatmap-view.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/9.heatmap-view.css):
+    - Nâng cấp animation `@keyframes heatmapSquarePulse` scale `1.45` và viền xanh neon sáng rực cho các ô vuông nhỏ `20px` để dễ dàng nhận biết từ xa.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v77`.
+
+---
+
 ## 📅 [2026-09-06 10:38] - Nâng Cấp Nút Focus Hoạt Động Thông Minh Theo Ngữ Cảnh (Context-Aware Smart Focus) Cho Cả Thời Khóa Biểu & Bản Đồ Nhiệt 🎯✨
 
 - **🎯 Yêu cầu & Quyết định thiết kế**:

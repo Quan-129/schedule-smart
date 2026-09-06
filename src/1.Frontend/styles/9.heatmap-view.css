@@ -1010,10 +1010,33 @@
 
 .heatmap-focus-ping {
   animation: heatmapTargetPulse 0.8s ease-in-out 3 !important;
-  z-index: 20 !important;
+  z-index: 50 !important;
   position: relative !important;
   border: 2px solid #a855f7 !important;
   outline: 2px solid #818cf8 !important;
+}
+
+@keyframes heatmapSquarePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.9), 0 0 16px rgba(168, 85, 247, 0.9);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(99, 102, 241, 0), 0 0 28px rgba(168, 85, 247, 1);
+    transform: scale(1.45);
+    border-color: #38bdf8 !important;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0), 0 0 12px rgba(168, 85, 247, 0.5);
+    transform: scale(1);
+  }
+}
+
+.semester-square-item.heatmap-focus-ping,
+.yearly-square-item.heatmap-focus-ping,
+.monthly-matrix-square.heatmap-focus-ping {
+  animation: heatmapSquarePulse 0.8s ease-in-out 3 !important;
+  z-index: 50 !important;
 }
 
 .cal-day-column.heatmap-focus-ping {
@@ -1029,9 +1052,10 @@
   background: rgba(99, 102, 241, 0.3) !important;
 }
 
-/* Marker viền nhẹ cho ô hôm nay trong Semester và Year matrix */
+/* Marker viền nhận diện cho ô hôm nay trong Semester và Year matrix */
 .semester-square-item.is-today-semester-square,
 .yearly-square-item.is-today-year-square {
-  outline: 1.5px solid #818cf8;
+  outline: 2px solid #38bdf8;
   outline-offset: 1px;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
 }
