@@ -209,7 +209,7 @@ export function persistSpacesList(spacesList, user = null) {
 }
 
 /**
- * Chuyển đổi và lưu Không Gian Lịch Học đang mở
+ * Chuyển đổi và lưu Không Gian Lịch Học đang mở (Cục bộ trên từng thiết bị)
  * @param {string} spaceId 
  * @param {Object|null} user 
  */
@@ -218,7 +218,6 @@ export function setActiveSpaceId(spaceId, user = null) {
   const activeSpaceKey = isOwnerUser(activeUser) ? STORAGE_KEYS.ACTIVE_SPACE_ID : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_active_space_id`;
   state.activeSpaceId = spaceId;
   setStorageItem(activeSpaceKey, spaceId);
-  triggerCloudSync(activeUser);
 }
 
 /**
@@ -379,15 +378,14 @@ export function persistGrades(user = null) {
 }
 
 /**
- * Lưu chế độ hiển thị ngày vào Storage
+ * Lưu chế độ hiển thị ngày vào Storage (Trạng thái cục bộ từng thiết bị)
  */
 export function persistDaysDisplayMode() {
   setStorageItem(STORAGE_KEYS.DAYS_DISPLAY_MODE, state.daysDisplayMode);
-  triggerCloudSync(getCurrentUser());
 }
 
 /**
- * Lưu Tab đang xem cuối cùng vào Storage theo User Scope
+ * Lưu Tab đang xem cuối cùng vào Storage theo User Scope (Trạng thái cục bộ từng thiết bị)
  * @param {string} tabName 
  * @param {Object|null} user 
  */
@@ -396,11 +394,10 @@ export function persistLastActiveTab(tabName, user = null) {
   state.lastActiveTab = tabName;
   const lastTabKey = getScopedStorageKey(STORAGE_KEYS.LAST_ACTIVE_TAB, activeUser);
   setStorageItem(lastTabKey, tabName);
-  triggerCloudSync(activeUser);
 }
 
 /**
- * Lưu Tuần đang xem cuối cùng vào Storage theo User Scope và Space
+ * Lưu Tuần đang xem cuối cùng vào Storage theo User Scope và Space (Trạng thái cục bộ từng thiết bị)
  * @param {string} weekFilename 
  * @param {Object|null} user 
  */
@@ -409,10 +406,6 @@ export function persistLastSelectedWeek(weekFilename, user = null) {
   state.lastSelectedWeek = weekFilename;
   const lastWeekKey = getScopedStorageKey(STORAGE_KEYS.LAST_SELECTED_WEEK, activeUser, state.activeSpaceId);
   setStorageItem(lastWeekKey, weekFilename);
-
-  // Cập nhật vào đối tượng Space
-  updateSpace(state.activeSpaceId, { lastSelectedWeek: weekFilename }, activeUser);
-  triggerCloudSync(activeUser);
 }
 
 /**
@@ -500,35 +493,23 @@ export function importFullBackupData(backupData, user = null, options = {}) {
       }
     }
 
-    // 2. Phục hồi Cài đặt (Settings)
-    if (backupData.settings) {
+    // 2. Phục hồi Cài đặt (Settings) - Chỉ áp dụng khi người dùng chủ động nhập file sao lưu thủ công
+    if (!isSilent && backupData.settings) {
       const s = backupData.settings;
       if (s.theme) localStorage.setItem(STORAGE_KEYS.THEME, s.theme);
       if (s.daysDisplayMode) {
         state.daysDisplayMode = s.daysDisplayMode;
-        if (isSilent) {
-          setStorageItem(STORAGE_KEYS.DAYS_DISPLAY_MODE, s.daysDisplayMode);
-        } else {
-          persistDaysDisplayMode();
-        }
+        setStorageItem(STORAGE_KEYS.DAYS_DISPLAY_MODE, s.daysDisplayMode);
       }
       if (s.lastActiveTab) {
         state.lastActiveTab = s.lastActiveTab;
-        if (isSilent) {
-          const lastTabKey = getScopedStorageKey(STORAGE_KEYS.LAST_ACTIVE_TAB, activeUser);
-          setStorageItem(lastTabKey, s.lastActiveTab);
-        } else {
-          persistLastActiveTab(s.lastActiveTab, activeUser);
-        }
+        const lastTabKey = getScopedStorageKey(STORAGE_KEYS.LAST_ACTIVE_TAB, activeUser);
+        setStorageItem(lastTabKey, s.lastActiveTab);
       }
       if (s.activeSpaceId) {
         state.activeSpaceId = s.activeSpaceId;
-        if (isSilent) {
-          const activeSpaceKey = isOwnerUser(activeUser) ? STORAGE_KEYS.ACTIVE_SPACE_ID : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_active_space_id`;
-          setStorageItem(activeSpaceKey, s.activeSpaceId);
-        } else {
-          setActiveSpaceId(s.activeSpaceId, activeUser);
-        }
+        const activeSpaceKey = isOwnerUser(activeUser) ? STORAGE_KEYS.ACTIVE_SPACE_ID : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_active_space_id`;
+        setStorageItem(activeSpaceKey, s.activeSpaceId);
       }
       if (s.heatmapMode) localStorage.setItem('smart_schedule_heatmap_mode', s.heatmapMode);
       if (s.heatmapBannerCollapsed) localStorage.setItem('smart_schedule_heatmap_banner_collapsed', s.heatmapBannerCollapsed);

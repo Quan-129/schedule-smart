@@ -4,6 +4,24 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 17:15] - Phân Tách Độc Lập Giữa Dữ Liệu Học Tập (Data Domain) & Trạng Thái Giao Diện (UI/Session State) 🛡⚡📱💻
+
+- **🎯 Yêu cầu từ người dùng**: Bỏ lưu trạng thái cuối (Active Space, Tab, Tuần xem, Theme, Days Mode) lên Cloud. Giữa các thiết bị dùng chung 1 tài khoản Google hoạt động độc lập 100% về mặt phiên làm việc/giao diện, chỉ chia sẻ chung Dữ liệu học tập cốt lõi để loại bỏ hoàn toàn xung đột & tranh chấp phiên (Session Race Condition).
+- **🔍 Giải pháp Kiến trúc (Decoupled Domain Architecture)**:
+  - **Dữ liệu chia sẻ Cloud (Data Domain)**: Danh sách Không Gian (`spaces`), Dữ liệu chi tiết từng Không Gian (`spacesData`: `driveSubjects`, `studentGrades`, `customWeeks`, `customMds`). Khi một thiết bị thêm/sửa/xóa môn học hoặc cập nhật điểm số, các thiết bị khác nhận cập nhật tức thì qua Firestore Snapshot.
+  - **Trạng thái cục bộ từng thiết bị (Local-Only Presentation State)**: `activeSpaceId`, `lastActiveTab`, `lastSelectedWeek`, `daysDisplayMode`, `theme`, `heatmapMode`, `isCollapsed`. Không gửi lên Cloud và không nhận đè khi có Snapshot từ xa.
+  - **Lợi ích thực tế**: Thiết bị A mở Học kỳ 1 / xem Tuần 2 / mở tab Điểm số, Thiết bị B mở Học kỳ 2 / xem Tuần 5 / mở tab Drive $\rightarrow$ Cả 2 máy chạy độc lập mượt mà, không bị đổi tab hay đổi học kỳ bất ngờ, nhưng dữ liệu môn học/điểm số luôn đồng nhất.
+- **✅ Chi tiết thay đổi**:
+  - [`src/3.Database/state.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/state.js):
+    + Gỡ bỏ `triggerCloudSync()` khỏi `persistDaysDisplayMode()`, `persistLastActiveTab()`, `persistLastSelectedWeek()`.
+    + Trong `importFullBackupData()`: Khi `options.isSilent === true` (nhận cập nhật từ Cloud Firestore), bỏ qua hoàn toàn việc ghi đè `settings` lên LocalStorage của thiết bị hiện tại.
+  - [`src/3.Database/auth/FirebaseAuthService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js):
+    + Trong `attachFirestoreListener()`: Bỏ việc gán `state.activeSpaceId` và `settings` từ Snapshot từ xa; chỉ import `spaces` và `spacesData`, sau đó nạp lại trạng thái nội bộ của thiết bị hiện tại và thông báo re-render.
+    + Trong `syncAllStateToCloud()`: Chỉ đóng gói payload gồm Data Domain (`spaces`, `spacesData`, `driveSubjects`, `studentGrades`) kèm định danh phiên `CLIENT_SESSION_ID`.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache version lên `smart-schedule-modular-v120`.
+
+---
+
 ## 📅 [2026-09-06 17:08] - Tối Ưu Trạng Thái Thu Gọn Hero Banner Thống Kê (Ultra-Compact Banner) 📐✨
 
 - **🎯 Yêu cầu từ người dùng**: Thu gọn hoàn toàn khung Hero Banner thống kê cường độ học tập (ẩn tiêu đề to, phụ đề dài và 4 card KPI khi ở chế độ Thu gọn).

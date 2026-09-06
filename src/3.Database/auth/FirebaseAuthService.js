@@ -424,46 +424,21 @@ function attachFirestoreListener(uid, onSyncCallback) {
           // Bật cờ im lặng để quá trình nạp dữ liệu không kích hoạt sync ngược lên Cloud
           setApplyingRemoteUpdateFlag(true);
 
-          // 2. Phục hồi toàn bộ Đa Không Gian & Dữ liệu Spaces từ Cloud
+          // 2. Phục hồi toàn bộ Đa Không Gian & Dữ liệu Spaces từ Cloud (Chỉ nạp Data Domain)
           if (data.spaces || data.spacesData || data.data) {
             const importPayload = {
               app: 'ScheduleSmart',
               version: '2.1.0',
-              settings: data.settings || {},
               spaces: Array.isArray(data.spaces) ? data.spaces : [],
               data: data.spacesData || data.data || {}
             };
             importFullBackupData(importPayload, currentUser, { isSilent: true });
           }
 
-          // 3. Khôi phục Active Space ID (Học kỳ đang chọn cuối cùng)
-          if (data.activeSpaceId) {
-            state.activeSpaceId = data.activeSpaceId;
-          } else if (data.settings && data.settings.activeSpaceId) {
-            state.activeSpaceId = data.settings.activeSpaceId;
-          }
-
-          // 4. Khôi phục Settings (Theme, DaysMode, LastActiveTab, LastSelectedWeek)
-          if (data.settings && typeof data.settings === 'object') {
-            if (data.settings.theme) localStorage.setItem('smart_schedule_theme', data.settings.theme);
-            if (data.settings.daysDisplayMode) {
-              state.daysDisplayMode = data.settings.daysDisplayMode;
-              localStorage.setItem('smart_schedule_days_mode', data.settings.daysDisplayMode);
-            }
-            if (data.settings.lastActiveTab) {
-              state.lastActiveTab = data.settings.lastActiveTab;
-              const lastTabKey = isOwnerUser(currentUser) ? 'smart_schedule_last_active_tab' : `smart_schedule_${currentUser.uid}_smart_schedule_last_active_tab`;
-              localStorage.setItem(lastTabKey, data.settings.lastActiveTab);
-            }
-            if (data.settings.lastSelectedWeek) {
-              state.lastSelectedWeek = data.settings.lastSelectedWeek;
-            }
-          }
-
-          // 5. Khởi tạo lại Application State
+          // 3. Khởi tạo lại Application State (Giữ nguyên không gian, tab, tuần của thiết bị hiện tại)
           initApplicationState(currentUser);
 
-          // 6. Thông báo re-render cho UI
+          // 4. Thông báo re-render cho UI (chỉ cập nhật dữ liệu môn học / điểm số / spaces mới)
           if (typeof onSyncCallback === 'function') onSyncCallback(currentUser);
         } catch (err) {
           console.error('[Firestore] Lỗi áp dụng Snapshot từ Cloud:', err);
@@ -472,7 +447,7 @@ function attachFirestoreListener(uid, onSyncCallback) {
         }
       }
     } else {
-      // Thiết bị mới / lần đầu: Lưu toàn bộ state hiện tại lên Cloud
+      // Thiết bị mới / lần đầu: Lưu toàn bộ dữ liệu hiện tại lên Cloud
       syncAllStateToCloud(currentUser);
     }
   }, (err) => {
@@ -481,7 +456,8 @@ function attachFirestoreListener(uid, onSyncCallback) {
 }
 
 /**
- * Đồng bộ toàn bộ trạng thái State cuối cùng và toàn bộ các Spaces lên Cloud Firestore
+ * Đồng bộ toàn bộ Dữ liệu học tập (Data Domain) lên Cloud Firestore
+ * Trạng thái giao diện / phiên làm việc (Active Space, Tab, Tuần, Theme) được giữ độc lập trên từng thiết bị
  * @param {Object|null} user 
  */
 export function syncAllStateToCloud(user = null) {
@@ -497,22 +473,14 @@ export function syncAllStateToCloud(user = null) {
     const backupData = exportFullBackupData(activeUser);
     const docRef = db.collection('users').doc(activeUser.uid);
     
-    // Đóng gói cấu trúc đầy đủ cho Cloud kèm Client Session ID
+    // Đóng gói cấu trúc Data Domain thuần túy (Không đồng bộ trạng thái giao diện UI/Session)
     const cloudPayload = {
       email: activeUser.email || '',
       displayName: activeUser.displayName || 'Sinh viên',
       photoURL: activeUser.photoURL || '',
-      activeSpaceId: state.activeSpaceId || backupData.settings?.activeSpaceId || 'default',
       spaces: backupData.spaces || [],
       spacesData: backupData.data || {},
-      settings: {
-        theme: localStorage.getItem('smart_schedule_theme') || 'violet',
-        daysDisplayMode: state.daysDisplayMode || '7',
-        lastActiveTab: state.lastActiveTab || 'grid',
-        lastSelectedWeek: state.lastSelectedWeek || '',
-        activeSpaceId: state.activeSpaceId || 'default'
-      },
-      // Tương thích ngược với các trường cũ
+      // Tương thích ngược với các client cũ
       driveSubjects: state.driveSubjects || [],
       studentGrades: state.studentGrades || {},
       lastUpdatedBySession: CLIENT_SESSION_ID,
