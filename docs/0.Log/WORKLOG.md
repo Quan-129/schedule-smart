@@ -4,6 +4,21 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 10:12] - Khắc Phục Triệt Để Hiện Tượng Navbar Tràn Lề Phải Khi Mở DevTools / Màn Hình Compact (< 1280px) 🚀🛡️
+
+- **🎯 Nguyên nhân sự cố**:
+  - Khi người dùng mở DevTools hoặc thu nhỏ cửa sổ trình duyệt (chiều rộng hiển thị rơi vào khoảng 950px - 1250px), breakpoint cũ chỉ kích hoạt ở `< 900px`, khiến Navbar ở trạng thái `flex-wrap: nowrap`.
+  - Tổng chiều rộng của 3 cụm Brand + View Toggles + Mode Selector & Week Navigation (~1200px) vượt quá kích thước khung hiển thị, đẩy cụm `.nav-right` tràn qua mép bo tròn bên phải của Navbar và gây hiện tượng cắt góc lòi viền.
+- **✅ Giải pháp khắc phục**:
+  - **Mở rộng dải Breakpoint Responsive**:
+    - `@media (max-width: 1280px)`: Tự động bẻ dòng sang layout 2 hàng thông minh (Hàng 1: Brand Info & User Auth; Hàng 2: View Toggles & Week Navigation dàn 2 bên).
+    - `@media (max-width: 992px)`: Chuyển sang bố cục dọc Tablet với Days Mode + Week Navigation chiếm trọn hàng giữa.
+    - `@media (max-width: 640px)`: Xếp tầng Mobile tối ưu 100% không gian.
+  - Thêm `min-width: 0; max-width: 100%;` cho `.nav-right` và `.navbar` để chống tràn cứng.
+  - Nâng `CACHE_NAME` lên `smart-schedule-modular-v71` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-06 10:05] - Tái Cấu Trúc Thanh Điều Hướng Tuần: Xử Lý Lỗi Viền Capsule Bị Lòi Ra Ngoài 🎨✨
 
 - **🎯 Vấn đề người dùng phản ánh**:
