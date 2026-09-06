@@ -159,6 +159,29 @@
 /* Medium Mobile & Small Tablet (< 640px) */
 @media (max-width: 640px) {
 
+  .grades-header-card,
+  .backpack-header-card {
+    padding: 0.55rem 0.85rem !important;
+    gap: 0.55rem !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .grades-filter-box,
+  .backpack-filter-box {
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  .backpack-header-actions {
+    width: 100% !important;
+  }
+
+  .btn-bp-action {
+    flex: 1 !important;
+    justify-content: center !important;
+  }
+
   /* Bảng điểm khớp 100% từng pixel (4 cột đồng nhất Header & Row) */
   .grade-table-header,
   .grade-item-row {

@@ -8,15 +8,15 @@
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: 1.5rem 1.75rem;
-  margin-bottom: 1.25rem;
+  padding: 0.65rem 1.15rem;
+  margin-bottom: 0.85rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 1.25rem;
+  gap: 0.85rem;
   box-shadow: var(--shadow-sm);
-  transition: border-color var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .backpack-header-card:hover {
@@ -25,43 +25,41 @@
 
 .backpack-header-info {
   display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  max-width: 600px;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
 }
 
 .badge-backpack {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.35rem;
   background: rgba(52, 168, 83, 0.12);
   color: #34a853;
   border: 1px solid rgba(52, 168, 83, 0.3);
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  padding: 0.25rem 0.65rem;
+  padding: 0.15rem 0.55rem;
   border-radius: var(--radius-full);
   width: fit-content;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0;
 }
 
 .backpack-main-title {
-  font-size: 1.45rem;
+  font-size: 1.05rem;
   font-weight: 800;
   color: var(--text-primary);
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
 .backpack-subtitle {
-  font-size: 0.86rem;
-  color: var(--text-secondary);
-  line-height: 1.45;
+  display: none;
 }
 
 .backpack-header-actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.65rem;
   flex-wrap: wrap;
 }
 
