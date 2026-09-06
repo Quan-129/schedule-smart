@@ -4,6 +4,21 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 14:50] - Cố Định Chế Độ 7 Ngày Tuần & Tinh Giản Giao Diện Lịch Tuần Google Calendar Style 🗓️✨
+
+- **🎯 Yêu cầu từ người dùng**:
+  - Chỉ cần cố định duy nhất chế độ xem **7 Ngày (Thứ 2 $\rightarrow$ Chủ Nhật)** đầy đủ, loại bỏ hoàn toàn bộ nút chuyển đổi 1 Ngày / 3 Ngày / 7 Ngày và thanh chọn ngày phụ để giao diện đạt độ tinh gọn, tập trung cao nhất.
+- **✅ Công việc đã hoàn thành**:
+  - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    - Cố định `visibleDays = standardDays` (7 Ngày từ Thứ 2 đến Chủ Nhật).
+    - Loại bỏ bộ chuyển mode `.cal-days-mode-switcher` và toàn bộ các state/listeners liên quan.
+    - Giữ nguyên kiến trúc **Single Unified Scroll Container** (`weekly-cal-unified-scroll-area`) giúp bảng và mốc giờ chuẩn khớp 100% không lệch cột.
+  - [`src/1.Frontend/styles/9.heatmap-view.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/9.heatmap-view.css): Dọn dẹp toàn bộ styles thừa của nút chuyển mode và day pill navigation.
+  - [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css): Dọn dẹp responsive classes thừa.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v96`.
+
+---
+
 ## 📅 [2026-09-06 14:45] - Khắc Phục Lỗi Nhầm Tab Mặc Định Sang Học Kỳ & Bổ Sung Import CSS Vào style.css 🛠️🎯
 
 - **🎯 Nguyên nhân gây ra giao diện khác lạ trong ảnh**:

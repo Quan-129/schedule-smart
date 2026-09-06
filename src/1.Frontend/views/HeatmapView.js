@@ -18,8 +18,6 @@ import { getDateForDayOfWeek } from '../../2.Backend/utils/dateHelpers.js';
 let currentHorizonMode = localStorage.getItem('smart_schedule_heatmap_mode') || 'week'; // 'week' | 'month' | 'semester'
 let currentMonthlyDate = new Date(); // Tháng đang xem trong chế độ Tháng
 let activeWeeklyFile = ''; // File tuần đang xem trong chế độ Tuần
-let weeklyCalDaysMode = localStorage.getItem('smart_schedule_cal_days_mode') || (window.innerWidth < 640 ? '1' : '7'); // '1' | '3' | '7'
-let weeklyCalActiveDayName = ''; // Ngày đang chọn khi ở chế độ xem 1 ngày / 3 ngày
 
 // Bộ nhớ đệm dữ liệu tất cả các tuần trong học kỳ
 const weeksDataCache = new Map();
@@ -255,7 +253,7 @@ function setupHeatmapTooltips() {
 
 /**
  * 1️⃣ CHẾ ĐỘ TUẦN: Lịch Tuần Scale Theo Khung Giờ Thực & Xếp Lớp Trùng Giờ (Google Calendar Style)
- * Hỗ trợ Unified Single Scroll Container (chống lệch cột 100%) và Chế độ xem 1 Ngày / 3 Ngày / 7 Ngày
+ * Cố định hiển thị trọn vẹn 7 Ngày (Thứ 2 -> Chủ Nhật) với Unified Single Scroll Container
  */
 function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile = '', onSelectWeek = null) {
   if (!activeWeeklyFile) {
@@ -270,39 +268,10 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
 
   const currentDayOfWeek = new Date().getDay();
   const dayIndexMap = { 'Thứ 2': 1, 'Thứ 3': 2, 'Thứ 4': 3, 'Thứ 5': 4, 'Thứ 6': 5, 'Thứ 7': 6, 'Chủ Nhật': 0 };
-  const todayDayNameMap = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
-  const todayName = todayDayNameMap[currentDayOfWeek];
   const standardDays = selectedWeek.days || [];
+  const visibleDays = standardDays; // Cố định hiển thị trọn vẹn 7 Ngày
 
-  // Xác định ngày đang chọn khi xem chế độ 1 Ngày / 3 Ngày
-  if (!weeklyCalActiveDayName || !standardDays.some(d => d.dayName === weeklyCalActiveDayName)) {
-    if (selectedWeek.filename === currentWeekFile && standardDays.some(d => d.dayName === todayName)) {
-      weeklyCalActiveDayName = todayName;
-    } else {
-      const firstWithClass = standardDays.find(d => d.classesCount > 0);
-      weeklyCalActiveDayName = firstWithClass ? firstWithClass.dayName : (standardDays[0]?.dayName || 'Thứ 2');
-    }
-  }
-
-  // Xác định danh sách ngày hiển thị (visibleDays) dựa theo weeklyCalDaysMode
-  let visibleDays = standardDays;
-  const activeDayIndex = standardDays.findIndex(d => d.dayName === weeklyCalActiveDayName);
-
-  if (weeklyCalDaysMode === '1') {
-    const found = standardDays.find(d => d.dayName === weeklyCalActiveDayName);
-    visibleDays = found ? [found] : [standardDays[0] || { dayName: 'Thứ 2', classes: [], classesCount: 0 }];
-  } else if (weeklyCalDaysMode === '3') {
-    let startIdx = activeDayIndex >= 0 ? activeDayIndex - 1 : 0;
-    if (startIdx < 0) startIdx = 0;
-    if (startIdx + 3 > standardDays.length) {
-      startIdx = Math.max(0, standardDays.length - 3);
-    }
-    visibleDays = standardDays.slice(startIdx, startIdx + 3);
-  } else {
-    visibleDays = standardDays;
-  }
-
-  // 1. TỰ ĐỘNG SCALE THỜI GIAN THEO DANH SÁCH NGÀY ĐANG HIỂN THỊ
+  // 1. TỰ ĐỘNG SCALE THỜI GIAN THEO TUẦN (Dynamic Time Bounds)
   let earliestMin = 24 * 60;
   let latestMax = 0;
   let hasAnyClasses = false;
@@ -449,9 +418,6 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
     return result;
   }
 
-  // Min-width tính toán cho Unified Grid
-  const gridMinWidth = weeklyCalDaysMode === '1' ? '100%' : (weeklyCalDaysMode === '3' ? '460px' : '720px');
-
   container.innerHTML = `
     <div class="heatmap-matrix-card">
       <div class="heatmap-card-header">
@@ -466,21 +432,8 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
         </div>
 
         <div class="heatmap-card-actions">
-          <!-- Bộ chuyển đổi chế độ xem 1 Ngày / 3 Ngày / 7 Ngày -->
-          <div class="cal-days-mode-switcher" title="Chọn chế độ hiển thị">
-            <button type="button" class="btn-cal-mode ${weeklyCalDaysMode === '1' ? 'is-active' : ''}" data-mode="1">
-              <i class="fa-solid fa-calendar-day"></i> <span>1 Ngày</span>
-            </button>
-            <button type="button" class="btn-cal-mode ${weeklyCalDaysMode === '3' ? 'is-active' : ''}" data-mode="3">
-              <i class="fa-solid fa-table-columns"></i> <span>3 Ngày</span>
-            </button>
-            <button type="button" class="btn-cal-mode ${weeklyCalDaysMode === '7' ? 'is-active' : ''}" data-mode="7">
-              <i class="fa-solid fa-calendar-week"></i> <span>7 Ngày</span>
-            </button>
-          </div>
-
           <span class="semester-workload-badge" style="background: ${selectedWeek.workload.bg}; color: ${selectedWeek.workload.color};">
-            ${selectedWeek.workload.label} (${selectedWeek.totalClasses} buổi)
+            ${selectedWeek.workload.label} (${selectedWeek.totalClasses} buổi học)
           </span>
 
           <select id="select-weekly-matrix-week" class="heatmap-select-filter">
@@ -494,43 +447,9 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
       </div>
 
       <div class="weekly-cal-scale-container">
-        <!-- THANH ĐIỀU HƯỚNG CHỌN NGÀY NHANH (CHỈ HIỂN THỊ KHI Ở CHẾ ĐỘ 1 NGÀY HOẶC 3 NGÀY) -->
-        ${weeklyCalDaysMode !== '7' ? `
-          <div class="cal-day-quick-nav">
-            <button type="button" class="btn-day-step btn-day-prev" title="Ngày trước">
-              <i class="fa-solid fa-chevron-left"></i>
-            </button>
-
-            <div class="cal-day-pills-row">
-              ${standardDays.map((d, dIdx) => {
-                const isSelected = (weeklyCalDaysMode === '1' && d.dayName === weeklyCalActiveDayName) ||
-                                   (weeklyCalDaysMode === '3' && visibleDays.some(vd => vd.dayName === d.dayName));
-                const isToday = dayIndexMap[d.dayName] === currentDayOfWeek && selectedWeek.filename === currentWeekFile;
-                const weekStartDate = selectedWeek.startDate || '';
-                const dateInfo = getDateForDayOfWeek(weekStartDate, dayIndexMap[d.dayName]);
-                const dateShort = dateInfo ? dateInfo.short : '';
-
-                return `
-                  <button type="button" class="cal-day-nav-pill ${isSelected ? 'is-active' : ''} ${isToday ? 'is-today' : ''}" data-day="${escapeHtml(d.dayName)}">
-                    <div class="cal-day-nav-pill-top">
-                      <span class="cal-pill-name">${escapeHtml(d.dayName.replace('Thứ ', 'T').replace('Chủ Nhật', 'CN'))}</span>
-                      ${d.classesCount > 0 ? `<span class="cal-pill-badge">${d.classesCount}</span>` : ''}
-                    </div>
-                    ${dateShort ? `<span class="cal-pill-date">${escapeHtml(dateShort)}</span>` : ''}
-                  </button>
-                `;
-              }).join('')}
-            </div>
-
-            <button type="button" class="btn-day-step btn-day-next" title="Ngày kế tiếp">
-              <i class="fa-solid fa-chevron-right"></i>
-            </button>
-          </div>
-        ` : ''}
-
         <!-- KHUNG CUỘN DUY NHẤT (UNIFIED SINGLE SCROLL CONTAINER - TRIỆT TIÊU 100% LỖI LỆCH CỘT) -->
         <div class="weekly-cal-unified-scroll-area">
-          <div class="weekly-cal-unified-grid" style="--cal-cols: ${visibleDays.length}; min-width: ${gridMinWidth};">
+          <div class="weekly-cal-unified-grid" style="--cal-cols: 7; min-width: 720px;">
             
             <!-- HÀNG HEADER DÍNH ĐỈNH (STICKY TOP) -->
             <div class="weekly-cal-sticky-header">
@@ -565,7 +484,7 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
                 `).join('')}
               </div>
 
-              <!-- Các Cột Ngày dạng Timeline -->
+              <!-- 7 Cột Ngày dạng Timeline -->
               <div class="cal-days-columns-grid">
                 ${visibleDays.map(d => {
                   const isToday = dayIndexMap[d.dayName] === currentDayOfWeek && selectedWeek.filename === currentWeekFile;
@@ -631,7 +550,7 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
         <div style="display: flex; align-items: center; gap: 0.85rem; font-size: 0.74rem; color: var(--text-muted); flex-wrap: wrap;">
           <span><i class="fa-solid fa-layer-group" style="color: #818cf8;"></i> Tự động xếp chồng khi trùng giờ</span>
           <span>•</span>
-          <span><i class="fa-solid fa-mobile-screen" style="color: #38bdf8;"></i> Chế độ 1 Ngày giúp cuộn 1 trục dọc mượt mà trên điện thoại</span>
+          <span><i class="fa-regular fa-hand-pointer"></i> Di chuột vào thẻ để xem chi tiết môn</span>
         </div>
 
         <button type="button" class="btn-ghost btn-open-week-nav" data-week="${escapeHtml(selectedWeek.filename)}" style="font-size: 0.78rem; color: #818cf8;">
@@ -651,61 +570,7 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
     };
   }
 
-  // GẮN SỰ KIỆN: 2. Chuyển chế độ xem 1 Ngày / 3 Ngày / 7 Ngày
-  container.querySelectorAll('.btn-cal-mode').forEach(btn => {
-    btn.onclick = () => {
-      const mode = btn.dataset.mode;
-      if (mode && ['1', '3', '7'].includes(mode)) {
-        weeklyCalDaysMode = mode;
-        localStorage.setItem('smart_schedule_cal_days_mode', mode);
-        renderWeeklyMatrixView(container, semesterWeeks, currentWeekFile, onSelectWeek);
-        setupHeatmapTooltips();
-      }
-    };
-  });
-
-  // GẮN SỰ KIỆN: 3. Chuyển ngày trên thanh Pill chọn ngày
-  container.querySelectorAll('.cal-day-nav-pill').forEach(pill => {
-    pill.onclick = () => {
-      const day = pill.dataset.day;
-      if (day) {
-        weeklyCalActiveDayName = day;
-        renderWeeklyMatrixView(container, semesterWeeks, currentWeekFile, onSelectWeek);
-        setupHeatmapTooltips();
-      }
-    };
-  });
-
-  // GẮN SỰ KIỆN: 4. Nút Prev / Next ngày
-  const btnPrev = container.querySelector('.btn-day-prev');
-  if (btnPrev) {
-    btnPrev.onclick = () => {
-      const currentIdx = standardDays.findIndex(d => d.dayName === weeklyCalActiveDayName);
-      if (currentIdx > 0) {
-        weeklyCalActiveDayName = standardDays[currentIdx - 1].dayName;
-      } else {
-        weeklyCalActiveDayName = standardDays[standardDays.length - 1].dayName;
-      }
-      renderWeeklyMatrixView(container, semesterWeeks, currentWeekFile, onSelectWeek);
-      setupHeatmapTooltips();
-    };
-  }
-
-  const btnNext = container.querySelector('.btn-day-next');
-  if (btnNext) {
-    btnNext.onclick = () => {
-      const currentIdx = standardDays.findIndex(d => d.dayName === weeklyCalActiveDayName);
-      if (currentIdx >= 0 && currentIdx < standardDays.length - 1) {
-        weeklyCalActiveDayName = standardDays[currentIdx + 1].dayName;
-      } else {
-        weeklyCalActiveDayName = standardDays[0].dayName;
-      }
-      renderWeeklyMatrixView(container, semesterWeeks, currentWeekFile, onSelectWeek);
-      setupHeatmapTooltips();
-    };
-  }
-
-  // GẮN SỰ KIỆN: 5. Mở chi tiết tuần
+  // GẮN SỰ KIỆN: 2. Mở chi tiết tuần
   const navBtn = container.querySelector('.btn-open-week-nav');
   if (navBtn) {
     navBtn.onclick = () => {
