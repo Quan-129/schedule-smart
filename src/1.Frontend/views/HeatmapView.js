@@ -15,7 +15,7 @@ import { getDateForDayOfWeek } from '../../2.Backend/utils/dateHelpers.js';
 /* ==========================================================================
    1. MODULE STATE & CONSTANTS
    ========================================================================== */
-let currentHorizonMode = 'semester'; // 'week' | 'month' | 'semester' | 'year'
+let currentHorizonMode = localStorage.getItem('smart_schedule_heatmap_mode') || 'week'; // 'week' | 'month' | 'semester'
 let currentMonthlyDate = new Date(); // Tháng đang xem trong chế độ Tháng
 let activeWeeklyFile = ''; // File tuần đang xem trong chế độ Tuần
 let weeklyCalDaysMode = localStorage.getItem('smart_schedule_cal_days_mode') || (window.innerWidth < 640 ? '1' : '7'); // '1' | '3' | '7'
@@ -1419,7 +1419,8 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
     btn.onclick = () => {
       container.querySelectorAll('.btn-heatmap-tab').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      currentHorizonMode = btn.dataset.mode || 'semester';
+      currentHorizonMode = btn.dataset.mode || 'week';
+      localStorage.setItem('smart_schedule_heatmap_mode', currentHorizonMode);
       renderActiveHorizonModeContent(semesterWeeks, currentWeekFile, onSelectWeek);
     };
   });

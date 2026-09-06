@@ -4,6 +4,19 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 14:45] - Khắc Phục Lỗi Nhầm Tab Mặc Định Sang Học Kỳ & Bổ Sung Import CSS Vào style.css 🛠️🎯
+
+- **🎯 Nguyên nhân gây ra giao diện khác lạ trong ảnh**:
+  1. **Nhầm tab mặc định**: Biến `currentHorizonMode` trước đây khởi tạo mặc định là `'semester'` (Chế độ Học Kỳ) thay vì `'week'` (Lịch Tuần Google Calendar Style), khiến khi load lại trang hệ thống tự động nhảy vào tab Ma trận Học kỳ thay vì Lịch Tuần.
+  2. **Thiếu import trong style.css**: File [`style.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/style.css) ở thư mục gốc trước đó chưa có dòng `@import url('./src/1.Frontend/styles/9.heatmap-view.css');`.
+- **✅ Giải pháp kỹ thuật**:
+  - [`style.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/style.css): Bổ sung `@import` cho `9.heatmap-view.css`.
+  - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    - Đặt mặc định `currentHorizonMode` là `'week'` (Lịch Tuần) và lưu trạng thái tab đang chọn vào `localStorage.setItem('smart_schedule_heatmap_mode', currentHorizonMode)` để giữ nguyên lựa chọn của người dùng khi tải lại trang.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v95`.
+
+---
+
 ## 📅 [2026-09-06 12:05] - Khắc Phục Lỗi Chiều Cao Thân Lịch Bị Thu Hẹp Về 0px & Tinh Giản Chế Độ 7 Ngày 🛠️📐✨
 
 - **🎯 Vấn đề phát hiện từ phản hồi của người dùng**:
