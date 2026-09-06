@@ -1,0 +1,393 @@
+/**
+ * ==========================================================================
+ * 11. SPACE SELECTOR (Bộ chuyển đổi Học kỳ & Không gian Lịch học Đa Không Gian)
+ * src/1.Frontend/styles/11.space-selector.css
+ * ==========================================================================
+ */
+
+/* Container bọc Dropdown trên Navbar */
+.space-selector-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Nút bấm chuyển đổi Space trên Navbar */
+.btn-space-selector {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.42rem 0.85rem;
+  background: var(--card-bg, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  border-radius: var(--radius-md, 10px);
+  color: var(--text-primary, #ffffff);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  user-select: none;
+  max-width: 240px;
+}
+
+.btn-space-selector:hover {
+  background: var(--card-hover-bg, rgba(255, 255, 255, 0.1));
+  border-color: var(--accent-primary, #6366f1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.space-btn-icon {
+  font-size: 1rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.space-btn-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+  letter-spacing: -0.01em;
+}
+
+.space-btn-arrow {
+  font-size: 0.72rem;
+  color: var(--text-muted, #94a3b8);
+  transition: transform 0.2s ease;
+  margin-left: 0.1rem;
+}
+
+.space-selector-wrapper.active .space-btn-arrow {
+  transform: rotate(180deg);
+}
+
+/* Dropdown Menu Danh Sách Không Gian */
+.space-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 280px;
+  max-width: 340px;
+  background: var(--dropdown-bg, #18181b);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.15));
+  border-radius: var(--radius-lg, 14px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  padding: 0.5rem;
+  z-index: 1000;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  animation: spaceDropdownFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes spaceDropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.space-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 0.65rem 0.55rem;
+  border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  margin-bottom: 0.4rem;
+}
+
+.space-dropdown-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted, #a1a1aa);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.space-dropdown-count {
+  font-size: 0.72rem;
+  padding: 0.1rem 0.4rem;
+  background: var(--bg-badge, rgba(255, 255, 255, 0.08));
+  border-radius: 999px;
+  color: var(--text-muted, #a1a1aa);
+}
+
+/* Danh sách cuộn các Không Gian */
+.space-items-list {
+  max-height: 260px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-right: 0.2rem;
+}
+
+.space-items-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.space-items-list::-webkit-scrollbar-thumb {
+  background: var(--border-color, rgba(255, 255, 255, 0.2));
+  border-radius: 999px;
+}
+
+/* Từng Item Không Gian */
+.space-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.65rem;
+  border-radius: var(--radius-md, 8px);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+  width: 100%;
+  color: var(--text-primary, #ffffff);
+}
+
+.space-item:hover {
+  background: var(--item-hover-bg, rgba(255, 255, 255, 0.06));
+}
+
+.space-item.active {
+  background: var(--accent-light, rgba(99, 102, 241, 0.15));
+  border-color: var(--accent-primary, #6366f1);
+}
+
+.space-item-main {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.space-item-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.space-item-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.space-item-name {
+  font-size: 0.86rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-primary, #ffffff);
+}
+
+.space-item-meta {
+  font-size: 0.72rem;
+  color: var(--text-muted, #a1a1aa);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.space-badge-archived {
+  font-size: 0.68rem;
+  padding: 0.08rem 0.35rem;
+  background: rgba(148, 163, 184, 0.15);
+  color: #94a3b8;
+  border-radius: 4px;
+}
+
+.space-badge-active {
+  font-size: 0.68rem;
+  padding: 0.08rem 0.35rem;
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.space-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+.space-item:hover .space-item-actions {
+  opacity: 1;
+}
+
+.btn-space-action-small {
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #a1a1aa);
+  font-size: 0.8rem;
+  padding: 0.3rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1;
+}
+
+.btn-space-action-small:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary, #ffffff);
+}
+
+.btn-space-action-small.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+/* Footer Dropdown (Nút Tạo Mới) */
+.space-dropdown-footer {
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+}
+
+.btn-create-space {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: var(--accent-gradient, linear-gradient(135deg, #6366f1, #8b5cf6));
+  border: none;
+  border-radius: var(--radius-md, 8px);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+}
+
+.btn-create-space:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+  filter: brightness(1.05);
+}
+
+/* ==========================================================================
+ * MODAL TẠO & CHỈNH SỬA KHÔNG GIAN HỌC KỲ (SpaceModal)
+ * ========================================================================== */
+.space-modal-content {
+  max-width: 480px;
+}
+
+.space-icon-picker {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+}
+
+.space-icon-opt {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  background: var(--card-bg, rgba(255, 255, 255, 0.05));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.space-icon-opt:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.08);
+}
+
+.space-icon-opt.selected {
+  border-color: var(--accent-primary, #6366f1);
+  background: rgba(99, 102, 241, 0.2);
+  transform: scale(1.08);
+  box-shadow: 0 0 0 2px var(--accent-primary, #6366f1);
+}
+
+/* Light Theme Adaptations */
+body.theme-white .btn-space-selector {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #1e293b;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+body.theme-white .btn-space-selector:hover {
+  background: #f8fafc;
+  border-color: #6366f1;
+}
+
+body.theme-white .space-dropdown-menu {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+body.theme-white .space-item {
+  color: #1e293b;
+}
+
+body.theme-white .space-item:hover {
+  background: #f1f5f9;
+}
+
+body.theme-white .space-item.active {
+  background: #eff6ff;
+  border-color: #3b82f6;
+}
+
+body.theme-white .space-item-name {
+  color: #0f172a;
+}
+
+body.theme-white .space-item-meta {
+  color: #64748b;
+}
+
+body.theme-white .space-icon-opt {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .btn-space-selector {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.8rem;
+    max-width: 170px;
+  }
+  
+  .space-btn-name {
+    max-width: 90px;
+  }
+
+  .space-dropdown-menu {
+    left: 0;
+    right: auto;
+    min-width: 260px;
+  }
+}

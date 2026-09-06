@@ -9,28 +9,38 @@ export const STORAGE_KEYS = {
   DAYS_DISPLAY_MODE: 'smart_schedule_days_mode',
   CUSTOM_WEEKS: 'smart_schedule_custom_weeks',
   LAST_ACTIVE_TAB: 'smart_schedule_last_active_tab',
-  LAST_SELECTED_WEEK: 'smart_schedule_last_selected_week'
+  LAST_SELECTED_WEEK: 'smart_schedule_last_selected_week',
+  SPACES_LIST: 'smart_schedule_spaces_list',
+  ACTIVE_SPACE_ID: 'smart_schedule_active_space_id'
 };
 
 /**
- * Trả về key lưu trữ theo User Scope
+ * Trả về key lưu trữ theo User Scope và Space ID
  * @param {string} baseKey 
  * @param {Object|null} user 
+ * @param {string|null} spaceId
  * @returns {string}
  */
-export function getScopedStorageKey(baseKey, user = null) {
+export function getScopedStorageKey(baseKey, user = null, spaceId = null) {
   const activeUser = user || getCurrentUser();
+  const currentSpace = spaceId !== null ? spaceId : (state.activeSpaceId || 'default');
+  const spaceSuffix = currentSpace && currentSpace !== 'default' ? `_${currentSpace}` : '';
+
   if (isOwnerUser(activeUser)) {
-    return baseKey;
+    return `${baseKey}${spaceSuffix}`;
   }
   if (activeUser && activeUser.uid) {
-    return `smart_schedule_${activeUser.uid}_${baseKey}`;
+    return `smart_schedule_${activeUser.uid}_${baseKey}${spaceSuffix}`;
   }
-  return `smart_schedule_guest_${baseKey}`;
+  return `smart_schedule_guest_${baseKey}${spaceSuffix}`;
 }
 
 // Khởi tạo state ban đầu
 export const state = {
+  // Không gian Lịch Học (Schedule Spaces / Profiles)
+  spaces: [],
+  activeSpaceId: 'default',
+
   // Navigation & View
   currentTab: 'backpack', // 'grid' | 'today' | 'grades' | 'backpack' | 'raw'
   lastActiveTab: 'grid',
@@ -83,19 +93,179 @@ export function setState(partialState) {
 }
 
 /**
- * Nạp dữ liệu ban đầu từ LocalStorage theo phạm vi người dùng (User Scope)
+ * ==========================================================================
+ * KHÔNG GIAN LỊCH HỌC (SCHEDULE SPACES ENGINE)
+ * ==========================================================================
+ */
+
+/**
+ * Lấy danh sách tất cả các Không Gian Lịch Học
+ * @param {Object|null} user 
+ * @returns {Array<Object>}
+ */
+export function getAllSpaces(user = null) {
+  const activeUser = user || getCurrentUser();
+  const spacesKey = isOwnerUser(activeUser) ? STORAGE_KEYS.SPACES_LIST : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_spaces_list`;
+  const saved = getStorageItem(spacesKey, null);
+
+  if (Array.isArray(saved) && saved.length > 0) {
+    return saved;
+  }
+
+  // Khởi tạo không gian mặc định ban đầu
+  const defaultSpaces = [
+    {
+      id: 'default',
+      name: 'HK1 2026–2027 (Chính khóa)',
+      code: 'HK1',
+      icon: 'fa-solid fa-graduation-cap',
+      color: '#6366f1',
+      isArchived: false,
+      createdAt: '2026-09-01T00:00:00.000Z',
+      lastSelectedWeek: ''
+    }
+  ];
+  setStorageItem(spacesKey, defaultSpaces);
+  return defaultSpaces;
+}
+
+/**
+ * Lấy Không Gian Lịch Học hiện đang mở
+ * @param {Object|null} user 
+ * @returns {Object}
+ */
+export function getActiveSpace(user = null) {
+  const spaces = getAllSpaces(user);
+  const found = spaces.find(s => s.id === state.activeSpaceId);
+  return found || spaces[0] || { id: 'default', name: 'HK1 2026–2027', code: 'HK1', icon: 'fa-solid fa-graduation-cap' };
+}
+
+/**
+ * Lưu danh sách Spaces vào Storage
+ * @param {Array<Object>} spacesList 
+ * @param {Object|null} user 
+ */
+export function persistSpacesList(spacesList, user = null) {
+  const activeUser = user || getCurrentUser();
+  const spacesKey = isOwnerUser(activeUser) ? STORAGE_KEYS.SPACES_LIST : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_spaces_list`;
+  state.spaces = spacesList;
+  setStorageItem(spacesKey, spacesList);
+}
+
+/**
+ * Chuyển đổi và lưu Không Gian Lịch Học đang mở
+ * @param {string} spaceId 
+ * @param {Object|null} user 
+ */
+export function setActiveSpaceId(spaceId, user = null) {
+  const activeUser = user || getCurrentUser();
+  const activeSpaceKey = isOwnerUser(activeUser) ? STORAGE_KEYS.ACTIVE_SPACE_ID : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_active_space_id`;
+  state.activeSpaceId = spaceId;
+  setStorageItem(activeSpaceKey, spaceId);
+}
+
+/**
+ * Tạo một Không Gian Lịch Học mới
+ * @param {Object} spaceData 
+ * @param {Object|null} user 
+ * @returns {Object} Không gian vừa tạo
+ */
+export function createSpace(spaceData, user = null) {
+  const spaces = getAllSpaces(user);
+  const newSpace = {
+    id: `space_${Date.now()}`,
+    name: spaceData.name || 'Học Kỳ Mới',
+    code: spaceData.code || 'HK',
+    icon: spaceData.icon || 'fa-solid fa-calendar-days',
+    color: spaceData.color || '#38bdf8',
+    isArchived: false,
+    createdAt: new Date().toISOString(),
+    lastSelectedWeek: ''
+  };
+
+  spaces.push(newSpace);
+  persistSpacesList(spaces, user);
+  setActiveSpaceId(newSpace.id, user);
+  return newSpace;
+}
+
+/**
+ * Cập nhật thông tin một Không Gian Lịch
+ * @param {string} spaceId 
+ * @param {Object} patch 
+ * @param {Object|null} user 
+ */
+export function updateSpace(spaceId, patch = {}, user = null) {
+  const spaces = getAllSpaces(user);
+  const target = spaces.find(s => s.id === spaceId);
+  if (target) {
+    Object.assign(target, patch);
+    persistSpacesList(spaces, user);
+  }
+}
+
+/**
+ * Lưu trữ / Bỏ lưu trữ một Không Gian Lịch
+ * @param {string} spaceId 
+ * @param {boolean} isArchived 
+ * @param {Object|null} user 
+ */
+export function archiveSpace(spaceId, isArchived = true, user = null) {
+  updateSpace(spaceId, { isArchived }, user);
+}
+
+/**
+ * Xóa một Không Gian Lịch và dọn dẹp dữ liệu của không gian đó
+ * @param {string} spaceId 
+ * @param {Object|null} user 
+ */
+export function deleteSpace(spaceId, user = null) {
+  if (spaceId === 'default') {
+    console.warn('[Space] Không thể xóa không gian mặc định');
+    return;
+  }
+
+  const spaces = getAllSpaces(user).filter(s => s.id !== spaceId);
+  persistSpacesList(spaces, user);
+
+  // Xóa các key liên quan đến space này trong LocalStorage
+  const prefix = getScopedStorageKey('', user, spaceId);
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.includes(spaceId)) {
+      keysToRemove.push(k);
+    }
+  }
+  keysToRemove.forEach(k => localStorage.removeItem(k));
+
+  // Nếu đang đứng ở space bị xóa, chuyển về space đầu tiên
+  if (state.activeSpaceId === spaceId) {
+    const fallbackSpace = spaces[0] || { id: 'default' };
+    setActiveSpaceId(fallbackSpace.id, user);
+  }
+}
+
+/**
+ * Nạp dữ liệu ban đầu từ LocalStorage theo phạm vi người dùng & Không Gian Lịch (User & Space Scope)
  * @param {Object|null} user 
  */
 export function initApplicationState(user = null) {
   const activeUser = user || getCurrentUser();
   const isOwner = isOwnerUser(activeUser);
 
-  // 1. Nạp danh sách môn học Drive
-  const driveKey = getScopedStorageKey(STORAGE_KEYS.DRIVE_SUBJECTS, activeUser);
+  // 1. Nạp danh sách Spaces & Active Space ID
+  state.spaces = getAllSpaces(activeUser);
+  const activeSpaceKey = isOwner ? STORAGE_KEYS.ACTIVE_SPACE_ID : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_active_space_id`;
+  const savedActiveSpaceId = getStorageItem(activeSpaceKey, 'default');
+  state.activeSpaceId = state.spaces.some(s => s.id === savedActiveSpaceId) ? savedActiveSpaceId : 'default';
+
+  // 2. Nạp danh sách môn học Drive theo Space hiện tại
+  const driveKey = getScopedStorageKey(STORAGE_KEYS.DRIVE_SUBJECTS, activeUser, state.activeSpaceId);
   const savedSubjects = getStorageItem(driveKey, null);
 
-  if (isOwner) {
-    // CHỦ SỞ HỮU: Nạp dữ liệu lịch học thực tế
+  if (isOwner && state.activeSpaceId === 'default') {
+    // CHỦ SỞ HỮU Ở SPACE GỐC: Nạp dữ liệu lịch học thực tế
     if (savedSubjects && Array.isArray(savedSubjects) && savedSubjects.length > 0) {
       state.driveSubjects = savedSubjects;
     } else {
@@ -103,44 +273,44 @@ export function initApplicationState(user = null) {
       setStorageItem(driveKey, state.driveSubjects);
     }
   } else {
-    // NGƯỜI DÙNG KHÁC / KHÁCH: Dữ liệu hoàn toàn mới (trống rỗng)
+    // CÁC SPACES KHÁC HOẶC GUEST: Dữ liệu độc lập
     state.driveSubjects = Array.isArray(savedSubjects) ? savedSubjects : [];
   }
 
-  // 2. Nạp điểm số
-  const gradesKey = getScopedStorageKey(STORAGE_KEYS.GRADES, activeUser);
+  // 3. Nạp điểm số theo Space
+  const gradesKey = getScopedStorageKey(STORAGE_KEYS.GRADES, activeUser, state.activeSpaceId);
   state.studentGrades = getStorageItem(gradesKey, {});
 
-  // 3. Nạp Theme
+  // 4. Nạp Theme
   const savedTheme = getStorageItem(STORAGE_KEYS.THEME, 'violet');
   state.isDarkTheme = savedTheme !== 'white';
 
-  // 4. Nạp chế độ hiển thị ngày (1, 3, 7)
+  // 5. Nạp chế độ hiển thị ngày (1, 3, 7)
   state.daysDisplayMode = getStorageItem(STORAGE_KEYS.DAYS_DISPLAY_MODE, '7');
 
-  // 5. Nạp Tab và Tuần đã lưu gần nhất (Cấp độ 1 & Tips Auto-Restore)
+  // 6. Nạp Tab và Tuần đã lưu gần nhất (Cấp độ 1 & Tips Auto-Restore)
   const lastTabKey = getScopedStorageKey(STORAGE_KEYS.LAST_ACTIVE_TAB, activeUser);
   state.lastActiveTab = getStorageItem(lastTabKey, 'grid');
 
-  const lastWeekKey = getScopedStorageKey(STORAGE_KEYS.LAST_SELECTED_WEEK, activeUser);
+  const lastWeekKey = getScopedStorageKey(STORAGE_KEYS.LAST_SELECTED_WEEK, activeUser, state.activeSpaceId);
   state.lastSelectedWeek = getStorageItem(lastWeekKey, '');
 }
 
 /**
- * Lưu danh sách môn học vào Storage
+ * Lưu danh sách môn học vào Storage theo Space
  * @param {Object|null} user 
  */
 export function persistDriveSubjects(user = null) {
-  const driveKey = getScopedStorageKey(STORAGE_KEYS.DRIVE_SUBJECTS, user);
+  const driveKey = getScopedStorageKey(STORAGE_KEYS.DRIVE_SUBJECTS, user, state.activeSpaceId);
   setStorageItem(driveKey, state.driveSubjects);
 }
 
 /**
- * Lưu điểm số vào Storage
+ * Lưu điểm số vào Storage theo Space
  * @param {Object|null} user 
  */
 export function persistGrades(user = null) {
-  const gradesKey = getScopedStorageKey(STORAGE_KEYS.GRADES, user);
+  const gradesKey = getScopedStorageKey(STORAGE_KEYS.GRADES, user, state.activeSpaceId);
   setStorageItem(gradesKey, state.studentGrades);
 }
 
@@ -163,41 +333,54 @@ export function persistLastActiveTab(tabName, user = null) {
 }
 
 /**
- * Lưu Tuần đang xem cuối cùng vào Storage theo User Scope
+ * Lưu Tuần đang xem cuối cùng vào Storage theo User Scope và Space
  * @param {string} weekFilename 
  * @param {Object|null} user 
  */
 export function persistLastSelectedWeek(weekFilename, user = null) {
   state.lastSelectedWeek = weekFilename;
-  const lastWeekKey = getScopedStorageKey(STORAGE_KEYS.LAST_SELECTED_WEEK, user);
+  const lastWeekKey = getScopedStorageKey(STORAGE_KEYS.LAST_SELECTED_WEEK, user, state.activeSpaceId);
   setStorageItem(lastWeekKey, weekFilename);
+
+  // Cập nhật vào đối tượng Space
+  updateSpace(state.activeSpaceId, { lastSelectedWeek: weekFilename }, user);
 }
 
 /**
- * Xuất toàn bộ cấu hình và dữ liệu của người dùng ra định dạng JSON (Cấp độ 3)
+ * Xuất toàn bộ cấu hình và dữ liệu của tất cả các Spaces ra định dạng JSON (Cấp độ 3)
  * @param {Object|null} user 
  * @returns {Object}
  */
 export function exportFullBackupData(user = null) {
   const activeUser = user || getCurrentUser();
-  const isOwner = isOwnerUser(activeUser);
+  const spaces = getAllSpaces(activeUser);
 
-  // Thu thập các file Markdown tùy chỉnh trong LocalStorage
-  const customMds = {};
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith('smart_schedule_custom_md_')) {
-      customMds[key] = localStorage.getItem(key);
+  // Thu thập dữ liệu của tất cả các spaces trong LocalStorage
+  const spacesData = {};
+  spaces.forEach(sp => {
+    const driveKey = getScopedStorageKey(STORAGE_KEYS.DRIVE_SUBJECTS, activeUser, sp.id);
+    const gradesKey = getScopedStorageKey(STORAGE_KEYS.GRADES, activeUser, sp.id);
+    const customWeeksKey = getScopedStorageKey(STORAGE_KEYS.CUSTOM_WEEKS, activeUser, sp.id);
+
+    const customMds = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.includes('custom_md') && (sp.id === 'default' ? !k.includes('space_') : k.includes(sp.id))) {
+        customMds[k] = localStorage.getItem(k);
+      }
     }
-  }
 
-  // Thu thập danh sách tuần tùy chỉnh theo Scope
-  const customWeeksKey = isOwner ? STORAGE_KEYS.CUSTOM_WEEKS : getScopedStorageKey(STORAGE_KEYS.CUSTOM_WEEKS, activeUser);
-  const customWeeks = getStorageItem(customWeeksKey, []);
+    spacesData[sp.id] = {
+      driveSubjects: getStorageItem(driveKey, []),
+      studentGrades: getStorageItem(gradesKey, {}),
+      customWeeks: getStorageItem(customWeeksKey, []),
+      customMds: customMds
+    };
+  });
 
   return {
     app: 'ScheduleSmart',
-    version: '2.0.0',
+    version: '2.1.0',
     exportedAt: new Date().toISOString(),
     user: activeUser ? {
       uid: activeUser.uid || 'guest',
@@ -208,16 +391,12 @@ export function exportFullBackupData(user = null) {
       theme: localStorage.getItem(STORAGE_KEYS.THEME) || 'violet',
       daysDisplayMode: state.daysDisplayMode || '7',
       lastActiveTab: state.lastActiveTab || state.currentTab || 'grid',
-      lastSelectedWeek: state.lastSelectedWeek || '',
+      activeSpaceId: state.activeSpaceId || 'default',
       heatmapMode: localStorage.getItem('smart_schedule_heatmap_mode') || 'week',
       heatmapBannerCollapsed: localStorage.getItem('smart_schedule_heatmap_banner_collapsed') || 'true'
     },
-    data: {
-      driveSubjects: state.driveSubjects || [],
-      studentGrades: state.studentGrades || {},
-      customWeeks: customWeeks,
-      customMds: customMds
-    }
+    spaces: spaces,
+    data: spacesData
   };
 }
 
@@ -238,9 +417,13 @@ export function importFullBackupData(backupData, user = null) {
     }
 
     const activeUser = user || getCurrentUser();
-    const isOwner = isOwnerUser(activeUser);
 
-    // 1. Phục hồi Cài đặt (Settings)
+    // 1. Phục hồi danh sách Spaces
+    if (Array.isArray(backupData.spaces) && backupData.spaces.length > 0) {
+      persistSpacesList(backupData.spaces, activeUser);
+    }
+
+    // 2. Phục hồi Cài đặt (Settings)
     if (backupData.settings) {
       const s = backupData.settings;
       if (s.theme) localStorage.setItem(STORAGE_KEYS.THEME, s.theme);
@@ -249,38 +432,39 @@ export function importFullBackupData(backupData, user = null) {
         persistDaysDisplayMode();
       }
       if (s.lastActiveTab) persistLastActiveTab(s.lastActiveTab, activeUser);
-      if (s.lastSelectedWeek) persistLastSelectedWeek(s.lastSelectedWeek, activeUser);
+      if (s.activeSpaceId) setActiveSpaceId(s.activeSpaceId, activeUser);
       if (s.heatmapMode) localStorage.setItem('smart_schedule_heatmap_mode', s.heatmapMode);
       if (s.heatmapBannerCollapsed) localStorage.setItem('smart_schedule_heatmap_banner_collapsed', s.heatmapBannerCollapsed);
     }
 
-    // 2. Phục hồi Dữ liệu (Data)
+    // 3. Phục hồi Dữ liệu từng Space
     const d = backupData.data || {};
-
-    if (Array.isArray(d.driveSubjects)) {
-      state.driveSubjects = d.driveSubjects;
-      persistDriveSubjects(activeUser);
-    }
-
-    if (d.studentGrades && typeof d.studentGrades === 'object') {
-      state.studentGrades = d.studentGrades;
-      persistGrades(activeUser);
-    }
-
-    if (Array.isArray(d.customWeeks)) {
-      const customWeeksKey = isOwner ? STORAGE_KEYS.CUSTOM_WEEKS : getScopedStorageKey(STORAGE_KEYS.CUSTOM_WEEKS, activeUser);
-      setStorageItem(customWeeksKey, d.customWeeks);
-    }
-
-    if (d.customMds && typeof d.customMds === 'object') {
-      Object.keys(d.customMds).forEach(k => {
-        if (typeof d.customMds[k] === 'string') {
-          localStorage.setItem(k, d.customMds[k]);
+    Object.keys(d).forEach(spaceId => {
+      const spData = d[spaceId];
+      if (spData) {
+        if (Array.isArray(spData.driveSubjects)) {
+          const driveKey = getScopedStorageKey(STORAGE_KEYS.DRIVE_SUBJECTS, activeUser, spaceId);
+          setStorageItem(driveKey, spData.driveSubjects);
         }
-      });
-    }
+        if (spData.studentGrades && typeof spData.studentGrades === 'object') {
+          const gradesKey = getScopedStorageKey(STORAGE_KEYS.GRADES, activeUser, spaceId);
+          setStorageItem(gradesKey, spData.studentGrades);
+        }
+        if (Array.isArray(spData.customWeeks)) {
+          const customWeeksKey = getScopedStorageKey(STORAGE_KEYS.CUSTOM_WEEKS, activeUser, spaceId);
+          setStorageItem(customWeeksKey, spData.customWeeks);
+        }
+        if (spData.customMds && typeof spData.customMds === 'object') {
+          Object.keys(spData.customMds).forEach(k => {
+            if (typeof spData.customMds[k] === 'string') {
+              localStorage.setItem(k, spData.customMds[k]);
+            }
+          });
+        }
+      }
+    });
 
-    return { success: true, message: 'Phục hồi toàn bộ trạng thái setup và dữ liệu thành công! ✨' };
+    return { success: true, message: 'Phục hồi toàn bộ Không Gian Lịch Học & Cài Đặt thành công! ✨' };
   } catch (err) {
     console.error('[Import Backup Error]', err);
     return { success: false, message: `Lỗi xử lý file: ${err.message}` };

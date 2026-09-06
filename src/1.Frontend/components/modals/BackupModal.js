@@ -43,6 +43,10 @@ function createBackupModalTemplate(backupSummary) {
           <!-- Tóm tắt dữ liệu hiện tại -->
           <div class="backup-summary-grid">
             <div class="backup-sum-item">
+              <span class="sum-label"><i class="fa-solid fa-layer-group"></i> Học kỳ / Bộ lịch</span>
+              <strong class="sum-value">${backupSummary.spaceCount || 1} không gian</strong>
+            </div>
+            <div class="backup-sum-item">
               <span class="sum-label"><i class="fa-brands fa-google-drive"></i> Môn học & Drive</span>
               <strong class="sum-value">${backupSummary.driveCount} môn</strong>
             </div>
@@ -53,10 +57,6 @@ function createBackupModalTemplate(backupSummary) {
             <div class="backup-sum-item">
               <span class="sum-label"><i class="fa-solid fa-calendar-week"></i> Tuần tùy chỉnh</span>
               <strong class="sum-value">${backupSummary.customWeekCount} tuần</strong>
-            </div>
-            <div class="backup-sum-item">
-              <span class="sum-label"><i class="fa-solid fa-palette"></i> Tone màu</span>
-              <strong class="sum-value" style="text-transform: capitalize;">${escapeHtml(backupSummary.theme)}</strong>
             </div>
           </div>
 
@@ -131,7 +131,9 @@ export function openBackupModal() {
   if (existing) existing.remove();
 
   // Tính toán tóm tắt dữ liệu
+  const allSpaces = state.spaces || [{ id: 'default', name: 'Học Kỳ 1' }];
   const summary = {
+    spaceCount: allSpaces.length,
     driveCount: (state.driveSubjects || []).length,
     gradeCount: Object.keys(state.studentGrades || {}).length,
     customWeekCount: 0,

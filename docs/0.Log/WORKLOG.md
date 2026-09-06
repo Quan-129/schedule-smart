@@ -4,7 +4,41 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
-## 📅 [2026-09-06 15:26] - Loại Bỏ Badge "BK TP.HCM • Học Kỳ 1 2026-2027" Trên Màn Hình Đăng Nhập 🧹✨
+## 📅 [2026-09-06 15:58] - Ra Mắt Hệ Thống Không Gian Học Kỳ & Bộ Lịch Đa Nhiệm (Multi-Semester Hub & Parallel Schedule Spaces) 🚀🎒
+
+- **🎯 Yêu cầu từ người dùng**:
+  1. Cho phép tạo nhiều bộ lịch / không gian học kỳ độc lập để lưu trữ (archive) các học kỳ cũ trọn đời mà không phải xóa lịch khi sang học kỳ mới.
+  2. Hỗ trợ các bộ lịch **trùng khoảng thời gian (Overlapping Timelines)** (học song bằng, thực tập doanh nghiệp song song, nháp xếp lịch môn học).
+  3. Duy trì tính năng **Focus Hôm Nay 🎯 thông minh**: tự động nhận diện và highlight chính xác ngày hôm nay dựa trên bộ lịch đang mở.
+  4. Tự động ghi nhớ không gian học kỳ đang mở (Auto-Persistence) và tích hợp vào hệ thống sao lưu JSON & Cloud Firestore.
+- **✅ Chi tiết thay đổi**:
+  - [`src/3.Database/state.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/state.js):
+    + Mở rộng hàm `getScopedStorageKey(baseKey, user, spaceId)` phân tách dữ liệu hoàn toàn theo cả User lẫn Space ID.
+    + Thêm State: `state.spaces`, `state.activeSpaceId`.
+    + Bộ API CRUD Space: `getAllSpaces()`, `getActiveSpace()`, `setActiveSpaceId()`, `createSpace()`, `updateSpace()`, `archiveSpace()`, `deleteSpace()`.
+    + Cập nhật `initApplicationState()` tự động nạp danh sách spaces và dữ liệu theo active space.
+    + Cập nhật `exportFullBackupData()` & `importFullBackupData()` sao lưu/phục hồi đa không gian.
+  - [`src/1.Frontend/styles/11.space-selector.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/11.space-selector.css):
+    + Thiết kế giao diện Glassmorphism cho Dropdown chọn Space trên thanh Navbar.
+    + Tương thích 7 bảng màu (Dark, AMOLED, White Milk, Amber Gold, Sakura, Sapphire, Mint).
+    + Badges trạng thái *Đang học* / *Đã lưu trữ*, nút thao tác nhanh (Sửa, Lưu trữ, Xóa, Tạo mới).
+  - [`src/1.Frontend/components/modals/SpaceModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/SpaceModal.js):
+    + Modal tạo mới & chỉnh sửa Học kỳ (Tên, Biểu tượng Emoji picker, Mô tả).
+    + Tùy chọn sao chép nhanh danh sách Môn học Drive sang học kỳ mới.
+  - [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html):
+    + Nạp stylesheet `11.space-selector.css`.
+    + Thêm container `#space-selector-wrapper` trong `.nav-left` ngay cạnh Logo.
+    + Dọn sạch các thẻ đóng lặp ở cuối file.
+  - [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    + Viết hàm `renderSpaceSelectorUi()`, `initSpaceSelector()`, `handleSwitchSpace()`.
+    + Cập nhật `initWeekSelector()` và `loadWeekSchedule()` nạp dữ liệu tuần và markdown theo không gian đang kích hoạt.
+    + Cập nhật `handleDeleteCurrentWeek()`, `persistCurrentSchedule()`, `initAddWeekModal()` ghi theo scoped key của Space.
+  - [`src/1.Frontend/components/modals/BackupModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/BackupModal.js):
+    + Thêm thẻ thống kê số lượng Không gian Học kỳ vào tóm tắt sao lưu.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js):
+    + Nâng version cache Service Worker lên `smart-schedule-modular-v105` và đăng ký các asset mới.
+
+---
 
 - **🎯 Yêu cầu từ người dùng**: Gỡ bỏ badge `BK TP.HCM • Học Kỳ 1 2026-2027` trên màn hình Landing / Login Screen.
 - **✅ Chi tiết thay đổi**:

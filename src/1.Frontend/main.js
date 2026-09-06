@@ -5,7 +5,7 @@
  * ==========================================================================
  */
 
-import { state, initApplicationState, persistDriveSubjects, persistDaysDisplayMode, persistLastActiveTab, persistLastSelectedWeek, setState } from '../3.Database/state.js';
+import { state, initApplicationState, persistDriveSubjects, persistDaysDisplayMode, persistLastActiveTab, persistLastSelectedWeek, setState, getAllSpaces, getActiveSpace, setActiveSpaceId, getScopedStorageKey } from '../3.Database/state.js';
 import { DEFAULT_WEEK_35_MD, DEFAULT_WEEK_36_MD } from '../3.Database/storage/SeedData.js';
 import { parseScheduleMarkdown, serializeScheduleToMarkdown, generateEmptyWeekMarkdown } from '../2.Backend/services/TimetableParser.js';
 import { formatCurrentVietnameseDate, getMondayOfCurrentWeek, addDaysToDateStr, formatDateDDMM, formatDateDDMMYYYY } from '../2.Backend/utils/dateHelpers.js';
@@ -20,6 +20,7 @@ import { ensureDeleteWeekModalDom, openDeleteWeekModal } from './components/moda
 import { ensureSubjectDetailModalDom, openSubjectDetailModal } from './components/modals/SubjectDetailModal.js';
 import { ensureAddClassModalDom, openAddClassModal, openEditClassModal } from './components/modals/AddClassModal.js';
 import { ensureEditWeeklyNotesModalDom, openEditWeeklyNotesModal } from './components/modals/EditWeeklyNotesModal.js';
+import { openSpaceModal, handleToggleArchiveSpace, handleDeleteSpace } from './components/modals/SpaceModal.js';
 import { openBackupModal } from './components/modals/BackupModal.js';
 import { showToast, initToastContainer } from './components/Toast.js';
 import { initPWA, promptPWAInstall } from '../5.Performance/pwaManager.js';
@@ -62,9 +63,10 @@ async function initApp() {
     currentDateBadge.onclick = focusTodayTarget;
   }
 
-  // 4. Khởi tạo Firebase Auth & Google Login với cơ chế cô lập dữ liệu theo User
+  // 4. Khởi tạo Firebase Auth & Google Login với cơ chế cô lập dữ liệu theo User & Space
   initFirebaseAuth(async (user) => {
     initApplicationState(user);
+    renderSpaceSelectorUi();
     await initWeekSelector(user);
     renderBackpackView();
     renderGradesView();
@@ -83,10 +85,11 @@ async function initApp() {
     }
   });
 
-  // 6. Gắn sự kiện điều hướng Tabs
+  // 6. Gắn sự kiện điều hướng Tabs & Space Selector
   initTabNavigation();
+  initSpaceSelector();
 
-  // 7. Nạp danh sách tuần học theo phạm vi người dùng
+  // 7. Nạp danh sách tuần học theo phạm vi người dùng & Không gian học kỳ
   await initWeekSelector();
 
   // 8. Khởi tạo công cụ tìm kiếm và bộ lọc
@@ -103,8 +106,8 @@ async function initApp() {
     () => currentRawMarkdown,
     (newWeekData) => {
       const activeUser = getCurrentUser();
-      const isOwner = isOwnerUser(activeUser);
-      const customWeeksKey = isOwner ? 'smart_schedule_custom_weeks' : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_custom_weeks`;
+      const currentSpaceId = state.activeSpaceId || 'default';
+      const customWeeksKey = getScopedStorageKey('smart_schedule_custom_weeks', activeUser, currentSpaceId);
 
       const newWeekItem = {
         id: newWeekData.id,
@@ -120,7 +123,8 @@ async function initApp() {
         availableWeeks.push(newWeekItem);
       }
 
-      localStorage.setItem(`smart_schedule_custom_md_${newWeekData.filename}`, newWeekData.mdContent);
+      const mdKey = getScopedStorageKey(`smart_schedule_custom_md_${newWeekData.filename}`, activeUser, currentSpaceId);
+      localStorage.setItem(mdKey, newWeekData.mdContent);
       const customWeeks = availableWeeks.filter(w => w.filename.startsWith('custom_'));
       localStorage.setItem(customWeeksKey, JSON.stringify(customWeeks));
       renderWeekDropdownOptions(newWeekData.filename);
@@ -313,7 +317,7 @@ export function switchTab(tabName) {
 }
 
 /**
- * Khởi tạo Dropdown danh sách tuần theo phạm vi người dùng (User Scope)
+ * Khởi tạo Dropdown danh sách tuần theo phạm vi người dùng & Không gian học kỳ (User & Space Scope)
  * @param {Object|null} user 
  */
 async function initWeekSelector(user = null) {
@@ -325,9 +329,10 @@ async function initWeekSelector(user = null) {
 
   const activeUser = user || getCurrentUser();
   const isOwner = isOwnerUser(activeUser);
+  const currentSpaceId = state.activeSpaceId || 'default';
 
   let deletedWeekIds = [];
-  const deletedKey = isOwner ? 'smart_schedule_deleted_weeks' : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_deleted_weeks`;
+  const deletedKey = getScopedStorageKey('smart_schedule_deleted_weeks', activeUser, currentSpaceId);
   try {
     const delRaw = localStorage.getItem(deletedKey);
     if (delRaw) deletedWeekIds = JSON.parse(delRaw);
@@ -335,8 +340,8 @@ async function initWeekSelector(user = null) {
 
   availableWeeks = [];
 
-  // CHỈ NẠP LỊCH GỐC (schedules/index.json) NẾU LÀ TÀI KHOẢN CHỦ SỞ HỮU
-  if (isOwner) {
+  // CHỈ NẠP LỊCH GỐC (schedules/index.json) NẾU LÀ TÀI KHOẢN CHỦ SỞ HỮU TRÊN KHÔNG GIAN MẶC ĐỊNH
+  if (isOwner && currentSpaceId === 'default') {
     try {
       const res = await fetch('schedules/index.json');
       if (res.ok) {
@@ -350,8 +355,8 @@ async function initWeekSelector(user = null) {
     }
   }
 
-  // Nạp thêm các tuần do người dùng tự tạo từ LocalStorage theo User Scope
-  const customWeeksKey = isOwner ? 'smart_schedule_custom_weeks' : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_custom_weeks`;
+  // Nạp thêm các tuần do người dùng tự tạo từ LocalStorage theo User & Space Scope
+  const customWeeksKey = getScopedStorageKey('smart_schedule_custom_weeks', activeUser, currentSpaceId);
   const customWeeksRaw = localStorage.getItem(customWeeksKey);
   if (customWeeksRaw) {
     try {
@@ -368,7 +373,7 @@ async function initWeekSelector(user = null) {
     }
   }
 
-  // NẾU LÀ NGƯỜI DÙNG MỚI (hoặc chưa có tuần nào): Khởi tạo 1 tuần trống tinh khôi gắn với ngày hôm nay
+  // NẾU LÀ HỌC KỲ MỚI (hoặc chưa có tuần nào): Khởi tạo 1 tuần trống tinh khôi gắn với ngày hôm nay
   if (availableWeeks.length === 0) {
     const currentMonday = getMondayOfCurrentWeek();
     const currentSunday = addDaysToDateStr(currentMonday, 6);
@@ -381,11 +386,10 @@ async function initWeekSelector(user = null) {
       description: 'Tuần học đầu tiên'
     };
     availableWeeks.push(initialCleanWeek);
-    const customMdKey = `smart_schedule_custom_md_${initialCleanWeek.filename}`;
-    if (!localStorage.getItem(customMdKey)) {
-      localStorage.setItem(customMdKey, generateEmptyWeekMarkdown(`Tuần 1 (${formattedRange})`));
+    const mdKey = getScopedStorageKey(`smart_schedule_custom_md_${initialCleanWeek.filename}`, activeUser, currentSpaceId);
+    if (!localStorage.getItem(mdKey)) {
+      localStorage.setItem(mdKey, generateEmptyWeekMarkdown(`Tuần 1 (${formattedRange})`));
     }
-    const customWeeksKey = isOwner ? 'smart_schedule_custom_weeks' : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_custom_weeks`;
     localStorage.setItem(customWeeksKey, JSON.stringify([initialCleanWeek]));
   }
 
@@ -457,24 +461,26 @@ async function initWeekSelector(user = null) {
     };
   }
 
-  // Tự động nhận diện tuần hiện tại theo ngày thực tế
+  // Tự động nhận diện tuần hiện tại theo ngày thực tế hoặc tuần đã chọn
   const initialWeek = getInitialWeekFilename();
   await loadWeekSchedule(initialWeek);
 }
 
 /**
- * Xử lý xóa tuần học hiện tại khỏi danh sách và đồng bộ LocalStorage theo User Scope
+ * Xử lý xóa tuần học hiện tại khỏi danh sách và đồng bộ LocalStorage theo User & Space Scope
  * @param {Object} weekObj 
  */
 function handleDeleteCurrentWeek(weekObj) {
   if (!weekObj) return;
 
   const activeUser = getCurrentUser();
-  const isOwner = isOwnerUser(activeUser);
-  const customWeeksKey = isOwner ? 'smart_schedule_custom_weeks' : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_custom_weeks`;
-  const deletedKey = isOwner ? 'smart_schedule_deleted_weeks' : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_deleted_weeks`;
+  const currentSpaceId = state.activeSpaceId || 'default';
+  const customWeeksKey = getScopedStorageKey('smart_schedule_custom_weeks', activeUser, currentSpaceId);
+  const deletedKey = getScopedStorageKey('smart_schedule_deleted_weeks', activeUser, currentSpaceId);
 
   // 1. Xóa Markdown trong LocalStorage nếu có
+  const mdKey = getScopedStorageKey(`smart_schedule_custom_md_${weekObj.filename}`, activeUser, currentSpaceId);
+  localStorage.removeItem(mdKey);
   localStorage.removeItem(`smart_schedule_custom_md_${weekObj.filename}`);
 
   // 2. Cập nhật danh sách custom_weeks nếu là tuần tự tạo
@@ -510,7 +516,8 @@ function handleDeleteCurrentWeek(weekObj) {
       description: 'Lịch học trống'
     };
     availableWeeks.push(fallbackWeek);
-    localStorage.setItem(`smart_schedule_custom_md_${fallbackWeek.filename}`, generateEmptyWeekMarkdown('Tuần học mới'));
+    const fallbackMdKey = getScopedStorageKey(`smart_schedule_custom_md_${fallbackWeek.filename}`, activeUser, currentSpaceId);
+    localStorage.setItem(fallbackMdKey, generateEmptyWeekMarkdown('Tuần học mới'));
   }
 
   // 6. Xác định tuần tiếp theo để hiển thị
@@ -599,8 +606,11 @@ async function loadWeekSchedule(filepath) {
   persistLastSelectedWeek(filepath);
   let mdText = '';
 
-  // 1. Kiểm tra trong LocalStorage nếu là tuần tự tạo
-  const customMd = localStorage.getItem(`smart_schedule_custom_md_${filepath}`);
+  // 1. Kiểm tra trong LocalStorage nếu là tuần tự tạo theo User & Space Scope
+  const activeUser = getCurrentUser();
+  const currentSpaceId = state.activeSpaceId || 'default';
+  const mdKey = getScopedStorageKey(`smart_schedule_custom_md_${filepath}`, activeUser, currentSpaceId);
+  const customMd = localStorage.getItem(mdKey) || localStorage.getItem(`smart_schedule_custom_md_${filepath}`);
   if (customMd) {
     mdText = customMd;
   } else {
@@ -1035,8 +1045,12 @@ function persistCurrentSchedule() {
   const newMarkdown = serializeScheduleToMarkdown(state.scheduleData);
   currentRawMarkdown = newMarkdown;
 
-  // 2. Lưu vào storage của tuần hiện tại
+  // 2. Lưu vào storage của tuần hiện tại theo User & Space Scope
   if (currentWeekFile) {
+    const activeUser = getCurrentUser();
+    const currentSpaceId = state.activeSpaceId || 'default';
+    const mdKey = getScopedStorageKey(`smart_schedule_custom_md_${currentWeekFile}`, activeUser, currentSpaceId);
+    localStorage.setItem(mdKey, newMarkdown);
     localStorage.setItem(`smart_schedule_custom_md_${currentWeekFile}`, newMarkdown);
   }
 
@@ -1110,6 +1124,191 @@ export async function focusTodayTarget() {
 }
 
 
+
+/**
+ * ==========================================================================
+ * KHÔNG GIAN HỌC KỲ ĐA NĂNG (Schedule Spaces / Multi-Semester Hub)
+ * ==========================================================================
+ */
+
+/**
+ * Render giao diện Bộ chuyển đổi Học kỳ / Bộ lịch trên Navbar
+ */
+export function renderSpaceSelectorUi() {
+  const container = document.getElementById('space-selector-wrapper');
+  if (!container) return;
+
+  const spaces = getAllSpaces();
+  const activeSpace = getActiveSpace();
+
+  container.innerHTML = `
+    <button type="button" class="btn-space-selector" id="btn-space-toggle" title="Chuyển đổi Học kỳ / Bộ lịch">
+      <span class="space-btn-icon">${escapeHtml(activeSpace.icon || '🎒')}</span>
+      <span class="space-btn-name">${escapeHtml(activeSpace.name || 'Học Kỳ')}</span>
+      ${activeSpace.archived ? '<span class="space-badge-archived">Lưu trữ</span>' : ''}
+      <i class="fa-solid fa-chevron-down space-btn-arrow"></i>
+    </button>
+
+    <div class="space-dropdown-menu hidden" id="space-dropdown-menu">
+      <div class="space-dropdown-header">
+        <span class="space-dropdown-title"><i class="fa-solid fa-layer-group"></i> Không Gian Học Kỳ</span>
+        <span class="space-dropdown-count">${spaces.length}</span>
+      </div>
+      <div class="space-items-list">
+        ${spaces.map(sp => `
+          <div class="space-item ${sp.id === activeSpace.id ? 'active' : ''}" data-space-id="${sp.id}">
+            <div class="space-item-main" title="Nhấp để chuyển sang ${escapeHtml(sp.name)}">
+              <span class="space-item-icon">${escapeHtml(sp.icon || '🎒')}</span>
+              <div class="space-item-info">
+                <span class="space-item-name">${escapeHtml(sp.name)}</span>
+                <div class="space-item-meta">
+                  ${sp.archived ? '<span class="space-badge-archived">Đã lưu trữ</span>' : '<span class="space-badge-active">Đang học</span>'}
+                  ${sp.description ? `<span>• ${escapeHtml(sp.description)}</span>` : ''}
+                </div>
+              </div>
+            </div>
+            <div class="space-item-actions">
+              <button type="button" class="btn-space-action-small btn-edit-space" data-space-id="${sp.id}" title="Đổi tên / sửa">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button type="button" class="btn-space-action-small btn-archive-space" data-space-id="${sp.id}" title="${sp.archived ? 'Kích hoạt lại' : 'Lưu trữ vào kho'}">
+                <i class="fa-solid ${sp.archived ? 'fa-box-open' : 'fa-box-archive'}"></i>
+              </button>
+              ${sp.id !== 'default' ? `
+                <button type="button" class="btn-space-action-small btn-danger btn-delete-space" data-space-id="${sp.id}" title="Xóa học kỳ này">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="space-dropdown-footer">
+        <button type="button" class="btn-create-space" id="btn-create-space-action">
+          <i class="fa-solid fa-plus"></i>
+          <span>Tạo Học Kỳ / Bộ Lịch Mới</span>
+        </button>
+      </div>
+    </div>
+  `;
+
+  const toggleBtn = document.getElementById('btn-space-toggle');
+  const dropdown = document.getElementById('space-dropdown-menu');
+
+  if (toggleBtn && dropdown) {
+    toggleBtn.onclick = (e) => {
+      e.stopPropagation();
+      const isHidden = dropdown.classList.toggle('hidden');
+      container.classList.toggle('active', !isHidden);
+    };
+  }
+
+  // Gắn sự kiện chọn Space
+  container.querySelectorAll('.space-item-main').forEach(item => {
+    item.onclick = async (e) => {
+      e.stopPropagation();
+      const parent = item.closest('.space-item');
+      const spaceId = parent ? parent.getAttribute('data-space-id') : null;
+      if (spaceId && spaceId !== state.activeSpaceId) {
+        dropdown.classList.add('hidden');
+        container.classList.remove('active');
+        await handleSwitchSpace(spaceId);
+      } else {
+        dropdown.classList.add('hidden');
+        container.classList.remove('active');
+      }
+    };
+  });
+
+  // Gắn sự kiện Chỉnh sửa Space
+  container.querySelectorAll('.btn-edit-space').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const spaceId = btn.getAttribute('data-space-id');
+      const sp = getAllSpaces().find(s => s.id === spaceId);
+      if (sp) {
+        dropdown.classList.add('hidden');
+        container.classList.remove('active');
+        openSpaceModal(sp, () => {
+          renderSpaceSelectorUi();
+        });
+      }
+    };
+  });
+
+  // Gắn sự kiện Lưu trữ / Bỏ lưu trữ Space
+  container.querySelectorAll('.btn-archive-space').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const spaceId = btn.getAttribute('data-space-id');
+      handleToggleArchiveSpace(spaceId, () => {
+        renderSpaceSelectorUi();
+      });
+    };
+  });
+
+  // Gắn sự kiện Xóa Space
+  container.querySelectorAll('.btn-delete-space').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const spaceId = btn.getAttribute('data-space-id');
+      handleDeleteSpace(spaceId, async () => {
+        if (state.activeSpaceId === spaceId) {
+          await handleSwitchSpace('default');
+        } else {
+          renderSpaceSelectorUi();
+        }
+      });
+    };
+  });
+
+  // Gắn sự kiện Tạo Space Mới
+  const createBtn = document.getElementById('btn-create-space-action');
+  if (createBtn) {
+    createBtn.onclick = (e) => {
+      e.stopPropagation();
+      dropdown.classList.add('hidden');
+      container.classList.remove('active');
+      openSpaceModal(null, async (newSpace) => {
+        await handleSwitchSpace(newSpace.id);
+      });
+    };
+  }
+}
+
+/**
+ * Xử lý chuyển đổi sang không gian học kỳ mới
+ * @param {string} targetSpaceId 
+ */
+export async function handleSwitchSpace(targetSpaceId) {
+  setActiveSpaceId(targetSpaceId);
+  initApplicationState(getCurrentUser());
+  renderSpaceSelectorUi();
+  await initWeekSelector(getCurrentUser());
+  renderBackpackView();
+  renderGradesView();
+  if (state.currentTab === 'today') {
+    renderHeatmapView(availableWeeks, currentWeekFile, handleSelectWeekFromHeatmap);
+  }
+  const currentSpace = getActiveSpace();
+  showToast(`Đã chuyển sang không gian: ${currentSpace.icon} ${currentSpace.name}! 🚀`);
+}
+
+/**
+ * Khởi tạo Space Selector và sự kiện click ngoài
+ */
+function initSpaceSelector() {
+  renderSpaceSelectorUi();
+
+  document.addEventListener('click', (e) => {
+    const wrapper = document.getElementById('space-selector-wrapper');
+    const dropdown = document.getElementById('space-dropdown-menu');
+    if (wrapper && dropdown && !wrapper.contains(e.target)) {
+      dropdown.classList.add('hidden');
+      wrapper.classList.remove('active');
+    }
+  });
+}
 
 /**
  * Khởi tạo Bộ điều khiển chế độ hiển thị ngày (1 Ngày / 3 Ngày / 7 Ngày)
