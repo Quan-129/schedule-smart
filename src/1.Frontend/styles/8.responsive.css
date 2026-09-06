@@ -43,8 +43,26 @@
 
   .week-navigation {
     width: 100%;
-    max-width: 480px;
+    max-width: 520px;
+    display: flex;
+    align-items: center;
     justify-content: space-between;
+    gap: 0.35rem;
+  }
+
+  .week-picker-capsule {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 0;
+  }
+
+  .week-actions-group {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex-shrink: 0;
   }
 
   .hero-banner {
@@ -221,14 +239,32 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.2rem 0.35rem;
-    background: var(--bg-secondary);
+    gap: 0.35rem;
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+
+  .week-picker-capsule {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.18rem 0.25rem;
+    min-width: 0;
+  }
+
+  .week-actions-group {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    flex-shrink: 0;
   }
 
   .btn-nav {
-    width: 30px;
-    height: 30px;
-    font-size: 0.8rem;
+    width: 28px;
+    height: 28px;
+    font-size: 0.78rem;
     flex-shrink: 0;
   }
 
@@ -237,7 +273,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 0.35rem;
+    padding: 0 0.25rem;
     min-width: 0;
   }
 
@@ -246,18 +282,21 @@
     flex-shrink: 0;
   }
 
+  .week-dropdown-wrapper select,
   .week-select {
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     font-weight: 700;
     width: 100%;
     text-align: center;
     text-overflow: ellipsis;
   }
 
-  .btn-add-week-nav {
-    width: 30px;
-    height: 30px;
-    font-size: 0.85rem;
+  .btn-today-nav,
+  .btn-add-week-nav,
+  .btn-delete-week-nav {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.75rem !important;
     flex-shrink: 0;
   }
 

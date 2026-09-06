@@ -4,6 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 10:05] - Tái Cấu Trúc Thanh Điều Hướng Tuần: Xử Lý Lỗi Viền Capsule Bị Lòi Ra Ngoài 🎨✨
+
+- **🎯 Vấn đề người dùng phản ánh**:
+  - Cụm điều hướng tuần học trên thanh Navbar hiển thị lỗi "lòi ra" (đường viền cong bo tròn cắt ngang giữa nút mũi tên `>` và 3 nút hành động `[Target]`, `[+]`, `[Trash]`, tạo ra 2 mảng capsule lồng nhau cọc cạch).
+- **✅ Giải pháp kỹ thuật & Tinh chỉnh thẩm mỹ**:
+  - **Tách bạch 2 khối chức năng độc lập**:
+    1. `.week-picker-capsule`: Capsule chọn tuần hoàn chỉnh chứa `<` + Dropdown tên tuần + `>`, bo tròn khép kín 2 đầu với nền Glassmorphism `rgba(30, 41, 59, 0.85)` và viền sáng mờ tinh tế.
+    2. `.week-actions-group`: Cụm 3 nút tròn thao tác nhanh độc lập (`[ 🎯 Focus Hôm nay ]`, `[ ➕ Thêm tuần ]`, `[ 🗑️ Xóa tuần ]`), đứng kế bên capsule chọn tuần với khoảng cách chuẩn `gap: 0.35rem`, không còn bất kỳ viền thừa nào bị lòi hay cắt ngang.
+  - **Cập nhật mã nguồn**:
+    - [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html): Chia cấu trúc DOM bên trong `.week-navigation` thành `.week-picker-capsule` và `.week-actions-group`.
+    - [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css): Tối ưu CSS capsule chọn tuần, loại bỏ margin thủ công, chuẩn hóa flexbox gap.
+    - [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css): Điều chỉnh co giãn mượt mà trên cả Tablet và Mobile (< 480px).
+    - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v70`.
+
+---
+
 ## 📅 [2026-09-06 09:56] - Khắc Phục Lỗi 404 Relative Import Path Trong OnboardingTour.js 🛠️
 
 - **🎯 Nguyên nhân sự cố**:

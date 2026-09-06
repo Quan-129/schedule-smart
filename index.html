@@ -194,17 +194,22 @@
 
         <!-- Week Selector Nav -->
         <div class="week-navigation">
-          <button id="prev-week-btn" class="btn-nav" title="Tuần trước"><i class="fa-solid fa-chevron-left"></i></button>
-          <div class="week-dropdown-wrapper">
-            <i class="fa-regular fa-calendar"></i>
-            <select id="week-select" title="Chọn tuần học">
-              <!-- Loaded dynamically from index.json -->
-            </select>
+          <div class="week-picker-capsule">
+            <button id="prev-week-btn" class="btn-nav" title="Tuần trước"><i class="fa-solid fa-chevron-left"></i></button>
+            <div class="week-dropdown-wrapper">
+              <i class="fa-regular fa-calendar"></i>
+              <select id="week-select" title="Chọn tuần học">
+                <!-- Loaded dynamically from index.json -->
+              </select>
+            </div>
+            <button id="next-week-btn" class="btn-nav" title="Tuần sau"><i class="fa-solid fa-chevron-right"></i></button>
           </div>
-          <button id="next-week-btn" class="btn-nav" title="Tuần sau"><i class="fa-solid fa-chevron-right"></i></button>
-          <button id="btn-focus-today" class="btn-nav btn-today-nav" title="Ping Target: Định vị & Cuộn tới ngày Hôm nay"><i class="fa-solid fa-crosshairs"></i></button>
-          <button id="btn-add-week-modal" class="btn-nav btn-add-week-nav" title="Thêm tuần học mới"><i class="fa-solid fa-plus"></i></button>
-          <button id="btn-delete-week" class="btn-nav btn-delete-week-nav" title="Xóa tuần học này"><i class="fa-solid fa-trash-can"></i></button>
+
+          <div class="week-actions-group">
+            <button id="btn-focus-today" class="btn-nav btn-today-nav" title="Ping Target: Định vị & Cuộn tới ngày Hôm nay"><i class="fa-solid fa-crosshairs"></i></button>
+            <button id="btn-add-week-modal" class="btn-nav btn-add-week-nav" title="Thêm tuần học mới"><i class="fa-solid fa-plus"></i></button>
+            <button id="btn-delete-week" class="btn-nav btn-delete-week-nav" title="Xóa tuần học này"><i class="fa-solid fa-trash-can"></i></button>
+          </div>
         </div>
       </div>
     </header>
