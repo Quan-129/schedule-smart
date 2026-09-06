@@ -944,147 +944,7 @@ function renderSemesterMatrixView(container, semesterWeeks = [], currentWeekFile
 }
 
 /**
- * 4️⃣ CHẾ ĐỘ CẢ NĂM: Ma trận 52 tuần x 7 ngày GitHub Matrix
- */
-function renderYearlyMatrixView(container, semesterWeeks = [], onSelectWeek = null) {
-  const months = ['Th 9', 'Th 10', 'Th 11', 'Th 12', 'Th 1', 'Th 2', 'Th 3', 'Th 4', 'Th 5', 'Th 6', 'Th 7', 'Th 8'];
-  const dayLabels = ['T2', '', 'T4', '', 'T6', '', 'CN'];
-
-  const totalWeeksCount = 52;
-  const squares = [];
-  const today = new Date();
-  const currentDayOfWeek = today.getDay(); // 0: CN, 1: T2...
-  const currentDayIndexInGrid = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1; // 0: T2 ... 6: CN
-  
-  // Xác định tuần thực tế hôm nay trong năm
-  let actualTodayWeekIdx = semesterWeeks.findIndex(w => w.isTodayWeek || isWeekContainingToday(w));
-  if (actualTodayWeekIdx === -1) {
-    actualTodayWeekIdx = semesterWeeks.findIndex(w => w.filename === activeWeeklyFile);
-    if (actualTodayWeekIdx === -1) actualTodayWeekIdx = 0;
-  }
-
-  for (let w = 0; w < totalWeeksCount; w++) {
-    const weekData = semesterWeeks[w % semesterWeeks.length] || null;
-    const isThisWeekInYear = (w === actualTodayWeekIdx);
-    for (let d = 0; d < 7; d++) {
-      let count = 0;
-      let dayName = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'][d];
-      let level = 0;
-      let classesList = [];
-      const isToday = isThisWeekInYear && (d === currentDayIndexInGrid);
-
-      if (weekData && weekData.days) {
-        const dStat = weekData.days[d];
-        if (dStat) {
-          count = dStat.classesCount;
-          level = dStat.level;
-          classesList = dStat.classes || [];
-        }
-      }
-
-      squares.push({
-        weekIdx: w + 1,
-        dayIdx: d,
-        dayName,
-        classesCount: count,
-        level,
-        isToday,
-        classes: classesList,
-        weekFilename: weekData ? weekData.filename : ''
-      });
-    }
-  }
-
-  container.innerHTML = `
-    <div class="heatmap-matrix-card">
-      <div class="heatmap-card-header">
-        <div class="heatmap-card-title-group">
-          <div class="heatmap-card-icon" style="background: rgba(168, 85, 247, 0.15); color: #c084fc;">
-            <i class="fa-solid fa-chart-line"></i>
-          </div>
-          <div>
-            <h3 class="heatmap-card-title">Toàn Cảnh Năm Học (52 Tuần Học & Rèn Luyện)</h3>
-            <span class="heatmap-card-sub">Chuẩn GitHub Contribution Matrix • 364 Ô Ngày Toàn Niên Khóa</span>
-          </div>
-        </div>
-
-        <div class="heatmap-card-actions">
-          <span style="font-size: 0.76rem; color: var(--text-muted);">
-            Chuẩn GitHub Contribution Matrix
-          </span>
-        </div>
-      </div>
-
-      <div class="yearly-matrix-scroll-wrap">
-        <div class="yearly-months-row">
-          ${months.map(m => `<span>${m}</span>`).join('')}
-        </div>
-
-        <div class="yearly-matrix-body">
-          <div class="yearly-days-labels">
-            ${dayLabels.map(l => `<span>${l}</span>`).join('')}
-          </div>
-
-          <div class="yearly-squares-grid" id="yearly-squares-grid">
-            ${squares.map(sq => {
-              const tooltipTitle = `Tuần ${sq.weekIdx} • ${sq.dayName}`;
-              const tooltipSub = sq.classesCount > 0 ? `${sq.classesCount} buổi học` : 'Nghỉ ngơi';
-              const tooltipBody = sq.classes.length > 0
-                ? sq.classes.map(c => `<div class="tt-row"><strong>${escapeHtml(c.subject)}</strong> <span>(${escapeHtml(c.timeRange)})</span></div>`).join('')
-                : `<div style="color: var(--text-muted); font-size: 0.72rem;">Không có buổi học</div>`;
-
-              return `
-                <div class="yearly-square-item level-${sq.level} ${sq.isToday ? 'is-today-year-square' : ''}" 
-                  data-week-num="${sq.weekIdx}"
-                  data-day="${sq.dayName}"
-                  data-count="${sq.classesCount}"
-                  data-is-today="${sq.isToday ? 'true' : 'false'}"
-                  data-filename="${escapeHtml(sq.weekFilename)}"
-                  data-heatmap-tooltip="true"
-                  data-tooltip-title="${escapeHtml(tooltipTitle)}"
-                  data-tooltip-sub="${escapeHtml(tooltipSub)}"
-                  data-tooltip-body="${escapeHtml(tooltipBody)}"
-                  data-tooltip-badge="${sq.classesCount > 0 ? `Level ${sq.level}` : 'Nghỉ'}"
-                  data-tooltip-badge-bg="${sq.classesCount > 0 ? 'rgba(168, 85, 247, 0.2)' : 'rgba(148, 163, 184, 0.15)'}"
-                  data-tooltip-badge-color="${sq.classesCount > 0 ? '#c084fc' : '#94a3b8'}">
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-      </div>
-
-      <div class="heatmap-card-footer">
-        <div class="heatmap-legend-row" style="font-size: 0.74rem;">
-          <span>Mức nhiệt:</span>
-          <div class="legend-scale-boxes">
-            <div class="legend-box level-0" title="0 buổi (Nghỉ)"></div>
-            <div class="legend-box level-1" title="1 buổi (Nhẹ)"></div>
-            <div class="legend-box level-2" title="2 buổi (Vừa)"></div>
-            <div class="legend-box level-3" title="3 buổi (Dày)"></div>
-            <div class="legend-box level-4" title="4+ buổi (Cao điểm)"></div>
-          </div>
-        </div>
-
-        <span style="font-size: 0.74rem; color: var(--text-muted);">
-          <i class="fa-regular fa-hand-pointer"></i> Bấm vào ô bất kỳ để mở tuần tương ứng
-        </span>
-      </div>
-    </div>
-  `;
-
-  container.querySelectorAll('.yearly-square-item').forEach(sq => {
-    sq.onclick = () => {
-      const fn = sq.dataset.filename;
-      if (fn && typeof onSelectWeek === 'function') {
-        onSelectWeek(fn);
-      }
-    };
-  });
-}
-
-/**
- * Điều phối render nội dung chi tiết theo chế độ thời gian đang chọn
+ * Điều phối render nội dung chi tiết theo chế độ thời gian đang chọn (Tuần / Tháng / Học kỳ)
  * @param {Array<Object>} semesterWeeks 
  * @param {string} currentWeekFile 
  * @param {Function} onSelectWeek 
@@ -1097,8 +957,6 @@ function renderActiveHorizonModeContent(semesterWeeks = [], currentWeekFile = ''
     renderWeeklyMatrixView(contentArea, semesterWeeks, currentWeekFile, onSelectWeek);
   } else if (currentHorizonMode === 'month') {
     renderMonthlyCalendarView(contentArea, semesterWeeks, onSelectWeek);
-  } else if (currentHorizonMode === 'year') {
-    renderYearlyMatrixView(contentArea, semesterWeeks, onSelectWeek);
   } else {
     renderSemesterMatrixView(contentArea, semesterWeeks, currentWeekFile, onSelectWeek);
   }
@@ -1266,9 +1124,6 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
           <button type="button" class="btn-heatmap-tab ${currentHorizonMode === 'semester' ? 'active' : ''}" data-mode="semester">
             <i class="fa-solid fa-layer-group"></i> <span>3. Học Kỳ / Quý</span>
           </button>
-          <button type="button" class="btn-heatmap-tab ${currentHorizonMode === 'year' ? 'active' : ''}" data-mode="year">
-            <i class="fa-solid fa-chart-line"></i> <span>4. Cả Năm</span>
-          </button>
         </div>
 
         <span style="font-size: 0.76rem; color: var(--text-muted);">
@@ -1297,7 +1152,7 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
 
 /**
  * Định vị thông minh ngày Hôm nay trên Bản Đồ Nhiệt (Smart Focus Context-Aware)
- * Hỗ trợ định vị cho cả 4 chế độ: Tuần (Week), Tháng (Month), Học kỳ (Semester), Cả năm (Year)
+ * Hỗ trợ định vị cho cả 3 chế độ: Tuần (Week), Tháng (Month), Học kỳ (Semester)
  * @param {Array<Object>} availableWeeks
  * @param {string} currentWeekFile
  * @param {Function} onSelectWeek
@@ -1363,23 +1218,8 @@ export function focusHeatmapTodayTarget(availableWeeks = [], currentWeekFile = '
         showToast('Không tìm thấy ô ngày Hôm nay trong tháng.');
       }
     }, 80);
-  } else if (currentHorizonMode === 'year') {
-    // 3️⃣ Chế độ Cả Năm: Định vị ô ngày hôm nay trong ma trận 364 ô
-    const todaySquare = contentArea.querySelector('.yearly-square-item.is-today-year-square') ||
-                        contentArea.querySelector('.yearly-square-item[data-is-today="true"]');
-    if (todaySquare) {
-      const weekNum = todaySquare.getAttribute('data-week-num') || '';
-      triggerFocusPing(todaySquare, `🎯 Đã định vị Ô Hôm nay (${todayName}${weekNum ? `, Tuần ${weekNum}` : ''}) trên Ma trận Cả năm!`);
-    } else {
-      const candidateSquares = Array.from(contentArea.querySelectorAll(`.yearly-square-item[data-day="${todayName}"]`));
-      if (candidateSquares.length > 0) {
-        triggerFocusPing(candidateSquares[0], `🎯 Đã định vị ${todayName} trên Ma trận Cả năm!`);
-      } else {
-        showToast('Đã định vị trên Ma trận Cả năm 🎯');
-      }
-    }
   } else {
-    // 4️⃣ Chế độ Học Kỳ / Quý: Định vị ô ngày hôm nay trong ma trận học kỳ
+    // 3️⃣ Chế độ Học Kỳ / Quý: Định vị ô ngày hôm nay trong ma trận học kỳ
     let todaySquare = contentArea.querySelector('.semester-square-item.is-today-semester-square') ||
                       contentArea.querySelector('.semester-square-item[data-is-today="true"]');
     

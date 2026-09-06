@@ -4,6 +4,24 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 10:49] - Tối Giản Bản Đồ Nhiệt: Giữ 3 Chế Độ (Tuần / Tháng / Học Kỳ) & Loại Bỏ Chế Độ Cả Năm 🎯⚡
+
+- **🎯 Yêu cầu & Quyết định thiết kế**:
+  - Người dùng yêu cầu tinh gọn Bản đồ nhiệt, chỉ cần 3 chế độ xem thực tế nhất cho học sinh/sinh viên:
+    1. **1. Lịch Tuần (Week)**: Timeline Google Calendar tự động scale theo giờ thực.
+    2. **2. Tháng (Month)**: GitHub Monthly Matrix chi tiết từng ngày trong tháng.
+    3. **3. Học Kỳ / Quý (Semester)**: Ma trận đóng góp toàn bộ các tuần trong kỳ.
+  - Loại bỏ hoàn toàn chế độ Cả năm (52 tuần) để giao diện gọn gàng, tải nhanh và tập trung vào tiến độ học tập thực tế.
+- **✅ Công việc đã hoàn thành**:
+  - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    - Xóa tab `data-mode="year"` và hàm `renderYearlyMatrixView()`.
+    - Tinh chỉnh `renderActiveHorizonModeContent()` và `focusHeatmapTodayTarget()` chỉ phục vụ 3 chế độ cốt lõi.
+  - [`src/1.Frontend/styles/9.heatmap-view.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/9.heatmap-view.css):
+    - Dọn dẹp toàn bộ CSS liên quan đến `.yearly-matrix-*` và `.yearly-square-item`.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v78`.
+
+---
+
 ## 📅 [2026-09-06 10:44] - Sửa Lỗi Định Vị Chế Độ Học Kỳ: Tính Toán Tuần Thực Tế Theo `startDate` & Fallback Chuẩn Xác 🎯🛠️
 
 - **🎯 Nguyên nhân sự cố**:
