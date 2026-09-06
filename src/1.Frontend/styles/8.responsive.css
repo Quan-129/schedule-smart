@@ -371,39 +371,247 @@
     padding: 0.75rem 0.85rem;
   }
 
-  /* Modal Component Mobile Responsive */
-  .modal-backdrop {
-    padding: 0.65rem 0.4rem;
-    align-items: center;
+  /* ==========================================================================
+     CHIẾC CẶP GOOGLE DRIVE (BACKPACK VIEW) MOBILE RESPONSIVE
+     ========================================================================== */
+  .backpack-view-container {
+    gap: 0.85rem;
+    padding-bottom: 2rem;
   }
 
-  .modal-card {
-    max-height: 94vh;
-    border-radius: var(--radius-lg);
-    box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.7);
+  .backpack-hero-banner {
+    padding: 1.15rem 1rem;
+    border-radius: var(--radius-md);
+    gap: 0.85rem;
+  }
+
+  .backpack-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
     width: 100%;
   }
 
-  .modal-header {
-    padding: 0.85rem 1rem;
+  .backpack-search-bar {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .backpack-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .backpack-card {
+    padding: 1rem;
+    border-radius: var(--radius-md);
+  }
+
+  .backpack-header {
     gap: 0.65rem;
   }
 
-  .modal-title-group {
+  .backpack-links-list {
+    gap: 0.45rem;
+  }
+
+  .drive-link-item {
+    padding: 0.5rem 0.65rem;
+    font-size: 0.78rem;
+  }
+
+  .btn-open-drive-main {
+    padding: 0.6rem 0.85rem;
+    font-size: 0.82rem;
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* ==========================================================================
+     TÍNH ĐIỂM MỤC TIÊU (GRADE SOLVER VIEW) MOBILE RESPONSIVE
+     ========================================================================== */
+  .grade-solver-container {
+    gap: 0.85rem;
+    padding-bottom: 2rem;
+  }
+
+  .grade-summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .grade-subject-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .target-score-calculator {
+    padding: 1rem;
+    border-radius: var(--radius-md);
+  }
+
+  .slider-container {
+    padding: 0.5rem 0;
+  }
+
+  /* ==========================================================================
+     BẢN ĐỒ NHIỆT (HEATMAP VIEW & TIMELINE) MOBILE RESPONSIVE
+     ========================================================================== */
+  .heatmap-view-wrapper {
+    gap: 0.85rem;
+    padding-bottom: 2rem;
+  }
+
+  .heatmap-hero-banner {
+    padding: 1.15rem 1rem;
+    border-radius: var(--radius-md);
+    gap: 0.75rem;
+  }
+
+  .heatmap-title {
+    font-size: 1.2rem;
+  }
+
+  .heatmap-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .heatmap-horizon-switch {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.25rem;
+    padding: 0.25rem;
+  }
+
+  .heatmap-horizon-btn {
+    padding: 0.45rem 0.35rem;
+    font-size: 0.76rem;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+  }
+
+  .heatmap-card-header {
+    flex-direction: column;
+    align-items: flex-start;
     gap: 0.65rem;
+    padding: 0.85rem 1rem;
+  }
+
+  .heatmap-card-actions {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .heatmap-select-filter {
+    flex: 1;
+    min-width: 140px;
+    font-size: 0.76rem;
+  }
+
+  /* Timeline Tuần Google Calendar trên Mobile */
+  .weekly-cal-scroll-area {
+    -webkit-overflow-scrolling: touch;
+    max-height: 520px;
+  }
+
+  .weekly-cal-scroll-inner {
+    min-width: 680px;
+  }
+
+  .cal-day-header-cell {
+    padding: 0.45rem 0.25rem;
+  }
+
+  .cal-day-name {
+    font-size: 0.76rem;
+  }
+
+  .cal-day-date-tag {
+    font-size: 0.62rem;
+  }
+
+  .cal-day-classes-count {
+    font-size: 0.62rem;
+  }
+
+  /* Chế độ Tháng Github Style trên Mobile */
+  .monthly-matrix-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
+  }
+
+  .monthly-matrix-days-header,
+  .monthly-matrix-grid {
+    gap: 4px;
+    min-width: 320px;
+  }
+
+  .monthly-matrix-square {
+    min-height: 38px;
+    max-height: 48px;
+    font-size: 0.74rem;
+    border-radius: 4px;
+  }
+
+  /* Chế độ Học kỳ trên Mobile */
+  .semester-grid-cols {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .semester-week-cell {
+    padding: 0.65rem 0.75rem;
+  }
+
+  /* ==========================================================================
+     TẤT CẢ MODAL COMPONENT TRÊN MOBILE
+     ========================================================================== */
+  .modal-backdrop {
+    padding: 0.35rem;
+    align-items: center;
+  }
+
+  .modal-card,
+  .modal-card-add-week,
+  .modal-card-lg,
+  .modal-card-md {
+    max-width: 96vw !important;
+    width: 96vw !important;
+    max-height: 94vh !important;
+    border-radius: var(--radius-md);
+    box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.7);
+  }
+
+  .modal-grid-2col {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .modal-header {
+    padding: 0.75rem 0.95rem;
+    gap: 0.55rem;
+  }
+
+  .modal-title-group {
+    gap: 0.55rem;
     min-width: 0;
   }
 
   .modal-icon-glow {
-    width: 36px;
-    height: 36px;
-    font-size: 1rem;
-    border-radius: 10px;
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+    border-radius: 8px;
     flex-shrink: 0;
   }
 
   .modal-title {
-    font-size: 1.02rem;
+    font-size: 0.96rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -411,22 +619,22 @@
 
   .modal-badges-row {
     flex-wrap: wrap;
-    gap: 0.35rem;
+    gap: 0.25rem;
   }
 
   .modal-subj-badge {
-    font-size: 0.68rem;
-    padding: 0.08rem 0.35rem;
+    font-size: 0.65rem;
+    padding: 0.06rem 0.3rem;
   }
 
   .modal-subj-sub {
-    font-size: 0.72rem;
+    font-size: 0.68rem;
   }
 
   .btn-modal-close {
-    width: 30px;
-    height: 30px;
-    font-size: 0.85rem;
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
     flex-shrink: 0;
   }
 
@@ -434,90 +642,64 @@
   .modal-nav-tabs {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    padding: 0.35rem 0.5rem;
-    gap: 0.25rem;
+    padding: 0.3rem 0.4rem;
+    gap: 0.2rem;
   }
 
   .modal-tab-btn {
-    padding: 0.45rem 0.2rem;
-    font-size: 0.7rem;
+    padding: 0.4rem 0.15rem;
+    font-size: 0.68rem;
     flex-direction: column;
-    gap: 0.2rem;
+    gap: 0.15rem;
     text-align: center;
     white-space: normal;
     line-height: 1.2;
   }
 
   .modal-tab-btn i {
-    font-size: 0.95rem;
+    font-size: 0.88rem;
   }
 
   .modal-tab-pane {
-    padding: 0.85rem 0.95rem;
-    max-height: calc(90vh - 160px);
+    padding: 0.75rem 0.85rem;
+    max-height: calc(94vh - 150px);
   }
 
   .modal-form>div {
-    padding: 0.85rem 0.95rem !important;
-    gap: 0.85rem !important;
-    max-height: calc(90vh - 150px) !important;
+    padding: 0.75rem 0.85rem !important;
+    gap: 0.75rem !important;
+    max-height: calc(94vh - 140px) !important;
   }
 
   .form-section-card {
-    padding: 0.85rem;
-    gap: 0.85rem;
+    padding: 0.75rem;
+    gap: 0.75rem;
   }
 
   .section-card-header {
-    gap: 0.65rem;
-    padding-bottom: 0.65rem;
+    gap: 0.55rem;
+    padding-bottom: 0.55rem;
   }
 
   .section-card-icon {
-    width: 34px;
-    height: 34px;
-    font-size: 1rem;
-    border-radius: 8px;
+    width: 30px;
+    height: 30px;
+    font-size: 0.9rem;
+    border-radius: 6px;
     flex-shrink: 0;
   }
 
   .section-card-header h4 {
-    font-size: 0.92rem;
+    font-size: 0.88rem;
   }
 
   .section-card-header p {
-    font-size: 0.75rem;
-  }
-
-  .grades-header-flex {
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-
-  .badge-grade-total {
     font-size: 0.72rem;
-    padding: 0.15rem 0.45rem;
   }
 
-  /* Input Drive + Nút Mở thử */
-  .input-with-action input {
-    padding: 0.75rem 4.8rem 0.75rem 2.2rem;
-    font-size: 0.82rem;
-  }
-
-  .input-with-action .input-icon {
-    left: 0.75rem;
-    font-size: 0.8rem;
-  }
-
-  .btn-input-action {
-    padding: 0.35rem 0.55rem;
-    font-size: 0.72rem;
-    right: 0.3rem;
-  }
-
+  /* Input form mobile (ngăn chặn iOS Safari tự phóng to khi tap input) */
   .form-group-styled label {
-    font-size: 0.78rem;
+    font-size: 0.76rem;
   }
 
   .form-group-styled input[type="text"],
@@ -526,40 +708,76 @@
   .form-group-styled input[type="number"],
   .form-group-styled input[type="email"],
   .form-group-styled select {
-    padding: 0.65rem 0.85rem;
-    font-size: 0.85rem;
+    padding: 0.6rem 0.75rem;
+    font-size: 16px; /* Tiêu chuẩn chống Safari zoom đột ngột */
   }
 
   .form-group-styled textarea {
-    padding: 0.75rem 0.85rem;
-    font-size: 0.82rem;
-    min-height: 100px;
+    padding: 0.65rem 0.75rem;
+    font-size: 16px;
+    min-height: 90px;
+  }
+
+  /* Khung Nhập Nhanh Toàn Tuần (Markdown Quick Setup) trên Mobile */
+  .quick-md-setup-container {
+    padding: 0.65rem 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .quick-md-badge {
+    font-size: 0.75rem;
+  }
+
+  .quick-md-hint {
+    font-size: 0.68rem;
+  }
+
+  .quick-md-actions-bar {
+    gap: 0.35rem;
+  }
+
+  .btn-preset-pill {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .guide-syntax-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.35rem;
+  }
+
+  .syntax-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+  }
+
+  .quick-md-textarea {
+    font-size: 15px;
+    min-height: 200px;
+    height: 220px;
+    padding: 0.65rem 0.75rem;
   }
 
   .modal-footer {
-    padding: 0.75rem 0.95rem;
-    gap: 0.5rem;
+    padding: 0.65rem 0.85rem;
+    gap: 0.45rem;
     flex-wrap: wrap;
   }
 
   .modal-footer .btn-ghost,
   .modal-footer .btn-primary-gradient,
   .modal-footer .btn-danger-ghost {
-    padding: 0.5rem 0.85rem;
-    font-size: 0.8rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.78rem;
+    flex: 1;
+    justify-content: center;
   }
 
   .modal-footer-right {
+    width: 100%;
+    display: flex;
     gap: 0.45rem;
-  }
-
-  .preset-notes-group {
-    gap: 0.35rem;
-  }
-
-  .preset-chip {
-    font-size: 0.72rem;
-    padding: 0.2rem 0.5rem;
   }
 }
 

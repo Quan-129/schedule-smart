@@ -4,6 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 11:20] - Tối Ưu Hóa Giao Diện Responsive Toàn Diện Cho Điện Thoại & Thiết Bị Di Động (Mobile-First UX) 📱✨
+
+- **🎯 Yêu cầu & Trải nghiệm di động**:
+  - Người dùng yêu cầu hoàn thiện responsive toàn diện trên mọi màn hình điện thoại (Smartphones từ 320px đến 600px và Tablets).
+  - Đảm bảo 4 chế độ xem chính (Lưới Lịch Học, Chiếc Cặp Drive, Tính Điểm Mục Tiêu, Bản Đồ Nhiệt) và toàn bộ Modal hiển thị hoàn hảo, không bị vỡ giao diện hoặc tràn viền.
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css):
+    - **Thanh điều hướng Navbar**: 3 hàng khoa học (Brand Info + Actions $\rightarrow$ Week Navigation $\rightarrow$ 4 View Toggles), icon to rõ, chống tràn text.
+    - **Chiếc Cặp Google Drive**: Grid 1 cột, card môn học co giãn linh hoạt, nút mở Drive chính full-width ở đáy.
+    - **Bảng Tính Điểm Mục Tiêu**: Thẻ GPA/CPA 2 cột, bảng điểm rút gọn 4 cột vừa khít 100% không tràn ngang, thanh trượt điểm mục tiêu chạm kéo mượt mà.
+    - **Bản Đồ Nhiệt & Timeline Tuần**: 3 tab Horizon Switch dàn đều, Timeline Google Calendar hỗ trợ cuộn ngang chạm mượt (`-webkit-overflow-scrolling: touch`), lưới Tháng Github Style hiển thị 7 cột tỷ lệ chuẩn.
+    - **Toàn bộ Hệ Thống Modals**: Đặt kích thước `96vw` & `max-height: 94vh`, form cuộn mượt, font chữ input `16px` chống Safari tự động zoom, các nút footer dàn đều dễ bấm bằng một tay.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v84`.
+
+---
+
 ## 📅 [2026-09-06 11:15] - Mở Rộng Không Gian Modal & Tăng Kích Thước Khung Nhập Markdown Soạn Thảo Siêu Thoáng 📐🖥️
 
 - **🎯 Yêu cầu & Tối ưu hóa Layout**:
