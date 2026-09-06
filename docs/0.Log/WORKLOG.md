@@ -4,6 +4,27 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 19:35] - Tự Động Tạo 4 Thư Mục Kịch Bản Biến Thể Kèm Ảnh Chèn Chữ Trực Tiếp Sẵn Sàng Đăng TikTok 🖼️🎬✨
+
+- **🎯 Yêu cầu từ người dùng**: Tạo 3 - 4 thư mục kịch bản mới kèm bộ ảnh đã được chèn chữ trực tiếp (Overlay) thẩm mỹ, bắt mắt, sẵn sàng tải lên TikTok ngay từ bộ ảnh gốc `kịch bản 1/`.
+- **🔍 Triển khai Công Nghệ & Nội Dung**:
+  - Dùng Python Pillow kết xuất tự động 24 ảnh PNG chất lượng cao (6 ảnh x 4 biến thể) với Card Container bo góc, Header Badge gradient viền màu nổi bật, Subtext giải thích lợi ích chi tiết.
+  - Phông chữ Tiếng Việt UTF-8 chuẩn (`Arial Bold` + `Arial Regular`) sắc nét, không vỡ nét.
+  - 4 Biến thể được chia theo 4 góc độ tiếp cận (Angles):
+    1. `kịch bản 1_ban_1_sinh_vien_chua_biet/`: Góc độ FOMO Sinh viên ("Sinh viên mà chưa biết cái này là dở rồi..."), viền vàng Amber.
+    2. `kịch bản 1_ban_2_dan_it_aesthetic/`: Góc độ Dân IT / Tech Aesthetic ("Khi sinh viên IT tự code TKB cho riêng mình..."), viền xanh Neon Cyan.
+    3. `kịch bản 1_ban_3_cuu_tinh_mua_thi/`: Góc độ Cứu tinh Mùa thi ("Mùa thi tới nơi mà không biết cái này là toang..."), viền đỏ cam Coral.
+    4. `kịch bản 1_ban_4_bo_chup_man_hinh/`: Góc độ Thói quen cũ ("Bỏ ngay trò chụp màn hình TKB đi bà con ơi!"), viền xanh ngọc Emerald.
+  - Trong mỗi thư mục đều có sẵn file [`KICH_BAN_CHI_TIET.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/k%E1%BB%8Bch%20b%E1%BA%A3n%201_ban_1_sinh_vien_chua_biet/KICH_BAN_CHI_TIET.md) ghi rõ nội dung text từng slide, lời thoại và caption TikTok kèm hashtags.
+- **✅ Chi tiết thay đổi**:
+  - [`kịch bản 1_ban_1_sinh_vien_chua_biet/`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/k%E1%BB%8Bch%20b%E1%BA%A3n%201_ban_1_sinh_vien_chua_biet/)
+  - [`kịch bản 1_ban_2_dan_it_aesthetic/`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/k%E1%BB%8Bch%20b%E1%BA%A3n%201_ban_2_dan_it_aesthetic/)
+  - [`kịch bản 1_ban_3_cuu_tinh_mua_thi/`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/k%E1%BB%8Bch%20b%E1%BA%A3n%201_ban_3_cuu_tinh_mua_thi/)
+  - [`kịch bản 1_ban_4_bo_chup_man_hinh/`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/k%E1%BB%8Bch%20b%E1%BA%A3n%201_ban_4_bo_chup_man_hinh/)
+  - [`docs/0.Log/WORKLOG.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/docs/0.Log/WORKLOG.md)
+
+---
+
 ## 📅 [2026-09-06 18:55] - Cập Nhật Định Vị & Call-To-Action: Mở Khóa Trọn Đời Chỉ Bằng 2 Ly Trà Sữa 🧋🧋✨
 
 - **🎯 Yêu cầu từ người dùng**: Thay đổi lời kêu gọi hành động (CTA) và định giá trong kịch bản TikTok: chuyển sang mô hình có phí tượng trưng siêu hạt dẻ — *"chỉ bằng 2 ly trà sữa"* (mở khóa trọn đời cả 4 năm đại học).
