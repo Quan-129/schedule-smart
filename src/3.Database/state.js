@@ -109,16 +109,34 @@ export function getAllSpaces(user = null) {
   const saved = getStorageItem(spacesKey, null);
 
   if (Array.isArray(saved) && saved.length > 0) {
-    return saved;
+    // Tự động chuẩn hóa icon nếu còn lưu class fontawesome cũ
+    let hasChanged = false;
+    const normalized = saved.map(s => {
+      let icon = s.icon;
+      let name = s.name;
+      if (icon === 'fa-solid fa-graduation-cap' || !icon || icon.includes('fa-')) {
+        icon = '🎓';
+        hasChanged = true;
+      }
+      if (s.id === 'default' && (name === 'HK1 2026–2027 (Chính khóa)' || name === 'HK1 2026–2027')) {
+        name = 'Học Kỳ 1';
+        hasChanged = true;
+      }
+      return { ...s, icon, name };
+    });
+    if (hasChanged) {
+      setStorageItem(spacesKey, normalized);
+    }
+    return normalized;
   }
 
   // Khởi tạo không gian mặc định ban đầu
   const defaultSpaces = [
     {
       id: 'default',
-      name: 'HK1 2026–2027 (Chính khóa)',
+      name: 'Học Kỳ 1',
       code: 'HK1',
-      icon: 'fa-solid fa-graduation-cap',
+      icon: '🎓',
       color: '#6366f1',
       isArchived: false,
       createdAt: '2026-09-01T00:00:00.000Z',
@@ -137,7 +155,7 @@ export function getAllSpaces(user = null) {
 export function getActiveSpace(user = null) {
   const spaces = getAllSpaces(user);
   const found = spaces.find(s => s.id === state.activeSpaceId);
-  return found || spaces[0] || { id: 'default', name: 'HK1 2026–2027', code: 'HK1', icon: 'fa-solid fa-graduation-cap' };
+  return found || spaces[0] || { id: 'default', name: 'Học Kỳ 1', code: 'HK1', icon: '🎓' };
 }
 
 /**

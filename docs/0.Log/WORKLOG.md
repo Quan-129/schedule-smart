@@ -4,6 +4,26 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 16:08] - Tinh Chỉnh & Sửa Lỗi Hiển Thị Icon / Bố Cục Nút Không Gian Học Kỳ Trên Navbar 🎨🛠
+
+- **🎯 Yêu cầu từ người dùng**: Sửa lỗi nút Space Selector bị hiển thị chuỗi text class `fa-solid fa-graduation-cap` và phình to đè lấn lên các nút công cụ bên cạnh trên thanh Navbar.
+- **✅ Chi tiết sửa đổi**:
+  - [`src/3.Database/state.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/state.js):
+    + Chuẩn hóa `defaultSpaces` với tên ngắn gọn `Học Kỳ 1` và icon Emoji `🎓`.
+    + Tự động migrate và chuẩn hóa dữ liệu icon chuỗi cũ trong LocalStorage sang Emoji.
+  - [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    + Viết hàm helper `formatSpaceIcon(icon)` xử lý linh hoạt cả Emoji và FontAwesome icon (chỉ render thẻ `<i>` khi là class FontAwesome, tránh in text thô).
+  - [`src/1.Frontend/styles/11.space-selector.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/11.space-selector.css):
+    + Thu gọn kích thước `.btn-space-selector` (`padding: 0.3rem 0.65rem; font-size: 0.8rem; max-width: 145px;`).
+    + Giới hạn độ dài tên `.space-btn-name` (`max-width: 80px; text-overflow: ellipsis;`).
+    + Thêm `flex-shrink: 0; white-space: nowrap;` ngăn tình trạng co rúm hoặc tràn dòng.
+  - [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css):
+    + Tinh chỉnh `.navbar-brand-row`, `.nav-left`, `.nav-quick-actions` với `flex-shrink: 0; gap: 0.6rem;` giúp bố cục Navbar luôn thẳng hàng và không bị đè lấn.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js):
+    + Nâng cache lên `smart-schedule-modular-v106`.
+
+---
+
 ## 📅 [2026-09-06 15:58] - Ra Mắt Hệ Thống Không Gian Học Kỳ & Bộ Lịch Đa Nhiệm (Multi-Semester Hub & Parallel Schedule Spaces) 🚀🎒
 
 - **🎯 Yêu cầu từ người dùng**:

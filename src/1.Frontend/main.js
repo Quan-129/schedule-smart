@@ -1132,6 +1132,19 @@ export async function focusTodayTarget() {
  */
 
 /**
+ * Format icon không gian học kỳ: hỗ trợ cả Emoji và FontAwesome icon class
+ * @param {string} icon 
+ * @returns {string}
+ */
+export function formatSpaceIcon(icon) {
+  if (!icon) return '🎓';
+  if (icon.startsWith('fa-') || icon.includes('fa-')) {
+    return `<i class="${escapeHtml(icon)}"></i>`;
+  }
+  return escapeHtml(icon);
+}
+
+/**
  * Render giao diện Bộ chuyển đổi Học kỳ / Bộ lịch trên Navbar
  */
 export function renderSpaceSelectorUi() {
@@ -1143,8 +1156,8 @@ export function renderSpaceSelectorUi() {
 
   container.innerHTML = `
     <button type="button" class="btn-space-selector" id="btn-space-toggle" title="Chuyển đổi Học kỳ / Bộ lịch">
-      <span class="space-btn-icon">${escapeHtml(activeSpace.icon || '🎒')}</span>
-      <span class="space-btn-name">${escapeHtml(activeSpace.name || 'Học Kỳ')}</span>
+      <span class="space-btn-icon">${formatSpaceIcon(activeSpace.icon || '🎓')}</span>
+      <span class="space-btn-name">${escapeHtml(activeSpace.name || 'Học Kỳ 1')}</span>
       ${activeSpace.archived ? '<span class="space-badge-archived">Lưu trữ</span>' : ''}
       <i class="fa-solid fa-chevron-down space-btn-arrow"></i>
     </button>
@@ -1158,7 +1171,7 @@ export function renderSpaceSelectorUi() {
         ${spaces.map(sp => `
           <div class="space-item ${sp.id === activeSpace.id ? 'active' : ''}" data-space-id="${sp.id}">
             <div class="space-item-main" title="Nhấp để chuyển sang ${escapeHtml(sp.name)}">
-              <span class="space-item-icon">${escapeHtml(sp.icon || '🎒')}</span>
+              <span class="space-item-icon">${formatSpaceIcon(sp.icon || '🎓')}</span>
               <div class="space-item-info">
                 <span class="space-item-name">${escapeHtml(sp.name)}</span>
                 <div class="space-item-meta">

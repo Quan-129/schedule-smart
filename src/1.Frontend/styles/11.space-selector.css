@@ -10,57 +10,62 @@
   position: relative;
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 /* Nút bấm chuyển đổi Space trên Navbar */
 .btn-space-selector {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  padding: 0.42rem 0.85rem;
-  background: var(--card-bg, rgba(255, 255, 255, 0.05));
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
-  border-radius: var(--radius-md, 10px);
+  gap: 0.4rem;
+  padding: 0.3rem 0.65rem;
+  background: var(--card-bg, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.14));
+  border-radius: var(--radius-md, 8px);
   color: var(--text-primary, #ffffff);
   font-family: inherit;
-  font-size: 0.88rem;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   user-select: none;
-  max-width: 240px;
+  max-width: 145px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .btn-space-selector:hover {
-  background: var(--card-hover-bg, rgba(255, 255, 255, 0.1));
+  background: var(--card-hover-bg, rgba(255, 255, 255, 0.12));
   border-color: var(--accent-primary, #6366f1);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
 }
 
 .space-btn-icon {
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .space-btn-name {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 140px;
+  max-width: 80px;
   letter-spacing: -0.01em;
 }
 
 .space-btn-arrow {
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   color: var(--text-muted, #94a3b8);
   transition: transform 0.2s ease;
-  margin-left: 0.1rem;
+  margin-left: 0.05rem;
+  flex-shrink: 0;
 }
 
 .space-selector-wrapper.active .space-btn-arrow {
