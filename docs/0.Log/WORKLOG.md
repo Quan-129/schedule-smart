@@ -4,6 +4,19 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 17:08] - Tối Ưu Trạng Thái Thu Gọn Hero Banner Thống Kê (Ultra-Compact Banner) 📐✨
+
+- **🎯 Yêu cầu từ người dùng**: Thu gọn hoàn toàn khung Hero Banner thống kê cường độ học tập (ẩn tiêu đề to, phụ đề dài và 4 card KPI khi ở chế độ Thu gọn).
+- **🔍 Phân tích & Khắc phục**:
+  - Trước đây, class `.heatmap-hero-body` và `.heatmap-kpi-grid` chưa được gán `display: none !important` khi banner có class `.is-collapsed`, khiến tiêu đề lớn và phụ đề vẫn hiển thị chiếm diện tích.
+  - Sau khi sửa: Khi ở trạng thái Thu gọn (`.is-collapsed`), banner co lại thành một dải thanh mảnh (~40px) hiển thị badge tóm tắt (`Hôm nay`, `Học kỳ`, `Cao điểm`, `Lên lớp`) và nút mở rộng, trả lại 100% không gian thoáng đãng cho ma trận thời khóa biểu.
+- **✅ Chi tiết thay đổi**:
+  - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js): Bổ sung `.heatmap-collapsed-tags` tóm tắt nhanh số liệu vào Header của Hero Banner.
+  - [`src/1.Frontend/styles/9.heatmap-view.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/9.heatmap-view.css): Cập nhật selector `.heatmap-hero-banner.is-collapsed .heatmap-hero-body` và `.heatmap-kpi-grid` ẩn hoàn toàn khi thu gọn.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache version lên `smart-schedule-modular-v119`.
+
+---
+
 ## 📅 [2026-09-06 17:05] - Tinh Gọn Khoa Học: Gộp Thanh Chuyển Đổi Chế Độ Xem Vào Trực Tiếp Header Card Bản Đồ (Unified Heatmap Card) 🎨✨📊
 
 - **🎯 Yêu cầu từ người dùng**: Gộp 2 box riêng biệt (thanh chọn chế độ xem `1. Lịch Tuần | 2. Tháng | 3. Học Kỳ / Quý` ở trên và khung hiển thị Bản Đồ Heatmap ở dưới) thành 1 thẻ Card duy nhất tinh gọn, khoa học, liền mạch.

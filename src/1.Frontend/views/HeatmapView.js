@@ -1177,6 +1177,14 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
             <span class="heatmap-version-badge">Timeline Google Calendar</span>
           </div>
 
+          <!-- Các thẻ tóm tắt nhanh khi thu gọn -->
+          <div class="heatmap-collapsed-tags">
+            <span class="collapsed-tag">Hôm nay: <strong>${todayClasses.length}b</strong></span>
+            <span class="collapsed-tag">Học kỳ: <strong>${totalSemesterClasses}b</strong></span>
+            <span class="collapsed-tag">Cao điểm: <strong>${peakWeek ? peakWeek.title : 'Chưa có'}</strong></span>
+            <span class="collapsed-tag">Lên lớp: <strong>${activeStudyDays} ngày</strong></span>
+          </div>
+
           <button type="button" class="btn-toggle-hero" id="btn-toggle-heatmap-banner" title="${isHeaderCollapsed ? 'Mở rộng bảng thống kê chi tiết' : 'Thu gọn bảng thống kê'}">
             <i class="fa-solid ${isHeaderCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'}"></i>
             <span class="toggle-text">${isHeaderCollapsed ? 'Chi tiết' : 'Thu gọn'}</span>
