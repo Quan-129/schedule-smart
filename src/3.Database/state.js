@@ -158,11 +158,34 @@ export function getActiveSpace(user = null) {
   return found || spaces[0] || { id: 'default', name: 'Học Kỳ 1', code: 'HK1', icon: '🎓' };
 }
 
+// Trạng thái cờ chống xung đột / echo loop khi nhận dữ liệu snapshot từ xa
+let isApplyingRemoteUpdate = false;
+
+/**
+ * Bật/tắt cờ Remote Update để ngăn chặn loop đồng bộ
+ * @param {boolean} val 
+ */
+export function setApplyingRemoteUpdateFlag(val) {
+  isApplyingRemoteUpdate = Boolean(val);
+}
+
+/**
+ * Lấy trạng thái cờ Remote Update
+ * @returns {boolean}
+ */
+export function getApplyingRemoteUpdateFlag() {
+  return isApplyingRemoteUpdate;
+}
+
 /**
  * Kích hoạt đồng bộ State lên Cloud trong nền
  * @param {Object|null} user 
  */
 export function triggerCloudSync(user = null) {
+  if (isApplyingRemoteUpdate) {
+    // Đang trong quá trình nạp snapshot từ Cloud về máy, không gửi ngược lại
+    return;
+  }
   try {
     if (typeof window !== 'undefined' && typeof window.__scheduleSmartSyncToCloud === 'function') {
       window.__scheduleSmartSyncToCloud(user);
@@ -450,9 +473,10 @@ export function exportFullBackupData(user = null) {
  * Nhập và phục hồi dữ liệu từ file JSON sao lưu (Cấp độ 3)
  * @param {Object} backupData 
  * @param {Object|null} user 
+ * @param {Object} options - { isSilent: boolean } nếu là true thì không kích hoạt cloud sync ngược lại
  * @returns {{success: boolean, message: string}}
  */
-export function importFullBackupData(backupData, user = null) {
+export function importFullBackupData(backupData, user = null, options = {}) {
   try {
     if (!backupData || typeof backupData !== 'object') {
       return { success: false, message: 'File dữ liệu không hợp lệ hoặc bị rỗng.' };
@@ -463,10 +487,17 @@ export function importFullBackupData(backupData, user = null) {
     }
 
     const activeUser = user || getCurrentUser();
+    const isSilent = options.isSilent === true;
 
     // 1. Phục hồi danh sách Spaces
     if (Array.isArray(backupData.spaces) && backupData.spaces.length > 0) {
-      persistSpacesList(backupData.spaces, activeUser);
+      if (isSilent) {
+        const spacesKey = isOwnerUser(activeUser) ? STORAGE_KEYS.SPACES_LIST : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_spaces_list`;
+        state.spaces = backupData.spaces;
+        setStorageItem(spacesKey, backupData.spaces);
+      } else {
+        persistSpacesList(backupData.spaces, activeUser);
+      }
     }
 
     // 2. Phục hồi Cài đặt (Settings)
@@ -475,10 +506,30 @@ export function importFullBackupData(backupData, user = null) {
       if (s.theme) localStorage.setItem(STORAGE_KEYS.THEME, s.theme);
       if (s.daysDisplayMode) {
         state.daysDisplayMode = s.daysDisplayMode;
-        persistDaysDisplayMode();
+        if (isSilent) {
+          setStorageItem(STORAGE_KEYS.DAYS_DISPLAY_MODE, s.daysDisplayMode);
+        } else {
+          persistDaysDisplayMode();
+        }
       }
-      if (s.lastActiveTab) persistLastActiveTab(s.lastActiveTab, activeUser);
-      if (s.activeSpaceId) setActiveSpaceId(s.activeSpaceId, activeUser);
+      if (s.lastActiveTab) {
+        state.lastActiveTab = s.lastActiveTab;
+        if (isSilent) {
+          const lastTabKey = getScopedStorageKey(STORAGE_KEYS.LAST_ACTIVE_TAB, activeUser);
+          setStorageItem(lastTabKey, s.lastActiveTab);
+        } else {
+          persistLastActiveTab(s.lastActiveTab, activeUser);
+        }
+      }
+      if (s.activeSpaceId) {
+        state.activeSpaceId = s.activeSpaceId;
+        if (isSilent) {
+          const activeSpaceKey = isOwnerUser(activeUser) ? STORAGE_KEYS.ACTIVE_SPACE_ID : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_active_space_id`;
+          setStorageItem(activeSpaceKey, s.activeSpaceId);
+        } else {
+          setActiveSpaceId(s.activeSpaceId, activeUser);
+        }
+      }
       if (s.heatmapMode) localStorage.setItem('smart_schedule_heatmap_mode', s.heatmapMode);
       if (s.heatmapBannerCollapsed) localStorage.setItem('smart_schedule_heatmap_banner_collapsed', s.heatmapBannerCollapsed);
     }

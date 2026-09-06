@@ -5,7 +5,7 @@
  * ==========================================================================
  */
 
-import { state, persistDriveSubjects, persistGrades, initApplicationState, exportFullBackupData, importFullBackupData } from '../state.js';
+import { state, persistDriveSubjects, persistGrades, initApplicationState, exportFullBackupData, importFullBackupData, setApplyingRemoteUpdateFlag, getApplyingRemoteUpdateFlag } from '../state.js';
 import { showToast } from '../../1.Frontend/components/Toast.js';
 
 export const firebaseConfig = {
@@ -22,11 +22,34 @@ export const OWNER_EMAILS = [
   'minhquan12092005@gmail.com'
 ];
 
+// Định danh phiên làm việc duy nhất cho mỗi Tab / Thiết bị để triệt tiêu echo loop
+export const CLIENT_SESSION_ID = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+
 let firebaseApp = null;
 let auth = null;
 let db = null;
 let currentUser = null;
 let firestoreUnsubscribe = null;
+let syncDebounceTimer = null;
+let authBroadcastChannel = null;
+
+// Khởi tạo kênh liên lạc giữa các tab để đồng bộ an toàn trạng thái đăng nhập
+if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+  try {
+    authBroadcastChannel = new BroadcastChannel('smart_schedule_auth_sync_channel');
+    authBroadcastChannel.onmessage = (event) => {
+      const { type, uid, displayName } = event.data || {};
+      if (type === 'SESSION_SWITCH') {
+        if (currentUser && currentUser.uid !== uid) {
+          showToast(`⚠️ Phiên đăng nhập đã được đổi sang: ${displayName || 'Tài khoản mới'} từ tab khác`);
+          window.location.reload();
+        }
+      }
+    };
+  } catch (e) {
+    console.warn('[BroadcastChannel] Không hỗ trợ đa tab channel:', e);
+  }
+}
 
 /**
  * Kiểm tra xem tài khoản hiện tại có phải là Chủ Sở Hữu (Admin) hay không
@@ -105,15 +128,40 @@ export function initFirebaseAuth(onAuthChangedCallback) {
       console.warn('[FirebaseAuth] getRedirectResult error:', err);
     });
 
-    // 3. Lắng nghe trạng thái đăng nhập Firebase
+    // 3. Lắng nghe trạng thái đăng nhập Firebase và xử lý chuyển đổi phiên sạch sẽ
     auth.onAuthStateChanged((user) => {
+      // Hủy debounce sync đang chờ của phiên trước (nếu có)
+      if (syncDebounceTimer) {
+        clearTimeout(syncDebounceTimer);
+        syncDebounceTimer = null;
+      }
+
       if (user) {
+        const isDifferentUser = !currentUser || currentUser.uid !== user.uid;
         currentUser = user;
         localStorage.removeItem('smart_schedule_guest_mode');
         localStorage.removeItem('smart_schedule_local_auth');
         updateAuthUI(user);
+
+        // Hủy listener cũ và gắn listener mới cho UID hiện tại
+        if (firestoreUnsubscribe) {
+          firestoreUnsubscribe();
+          firestoreUnsubscribe = null;
+        }
+
         attachFirestoreListener(user.uid, onAuthChangedCallback);
-        showToast(`Xin chào, ${user.displayName || 'bạn'}! Đã kết nối Cloud.`);
+
+        if (isDifferentUser) {
+          showToast(`Xin chào, ${user.displayName || 'bạn'}! Đã kết nối Cloud an toàn.`);
+          if (authBroadcastChannel) {
+            authBroadcastChannel.postMessage({
+              type: 'SESSION_SWITCH',
+              uid: user.uid,
+              displayName: user.displayName || user.email || 'Sinh viên'
+            });
+          }
+        }
+
         if (typeof onAuthChangedCallback === 'function') {
           onAuthChangedCallback(user);
         }
@@ -393,47 +441,64 @@ function attachFirestoreListener(uid, onSyncCallback) {
     if (doc.exists) {
       const data = doc.data();
       if (data) {
-        // 1. Phục hồi toàn bộ Đa Không Gian & Dữ liệu Spaces từ Cloud
-        if (data.spaces || data.spacesData || data.data) {
-          const importPayload = {
-            app: 'ScheduleSmart',
-            version: '2.1.0',
-            settings: data.settings || {},
-            spaces: Array.isArray(data.spaces) ? data.spaces : [],
-            data: data.spacesData || data.data || {}
-          };
-          importFullBackupData(importPayload, currentUser);
+        // 1. CHỐNG ECHO LOOP: Nếu bản cập nhật này do chính tab này vừa đẩy lên -> Bỏ qua không import lại
+        if (data.lastUpdatedBySession === CLIENT_SESSION_ID) {
+          return;
         }
 
-        // 2. Khôi phục Active Space ID (Học kỳ đang chọn cuối cùng)
-        if (data.activeSpaceId) {
-          state.activeSpaceId = data.activeSpaceId;
-        } else if (data.settings && data.settings.activeSpaceId) {
-          state.activeSpaceId = data.settings.activeSpaceId;
+        try {
+          // Bật cờ im lặng để quá trình nạp dữ liệu không kích hoạt sync ngược lên Cloud
+          setApplyingRemoteUpdateFlag(true);
+
+          // 2. Phục hồi toàn bộ Đa Không Gian & Dữ liệu Spaces từ Cloud
+          if (data.spaces || data.spacesData || data.data) {
+            const importPayload = {
+              app: 'ScheduleSmart',
+              version: '2.1.0',
+              settings: data.settings || {},
+              spaces: Array.isArray(data.spaces) ? data.spaces : [],
+              data: data.spacesData || data.data || {}
+            };
+            importFullBackupData(importPayload, currentUser, { isSilent: true });
+          }
+
+          // 3. Khôi phục Active Space ID (Học kỳ đang chọn cuối cùng)
+          if (data.activeSpaceId) {
+            state.activeSpaceId = data.activeSpaceId;
+          } else if (data.settings && data.settings.activeSpaceId) {
+            state.activeSpaceId = data.settings.activeSpaceId;
+          }
+
+          // 4. Khôi phục Settings (Theme, DaysMode, LastActiveTab, LastSelectedWeek)
+          if (data.settings && typeof data.settings === 'object') {
+            if (data.settings.theme) localStorage.setItem('smart_schedule_theme', data.settings.theme);
+            if (data.settings.daysDisplayMode) {
+              state.daysDisplayMode = data.settings.daysDisplayMode;
+              localStorage.setItem('smart_schedule_days_mode', data.settings.daysDisplayMode);
+            }
+            if (data.settings.lastActiveTab) {
+              state.lastActiveTab = data.settings.lastActiveTab;
+              const lastTabKey = isOwnerUser(currentUser) ? 'smart_schedule_last_active_tab' : `smart_schedule_${currentUser.uid}_smart_schedule_last_active_tab`;
+              localStorage.setItem(lastTabKey, data.settings.lastActiveTab);
+            }
+            if (data.settings.lastSelectedWeek) {
+              state.lastSelectedWeek = data.settings.lastSelectedWeek;
+            }
+          }
+
+          // 5. Khởi tạo lại Application State
+          initApplicationState(currentUser);
+
+          // 6. Thông báo re-render cho UI
+          if (typeof onSyncCallback === 'function') onSyncCallback(currentUser);
+        } catch (err) {
+          console.error('[Firestore] Lỗi áp dụng Snapshot từ Cloud:', err);
+        } finally {
+          // Trả lại cờ sau 200ms để đảm bảo UI và state đã ổn định
+          setTimeout(() => {
+            setApplyingRemoteUpdateFlag(false);
+          }, 200);
         }
-
-        // 3. Khôi phục Settings (Theme, DaysMode, LastActiveTab, LastSelectedWeek)
-        if (data.settings && typeof data.settings === 'object') {
-          if (data.settings.theme) localStorage.setItem('smart_schedule_theme', data.settings.theme);
-          if (data.settings.daysDisplayMode) {
-            state.daysDisplayMode = data.settings.daysDisplayMode;
-            localStorage.setItem('smart_schedule_days_mode', data.settings.daysDisplayMode);
-          }
-          if (data.settings.lastActiveTab) {
-            state.lastActiveTab = data.settings.lastActiveTab;
-            const lastTabKey = isOwnerUser(currentUser) ? 'smart_schedule_last_active_tab' : `smart_schedule_${currentUser.uid}_smart_schedule_last_active_tab`;
-            localStorage.setItem(lastTabKey, data.settings.lastActiveTab);
-          }
-          if (data.settings.lastSelectedWeek) {
-            state.lastSelectedWeek = data.settings.lastSelectedWeek;
-          }
-        }
-
-        // 4. Khởi tạo lại Application State
-        initApplicationState(currentUser);
-
-        // 5. Thông báo re-render cho UI
-        if (typeof onSyncCallback === 'function') onSyncCallback(currentUser);
       }
     } else {
       // Thiết bị mới / lần đầu: Lưu toàn bộ state hiện tại lên Cloud
@@ -449,6 +514,11 @@ function attachFirestoreListener(uid, onSyncCallback) {
  * @param {Object|null} user 
  */
 export function syncAllStateToCloud(user = null) {
+  if (getApplyingRemoteUpdateFlag()) {
+    // Đang nhận snapshot từ Cloud về máy, bỏ qua không đẩy ngược lại
+    return;
+  }
+
   const activeUser = user || currentUser;
   if (!db || !activeUser || !activeUser.uid) return;
 
@@ -456,7 +526,7 @@ export function syncAllStateToCloud(user = null) {
     const backupData = exportFullBackupData(activeUser);
     const docRef = db.collection('users').doc(activeUser.uid);
     
-    // Đóng gói cấu trúc đầy đủ cho Cloud
+    // Đóng gói cấu trúc đầy đủ cho Cloud kèm Client Session ID
     const cloudPayload = {
       email: activeUser.email || '',
       displayName: activeUser.displayName || 'Sinh viên',
@@ -474,6 +544,8 @@ export function syncAllStateToCloud(user = null) {
       // Tương thích ngược với các trường cũ
       driveSubjects: state.driveSubjects || [],
       studentGrades: state.studentGrades || {},
+      lastUpdatedBySession: CLIENT_SESSION_ID,
+      clientTimestamp: Date.now(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
@@ -486,10 +558,29 @@ export function syncAllStateToCloud(user = null) {
 }
 
 /**
+ * Đồng bộ State lên Cloud với Debounce (Tránh spam Firestore khi thao tác liên tục)
+ * @param {Object|null} user 
+ * @param {number} delay 
+ */
+export function debounceSyncToCloud(user = null, delay = 600) {
+  if (getApplyingRemoteUpdateFlag()) return;
+
+  if (syncDebounceTimer) {
+    clearTimeout(syncDebounceTimer);
+    syncDebounceTimer = null;
+  }
+
+  syncDebounceTimer = setTimeout(() => {
+    syncDebounceTimer = null;
+    syncAllStateToCloud(user);
+  }, delay);
+}
+
+/**
  * Đồng bộ danh sách môn học và dữ liệu lên Cloud Firestore (Hỗ trợ tương thích ngược)
  */
 export function syncDriveSubjectsToCloud() {
-  syncAllStateToCloud();
+  debounceSyncToCloud();
 }
 
 /**
@@ -498,9 +589,9 @@ export function syncDriveSubjectsToCloud() {
  * @param {Object} customMds 
  */
 export function syncUserDataToCloud(customWeeks = [], customMds = {}) {
-  syncAllStateToCloud();
+  debounceSyncToCloud();
 }
 
 if (typeof window !== 'undefined') {
-  window.__scheduleSmartSyncToCloud = syncAllStateToCloud;
+  window.__scheduleSmartSyncToCloud = debounceSyncToCloud;
 }

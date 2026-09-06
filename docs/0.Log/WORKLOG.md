@@ -4,6 +4,27 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 16:58] - Xử Lý Triệt Để Tranh Chấp Phiên & Khóa Đồng Bộ Đa Thiết Bị / Đa Tài Khoản (Anti-Race Session Guard & Debounce Sync) 🛡️⚡🔄
+
+- **🎯 Yêu cầu từ người dùng**: Xử lý triệt để lỗi khi mở 2 tài khoản cùng lúc hoặc mở đồng thời trên nhiều thiết bị/tab bị tranh chấp phiên (Session conflict), giật lag và ghi đè dữ liệu lẫn nhau.
+- **🔍 Phân tích nguyên nhân gốc rễ**:
+  1. **Vòng lặp Echo Loop (Ping-Pong Sync Storm)**: Khi Tab A đẩy dữ liệu lên Firestore $\rightarrow$ Firestore bắn `onSnapshot` về cho Tab B $\rightarrow$ Tab B nạp dữ liệu bằng `importFullBackupData` lại vô tình gọi `persist*` kích hoạt `triggerCloudSync()` đẩy ngược lại $\rightarrow$ tạo thành bão requests và tranh chấp state liên tục.
+  2. **Tranh chấp Shared IndexedDB / Auth State giữa các Tab**: Trình duyệt chia sẻ chung Auth Token cho tất cả tab cùng origin. Khi một tab đăng nhập tài khoản khác, dữ liệu trong RAM của tài khoản cũ dễ bị đẩy nhầm sang Firestore của tài khoản mới nếu không có cơ chế Clean Switch và Scoped Isolation.
+- **✅ Chi tiết giải pháp kỹ thuật 3 tầng đã triển khai**:
+  - [`src/3.Database/auth/FirebaseAuthService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js):
+    + **Client Session ID (`CLIENT_SESSION_ID`)**: Sinh ID phiên duy nhất `sess_timestamp_random` cho từng tab/thiết bị và đính kèm `lastUpdatedBySession` vào payload Firestore.
+    + **Chặn Echo Snapshot**: Khi `onSnapshot` nhận về từ Firestore, nếu `data.lastUpdatedBySession === CLIENT_SESSION_ID` $\rightarrow$ bỏ qua không re-import, triệt tiêu 100% tình trạng giật màn hình và echo loop.
+    + **Remote Update Lock (`setApplyingRemoteUpdateFlag`)**: Khóa toàn bộ các trigger đồng bộ ngược lên Cloud trong khi đang nạp dữ liệu từ Cloud về máy.
+    + **Debounce Cloud Sync (`debounceSyncToCloud`)**: Gom các thao tác liên tiếp (gõ điểm, chọn tuần, đổi tab) trong 600ms, chỉ gửi 1 request duy nhất thay vì spam Firestore.
+    + **Clean Switch & Multi-Tab BroadcastChannel**: Khi đổi tài khoản, hủy toàn bộ timer và Firestore listener cũ, xóa cache RAM, phát sóng kênh `smart_schedule_auth_sync_channel` để các tab khác đồng bộ tự động mà không làm rò rỉ dữ liệu chéo.
+  - [`src/3.Database/state.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/state.js):
+    + Nâng cấp `triggerCloudSync(user)`: Tự động kiểm tra cờ `isApplyingRemoteUpdate`, bỏ qua an toàn khi đang nạp snapshot.
+    + Nâng cấp `importFullBackupData(backupData, user, options)`: Bổ sung chế độ `{ isSilent: true }` ghi trực tiếp vào LocalStorage mà không kích hoạt các hook persist gây loop sync.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js):
+    + Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v116`.
+
+---
+
 ## 📅 [2026-09-06 16:51] - Đồng Bộ Toàn Bộ Trạng Thái State & Đa Không Gian Lên Cloud Đa Thiết Bị (Omnichannel Cloud Sync) ☁️🔄📱
 
 - **🎯 Yêu cầu từ người dùng**: Đảm bảo cùng 1 tài khoản khi chuyển sang thiết bị mới (từ Máy tính sang Điện thoại hoặc ngược lại) thì toàn bộ trạng thái State cuối cùng (Học kỳ đang chọn, Tab đang mở, Tuần đang xem, Môn học, Điểm số) phải được lưu trữ và khôi phục 100% tự động.
