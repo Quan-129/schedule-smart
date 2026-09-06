@@ -6,15 +6,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1.35rem;
+  padding: 0.65rem 1.15rem;
   background: var(--bg-glass);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-xl);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.04);
-  gap: 1.25rem;
+  gap: 0.75rem 1rem;
   position: relative;
+  max-width: 100%;
   transition: all 0.3s ease;
 }
 
@@ -262,22 +263,22 @@
   background: rgba(30, 41, 59, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-full);
-  padding: 0.22rem 0.3rem;
+  padding: 0.2rem 0.25rem;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
-  gap: 0.2rem;
+  gap: 0.15rem;
 }
 
 .btn-days-mode {
   background: transparent;
   border: none;
   color: var(--text-secondary);
-  padding: 0.35rem 0.72rem;
+  padding: 0.32rem 0.62rem;
   border-radius: var(--radius-full);
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
   font-family: var(--font-main);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   cursor: pointer;

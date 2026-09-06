@@ -4,6 +4,18 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 10:21] - Triển Khai Bố Cục Grid 2 Hàng Thông Minh Cho Navbar Chống Tràn Tuyệt Đối (< 1380px) 🚀🎨
+
+- **🎯 Vấn đề giải quyết**:
+  - Trên màn hình Laptop và khi mở DevTools / chia đôi cửa sổ (`< 1380px`), thanh điều hướng tuần và các nút bị thiếu không gian nên đâm thủng mép phải của thanh Navbar.
+- **✅ Giải pháp Grid 2 Hàng Sang Trọng**:
+  - **Hàng 1**: Logo & Tài Khoản (bên trái) + 4 Tab Chế Độ Xem (bên phải).
+  - **Hàng 2**: Bộ chọn Ngày (`1N / 3N / 7N`) + Cụm Điều Hướng Tuần (`< Tuần 36 > | 🎯 + 🗑`) dàn đều ở Hàng 2 với đường phân cách `border-top: 1px solid rgba(255, 255, 255, 0.08)`.
+  - Cập nhật [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css) và [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css).
+  - Nâng `CACHE_NAME` lên `smart-schedule-modular-v73` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-06 10:18] - Hợp Nhất Hoàn Chỉnh Toàn Bộ Cụm Điều Hướng Tuần Vào 1 Capsule Liền Mạch (Unified Pill Capsule) 🎨✨
 
 - **🎯 Vấn đề & Mong muốn của người dùng**:
