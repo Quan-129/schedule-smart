@@ -31,25 +31,6 @@ let db = null;
 let currentUser = null;
 let firestoreUnsubscribe = null;
 let syncDebounceTimer = null;
-let authBroadcastChannel = null;
-
-// Khởi tạo kênh liên lạc giữa các tab để đồng bộ an toàn trạng thái đăng nhập
-if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
-  try {
-    authBroadcastChannel = new BroadcastChannel('smart_schedule_auth_sync_channel');
-    authBroadcastChannel.onmessage = (event) => {
-      const { type, uid, displayName } = event.data || {};
-      if (type === 'SESSION_SWITCH') {
-        if (currentUser && currentUser.uid !== uid) {
-          showToast(`⚠️ Phiên đăng nhập đã được đổi sang: ${displayName || 'Tài khoản mới'} từ tab khác`);
-          window.location.reload();
-        }
-      }
-    };
-  } catch (e) {
-    console.warn('[BroadcastChannel] Không hỗ trợ đa tab channel:', e);
-  }
-}
 
 /**
  * Kiểm tra xem tài khoản hiện tại có phải là Chủ Sở Hữu (Admin) hay không
@@ -153,13 +134,6 @@ export function initFirebaseAuth(onAuthChangedCallback) {
 
         if (isDifferentUser) {
           showToast(`Xin chào, ${user.displayName || 'bạn'}! Đã kết nối Cloud an toàn.`);
-          if (authBroadcastChannel) {
-            authBroadcastChannel.postMessage({
-              type: 'SESSION_SWITCH',
-              uid: user.uid,
-              displayName: user.displayName || user.email || 'Sinh viên'
-            });
-          }
         }
 
         if (typeof onAuthChangedCallback === 'function') {
@@ -494,10 +468,7 @@ function attachFirestoreListener(uid, onSyncCallback) {
         } catch (err) {
           console.error('[Firestore] Lỗi áp dụng Snapshot từ Cloud:', err);
         } finally {
-          // Trả lại cờ sau 200ms để đảm bảo UI và state đã ổn định
-          setTimeout(() => {
-            setApplyingRemoteUpdateFlag(false);
-          }, 200);
+          setApplyingRemoteUpdateFlag(false);
         }
       }
     } else {
