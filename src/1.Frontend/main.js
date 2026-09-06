@@ -21,6 +21,7 @@ import { ensureSubjectDetailModalDom, openSubjectDetailModal } from './component
 import { ensureAddClassModalDom, openAddClassModal, openEditClassModal } from './components/modals/AddClassModal.js';
 import { ensureEditWeeklyNotesModalDom, openEditWeeklyNotesModal } from './components/modals/EditWeeklyNotesModal.js';
 import { showToast, initToastContainer } from './components/Toast.js';
+import { initOnboardingTour, startOnboardingTour, hasCompletedOnboarding } from './components/onboarding/OnboardingTour.js';
 import { initPWA, promptPWAInstall } from '../5.Performance/pwaManager.js';
 import { initVisibilityOptimizer } from '../5.Performance/visibilityOptimizer.js';
 import { formatSafeUrl } from '../4.Security/urlValidator.js';
@@ -131,6 +132,15 @@ async function initApp() {
   initHeroToggle();
   initRawMarkdownEditor();
   initWeeklyNotesEditor();
+  initOnboardingTour();
+
+  // Nút xem lại Hướng Dẫn Từng Bước (Spotlight Tour)
+  const helpTourBtn = document.getElementById('btn-restart-onboarding');
+  if (helpTourBtn) {
+    helpTourBtn.onclick = () => {
+      startOnboardingTour(true);
+    };
+  }
 
   // 11. Tối ưu hiệu năng khi chuyển tab trình duyệt
   initVisibilityOptimizer(
@@ -142,6 +152,13 @@ async function initApp() {
   const urlParams = new URLSearchParams(window.location.search);
   const targetTab = urlParams.get('tab') || 'backpack';
   switchTab(targetTab);
+
+  // 13. Tự động kích hoạt Onboarding Tour cho tài khoản mới chưa xem lần nào
+  setTimeout(() => {
+    if (!hasCompletedOnboarding()) {
+      startOnboardingTour(false);
+    }
+  }, 900);
 }
 
 /**

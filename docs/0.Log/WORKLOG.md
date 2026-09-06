@@ -4,6 +4,27 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 09:55] - Triển Khai Tính Năng Interactive Spotlight Onboarding Tour (Hướng Dẫn Tương Tác Rọi Sáng Từng Bước) 🚀✨
+
+- **🎯 Yêu cầu & Mục tiêu**:
+  - Khi một tài khoản mới đăng nhập hoặc truy cập lần đầu, ứng dụng tự động hiển thị hướng dẫn tương tác từng bước (Spotlight Onboarding Tour) với hiệu ứng rọi sáng zoom vào phần tử UI và thẻ chú thích thông minh.
+  - Hướng dẫn 5 bước trọng tâm: 4 góc nhìn thời khóa biểu, Quản lý tuần & ngày hôm nay, Tùy chỉnh chế độ xem, Thêm tiết học siêu tốc với con lăn iOS, Chiếc cặp Google Drive.
+  - Lưu trạng thái hoàn thành vào LocalStorage (`smart_schedule_onboarding_done_${uid}`) để không làm phiền người dùng cũ.
+  - Cung cấp nút bấm `[ ❓ Hướng dẫn ]` trên Navbar để người dùng có thể mở lại tour bất kỳ lúc nào.
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - `[Frontend Component]` [`src/1.Frontend/components/onboarding/OnboardingTour.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/onboarding/OnboardingTour.js):
+    - Xây dựng component độc lập quản lý 5 bước tour, tính toán toạ độ `getBoundingClientRect()` chuẩn xác, tự động cuộn màn hình (`scrollIntoView`), định vị thẻ popover thông minh chống tràn mép màn hình mobile/desktop.
+    - Hỗ trợ phím tắt bàn phím (`ArrowRight`, `ArrowLeft`, `Enter`, `Escape`), thanh tiến trình Dots và nút Skip.
+  - `[Modular CSS]` [`src/1.Frontend/styles/10.onboarding-tour.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/10.onboarding-tour.css):
+    - Thiết kế khung rọi sáng `.onboarding-spotlight-box` với bóng tối khổng lồ `box-shadow: 0 0 0 9999px rgba(8, 12, 28, 0.82)`, viền phát sáng neon, hiệu ứng nhịp thở pulse và thẻ popover Glassmorphism sang trọng.
+  - `[HTML & Navbar]` [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html):
+    - Nạp file `10.onboarding-tour.css` và bổ sung nút `#btn-restart-onboarding` (`<i class="fa-solid fa-circle-question"></i>`) trên thanh Navbar.
+  - `[App Controller]` [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    - Tích hợp `initOnboardingTour()`, tự động kích hoạt sau khi khởi động app nếu chưa từng xem, gắn sự kiện cho nút xem lại.
+  - `[Performance / PWA]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v68` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-06 09:30] - Tự Động Định Vị Ngày Tuần Hiện Tại (DD-MM-YYYY), Hiển Thị Ngày Cạnh Thứ & Mở Rộng Thêm Tuần 2 Chiều (Cộng Trên / Cộng Dưới) 📅⚡
 
 - **🎯 Yêu cầu & Mục tiêu**:
