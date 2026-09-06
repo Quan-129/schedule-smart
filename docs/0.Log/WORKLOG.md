@@ -4,6 +4,19 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 14:55] - Chỉ Hiển Thị Bộ Chọn Chế Độ Ngày (1 Ngày / 3 Ngày / 7 Ngày) Khi Ở Mục 1 (Lưới Tuần Thời Khóa Biểu) 🎯✨
+
+- **🎯 Yêu cầu từ người dùng**:
+  - Bộ chọn chế độ ngày `[1 Ngày] [3 Ngày] [7 Ngày]` (`#days-mode-selector`) trên Navbar chỉ xuất hiện khi người dùng bấm vào **Mục 1** (Lưới tuần Thời Khóa Biểu / `grid` / `schedule`).
+  - Khi người dùng đang ở các mục khác (**Mục 2**: Bản Đồ Nhiệt `today`, **Mục 3**: Tỉ Lệ Điểm `grades`, **Mục 4**: Chiếc Cặp `backpack`), thanh chọn chế độ ngày này sẽ tự động ẩn đi để giao diện gọn gàng, tinh tế.
+- **✅ Công việc đã hoàn thành**:
+  - [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    - Cập nhật hàm [`switchTab(tabName)`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js#L261-L295): Thêm logic tự động kiểm tra `isGridTab = (tabName === 'grid' || tabName === 'schedule')`.
+    - Đặt `daysModeSelector.style.display = isGridTab ? '' : 'none'` để hiển thị chính xác theo bố cục CSS khi ở Mục 1 và ẩn hoàn toàn khi ở các mục khác.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v97`.
+
+---
+
 ## 📅 [2026-09-06 14:50] - Cố Định Chế Độ 7 Ngày Tuần & Tinh Giản Giao Diện Lịch Tuần Google Calendar Style 🗓️✨
 
 - **🎯 Yêu cầu từ người dùng**:

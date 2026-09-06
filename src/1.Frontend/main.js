@@ -284,6 +284,13 @@ export function switchTab(tabName) {
     panel.style.display = isTarget ? 'block' : 'none';
   });
 
+  // Chỉ hiển thị Bộ chọn chế độ ngày (1 Ngày / 3 Ngày / 7 Ngày) khi đang ở Mục 1 (Thời khóa biểu / Lưới tuần)
+  const daysModeSelector = document.getElementById('days-mode-selector');
+  if (daysModeSelector) {
+    const isGridTab = (tabName === 'grid' || tabName === 'schedule');
+    daysModeSelector.style.display = isGridTab ? '' : 'none';
+  }
+
   if (tabName === 'backpack') {
     renderBackpackView();
   } else if (tabName === 'grades') {
