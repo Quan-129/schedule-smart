@@ -4,6 +4,26 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 15:10] - Khắc Phục Triệt Để Lỗi Tương Phản & Chìm Màu Của Theme Trắng Sáng (Clean Milk) ☀️✨
+
+- **🎯 Vấn đề phát hiện từ ảnh chụp màn hình của người dùng**:
+  1. Chữ "Schedule" trong logo Navbar bị màu trắng tàng hình trên nền trắng (chỉ thấy chữ "Smart").
+  2. Các cụm điều khiển trên Navbar (`.view-toggles`, `.days-mode-selector`, `.week-navigation`) bị nền đen tím `rgba(30, 41, 59)` thô cứng, làm icon và chữ bên trong bị tối mờ không đọc được.
+  3. Thẻ ngày (Day Cards) và thẻ môn học (Class Items) bị trắng đồng màu, thiếu bóng đổ phân tầng và tag ngày hôm nay bị chìm màu.
+  4. Thẻ ngày nghỉ (`.day-off-card`) và nút thêm buổi học bị mất viền nét đứt do hardcode màu trắng mờ.
+- **✅ Giải pháp kỹ thuật đã triển khai**:
+  - [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css):
+    - Đổi `.brand-info h1` sang `color: var(--text-primary)` để tự động hiển thị xám than đậm `#0f172a` sắc nét trên Theme Trắng.
+    - Chuyển toàn bộ nền của `.view-toggles`, `.days-mode-selector`, `.week-navigation`, `.btn-icon` từ `rgba(30, 41, 59)` sang `var(--bg-card)` và `var(--border-color)`.
+    - Cập nhật màu hover và text sang `var(--text-primary)` & `var(--bg-tertiary)`.
+  - [`src/1.Frontend/styles/3.timetable-grid.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/3.timetable-grid.css):
+    - Tối ưu phân tầng thẻ: `.day-card` (nền trắng tinh khôi `#ffffff` đổ bóng mượt `box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04)`), thẻ môn học `.class-item` (nền `#ffffff` viền `rgba(15, 23, 42, 0.09)`).
+    - Fix tag ngày `.day-date-tag` và ngày hôm nay `.day-card.is-today .day-date-tag` có chữ tím đậm nổi bật trên nền tím nhạt `var(--accent-subtle)`.
+    - Fix viền nét đứt của ngày nghỉ `.day-off-card` dùng `border: 1.5px dashed var(--border-color)`.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v100`.
+
+---
+
 ## 📅 [2026-09-06 15:05] - Xây Dựng Hệ Thống Bảng Màu Giao Diện (Theme System 7 Tone Màu Độc Đáo) 🎨✨
 
 - **🎯 Yêu cầu từ người dùng**:
