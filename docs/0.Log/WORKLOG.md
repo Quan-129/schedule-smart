@@ -4,6 +4,29 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 10:38] - Nâng Cấp Nút Focus Hoạt Động Thông Minh Theo Ngữ Cảnh (Context-Aware Smart Focus) Cho Cả Thời Khóa Biểu & Bản Đồ Nhiệt 🎯✨
+
+- **🎯 Yêu cầu & Quyết định thiết kế**:
+  - Người dùng mong muốn nút **🎯 Focus** hoạt động độc lập và nhận diện theo ngữ cảnh của từng Tab:
+    - **Khi ở Tab 1 (Thời khóa biểu / Grid)**: Cuộn mượt mà và nhấp nháy hiệu ứng Ping Target trên thẻ ngày hôm nay trên Lưới.
+    - **Khi ở Tab 2 (Bản đồ nhiệt / Heatmap View)**: Không ép chuyển sang Tab 1 nữa mà định vị trực tiếp điểm, cột, ô ngày hôm nay tương ứng với chế độ thời gian đang xem (Tuần / Tháng / Học kỳ / Cả năm) kèm hiệu ứng radar phát sáng neon tím/xanh.
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    - Đánh dấu thuộc tính `isToday`, class `.is-today-semester-square`, `.is-today-year-square` trên các ma trận.
+    - Xây dựng hàm `focusHeatmapTodayTarget(availableWeeks, currentWeekFile, onSelectWeek)` xử lý 4 chế độ:
+      - **Tuần (Week)**: Cuộn tới cột `.cal-day-column.is-today-cal-column` trên Timeline Google Calendar.
+      - **Tháng (Month)**: Tự động chuyển về tháng hiện tại nếu đang duyệt tháng khác, cuộn tới `.monthly-matrix-square.is-today-square`.
+      - **Học kỳ (Semester)**: Cuộn tới `.semester-square-item.is-today-semester-square`.
+      - **Cả năm (Year)**: Cuộn tới `.yearly-square-item.is-today-year-square` trên ma trận 364 ô GitHub-style.
+  - [`src/1.Frontend/styles/9.heatmap-view.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/9.heatmap-view.css):
+    - Thêm `@keyframes heatmapTargetPulse` và class `.heatmap-focus-ping` tạo hiệu ứng radar phát sáng neon tím đa lớp nổi bật.
+  - [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    - Cập nhật hàm `switchTab`: Đổi title tooltip của `#btn-focus-today` và `#current-date-badge` theo ngữ cảnh tab hiện tại.
+    - Cập nhật hàm `focusTodayTarget`: Tự động rẽ nhánh gọi `focusHeatmapTodayTarget()` khi ở tab Bản đồ nhiệt, hoặc cuộn thẻ hôm nay trên Lưới khi ở tab Thời khóa biểu.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v76`.
+
+---
+
 ## 📅 [2026-09-06 10:24] - Tối Giản Widget Tài Khoản: Chỉ Hiển Thị Avatar Tròn & Nút Đăng Xuất (Không Hiện Tên) 🎨✨
 
 - **🎯 Yêu cầu & Quyết định thiết kế**:

@@ -11,6 +11,7 @@ import { parseScheduleMarkdown } from '../../2.Backend/services/TimetableParser.
 import { escapeHtml } from '../../4.Security/sanitizer.js';
 import { getSubjectColor } from './TimetableGrid.js';
 import { getDateForDayOfWeek } from '../../2.Backend/utils/dateHelpers.js';
+import { showToast } from '../components/Toast.js';
 
 /* ==========================================================================
    1. MODULE STATE & CONSTANTS
@@ -796,14 +797,20 @@ function renderSemesterMatrixView(container, semesterWeeks = [], currentWeekFile
   const totalWeeks = semesterWeeks.length;
   const currentWeekIndex = semesterWeeks.findIndex(w => w.filename === currentWeekFile);
 
+  const currentDayOfWeek = new Date().getDay();
+  const dayIndexMap = { 'Thứ 2': 1, 'Thứ 3': 2, 'Thứ 4': 3, 'Thứ 5': 4, 'Thứ 6': 5, 'Thứ 7': 6, 'Chủ Nhật': 0 };
+
   const squares = [];
   semesterWeeks.forEach((w, wIdx) => {
+    const isThisWeek = w.filename === currentWeekFile;
     w.days.forEach((d, dIdx) => {
+      const isToday = isThisWeek && (dayIndexMap[d.dayName] === currentDayOfWeek);
       squares.push({
         weekIdx: wIdx + 1,
         weekTitle: w.title,
         weekFilename: w.filename,
-        isCurrentWeek: w.filename === currentWeekFile,
+        isCurrentWeek: isThisWeek,
+        isToday,
         dayIdx: dIdx,
         dayName: d.dayName,
         classesCount: d.classesCount,
@@ -857,8 +864,9 @@ function renderSemesterMatrixView(container, semesterWeeks = [], currentWeekFile
                 : `<div style="color: var(--text-muted); font-size: 0.72rem;">Không có buổi học trong ngày này</div>`;
 
               return `
-                <div class="semester-square-item level-${sq.level} ${sq.isCurrentWeek ? 'is-in-current-week' : ''}"
+                <div class="semester-square-item level-${sq.level} ${sq.isCurrentWeek ? 'is-in-current-week' : ''} ${sq.isToday ? 'is-today-semester-square' : ''}"
                   data-filename="${escapeHtml(sq.weekFilename)}"
+                  data-is-today="${sq.isToday ? 'true' : 'false'}"
                   data-heatmap-tooltip="true"
                   data-tooltip-title="${escapeHtml(tooltipTitle)}"
                   data-tooltip-sub="${escapeHtml(tooltipSub)}"
@@ -911,14 +919,20 @@ function renderYearlyMatrixView(container, semesterWeeks = [], onSelectWeek = nu
 
   const totalWeeksCount = 52;
   const squares = [];
+  const today = new Date();
+  const currentDayOfWeek = today.getDay(); // 0: CN, 1: T2...
+  const currentDayIndexInGrid = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1; // 0: T2 ... 6: CN
+  const currentWeekIndex = semesterWeeks.findIndex(w => w.filename === activeWeeklyFile);
 
   for (let w = 0; w < totalWeeksCount; w++) {
     const weekData = semesterWeeks[w % semesterWeeks.length] || null;
+    const isThisWeekInYear = (w === (currentWeekIndex >= 0 ? currentWeekIndex : 0));
     for (let d = 0; d < 7; d++) {
       let count = 0;
       let dayName = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'][d];
       let level = 0;
       let classesList = [];
+      const isToday = isThisWeekInYear && (d === currentDayIndexInGrid);
 
       if (weekData && weekData.days) {
         const dStat = weekData.days[d];
@@ -935,6 +949,7 @@ function renderYearlyMatrixView(container, semesterWeeks = [], onSelectWeek = nu
         dayName,
         classesCount: count,
         level,
+        isToday,
         classes: classesList,
         weekFilename: weekData ? weekData.filename : ''
       });
@@ -980,10 +995,11 @@ function renderYearlyMatrixView(container, semesterWeeks = [], onSelectWeek = nu
                 : `<div style="color: var(--text-muted); font-size: 0.72rem;">Không có buổi học</div>`;
 
               return `
-                <div class="yearly-square-item level-${sq.level}" 
+                <div class="yearly-square-item level-${sq.level} ${sq.isToday ? 'is-today-year-square' : ''}" 
                   data-week-num="${sq.weekIdx}"
                   data-day="${sq.dayName}"
                   data-count="${sq.classesCount}"
+                  data-is-today="${sq.isToday ? 'true' : 'false'}"
                   data-filename="${escapeHtml(sq.weekFilename)}"
                   data-heatmap-tooltip="true"
                   data-tooltip-title="${escapeHtml(tooltipTitle)}"
@@ -1238,4 +1254,99 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
       renderActiveHorizonModeContent(semesterWeeks, currentWeekFile, onSelectWeek);
     };
   });
+}
+
+/**
+ * Định vị thông minh ngày Hôm nay trên Bản Đồ Nhiệt (Smart Focus Context-Aware)
+ * Hỗ trợ định vị cho cả 4 chế độ: Tuần (Week), Tháng (Month), Học kỳ (Semester), Cả năm (Year)
+ * @param {Array<Object>} availableWeeks
+ * @param {string} currentWeekFile
+ * @param {Function} onSelectWeek
+ */
+export function focusHeatmapTodayTarget(availableWeeks = [], currentWeekFile = '', onSelectWeek = null) {
+  const contentArea = document.getElementById('heatmap-dynamic-content-area');
+  if (!contentArea) return;
+
+  const today = new Date();
+  const currentDayOfWeek = today.getDay(); // 0: CN, 1: T2, 2: T3...
+  const dayNameMap = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+  const todayName = dayNameMap[currentDayOfWeek];
+
+  // Helper kích hoạt hiệu ứng Ping phát sáng trên DOM element
+  function triggerFocusPing(element, toastMsg) {
+    if (!element) return;
+    element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    element.classList.remove('heatmap-focus-ping');
+    void element.offsetWidth; // Reflow
+    element.classList.add('heatmap-focus-ping');
+    setTimeout(() => {
+      element.classList.remove('heatmap-focus-ping');
+    }, 2800);
+    if (toastMsg) showToast(toastMsg);
+  }
+
+  if (currentHorizonMode === 'week') {
+    // 1️⃣ Chế độ Tuần: Định vị cột hôm nay trên Timeline
+    let todayCol = contentArea.querySelector('.cal-day-column.is-today-cal-column');
+    if (!todayCol && currentWeekFile && activeWeeklyFile !== currentWeekFile) {
+      activeWeeklyFile = currentWeekFile;
+      const semesterWeeks = aggregateSemesterData(availableWeeks, currentWeekFile);
+      renderActiveHorizonModeContent(semesterWeeks, currentWeekFile, onSelectWeek);
+      todayCol = contentArea.querySelector('.cal-day-column.is-today-cal-column');
+    }
+
+    if (todayCol) {
+      triggerFocusPing(todayCol, `🎯 Đã định vị Cột ${todayName} trên Timeline Tuần!`);
+    } else {
+      const headerCell = contentArea.querySelector('.cal-day-header-cell.is-today-cal-header');
+      if (headerCell) {
+        triggerFocusPing(headerCell, `🎯 Đã định vị Cột ${todayName} trên Lịch Tuần!`);
+      } else {
+        showToast(`Tuần đang xem không chứa ngày Hôm nay (${todayName}).`);
+      }
+    }
+  } else if (currentHorizonMode === 'month') {
+    // 2️⃣ Chế độ Tháng: Định vị ô ngày hôm nay trong lịch tháng
+    const nowYear = today.getFullYear();
+    const nowMonth = today.getMonth();
+
+    if (currentMonthlyDate.getFullYear() !== nowYear || currentMonthlyDate.getMonth() !== nowMonth) {
+      currentMonthlyDate = new Date();
+      const semesterWeeks = aggregateSemesterData(availableWeeks, currentWeekFile);
+      renderActiveHorizonModeContent(semesterWeeks, currentWeekFile, onSelectWeek);
+    }
+
+    setTimeout(() => {
+      const todaySquare = contentArea.querySelector('.monthly-matrix-square.is-today-square');
+      if (todaySquare) {
+        triggerFocusPing(todaySquare, `🎯 Đã định vị Ô Ngày ${today.getDate()} Tháng ${nowMonth + 1} Hôm nay!`);
+      } else {
+        showToast('Không tìm thấy ô ngày Hôm nay trong tháng.');
+      }
+    }, 80);
+  } else if (currentHorizonMode === 'year') {
+    // 3️⃣ Chế độ Cả Năm: Định vị ô ngày hôm nay trong ma trận 364 ô
+    const todaySquare = contentArea.querySelector('.yearly-square-item.is-today-year-square') ||
+                        contentArea.querySelector('.yearly-square-item[data-is-today="true"]');
+    if (todaySquare) {
+      triggerFocusPing(todaySquare, `🎯 Đã định vị Ô Hôm nay (${todayName}) trên Ma trận Cả năm!`);
+    } else {
+      const candidateSquares = Array.from(contentArea.querySelectorAll(`.yearly-square-item[data-day="${todayName}"]`));
+      if (candidateSquares.length > 0) {
+        triggerFocusPing(candidateSquares[0], `🎯 Đã định vị ${todayName} trên Ma trận Cả năm!`);
+      } else {
+        showToast('Đã định vị trên Ma trận Cả năm 🎯');
+      }
+    }
+  } else {
+    // 4️⃣ Chế độ Học Kỳ / Quý: Định vị ô ngày hôm nay trong ma trận học kỳ
+    const todaySquare = contentArea.querySelector('.semester-square-item.is-today-semester-square') ||
+                        contentArea.querySelector('.semester-square-item[data-is-today="true"]') ||
+                        contentArea.querySelector('.semester-square-item.is-in-current-week');
+    if (todaySquare) {
+      triggerFocusPing(todaySquare, `🎯 Đã định vị Ô ${todayName} của Tuần hiện tại!`);
+    } else {
+      showToast('Đã định vị tuần học hiện tại 🎯');
+    }
+  }
 }
