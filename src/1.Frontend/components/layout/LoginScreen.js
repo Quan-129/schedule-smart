@@ -4,7 +4,7 @@
  * ==========================================================================
  */
 
-import { handleGoogleLogin, handleGuestLogin, handleOwnerFastLogin, handleGoogleRedirectLogin } from '../../../3.Database/auth/FirebaseAuthService.js';
+import { handleGoogleLogin, handleOwnerFastLogin, handleGoogleRedirectLogin } from '../../../3.Database/auth/FirebaseAuthService.js';
 
 /**
  * Render Màn hình Đăng nhập (Auth Landing Screen)
@@ -87,12 +87,6 @@ export function renderLoginScreen(containerEl) {
             </svg>
             <span class="btn-login-text">Đăng nhập tài khoản Google khác</span>
           </button>
-
-          <!-- 3. CHẾ ĐỘ KHÁCH -->
-          <button type="button" id="landing-guest-btn" class="btn-guest-login-large" title="Vào xem và chỉnh sửa thời khóa biểu ngay với không gian mới">
-            <i class="fa-solid fa-user-astronaut"></i>
-            <span>Dùng ngay với tư cách Khách (Không gian mới tinh)</span>
-          </button>
         </div>
 
         <div class="login-footer-note">
@@ -104,9 +98,7 @@ export function renderLoginScreen(containerEl) {
 
   const ownerBtn = containerEl.querySelector('#landing-owner-fast-btn');
   const loginBtn = containerEl.querySelector('#landing-login-btn');
-  const guestBtn = containerEl.querySelector('#landing-guest-btn');
 
   if (ownerBtn) ownerBtn.onclick = handleOwnerFastLogin;
   if (loginBtn) loginBtn.onclick = handleGoogleLogin;
-  if (guestBtn) guestBtn.onclick = handleGuestLogin;
 }

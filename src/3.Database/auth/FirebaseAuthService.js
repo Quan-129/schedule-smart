@@ -210,14 +210,12 @@ export function initFirebaseAuth(onAuthChangedCallback) {
  */
 export function bindAuthButtonEvents() {
   const landingLoginBtn = document.getElementById('landing-login-btn');
-  const landingGuestBtn = document.getElementById('landing-guest-btn');
   const landingOwnerBtn = document.getElementById('landing-owner-fast-btn');
   const landingRedirectBtn = document.getElementById('landing-redirect-login-btn');
   const authLoginBtn = document.getElementById('auth-login-btn');
   const authLogoutBtn = document.getElementById('auth-logout-btn');
 
   if (landingLoginBtn) landingLoginBtn.onclick = handleGoogleLogin;
-  if (landingGuestBtn) landingGuestBtn.onclick = handleGuestLogin;
   if (landingOwnerBtn) landingOwnerBtn.onclick = handleOwnerFastLogin;
   if (landingRedirectBtn) landingRedirectBtn.onclick = handleGoogleRedirectLogin;
   if (authLoginBtn) authLoginBtn.onclick = handleGoogleLogin;

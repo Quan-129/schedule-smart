@@ -4,6 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 17:28] - Tinh Gọn Giao Diện Đăng Nhập: Loại Bỏ Hoàn Toàn Chế Độ Khách (Guest Mode) 🎯✨
+
+- **🎯 Yêu cầu từ người dùng**: Bỏ hoàn toàn nút "Dùng ngay với tư cách Khách" khỏi màn hình xác thực và giao diện ứng dụng.
+- **🔍 Tối ưu hóa Authentication UX**:
+  - Loại bỏ nút `#landing-guest-btn` (`.btn-guest-login-large`) khỏi cả template tĩnh trong [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html#L102-L125) và component [`LoginScreen.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/layout/LoginScreen.js#L68-L98).
+  - Giờ đây màn hình đăng nhập tập trung 100% vào 2 luồng rõ ràng, bảo mật và đồng bộ Cloud an toàn:
+    1. **Đăng nhập nhanh (Minh Quân)** - Quyền Chủ Sở Hữu (1 chạm vào ngay dữ liệu của Minh Quân).
+    2. **Đăng nhập tài khoản Google khác** - Đồng bộ Cloud riêng tư cho từng tài khoản Google.
+- **✅ Chi tiết thay đổi**:
+  - [`src/1.Frontend/components/layout/LoginScreen.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/layout/LoginScreen.js): Xóa nút `#landing-guest-btn` và event listener.
+  - [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html): Đồng bộ layout HTML tĩnh với 2 nút đăng nhập chính thức.
+  - [`src/3.Database/auth/FirebaseAuthService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js): Dọn dẹp binding cho guest button trong [`bindAuthButtonEvents()`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js#L208-L225).
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache version lên `smart-schedule-modular-v122`.
+
+---
+
 ## 📅 [2026-09-06 17:22] - Khắc Phục Lỗi Đồng Bộ Thiết Bị Mới & Chuẩn Hóa Document ID Email Firestore 🔧✨🛡
 
 - **🎯 Vấn đề người dùng gặp phải**: Khi đăng nhập tài khoản trên thiết bị mới bị hiện Avatar là chữ 'K' (do bị fallback sang Khách khi mobile popup bị chặn) và không tải được data môn học (do lệch UID giữa Fast Owner Login và Google OAuth UID).
