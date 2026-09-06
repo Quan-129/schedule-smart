@@ -82,7 +82,7 @@ export function initFirebaseAuth(onAuthChangedCallback) {
           onAuthChangedCallback(localUser);
         }
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   // Gắn sự kiện click các nút đăng nhập / khách / đăng xuất
@@ -245,7 +245,7 @@ export async function handleGoogleLogin() {
     await auth.signInWithPopup(provider);
   } catch (err) {
     console.error('[FirebaseAuth] Lỗi đăng nhập Google Popup:', err);
-    
+
     // Nếu popup bị chặn hoặc gặp lỗi COOP Cross-Origin, tự động chuyển sang Redirect
     showToast('Đang chuyển hướng đăng nhập an toàn qua Google Redirect...');
     try {
@@ -346,14 +346,10 @@ export function updateAuthUI(user) {
     }
     if (userAvatar && user.photoURL) {
       userAvatar.src = user.photoURL;
-      userAvatar.title = user.displayName ? `${user.displayName} (${user.email || ''})` : (user.email || 'Sinh viên');
       userAvatar.style.display = 'inline-block';
     }
     if (userDisplayName) {
       userDisplayName.textContent = user.displayName || 'Sinh viên';
-    }
-    if (userProfileWidget) {
-      userProfileWidget.title = user.displayName ? `${user.displayName} (${user.email || ''})` : (user.email || 'Sinh viên');
     }
   } else {
     // CHƯA ĐĂNG NHẬP: Hiển thị Login Screen

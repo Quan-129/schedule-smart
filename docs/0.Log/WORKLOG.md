@@ -4,6 +4,23 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 11:35] - Triển Khai Thanh Điều Hướng Sticky Floating Navbar Lơ Lửng Đỉnh Màn Hình Khi Cuộn Trang 🧭✨
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng mong muốn thanh điều hướng (**Navbar**) trượt theo và giữ cố định ở đỉnh màn hình khi cuộn/lăn chuột (`position: sticky`), giúp dễ dàng chuyển tuần, đổi tab hoặc thêm lịch mà không cần phải cuộn ngược lại đỉnh trang.
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css):
+    - Đặt `.navbar` thành `position: sticky; top: 0.5rem; z-index: 1000;` với hiệu ứng kính mờ `backdrop-filter: blur(24px)` và chuyển động mượt mà `transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1)`.
+    - Thêm trạng thái `.navbar.is-scrolled`: Tự động co gọn padding (`0.55rem 1rem`), nâng độ mờ nền kính `blur(28px)`, tạo viền neon tím huyền ảo và đổ bóng nổi khối `box-shadow` khi cuộn trang.
+    - Đồng bộ màu sắc ánh sáng kính mờ cho cả chế độ **Dark Theme** và **Light Theme**.
+  - [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css):
+    - Tối ưu cho Mobile (< 640px): `position: sticky; top: 0.25rem; z-index: 1000;`, đảm bảo trải nghiệm lơ lửng mượt mà trên cả điện thoại màn hình nhỏ.
+  - [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    - Tích hợp hàm `initStickyNavbarScrollListener()` sử dụng `window.requestAnimationFrame` + `{ passive: true }` để lắng nghe sự kiện cuộn với tần số quét 60/120Hz mượt mà không gây giật lag.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v86`.
+
+---
+
 ## 📅 [2026-09-06 11:22] - Khắc Phục Lỗi Tràn Hàng Navbar Trên Mobile & Tự Động Ẩn Days Mode Selector Khi Đổi Tab 📱🎯
 
 - **🎯 Yêu cầu & Phân tích nguyên nhân**:

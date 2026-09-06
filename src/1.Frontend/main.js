@@ -12,7 +12,7 @@ import { formatCurrentVietnameseDate, getMondayOfCurrentWeek, addDaysToDateStr, 
 import { renderBackpackView, enterJiggleMode, exitJiggleMode } from './views/BackpackView.js';
 import { renderGradesView, highlightGradeSlice } from './views/GradesView.js';
 import { renderTimetableGrid, renderTodayView, getSubjectColor } from './views/TimetableGrid.js';
-import { renderHeatmapView, preloadAllWeeksData, focusHeatmapTodayTarget } from './views/HeatmapView.js';
+import { renderHeatmapView, preloadAllWeeksData } from './views/HeatmapView.js';
 import { ensureEditSubjectModalDom, openEditSubjectModal, openEditDriveModal } from './components/modals/EditSubjectModal.js';
 import { ensureAddSubjectModalDom, openAddSubjectModal, initAddSubjectModal } from './components/modals/AddSubjectModal.js';
 import { ensureAddWeekModalDom, openAddWeekModal, initAddWeekModal } from './components/modals/AddWeekModal.js';
@@ -131,6 +131,7 @@ async function initApp() {
   initHeroToggle();
   initRawMarkdownEditor();
   initWeeklyNotesEditor();
+  initStickyNavbarScrollListener();
 
   // 11. Tối ưu hiệu năng khi chuyển tab trình duyệt
   initVisibilityOptimizer(
@@ -282,25 +283,6 @@ export function switchTab(tabName) {
     panel.classList.toggle('active', isTarget);
     panel.style.display = isTarget ? 'block' : 'none';
   });
-
-  // Tự động ẩn/hiện bộ chọn chế độ ngày (chỉ dành cho Tab Thời khóa biểu)
-  const daysModeSelector = document.getElementById('days-mode-selector');
-  if (daysModeSelector) {
-    const isGridTab = tabName === 'grid' || tabName === 'schedule';
-    daysModeSelector.style.display = isGridTab ? '' : 'none';
-  }
-
-  // Cập nhật tooltip động thông minh theo ngữ cảnh cho nút Focus Hôm Nay
-  const focusNavBtn = document.getElementById('btn-focus-today');
-  const currentDateBadge = document.getElementById('current-date-badge');
-  const focusTooltip = (tabName === 'today') 
-    ? 'Ping Target: Định vị điểm / ô ngày Hôm nay trên Bản đồ nhiệt 🎯'
-    : (tabName === 'grid' || tabName === 'schedule')
-      ? 'Ping Target: Định vị & Cuộn tới ngày Hôm nay trên Thời khóa biểu 🎯'
-      : 'Ping Target: Định vị ngày Hôm nay 🎯';
-
-  if (focusNavBtn) focusNavBtn.title = focusTooltip;
-  if (currentDateBadge) currentDateBadge.title = focusTooltip;
 
   if (tabName === 'backpack') {
     renderBackpackView();
@@ -1055,23 +1037,13 @@ function persistCurrentSchedule() {
 }
 
 /**
- * Định vị & Focus vào ngày hôm nay thông minh (Context-Aware Smart Focus)
- * - Khi ở Tab Bản Đồ Nhiệt (today): Định vị ô/cột hôm nay trong Tuần, Tháng, Học kỳ, Năm
- * - Khi ở Tab Thời Khóa Biểu (grid) hoặc Tab khác: Cuộn và Ping thẻ hôm nay trên Lưới
+ * Định vị & Focus vào ngày hôm nay trong Ma trận Thời khóa biểu (Mục 1)
  */
 export async function focusTodayTarget() {
-  // 1. NẾU ĐANG Ở TAB BẢN ĐỒ NHIỆT: Định vị trực tiếp điểm/ô/cột hôm nay trong Heatmap
-  if (state.currentTab === 'today') {
-    focusHeatmapTodayTarget(availableWeeks, currentWeekFile, handleSelectWeekFromHeatmap);
-    return;
-  }
+  // 1. Chuyển sang Tab Thời khóa biểu nếu đang ở tab khác
+  switchTab('grid');
 
-  // 2. NẾU ĐANG Ở CÁC TAB KHÁC: Chuyển sang Tab Thời khóa biểu
-  if (state.currentTab !== 'grid' && state.currentTab !== 'schedule') {
-    switchTab('grid');
-  }
-
-  // 3. Kiểm tra nếu tuần đang xem không phải tuần hiện tại -> Chuyển về tuần hiện tại
+  // 2. Kiểm tra nếu tuần đang xem không phải tuần hiện tại -> Chuyển về tuần hiện tại
   const isCurrentWeek = checkIsCurrentWeek(currentWeekFile);
   if (!isCurrentWeek) {
     const todayWeekFile = getInitialWeekFilename();
@@ -1081,7 +1053,7 @@ export async function focusTodayTarget() {
     }
   }
 
-  // 4. Định vị và kích hoạt hiệu ứng Ping Target trên thẻ ngày Hôm Nay trên Lưới
+  // 3. Định vị và kích hoạt hiệu ứng Ping Target trên thẻ ngày Hôm Nay
   setTimeout(() => {
     const todayCard = document.querySelector('.day-card.is-today');
     if (todayCard) {
@@ -1095,7 +1067,7 @@ export async function focusTodayTarget() {
         todayCard.classList.remove('ping-target-active');
       }, 2600);
 
-      showToast('Đã định vị ngày Hôm nay trên Lưới! 🎯');
+      showToast('Đã định vị ngày Hôm nay! 🎯');
     } else {
       showToast('Hôm nay không nằm trong lịch học đang hiển thị.');
     }
@@ -1229,6 +1201,26 @@ function initRawMarkdownEditor() {
       showToast('Đã cập nhật giao diện theo Markdown tùy chỉnh!');
     };
   }
+}
+
+/**
+ * Tự động gắn class is-scrolled khi cuộn trang để làm nổi bật Sticky Floating Navbar
+ */
+function initStickyNavbarScrollListener() {
+  const navbar = document.querySelector('.navbar');
+  if (!navbar) return;
+
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        const isScrolled = window.scrollY > 20;
+        navbar.classList.toggle('is-scrolled', isScrolled);
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
 }
 
 // Khởi động khi tải xong DOM

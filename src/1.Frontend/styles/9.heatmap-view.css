@@ -20,6 +20,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -300,26 +301,30 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.level-0 { 
-  background: rgba(255, 255, 255, 0.04); 
-  border-color: rgba(255, 255, 255, 0.06); 
+.level-0 {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.06);
 }
-.level-1 { 
-  background: rgba(99, 102, 241, 0.35); 
-  border-color: rgba(99, 102, 241, 0.5); 
+
+.level-1 {
+  background: rgba(99, 102, 241, 0.35);
+  border-color: rgba(99, 102, 241, 0.5);
 }
-.level-2 { 
-  background: rgba(129, 140, 248, 0.7); 
-  border-color: #818cf8; 
+
+.level-2 {
+  background: rgba(129, 140, 248, 0.7);
+  border-color: #818cf8;
 }
-.level-3 { 
-  background: rgba(168, 85, 247, 0.9); 
-  border-color: #c084fc; 
+
+.level-3 {
+  background: rgba(168, 85, 247, 0.9);
+  border-color: #c084fc;
 }
-.level-4 { 
-  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); 
-  border-color: #f87171; 
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5); 
+
+.level-4 {
+  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  border-color: #f87171;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
 }
 
 /* ==========================================================================
@@ -521,17 +526,10 @@
   background: rgba(15, 23, 42, 0.25);
 }
 
-.weekly-cal-scroll-inner {
-  min-width: 720px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.weekly-cal-body {
+.weekly-cal-body-grid {
   display: flex;
   position: relative;
-  width: 100%;
+  min-width: 720px;
 }
 
 /* Cột mốc thời gian trục Y */
@@ -565,32 +563,12 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* Khung Lưới Timeline chứa vạch ngang và 7 cột */
-.cal-timeline-content {
-  flex: 1;
-  position: relative;
-  height: 100%;
-}
-
-/* Lớp vạch kẻ giờ ngang trải dài từ T2 đến CN */
-.cal-grid-lines-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  z-index: 1;
-}
-
 /* 7 Cột Ngày */
 .cal-days-columns-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  width: 100%;
-  height: 100%;
+  flex: 1;
   position: relative;
-  z-index: 2;
 }
 
 .cal-day-column {
@@ -624,72 +602,20 @@
   right: 0;
   height: 2px;
   background: linear-gradient(90deg, #ef4444 0%, #f43f5e 100%);
-  z-index: 25;
+  z-index: 20;
   pointer-events: none;
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.7);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
 }
 
 .cal-current-time-dot {
   position: absolute;
-  left: -5px;
-  top: -4px;
-  width: 10px;
-  height: 10px;
+  left: -4px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: #ef4444;
-  box-shadow: 0 0 12px #ef4444;
-  animation: pulse-current-time 2s infinite ease-in-out;
-}
-
-.cal-current-time-tag {
-  position: absolute;
-  right: 6px;
-  top: -18px;
-  font-size: 0.62rem;
-  font-weight: 800;
-  font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  color: #ffffff;
-  background: #ef4444;
-  padding: 0.08rem 0.35rem;
-  border-radius: 4px;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.5);
-  pointer-events: none;
-}
-
-.cal-current-time-axis-mark {
-  position: absolute;
-  left: 0;
-  right: 0;
-  transform: translateY(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 25;
-  pointer-events: none;
-}
-
-.cal-current-time-axis-mark span {
-  font-size: 0.66rem;
-  font-weight: 800;
-  color: #ffffff;
-  font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  background: #ef4444;
-  border: 1px solid #f87171;
-  padding: 0.12rem 0.35rem;
-  border-radius: 5px;
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.7);
-  animation: pulse-current-time 2s infinite ease-in-out;
-}
-
-@keyframes pulse-current-time {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.75;
-    transform: scale(1.08);
-  }
+  box-shadow: 0 0 10px #ef4444;
 }
 
 /* Khối Thẻ Sự Kiện Môn Học (Google Calendar Event Block) */
@@ -900,7 +826,68 @@
 }
 
 /* ==========================================================================
-   8. GLOBAL TOOLTIP POPOVER (GLASSMORPHISM & SMART POSITIONING)
+   8. BẢNG 4: CHẾ ĐỘ CẢ NĂM (YEARLY 52-WEEK GITHUB MATRIX)
+   ========================================================================== */
+.yearly-matrix-scroll-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 820px;
+  overflow-x: auto;
+  padding: 0.25rem 0;
+}
+
+.yearly-months-row {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  font-size: 0.72rem;
+  color: var(--text-muted, #94a3b8);
+  font-weight: 600;
+  padding-left: 28px;
+}
+
+.yearly-matrix-body {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.yearly-days-labels {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--text-muted, #94a3b8);
+  width: 24px;
+  padding: 2px 0;
+}
+
+.yearly-squares-grid {
+  display: grid;
+  grid-template-rows: repeat(7, 13px);
+  grid-auto-flow: column;
+  grid-auto-columns: 13px;
+  gap: 3px;
+  flex: 1;
+}
+
+.yearly-square-item {
+  width: 13px;
+  height: 13px;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.yearly-square-item:hover {
+  transform: scale(1.4);
+  z-index: 10;
+  filter: brightness(1.3);
+  box-shadow: 0 0 8px rgba(129, 140, 248, 0.8);
+}
+
+/* ==========================================================================
+   9. GLOBAL TOOLTIP POPOVER (GLASSMORPHISM & SMART POSITIONING)
    ========================================================================== */
 .heatmap-tooltip-popover {
   position: fixed;
@@ -1006,24 +993,7 @@
     min-height: 38px;
   }
 }
-
-/* ==========================================================================
-   11. SMART FOCUS PING TARGET ANIMATIONS (HEATMAP VIEW)
-   ========================================================================== */
-@keyframes heatmapTargetPulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.9), 0 0 20px rgba(168, 85, 247, 0.8);
-    transform: scale(1);
-  }
-  50% {
-    box-shadow: 0 0 0 12px rgba(99, 102, 241, 0), 0 0 32px rgba(168, 85, 247, 1);
-    transform: scale(1.18);
-    border-color: #818cf8 !important;
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0), 0 0 16px rgba(168, 85, 247, 0.5);
-    transform: scale(1);
-  }
+}
 }
 
 .heatmap-focus-ping {
@@ -1039,11 +1009,13 @@
     box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.9), 0 0 16px rgba(168, 85, 247, 0.9);
     transform: scale(1);
   }
+
   50% {
     box-shadow: 0 0 0 8px rgba(99, 102, 241, 0), 0 0 28px rgba(168, 85, 247, 1);
     transform: scale(1.45);
     border-color: #38bdf8 !important;
   }
+
   100% {
     box-shadow: 0 0 0 0 rgba(99, 102, 241, 0), 0 0 12px rgba(168, 85, 247, 0.5);
     transform: scale(1);

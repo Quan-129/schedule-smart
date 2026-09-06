@@ -120,13 +120,16 @@
     overflow-x: hidden;
   }
 
-  /* Header & Navbar 3 Hàng Rộng Rãi Không Tràn */
+  /* Header & Navbar 3 Hàng Rộng Rãi Không Tràn (Sticky Mobile Header) */
   .navbar {
     display: flex;
     flex-direction: column;
     padding: 0.45rem 0.6rem;
     gap: 0.45rem;
     border-radius: var(--radius-md);
+    position: sticky;
+    top: 0.25rem;
+    z-index: 1000;
   }
 
   /* Hàng 1: Brand Info bên trái + Nút Theme/User bên phải */
