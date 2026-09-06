@@ -8,7 +8,7 @@ Toàn bộ AI Agent hoạt động trên repository này **BẮT BUỘC PHẢI T
 
 ## ⚡ 1. NGUYÊN TẮC CHUNG & TỰ ĐỘNG HÓA KỸ NĂNG (PROACTIVE AUTOMATION)
 1. **Ngôn ngữ phản hồi**: Luôn luôn trả lời bằng **Tiếng Việt**.
-2. **Tự động kích hoạt Skill & Rule**: Tự động áp dụng các skill tương ứng (`update-worklog`, `update-new-in4`, `tiktok-script-builder`, `9-more-archiver`, các skill chuyên môn 1–8) khi phát sinh tác vụ mà **không cần người dùng phải yêu cầu**.
+2. **Tự động kích hoạt Skill & Rule**: Tự động áp dụng các skill tương ứng (`update-worklog`, `update-new-in4`, `tiktok-script-builder`, `tiktok-overlay-generator`, `9-more-archiver`, các skill chuyên môn 1–8) khi phát sinh tác vụ mà **không cần người dùng phải yêu cầu**.
 3. **Deploy & Static Hosting**: Giữ nguyên cơ chế Zero-Dependency Native ES Modules (`type="module"`) để ứng dụng chạy mượt mà ngay trên GitHub Pages mà không cần build step.
 
 ---

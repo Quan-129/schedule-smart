@@ -4,6 +4,25 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 19:40] - Khởi Tạo & Đăng Ký Skill Chuyên Môn: `tiktok-overlay-generator` 🖼️🎨📱✨
+
+- **🎯 Yêu cầu từ người dùng**: Đóng gói quy trình tự động vẽ card, chèn chữ (Text Overlay), xử lý đa dòng tiếng Việt và kết xuất 3-4 biến thể kịch bản ảnh TikTok thành một Skill độc lập (`tiktok-overlay-generator`).
+- **🔍 Chi tiết Kỹ Năng Đã Xây Dựng**:
+  - Tạo tài liệu [`.agents/skills/tiktok-overlay-generator/SKILL.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/.agents/skills/tiktok-overlay-generator/SKILL.md):
+    - Định nghĩa tiêu chuẩn thiết kế đồ họa Rich Aesthetics: Dark Slate Card Glassmorphism, Rounded Badges, Dynamic Line Height, Auto Text Wrap.
+    - Bộ bảng màu Visual Tokens theo từng góc độ truyền thông (Amber Gold, Neon Cyan, Coral Sunset, Emerald Green, Cyber Purple).
+    - Cung cấp mã nguồn Python Pillow mẫu hoàn chỉnh hỗ trợ UTF-8 không lỗi font.
+    - Quy trình tự động xuất biến thể thư mục kèm file `KICH_BAN_CHI_TIET.md`.
+  - Tạo script tái sử dụng [`.agents/skills/tiktok-overlay-generator/scripts/render_overlays.py`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/.agents/skills/tiktok-overlay-generator/scripts/render_overlays.py).
+  - Cập nhật [`AGENTS.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/AGENTS.md) để tự động kích hoạt skill khi có tác vụ chèn chữ/render biến thể ảnh tiếp thị.
+- **✅ Chi tiết thay đổi**:
+  - [`.agents/skills/tiktok-overlay-generator/SKILL.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/.agents/skills/tiktok-overlay-generator/SKILL.md)
+  - [`.agents/skills/tiktok-overlay-generator/scripts/render_overlays.py`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/.agents/skills/tiktok-overlay-generator/scripts/render_overlays.py)
+  - [`AGENTS.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/AGENTS.md)
+  - [`docs/0.Log/WORKLOG.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/docs/0.Log/WORKLOG.md)
+
+---
+
 ## 📅 [2026-09-06 19:35] - Tự Động Tạo 4 Thư Mục Kịch Bản Biến Thể Kèm Ảnh Chèn Chữ Trực Tiếp Sẵn Sàng Đăng TikTok 🖼️🎬✨
 
 - **🎯 Yêu cầu từ người dùng**: Tạo 3 - 4 thư mục kịch bản mới kèm bộ ảnh đã được chèn chữ trực tiếp (Overlay) thẩm mỹ, bắt mắt, sẵn sàng tải lên TikTok ngay từ bộ ảnh gốc `kịch bản 1/`.
