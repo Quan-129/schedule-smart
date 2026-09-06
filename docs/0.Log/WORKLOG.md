@@ -4,6 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 17:30] - Responsive Hoàn Hảo Cho Nút Đăng Nhập Chủ Sở Hữu & Màn Hình Login Mobile 📱✨🎨
+
+- **🎯 Yêu cầu từ người dùng**: Tối ưu responsive cho khung nút "Đăng nhập nhanh (Minh Quân)" - Chủ Sở Hữu trên thiết bị di động.
+- **🔍 Tối ưu hóa Mobile Responsive**:
+  - **Khung nút `.btn-owner-login-large`**: Thêm `box-sizing: border-box`, `min-width: 0`, `flex: 1 1 auto` cho khối text và xử lý `text-overflow: ellipsis; white-space: nowrap; overflow: hidden;` giúp tiêu đề và email không bị gãy dòng hay tràn viền trên màn hình hẹp.
+  - **Mobile Breakpoint (< 540px & < 380px)**:
+    - Thẻ card `.login-card`: Co giãn padding gọn gàng (`1.65rem 1.15rem` và `1.35rem 0.75rem`), vừa vặn 100% chiều rộng màn hình điện thoại.
+    - Badge `.owner-btn-badge`: Tinh chỉnh font-size `0.58rem` và padding `0.2rem 0.45rem` sắc nét.
+    - Text `.owner-btn-text span/small`: Font size co giãn tỉ lệ vàng `0.82rem / 0.66rem`.
+- **✅ Chi tiết thay đổi**:
+  - [`src/1.Frontend/styles/1.variables.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/1.variables.css): Tối ưu flexbox và text-overflow cho `.btn-owner-login-large`.
+  - [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css): Bổ sung toàn diện media queries cho Login Screen và Owner Button trên mobile.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache version lên `smart-schedule-modular-v123`.
+
+---
+
 ## 📅 [2026-09-06 17:28] - Tinh Gọn Giao Diện Đăng Nhập: Loại Bỏ Hoàn Toàn Chế Độ Khách (Guest Mode) 🎯✨
 
 - **🎯 Yêu cầu từ người dùng**: Bỏ hoàn toàn nút "Dùng ngay với tư cách Khách" khỏi màn hình xác thực và giao diện ứng dụng.

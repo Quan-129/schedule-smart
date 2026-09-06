@@ -1024,6 +1024,131 @@
   }
 }
 
+/* ==========================================================================
+   LOGIN SCREEN RESPONSIVE (MOBILE & TABLET OPTIMIZATION)
+   ========================================================================== */
+@media (max-width: 540px) {
+  .login-screen-container {
+    padding: 0.75rem 0.5rem !important;
+  }
+
+  .login-card {
+    padding: 1.65rem 1.15rem !important;
+    border-radius: var(--radius-lg) !important;
+    gap: 1.15rem !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .login-logo-glow {
+    width: 50px !important;
+    height: 50px !important;
+    font-size: 1.45rem !important;
+    border-radius: 14px !important;
+    margin-bottom: 0.45rem !important;
+  }
+
+  .login-title {
+    font-size: 1.5rem !important;
+  }
+
+  .login-desc {
+    font-size: 0.8rem !important;
+    line-height: 1.4 !important;
+  }
+
+  .login-features-list {
+    padding: 0.75rem 0.85rem !important;
+    gap: 0.55rem !important;
+  }
+
+  .login-feature-item {
+    gap: 0.65rem !important;
+  }
+
+  .login-feat-icon {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.8rem !important;
+    border-radius: 7px !important;
+  }
+
+  .login-feat-text strong {
+    font-size: 0.76rem !important;
+  }
+
+  .login-feat-text span {
+    font-size: 0.66rem !important;
+  }
+
+  .btn-owner-login-large {
+    padding: 0.75rem 0.85rem !important;
+    gap: 0.65rem !important;
+    border-radius: var(--radius-md) !important;
+  }
+
+  .owner-btn-badge {
+    font-size: 0.58rem !important;
+    padding: 0.2rem 0.45rem !important;
+    border-radius: 6px !important;
+    gap: 0.25rem !important;
+  }
+
+  .owner-btn-text span {
+    font-size: 0.82rem !important;
+  }
+
+  .owner-btn-text small {
+    font-size: 0.66rem !important;
+  }
+
+  .btn-google-login-large {
+    padding: 0.75rem 1rem !important;
+    font-size: 0.82rem !important;
+    gap: 0.6rem !important;
+    border-radius: var(--radius-md) !important;
+  }
+
+  .btn-google-login-large svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .login-footer-note {
+    font-size: 0.68rem !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .login-card {
+    padding: 1.35rem 0.75rem !important;
+    gap: 0.95rem !important;
+  }
+
+  .btn-owner-login-large {
+    padding: 0.65rem 0.7rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .owner-btn-badge {
+    font-size: 0.52rem !important;
+    padding: 0.16rem 0.35rem !important;
+  }
+
+  .owner-btn-text span {
+    font-size: 0.76rem !important;
+  }
+
+  .owner-btn-text small {
+    font-size: 0.6rem !important;
+  }
+
+  .btn-google-login-large {
+    padding: 0.65rem 0.75rem !important;
+    font-size: 0.76rem !important;
+  }
+}
+
 /* Modal Footer Utility */
 .modal-footer {
   display: flex;
