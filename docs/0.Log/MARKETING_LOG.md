@@ -18,13 +18,15 @@
 - **Slide 5 (Feature 4)**: `05_bieu_do_ti_le_diem.png` - Bảng tỉ lệ điểm 100% kèm quy chế môn học tính điểm qua môn.
 - **Slide 6 (CTA)**: `06_them_tiet_hoc_sieu_toc.png` - Thêm tiết học 3 giây với ca học mẫu gợi ý 1-chạm.
 
-### 2. 🎣 3 Viral Hooks Sắc Bén:
-1. **Coder Aesthetic Hook**:
-   > *"Khi dân IT tự code Web Thời khóa biểu vì quá chán giao diện cổ lỗ sĩ của trường..."*
-2. **All-In-One Problem Solver Hook**:
-   > *"Web thời khóa biểu duy nhất gom cả Lịch học, Google Drive và Bộ tính điểm qua môn vào 1 chỗ!"*
-3. **GitHub Heatmap Comparison Hook**:
-   > *"Thời khóa biểu mà có cả GitHub Heatmap 16 tuần và Google Calendar Timeline? Đỉnh thật sự!"*
+### 2. 🎣 Bộ Viral Hooks Đời Thường & Tự Nhiên Cho Sinh Viên:
+1. **Call-out Trend Hook (Đề xuất)**:
+   > *"Sinh viên năm mấy rồi mà còn chưa biết trang web này thì quá thiệt thòi luôn á..."*
+2. **Pain-point Hook**:
+   > *"Sinh viên đại học mà chưa biết web này thì bảo sao suốt ngày phải đi xin link Drive với không nhớ lịch học!"*
+3. **Regret Hook**:
+   > *"Ước gì tui biết chiếc web này từ năm nhất, đỡ phải khổ sở suốt mấy học kỳ liền..."*
+4. **Relatable Habit Hook**:
+   > *"Bỏ ngay cái trò chụp màn hình thời khóa biểu mờ căm làm hình nền đi, 2026 rồi dùng cái này xịn gấp 10 lần!"*
 
 ---
 

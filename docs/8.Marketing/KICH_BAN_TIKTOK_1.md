@@ -6,14 +6,29 @@
 
 ---
 
-## 🎯 3 TÙY CHỌN VIRAL HOOK (TIÊU ĐỀ BẮT TREND TIKTOK)
+## 🎯 BỘ VIRAL HOOKS ĐỜI THƯỜNG (PHONG CÁCH TỰ NHIÊN, GẦN GŨI SINH VIÊN)
 
-* **Tùy chọn 1 (Góc nhìn Coder / Aesthetic - ĐỀ XUẤT)**:
-  > *"Khi dân IT tự code Web Thời khóa biểu vì quá chán giao diện cổ lỗ sĩ của trường..."*
-* **Tùy chọn 2 (Giải quyết nỗi đau điểm số & tài liệu)**:
-  > *"Web thời khóa biểu duy nhất gom cả Lịch học, Google Drive và Bộ tính điểm qua môn vào 1 chỗ!"*
-* **Tùy chọn 3 (So sánh công nghệ)**:
-  > *"Thời khóa biểu mà có cả GitHub Heatmap 16 tuần và Google Calendar Timeline? Đỉnh thật sự!"*
+### 🌟 Nhóm 1: "Sinh viên năm mấy rồi mà còn..." (Call-out gây tò mò cực mạnh - ĐỀ XUẤT 🔥)
+1. **Hook 1 (Hot trend Tikok)**:
+   > *"Sinh viên năm mấy rồi mà còn chưa biết trang web này thì quá thiệt thòi luôn á..."*
+2. **Hook 2 (Đánh trúng tâm lý)**:
+   > *"Sinh viên đại học mà chưa biết web này thì bảo sao suốt ngày phải đi xin link Drive với không nhớ lịch học!"*
+3. **Hook 3 (Tiếc nuối chân thật)**:
+   > *"Ước gì tui biết chiếc web này từ năm nhất, đỡ phải khổ sở suốt mấy học kỳ liền..."*
+
+### 💡 Nhóm 2: Đồng cảm nỗi đau sinh viên (Relatable & Hài hước)
+4. **Hook 4 (Bỏ thói quen cũ)**:
+   > *"Bỏ ngay cái trò chụp màn hình thời khóa biểu mờ căm làm hình nền đi, 2026 rồi dùng cái này xịn gấp 10 lần!"*
+5. **Hook 5 (Nỗi đau mùa thi)**:
+   > *"Môn này Giữa kỳ bao nhiêu %? Cuối kỳ cần mấy điểm để qua môn? Không nhớ thì vào đây nó tính sẵn hết cho nè!"*
+6. **Hook 6 (Nỗi đau xin tài liệu)**:
+   > *"Dành cho những đứa học thì ít mà tới sát giờ thi mới cuống cuồng đi lục tin nhắn Zalo xin link tài liệu giống tui..."*
+
+### 🤫 Nhóm 3: Bí mật truyền tai (Insider Secret)
+7. **Hook 7**:
+   > *"Đứa bạn cùng phòng giấu tui chiếc web này suốt 2 học kỳ, nay tui khui luôn cho cả lớp cùng dùng!"*
+8. **Hook 8**:
+   > *"Một chiếc web cứu rỗi cả 4 năm đại học mà sinh viên trường nào cũng nên ghim sẵn trên điện thoại..."*
 
 ---
 
@@ -22,10 +37,10 @@
 ### 🖼 SLIDE 1 (HOOK): `01_hook_heatmap_16tuan.png`
 * **Hình ảnh**: Bản đồ cường độ học tập 16 tuần chuẩn GitHub Contribution Graph.
 * **Vị trí chèn chữ**: 
-  - **Trên cùng (Banner viền đen chữ vàng nổi bật)**: `THỜI KHÓA BIỂU CHUẨN GITHUB HEATMAP? 😱`
-  - **Chính giữa/Dưới**: `🔥 Nhìn 1 phát biết tuần nào thi cử, tuần nào nhẹ nhàng, tuần nào gánh team!`
+  - **Trên cùng (Banner viền đen chữ vàng to nổi bật)**: `SINH VIÊN MÀ CHƯA BIẾT CÁI NÀY LÀ DỞ RỒI... 😱`
+  - **Chính giữa/Dưới**: `🔥 Bản đồ nhiệt 16 tuần: Nhìn 1 phát biết tuần nào thi cử, tuần nào nhẹ nhàng!`
 * **Voiceover (Lời thoại)**:
-  > *"Ai bảo thời khóa biểu là phải nhàm chán? Đây là bản đồ nhiệt 16 tuần chuẩn GitHub, giúp bạn nhìn trước cả học kỳ để lên kế hoạch đi chơi hay cày cuốc!"*
+  > *"Sinh viên năm mấy rồi mà còn chưa biết cái này là dở rồi nha! Nhìn vào bản đồ 16 tuần này là biết ngay tuần nào thi cử, tuần nào gánh team đồ án để mà lên kèo đi chơi trước!"*
 
 ---
 
