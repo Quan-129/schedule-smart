@@ -87,10 +87,10 @@
 ### 🖼 SLIDE 6 (CALL TO ACTION): `06_them_tiet_hoc_sieu_toc.png`
 * **Hình ảnh**: Modal thêm tiết học siêu tốc với ca học mẫu gợi ý 1-chạm.
 * **Vị trí chèn chữ**:
-  - **Phía trên (To, nổi bật)**: `THÊM LỊCH CHỈ VỚI 3 GIÂY ⚡`
-  - **Phía dưới (Khung nút kêu gọi)**: `👉 Web miễn phí 100%, không quảng cáo, dùng ngay tại Link Bio!`
+  - **Phía trên (To, nổi bật)**: `MỞ KHÓA TRỌN ĐỜI CẢ 4 NĂM ĐẠI HỌC 🎓✨`
+  - **Phía dưới (Khung nút kêu gọi)**: `👉 Chi phí chỉ bằng 2 ly trà sữa (dùng trọn đời), nhận web tại Link Bio!`
 * **Voiceover (Lời thoại)**:
-  > *"Giao diện siêu mượt, thêm môn học chỉ trong 3 giây. Web mã nguồn mở miễn phí 100%, link trải nghiệm mình để ở đầu trang cá nhân nhé!"*
+  > *"Giao diện siêu mượt, thêm môn chỉ trong 3 giây. Chi phí mở khóa trọn đời chỉ bằng 2 ly trà sữa mà dùng tẹt ga suốt 4 năm đại học, link đăng ký mình để ở đầu trang cá nhân nhé!"*
 
 ---
 
@@ -100,8 +100,8 @@
 Thời khóa biểu của bạn có làm được như thế này không? 😎 
 Một chiếc web thời khóa biểu gom trọn cả Lịch học Google Calendar, Chiếc Cặp Google Drive 1-chạm và Bản đồ nhiệt GitHub 16 tuần siêu chiến! 
 
-Dùng mượt trên cả Điện thoại & Máy tính, hoàn toàn miễn phí không quảng cáo ✨
-👉 Link trải nghiệm ở Bio trang cá nhân nhé!
+Dùng mượt trên cả Điện thoại & Máy tính, chi phí mở khóa trọn đời chỉ bằng 2 ly trà sữa ✨
+👉 Link nhận tài khoản ở Bio trang cá nhân nhé!
 
 #sinhvien #schedule #studytok #studyhacks #thoikhoabieu #bkhcm #hcmut #daihoc #cntt #webdev #productivity
 ```

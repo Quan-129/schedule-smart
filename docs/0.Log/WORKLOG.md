@@ -4,6 +4,19 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 18:55] - Cập Nhật Định Vị & Call-To-Action: Mở Khóa Trọn Đời Chỉ Bằng 2 Ly Trà Sữa 🧋🧋✨
+
+- **🎯 Yêu cầu từ người dùng**: Thay đổi lời kêu gọi hành động (CTA) và định giá trong kịch bản TikTok: chuyển sang mô hình có phí tượng trưng siêu hạt dẻ — *"chỉ bằng 2 ly trà sữa"* (mở khóa trọn đời cả 4 năm đại học).
+- **🔍 Triển khai Content**:
+  - Cập nhật Slide 6 (CTA) trong [`kịch bản 1/KICH_BAN.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/k%E1%BB%8Bch%20b%E1%BA%A3n%201/KICH_BAN.md) và [`docs/8.Marketing/KICH_BAN_TIKTOK_1.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/docs/8.Marketing/KICH_BAN_TIKTOK_1.md).
+  - Text Overlay Slide 6: `MỞ KHÓA TRỌN ĐỜI CẢ 4 NĂM ĐẠI HỌC 🎓✨` / `👉 Chi phí chỉ bằng 2 ly trà sữa (dùng trọn đời), nhận web tại Link Bio!`
+  - Voiceover Slide 6: Nhấn mạnh giá trị mở khóa 1 lần dùng tẹt ga suốt 4 năm đại học.
+- **✅ Chi tiết thay đổi**:
+  - [`kịch bản 1/KICH_BAN.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/k%E1%BB%8Bch%20b%E1%BA%A3n%201/KICH_BAN.md): Cập nhật CTA & Caption.
+  - [`docs/8.Marketing/KICH_BAN_TIKTOK_1.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/docs/8.Marketing/KICH_BAN_TIKTOK_1.md): Đồng bộ tài liệu kịch bản marketing.
+
+---
+
 ## 📅 [2026-09-06 18:35] - Tích Hợp Skill Tự Động Hóa: `tiktok-script-builder` 🎬📱⚙️
 
 - **🎯 Yêu cầu từ người dùng**: Thêm skill chuyên môn để tự động hóa quy trình dựng kịch bản chèn chữ TikTok, chuẩn hóa bộ ảnh và xuất tài liệu kịch bản hoàn chỉnh.
