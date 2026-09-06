@@ -4,6 +4,19 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 16:42] - Sửa Lỗi Cú Pháp Media Query (CSS Selector Expected Lint Fix) 🩺✨
+
+- **🎯 Vấn đề phát hiện**: Lỗi cú pháp CSS `at-rule or selector expected` tại dòng 1026 trong `src/1.Frontend/styles/8.responsive.css`.
+- **🔍 Nguyên nhân**: Khối `@media (max-width: 768px)` bị đóng ngoặc sớm ở giữa chừng, khiến các style phía sau bị lọt ra root và dấu đóng ngoặc ở cuối khối trở nên dư thừa.
+- **✅ Chi tiết khắc phục**:
+  - [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css):
+    + Tái cấu trúc mở/đóng media query chuẩn xác: `@media (max-width: 768px)` bao trọn toàn bộ component mobile và chuyển `@media (max-width: 400px)` xuống vị trí sau khối 768px.
+    + Khắc phục triệt để 100% cảnh báo linting.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js):
+    + Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v113`.
+
+---
+
 ## 📅 [2026-09-06 16:39] - Tối Ưu Hóa Responsive Mobile Toàn Diện Cho Header/Navbar (Chống Tràn Layout Tuyệt Đối) 📱🛡️
 
 - **🎯 Yêu cầu từ người dùng**: Thực hiện responsive trên điện thoại vì các phần tử đang bị out / tràn khỏi layout của thanh bar.
