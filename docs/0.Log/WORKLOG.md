@@ -4,6 +4,24 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 17:05] - Tinh Gọn Khoa Học: Gộp Thanh Chuyển Đổi Chế Độ Xem Vào Trực Tiếp Header Card Bản Đồ (Unified Heatmap Card) 🎨✨📊
+
+- **🎯 Yêu cầu từ người dùng**: Gộp 2 box riêng biệt (thanh chọn chế độ xem `1. Lịch Tuần | 2. Tháng | 3. Học Kỳ / Quý` ở trên và khung hiển thị Bản Đồ Heatmap ở dưới) thành 1 thẻ Card duy nhất tinh gọn, khoa học, liền mạch.
+- **🔍 Tối ưu hóa UI/UX**:
+  - Trước đây, thanh `.heatmap-controls-bar` nằm tách biệt thành một khung bo viền riêng phía trên, tạo cảm giác rời rạc và chiếm diện tích chiều dọc.
+  - Sau khi gộp: Bộ nút chuyển đổi chế độ (`.heatmap-mode-tabs`) được nhúng trực tiếp vào góc phải của `.heatmap-card-header` bên trong `.heatmap-matrix-card`.
+- **✅ Chi tiết thay đổi**:
+  - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    + Xóa bỏ thẻ `.heatmap-controls-bar` tách rời ở ngoài.
+    + Thêm hàm `generateHorizonModeTabsHtml(currentMode)` và `bindHorizonModeTabsEvents(container, semesterWeeks, currentWeekFile, onSelectWeek)`.
+    + Nhúng trực tiếp bộ nút chuyển đổi chế độ vào `.heatmap-card-actions` của tất cả 4 chế độ xem: Tuần (Google Calendar), Tháng (Monthly Matrix), Học Kỳ (Semester Contribution Grid), và Cả Năm (Yearly Overview).
+  - [`src/1.Frontend/styles/9.heatmap-view.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/9.heatmap-view.css):
+    + Tinh chỉnh CSS cho `.heatmap-mode-tabs` và `.btn-heatmap-tab` tích hợp gọn gàng, sắc nét, chuyển đổi mượt mà.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js):
+    + Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v118`.
+
+---
+
 ## 📅 [2026-09-06 16:58] - Xử Lý Triệt Để Tranh Chấp Phiên & Khóa Đồng Bộ Đa Thiết Bị / Đa Tài Khoản (Anti-Race Session Guard & Debounce Sync) 🛡️⚡🔄
 
 - **🎯 Yêu cầu từ người dùng**: Xử lý triệt để lỗi khi mở 2 tài khoản cùng lúc hoặc mở đồng thời trên nhiều thiết bị/tab bị tranh chấp phiên (Session conflict), giật lag và ghi đè dữ liệu lẫn nhau.

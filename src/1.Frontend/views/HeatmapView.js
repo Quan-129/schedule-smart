@@ -257,6 +257,48 @@ function setupHeatmapTooltips() {
    ========================================================================== */
 
 /**
+ * Tạo mã HTML cho bộ nút chuyển đổi chế độ xem (Lịch Tuần, Tháng, Học Kỳ) tích hợp trực tiếp vào Card Header
+ * @param {string} currentMode 
+ * @returns {string}
+ */
+export function generateHorizonModeTabsHtml(currentMode = 'week') {
+  return `
+    <div class="heatmap-mode-tabs" role="tablist" aria-label="Chế độ xem lịch học">
+      <button type="button" class="btn-heatmap-tab ${currentMode === 'week' ? 'active' : ''}" data-mode="week" title="1. Xem thời khóa biểu theo tuần (Google Calendar)">
+        <i class="fa-solid fa-calendar-week"></i> <span>1. Lịch Tuần</span>
+      </button>
+      <button type="button" class="btn-heatmap-tab ${currentMode === 'month' ? 'active' : ''}" data-mode="month" title="2. Xem ma trận lịch học theo tháng">
+        <i class="fa-solid fa-calendar-days"></i> <span>2. Tháng</span>
+      </button>
+      <button type="button" class="btn-heatmap-tab ${currentMode === 'semester' ? 'active' : ''}" data-mode="semester" title="3. Xem toàn bộ ma trận tiến độ học kỳ">
+        <i class="fa-solid fa-layer-group"></i> <span>3. Học Kỳ / Quý</span>
+      </button>
+    </div>
+  `;
+}
+
+/**
+ * Gắn sự kiện chuyển đổi chế độ xem cho các nút Tabs trong Card Header
+ * @param {HTMLElement} container 
+ * @param {Array<Object>} semesterWeeks 
+ * @param {string} currentWeekFile 
+ * @param {Function} onSelectWeek 
+ */
+export function bindHorizonModeTabsEvents(container, semesterWeeks, currentWeekFile, onSelectWeek) {
+  if (!container) return;
+  container.querySelectorAll('.btn-heatmap-tab').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const mode = btn.dataset.mode || 'week';
+      if (mode === currentHorizonMode) return;
+      currentHorizonMode = mode;
+      localStorage.setItem('smart_schedule_heatmap_mode', currentHorizonMode);
+      renderActiveHorizonModeContent(semesterWeeks, currentWeekFile, onSelectWeek);
+    };
+  });
+}
+
+/**
  * 1️⃣ CHẾ ĐỘ TUẦN: Lịch Tuần Scale Theo Khung Giờ Thực & Xếp Lớp Trùng Giờ (Google Calendar Style)
  * Cố định hiển thị trọn vẹn 7 Ngày (Thứ 2 -> Chủ Nhật) với Unified Single Scroll Container
  */
@@ -437,17 +479,19 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
         </div>
 
         <div class="heatmap-card-actions">
-          <span class="semester-workload-badge" style="background: ${selectedWeek.workload.bg}; color: ${selectedWeek.workload.color};">
-            ${selectedWeek.workload.label} (${selectedWeek.totalClasses} buổi học)
-          </span>
+          ${generateHorizonModeTabsHtml('week')}
 
-          <select id="select-weekly-matrix-week" class="heatmap-select-filter">
+          <select id="select-weekly-matrix-week" class="heatmap-select-filter" title="Chọn tuần học">
             ${semesterWeeks.map(w => `
               <option value="${escapeHtml(w.filename)}" ${w.filename === activeWeeklyFile ? 'selected' : ''}>
                 ${escapeHtml(w.title)}
               </option>
             `).join('')}
           </select>
+
+          <span class="semester-workload-badge" style="background: ${selectedWeek.workload.bg}; color: ${selectedWeek.workload.color};">
+            ${selectedWeek.workload.label} (${selectedWeek.totalClasses} buổi)
+          </span>
         </div>
       </div>
 
@@ -692,15 +736,19 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
         </div>
 
         <div class="heatmap-card-actions">
-          <button type="button" id="btn-prev-month" class="btn-ghost" title="Tháng trước">
-            <i class="fa-solid fa-chevron-left"></i>
-          </button>
-          <button type="button" id="btn-this-month" class="btn-ghost" style="font-size: 0.78rem;">
-            Hiện tại
-          </button>
-          <button type="button" id="btn-next-month" class="btn-ghost" title="Tháng sau">
-            <i class="fa-solid fa-chevron-right"></i>
-          </button>
+          ${generateHorizonModeTabsHtml('month')}
+
+          <div class="monthly-nav-btn-group" style="display: inline-flex; align-items: center; gap: 0.25rem;">
+            <button type="button" id="btn-prev-month" class="btn-ghost" title="Tháng trước" style="padding: 0.35rem 0.6rem;">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button type="button" id="btn-this-month" class="btn-ghost" style="font-size: 0.76rem; padding: 0.35rem 0.65rem;">
+              Hiện tại
+            </button>
+            <button type="button" id="btn-next-month" class="btn-ghost" title="Tháng sau" style="padding: 0.35rem 0.6rem;">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -844,6 +892,8 @@ function renderSemesterMatrixView(container, semesterWeeks = [], currentWeekFile
         </div>
 
         <div class="heatmap-card-actions">
+          ${generateHorizonModeTabsHtml('semester')}
+
           <span class="semester-workload-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
             ${totalWeeks} Tuần học
           </span>
@@ -971,9 +1021,7 @@ function renderYearlyMatrixView(container, semesterWeeks = [], onSelectWeek = nu
         </div>
 
         <div class="heatmap-card-actions">
-          <span style="font-size: 0.76rem; color: var(--text-muted);">
-            Chuẩn GitHub Contribution Matrix
-          </span>
+          ${generateHorizonModeTabsHtml('year')}
         </div>
       </div>
 
@@ -989,13 +1037,13 @@ function renderYearlyMatrixView(container, semesterWeeks = [], onSelectWeek = nu
 
           <div class="yearly-squares-grid" id="yearly-squares-grid">
             ${squares.map(sq => {
-    const tooltipTitle = `Tuần ${sq.weekIdx} • ${sq.dayName}`;
-    const tooltipSub = sq.classesCount > 0 ? `${sq.classesCount} buổi học` : 'Nghỉ ngơi';
-    const tooltipBody = sq.classes.length > 0
-      ? sq.classes.map(c => `<div class="tt-row"><strong>${escapeHtml(c.subject)}</strong> <span>(${escapeHtml(c.timeRange)})</span></div>`).join('')
-      : `<div style="color: var(--text-muted); font-size: 0.72rem;">Không có buổi học</div>`;
+              const tooltipTitle = `Tuần ${sq.weekIdx} • ${sq.dayName}`;
+              const tooltipSub = sq.classesCount > 0 ? `${sq.classesCount} buổi học` : 'Nghỉ ngơi';
+              const tooltipBody = sq.classes.length > 0
+                ? sq.classes.map(c => `<div class="tt-row"><strong>${escapeHtml(c.subject)}</strong> <span>(${escapeHtml(c.timeRange)})</span></div>`).join('')
+                : `<div style="color: var(--text-muted); font-size: 0.72rem;">Không có buổi học</div>`;
 
-    return `
+              return `
                 <div class="yearly-square-item level-${sq.level}" 
                   data-week-num="${sq.weekIdx}"
                   data-day="${sq.dayName}"
@@ -1010,7 +1058,7 @@ function renderYearlyMatrixView(container, semesterWeeks = [], onSelectWeek = nu
                   data-tooltip-badge-color="${sq.classesCount > 0 ? '#c084fc' : '#94a3b8'}">
                 </div>
               `;
-  }).join('')}
+            }).join('')}
           </div>
         </div>
       </div>
@@ -1064,6 +1112,8 @@ function renderActiveHorizonModeContent(semesterWeeks = [], currentWeekFile = ''
     renderSemesterMatrixView(contentArea, semesterWeeks, currentWeekFile, onSelectWeek);
   }
 
+  // Tích hợp bộ bắt sự kiện Tabs trực tiếp trong Card Header
+  bindHorizonModeTabsEvents(contentArea, semesterWeeks, currentWeekFile, onSelectWeek);
   setupHeatmapTooltips();
 }
 
@@ -1224,28 +1274,9 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
         `}
       </div>
 
-      <!-- 3. BỘ LỌC CHUYỂN ĐỔI CHẾ ĐỘ THỜI GIAN -->
-      <div class="heatmap-controls-bar">
-        <div class="heatmap-mode-tabs">
-          <button type="button" class="btn-heatmap-tab ${currentHorizonMode === 'week' ? 'active' : ''}" data-mode="week">
-            <i class="fa-solid fa-calendar-week"></i> <span>1. Lịch Tuần</span>
-          </button>
-          <button type="button" class="btn-heatmap-tab ${currentHorizonMode === 'month' ? 'active' : ''}" data-mode="month">
-            <i class="fa-solid fa-calendar-days"></i> <span>2. Tháng</span>
-          </button>
-          <button type="button" class="btn-heatmap-tab ${currentHorizonMode === 'semester' ? 'active' : ''}" data-mode="semester">
-            <i class="fa-solid fa-layer-group"></i> <span>3. Học Kỳ / Quý</span>
-          </button>
-        </div>
-
-        <span style="font-size: 0.76rem; color: var(--text-muted);">
-          <i class="fa-regular fa-hand-pointer"></i> Bấm vào ô/thẻ để mở nhanh lịch học
-        </span>
-      </div>
-
-      <!-- 4. KHUNG NỘI DUNG HEATMAP TƯƠNG ỨNG -->
+      <!-- 3. KHUNG NỘI DUNG HEATMAP TÍCH HỢP TABS ĐỒNG NHẤT (UNIFIED SINGLE CARD) -->
       <div id="heatmap-dynamic-content-area">
-        <!-- Render động theo currentHorizonMode -->
+        <!-- Render động trọn gói Card + Tabs Header theo currentHorizonMode -->
       </div>
     </div>
   `;
@@ -1276,16 +1307,6 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
       toggleBannerBtn.title = isNowCollapsed ? 'Mở rộng bảng thống kê chi tiết' : 'Thu gọn bảng thống kê';
     };
   }
-
-  container.querySelectorAll('.btn-heatmap-tab').forEach(btn => {
-    btn.onclick = () => {
-      container.querySelectorAll('.btn-heatmap-tab').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentHorizonMode = btn.dataset.mode || 'week';
-      localStorage.setItem('smart_schedule_heatmap_mode', currentHorizonMode);
-      renderActiveHorizonModeContent(semesterWeeks, currentWeekFile, onSelectWeek);
-    };
-  });
 }
 
 /**
