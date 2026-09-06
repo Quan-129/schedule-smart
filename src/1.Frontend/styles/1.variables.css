@@ -269,6 +269,65 @@ body.theme-light .bg-glow {
 
 .login-actions {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.btn-owner-login-large {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1.15rem;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(168, 85, 247, 0.25) 50%, rgba(245, 158, 11, 0.2) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  border-radius: var(--radius-lg);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.2);
+  text-align: left;
+}
+
+.btn-owner-login-large:hover {
+  transform: translateY(-2px);
+  border-color: #f59e0b;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.35), 0 0 20px rgba(129, 140, 248, 0.4);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.35) 0%, rgba(168, 85, 247, 0.35) 50%, rgba(245, 158, 11, 0.3) 100%);
+}
+
+.owner-btn-badge {
+  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.25rem 0.55rem;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  letter-spacing: 0.04em;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+  flex-shrink: 0;
+}
+
+.owner-btn-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.owner-btn-text span {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.owner-btn-text small {
+  font-size: 0.72rem;
+  color: #cbd5e1;
+  font-family: var(--font-mono, monospace);
 }
 
 .btn-google-login-large {
@@ -277,11 +336,11 @@ body.theme-light .bg-glow {
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  padding: 0.95rem 1.5rem;
+  padding: 0.85rem 1.25rem;
   background: #ffffff;
   color: #1f2937;
   border-radius: var(--radius-lg);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
   font-family: var(--font-heading);
   border: none;
@@ -306,16 +365,16 @@ body.theme-light .bg-glow {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.8rem 1.25rem;
+  padding: 0.75rem 1.25rem;
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-secondary);
   border-radius: var(--radius-lg);
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   font-weight: 600;
   font-family: var(--font-main);
   border: 1px solid var(--border-color);
   cursor: pointer;
-  margin-top: 0.75rem;
+  margin-top: 0;
   transition: all 0.2s ease;
 }
 

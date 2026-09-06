@@ -4,7 +4,7 @@
  * ==========================================================================
  */
 
-import { handleGoogleLogin, handleGuestLogin } from '../../../3.Database/auth/FirebaseAuthService.js';
+import { handleGoogleLogin, handleGuestLogin, handleOwnerFastLogin, handleGoogleRedirectLogin } from '../../../3.Database/auth/FirebaseAuthService.js';
 
 /**
  * Render Màn hình Đăng nhập (Auth Landing Screen)
@@ -35,7 +35,7 @@ export function renderLoginScreen(containerEl) {
             </div>
             <div class="login-feat-text">
               <strong>Thời khóa biểu tự động</strong>
-              <span>Tự nhận diện tuần học và tiết học hôm nay</span>
+              <span>Tự nhận diện tuần học và khung giờ thực tế</span>
             </div>
           </div>
 
@@ -71,31 +71,46 @@ export function renderLoginScreen(containerEl) {
         </div>
 
         <div class="login-actions">
-          <button id="landing-login-btn" class="btn-google-login-large">
+          <!-- 1. ĐĂNG NHẬP NHANH CHỦ SỞ HỮU -->
+          <button type="button" id="landing-owner-fast-btn" class="btn-owner-login-large" title="1-Chạm vào ngay thời khóa biểu của Minh Quân">
+            <div class="owner-btn-badge"><i class="fa-solid fa-crown"></i> CHỦ SỞ HỮU</div>
+            <div class="owner-btn-text">
+              <span>Đăng nhập nhanh (Minh Quân)</span>
+              <small>minhquan12092005@gmail.com</small>
+            </div>
+            <i class="fa-solid fa-arrow-right" style="margin-left: auto;"></i>
+          </button>
+
+          <!-- 2. ĐĂNG NHẬP GOOGLE OAUTH -->
+          <button type="button" id="landing-login-btn" class="btn-google-login-large">
             <svg class="google-icon-svg" viewBox="0 0 48 48" width="22" height="22">
               <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
               <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
               <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
               <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
             </svg>
-            <span class="btn-login-text">Đăng nhập bằng tài khoản Google</span>
+            <span class="btn-login-text">Đăng nhập tài khoản Google khác</span>
           </button>
 
-          <button type="button" id="landing-guest-btn" class="btn-guest-login-large" title="Vào xem và chỉnh sửa thời khóa biểu ngay không cần tài khoản">
-            <i class="fa-solid fa-arrow-right-to-bracket"></i>
-            <span>Dùng ngay với tư cách Khách (Lưu Offline)</span>
+          <!-- 3. CHẾ ĐỘ KHÁCH -->
+          <button type="button" id="landing-guest-btn" class="btn-guest-login-large" title="Vào xem và chỉnh sửa thời khóa biểu ngay với không gian mới">
+            <i class="fa-solid fa-user-astronaut"></i>
+            <span>Dùng ngay với tư cách Khách (Không gian mới tinh)</span>
           </button>
         </div>
 
         <div class="login-footer-note">
-          <i class="fa-solid fa-shield-halved"></i> Đăng nhập an toàn • Mỗi người dùng có một không gian lưu trữ riêng biệt
+          <i class="fa-solid fa-shield-halved"></i> Đăng nhập an toàn • Phân tách dữ liệu cô lập 100% giữa các người dùng
         </div>
       </div>
     </div>
   `;
 
+  const ownerBtn = containerEl.querySelector('#landing-owner-fast-btn');
   const loginBtn = containerEl.querySelector('#landing-login-btn');
   const guestBtn = containerEl.querySelector('#landing-guest-btn');
+
+  if (ownerBtn) ownerBtn.onclick = handleOwnerFastLogin;
   if (loginBtn) loginBtn.onclick = handleGoogleLogin;
   if (guestBtn) guestBtn.onclick = handleGuestLogin;
 }

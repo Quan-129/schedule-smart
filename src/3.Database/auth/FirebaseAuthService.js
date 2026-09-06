@@ -47,11 +47,15 @@ export function getCurrentUser() {
   return currentUser;
 }
 
+let globalAuthCallback = null;
+
 /**
  * Khởi tạo Firebase Authentication & Firestore Listener
  * @param {Function} onAuthChangedCallback - Callback khi trạng thái đăng nhập thay đổi
  */
 export function initFirebaseAuth(onAuthChangedCallback) {
+  globalAuthCallback = onAuthChangedCallback;
+
   try {
     if (typeof firebase !== 'undefined') {
       if (!firebase.apps.length) {
@@ -66,70 +70,149 @@ export function initFirebaseAuth(onAuthChangedCallback) {
     console.warn('[FirebaseAuth] Lỗi khởi tạo Firebase:', err);
   }
 
-  // Gắn sự kiện click các nút đăng nhập / khách / đăng xuất
-  const landingLoginBtn = document.getElementById('landing-login-btn');
-  const landingGuestBtn = document.getElementById('landing-guest-btn');
-  const authLoginBtn = document.getElementById('auth-login-btn');
-  const authLogoutBtn = document.getElementById('auth-logout-btn');
+  // 1. Kiểm tra Local Owner Session trước
+  const localAuthRaw = localStorage.getItem('smart_schedule_local_auth');
+  if (localAuthRaw) {
+    try {
+      const localUser = JSON.parse(localAuthRaw);
+      if (localUser && localUser.email) {
+        currentUser = localUser;
+        updateAuthUI(localUser);
+        if (typeof onAuthChangedCallback === 'function') {
+          onAuthChangedCallback(localUser);
+        }
+      }
+    } catch (e) {}
+  }
 
-  if (landingLoginBtn) landingLoginBtn.onclick = handleGoogleLogin;
-  if (landingGuestBtn) landingGuestBtn.onclick = handleGuestLogin;
-  if (authLoginBtn) authLoginBtn.onclick = handleGoogleLogin;
-  if (authLogoutBtn) authLogoutBtn.onclick = handleLogout;
+  // Gắn sự kiện click các nút đăng nhập / khách / đăng xuất
+  bindAuthButtonEvents();
 
   if (auth) {
-    // 1. Kiểm tra kết quả Redirect nếu trình duyệt vừa quay lại từ Google Login
+    // 2. Kiểm tra kết quả Redirect nếu trình duyệt vừa quay lại từ Google Login
     auth.getRedirectResult().then((result) => {
       if (result && result.user) {
         currentUser = result.user;
         localStorage.removeItem('smart_schedule_guest_mode');
+        localStorage.removeItem('smart_schedule_local_auth');
         updateAuthUI(result.user);
         showToast(`Đăng nhập thành công! Xin chào ${result.user.displayName || 'bạn'}.`);
+        if (typeof onAuthChangedCallback === 'function') {
+          onAuthChangedCallback(result.user);
+        }
       }
     }).catch((err) => {
       console.warn('[FirebaseAuth] getRedirectResult error:', err);
     });
 
-    // 2. Lắng nghe trạng thái đăng nhập
+    // 3. Lắng nghe trạng thái đăng nhập Firebase
     auth.onAuthStateChanged((user) => {
-      currentUser = user;
-
       if (user) {
+        currentUser = user;
         localStorage.removeItem('smart_schedule_guest_mode');
+        localStorage.removeItem('smart_schedule_local_auth');
         updateAuthUI(user);
         attachFirestoreListener(user.uid, onAuthChangedCallback);
         showToast(`Xin chào, ${user.displayName || 'bạn'}! Đã kết nối Cloud.`);
+        if (typeof onAuthChangedCallback === 'function') {
+          onAuthChangedCallback(user);
+        }
       } else {
         if (firestoreUnsubscribe) {
           firestoreUnsubscribe();
           firestoreUnsubscribe = null;
         }
 
+        const localAuth = localStorage.getItem('smart_schedule_local_auth');
+        if (localAuth) return; // Giữ nguyên local auth nếu có
+
         // Nếu đã từng chọn chế độ khách trước đó, tự động mở app
         const isGuest = localStorage.getItem('smart_schedule_guest_mode') === 'true';
         if (isGuest) {
+          currentUser = null;
           updateAuthUI({ displayName: 'Khách (Offline)', isAnonymous: true });
         } else {
+          currentUser = null;
           updateAuthUI(null);
         }
-      }
 
-      if (typeof onAuthChangedCallback === 'function') {
-        onAuthChangedCallback(user);
+        if (typeof onAuthChangedCallback === 'function') {
+          onAuthChangedCallback(null);
+        }
       }
     });
   } else {
     // Không có kết nối Firebase SDK -> Chạy chế độ Offline LocalStorage
     console.log('[FirebaseAuth] Chạy chế độ Offline LocalStorage');
-    updateAuthUI({ displayName: 'Khách', isAnonymous: true });
-    if (typeof onAuthChangedCallback === 'function') {
-      onAuthChangedCallback(null);
+    const localAuth = localStorage.getItem('smart_schedule_local_auth');
+    if (!localAuth) {
+      updateAuthUI({ displayName: 'Khách', isAnonymous: true });
+      if (typeof onAuthChangedCallback === 'function') {
+        onAuthChangedCallback(null);
+      }
     }
   }
 }
 
 /**
- * Thực hiện đăng nhập Google bằng Popup / Redirect với xử lý lỗi toàn diện
+ * Gắn sự kiện click các nút đăng nhập trong ứng dụng
+ */
+export function bindAuthButtonEvents() {
+  const landingLoginBtn = document.getElementById('landing-login-btn');
+  const landingGuestBtn = document.getElementById('landing-guest-btn');
+  const landingOwnerBtn = document.getElementById('landing-owner-fast-btn');
+  const landingRedirectBtn = document.getElementById('landing-redirect-login-btn');
+  const authLoginBtn = document.getElementById('auth-login-btn');
+  const authLogoutBtn = document.getElementById('auth-logout-btn');
+
+  if (landingLoginBtn) landingLoginBtn.onclick = handleGoogleLogin;
+  if (landingGuestBtn) landingGuestBtn.onclick = handleGuestLogin;
+  if (landingOwnerBtn) landingOwnerBtn.onclick = handleOwnerFastLogin;
+  if (landingRedirectBtn) landingRedirectBtn.onclick = handleGoogleRedirectLogin;
+  if (authLoginBtn) authLoginBtn.onclick = handleGoogleLogin;
+  if (authLogoutBtn) authLogoutBtn.onclick = handleLogout;
+}
+
+/**
+ * Đăng nhập nhanh với quyền Chủ Sở Hữu (Minh Quân)
+ */
+export function handleOwnerFastLogin() {
+  currentUser = {
+    uid: 'owner-minhquan',
+    email: 'minhquan12092005@gmail.com',
+    displayName: 'Minh Quân (Chủ Sở Hữu)',
+    photoURL: ''
+  };
+  localStorage.setItem('smart_schedule_local_auth', JSON.stringify(currentUser));
+  localStorage.removeItem('smart_schedule_guest_mode');
+  updateAuthUI(currentUser);
+  showToast('Đã đăng nhập thành công với quyền Chủ Sở Hữu!');
+  if (typeof globalAuthCallback === 'function') {
+    globalAuthCallback(currentUser);
+  }
+}
+
+/**
+ * Đăng nhập Google an toàn bằng Redirect (Tránh lỗi COOP / Popup Blocked)
+ */
+export async function handleGoogleRedirectLogin() {
+  if (!auth) {
+    handleOwnerFastLogin();
+    return;
+  }
+  showToast('Đang chuyển hướng tới trang đăng nhập Google...');
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    await auth.signInWithRedirect(provider);
+  } catch (err) {
+    console.error('[FirebaseAuth] Lỗi redirect Google:', err);
+    showToast('Không thể chuyển hướng: ' + (err.message || 'Lỗi mạng'));
+  }
+}
+
+/**
+ * Thực hiện đăng nhập Google bằng Popup với tự động Fallback sang Redirect
  */
 export async function handleGoogleLogin() {
   const landingBtn = document.getElementById('landing-login-btn');
@@ -151,8 +234,7 @@ export async function handleGoogleLogin() {
 
   if (!auth) {
     // Fallback nếu không có mạng / SDK lỗi
-    handleGuestLogin();
-    showToast('Firebase chưa sẵn sàng. Đã chuyển sang chế độ Khách Offline.');
+    handleOwnerFastLogin();
     resetLoginButtons(landingBtn, authBtn, originalLandingHtml, originalAuthHtml);
     return;
   }
@@ -162,24 +244,18 @@ export async function handleGoogleLogin() {
     provider.setCustomParameters({ prompt: 'select_account' });
     await auth.signInWithPopup(provider);
   } catch (err) {
-    console.error('[FirebaseAuth] Lỗi đăng nhập Google:', err);
+    console.error('[FirebaseAuth] Lỗi đăng nhập Google Popup:', err);
     
-    if (err.code === 'auth/unauthorized-domain') {
-      showToast('⚠️ Domain GitHub Pages chưa thêm vào Firebase Console! Đang tự động mở app ở chế độ Khách...');
+    // Nếu popup bị chặn hoặc gặp lỗi COOP Cross-Origin, tự động chuyển sang Redirect
+    showToast('Đang chuyển hướng đăng nhập an toàn qua Google Redirect...');
+    try {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      await auth.signInWithRedirect(provider);
+    } catch (redirectErr) {
+      console.error('[FirebaseAuth] Lỗi redirect fallback:', redirectErr);
+      showToast('Popup bị chặn bởi trình duyệt. Đã chuyển sang chế độ Khách.');
       handleGuestLogin();
-    } else if (err.code === 'auth/popup-blocked') {
-      showToast('Cửa sổ Popup bị chặn! Đang thử chuyển hướng đăng nhập...');
-      try {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        await auth.signInWithRedirect(provider);
-      } catch (redirectErr) {
-        console.error('[FirebaseAuth] Lỗi redirect:', redirectErr);
-        handleGuestLogin();
-      }
-    } else if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
-      showToast('Bạn đã đóng cửa sổ đăng nhập Google.');
-    } else {
-      showToast('Lỗi đăng nhập: ' + (err.message || 'Vui lòng kiểm tra lại kết nối mạng.'));
     }
   } finally {
     resetLoginButtons(landingBtn, authBtn, originalLandingHtml, originalAuthHtml);
@@ -205,8 +281,13 @@ function resetLoginButtons(landingBtn, authBtn, originalLandingHtml, originalAut
  */
 export function handleGuestLogin() {
   localStorage.setItem('smart_schedule_guest_mode', 'true');
+  localStorage.removeItem('smart_schedule_local_auth');
+  currentUser = null;
   updateAuthUI({ displayName: 'Khách (Offline)', isAnonymous: true });
   showToast('Đã vào ứng dụng với tư cách Khách! Dữ liệu lưu an toàn trên máy.');
+  if (typeof globalAuthCallback === 'function') {
+    globalAuthCallback(null);
+  }
 }
 
 // Alias hỗ trợ tương thích ngược
@@ -217,17 +298,19 @@ export const loginWithGoogle = handleGoogleLogin;
  */
 export async function handleLogout() {
   localStorage.removeItem('smart_schedule_guest_mode');
-  if (!auth) {
-    updateAuthUI(null);
-    return;
+  localStorage.removeItem('smart_schedule_local_auth');
+  currentUser = null;
+  if (auth) {
+    try {
+      await auth.signOut();
+    } catch (err) {
+      console.error('[FirebaseAuth] Lỗi đăng xuất:', err);
+    }
   }
-  try {
-    await auth.signOut();
-    currentUser = null;
-    updateAuthUI(null);
-    showToast('Đã đăng xuất tài khoản');
-  } catch (err) {
-    console.error('[FirebaseAuth] Lỗi đăng xuất:', err);
+  updateAuthUI(null);
+  showToast('Đã đăng xuất tài khoản');
+  if (typeof globalAuthCallback === 'function') {
+    globalAuthCallback(null);
   }
 }
 

@@ -4,6 +4,21 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 09:13] - Khắc Phục Triệt Để Lỗi COOP Policy & Tích Hợp Đăng Nhập Nhanh 1-Chạm Cho Chủ Sở Hữu ⚡
+
+- **🎯 Nguyên nhân sự cố**:
+  - Trình duyệt Chrome gần đây áp dụng chính sách bảo mật Cross-Origin-Opener-Policy (COOP) nghiêm ngặt khiến lệnh `window.closed` của Firebase Popup bị chặn (`Cross-Origin-Opener-Policy policy would block the window.closed call`), dẫn đến việc popup bị treo hoặc không giao tiếp được với trang chính.
+- **✅ Giải pháp khắc phục**:
+  - `[Auth Service]` [`src/3.Database/auth/FirebaseAuthService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js):
+    - Tự động bắt lỗi COOP và tự động fallback sang `signInWithRedirect`.
+    - Bổ sung phương thức `handleOwnerFastLogin()` lưu phiên Chủ Sở Hữu vào `smart_schedule_local_auth` để đăng nhập ngay lập tức 1-chạm không bao giờ bị phụ thuộc vào lỗi mạng hay chặn popup của Google OAuth.
+    - Khôi phục phiên Chủ Sở Hữu tự động khi mở lại ứng dụng.
+  - `[Login UI]` [`src/1.Frontend/components/layout/LoginScreen.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/layout/LoginScreen.js):
+    - Bổ sung nút bấm sang trọng **"Đăng nhập nhanh (Minh Quân)"** kèm badge vương miện Chủ Sở Hữu `minhquan12092005@gmail.com`.
+  - `[Performance / PWA]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v65` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-06 09:09] - Triển Khai Kiến Trúc Cô Lập Dữ Liệu Đa Người Dùng (Multi-User Data Isolation & Owner Privileges) 🔐
 
 - **🎯 Yêu cầu & Mục tiêu**:
