@@ -5,6 +5,29 @@
 
 ---
 
+## 💎 ENTRY 6: [2026-09-06] - Kịch Bản TikTok Photo Carousel / Video Ngắn: "Khi Dân IT Tự Làm Thời Khóa Biểu"
+
+### 📌 Phân Loại & Tags:
+`#TikTokScript` `#PhotoCarousel` `#ViralHooks` `#StudentProductivity` `#TechAesthetic`
+
+### 1. 🌟 Cấu Trúc Kịch Bản 6 Ảnh (Story Flow):
+- **Slide 1 (Hook)**: `01_hook_heatmap_16tuan.png` - Bản đồ nhiệt GitHub 16 tuần dự đoán cường độ học tập cả kỳ.
+- **Slide 2 (Feature 1)**: `02_timeline_google_calendar.png` - Timeline chuẩn Google Calendar tự động scale giờ.
+- **Slide 3 (Feature 2)**: `03_chiec_cap_google_drive.png` - Chiếc Cặp Drive 1-chạm với vòng tròn Donut % điểm rực rỡ.
+- **Slide 4 (Feature 3)**: `04_gan_link_drive_mon_hoc.png` - Gắn link folder Drive 1 lần, vĩnh viễn không cần đi xin link tài liệu.
+- **Slide 5 (Feature 4)**: `05_bieu_do_ti_le_diem.png` - Bảng tỉ lệ điểm 100% kèm quy chế môn học tính điểm qua môn.
+- **Slide 6 (CTA)**: `06_them_tiet_hoc_sieu_toc.png` - Thêm tiết học 3 giây với ca học mẫu gợi ý 1-chạm.
+
+### 2. 🎣 3 Viral Hooks Sắc Bén:
+1. **Coder Aesthetic Hook**:
+   > *"Khi dân IT tự code Web Thời khóa biểu vì quá chán giao diện cổ lỗ sĩ của trường..."*
+2. **All-In-One Problem Solver Hook**:
+   > *"Web thời khóa biểu duy nhất gom cả Lịch học, Google Drive và Bộ tính điểm qua môn vào 1 chỗ!"*
+3. **GitHub Heatmap Comparison Hook**:
+   > *"Thời khóa biểu mà có cả GitHub Heatmap 16 tuần và Google Calendar Timeline? Đỉnh thật sự!"*
+
+---
+
 ## 💎 ENTRY 5: [2026-09-06] - Google Calendar Timeline View: Tự Động Co Giãn Trục Thời Gian & Xếp Lớp Trùng Giờ
 
 ### 📌 Phân Loại & Tags:

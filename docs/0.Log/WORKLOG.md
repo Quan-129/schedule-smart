@@ -4,6 +4,24 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 18:25] - Xây Dựng Kịch Bản TikTok Chèn Chữ & Đổi Tên Khoa Học Bộ Ảnh `kịch bản 1` 🎬📸🚀
+
+- **🎯 Yêu cầu từ người dùng**: Dựng kịch bản chèn chữ đăng TikTok có Hook hấp dẫn, giữ chân người xem và đổi tên lại toàn bộ ảnh trong thư mục `kịch bản 1` theo đúng mạch nội dung.
+- **🔍 Triển khai Content & Assets**:
+  - Đã đổi tên toàn bộ 6 file ảnh trong [`kịch bản 1/`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/k%E1%BB%8Bch%20b%E1%BA%A3n%201/) theo thứ tự logic:
+    1. `01_hook_heatmap_16tuan.png` (Bản đồ nhiệt GitHub 16 tuần - Hook tò mò)
+    2. `02_timeline_google_calendar.png` (Timeline tuần Google Calendar)
+    3. `03_chiec_cap_google_drive.png` (Chiếc cặp Drive tốc độ cao)
+    4. `04_gan_link_drive_mon_hoc.png` (Gắn link tài liệu 1 lần)
+    5. `05_bieu_do_ti_le_diem.png` (Biểu đồ tính điểm qua môn 100%)
+    6. `06_them_tiet_hoc_sieu_toc.png` (Thêm tiết học 3s & Call To Action)
+  - Soạn thảo tài liệu kịch bản chi tiết tại [`docs/8.Marketing/KICH_BAN_TIKTOK_1.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/docs/8.Marketing/KICH_BAN_TIKTOK_1.md) gồm: 3 Viral Hooks, Text Overlay từng slide, Voiceover, Caption và Hashtags lên xu hướng.
+- **✅ Chi tiết thay đổi**:
+  - [`docs/8.Marketing/KICH_BAN_TIKTOK_1.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/docs/8.Marketing/KICH_BAN_TIKTOK_1.md): Tài liệu kịch bản chi tiết.
+  - [`docs/0.Log/MARKETING_LOG.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/docs/0.Log/MARKETING_LOG.md): Ghi ENTRY 6 tư liệu tiếp thị.
+
+---
+
 ## 📅 [2026-09-06 17:30] - Responsive Hoàn Hảo Cho Nút Đăng Nhập Chủ Sở Hữu & Màn Hình Login Mobile 📱✨🎨
 
 - **🎯 Yêu cầu từ người dùng**: Tối ưu responsive cho khung nút "Đăng nhập nhanh (Minh Quân)" - Chủ Sở Hữu trên thiết bị di động.
