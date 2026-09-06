@@ -217,3 +217,52 @@ export function generateEmptyWeekMarkdown(weekTitle = 'Tuần mới') {
 - Bấm "+ Thêm buổi học" hoặc nhấn giữ ô ngày để thêm lịch học nhanh.`;
 }
 
+/**
+ * Sinh chuỗi Markdown mẫu hoàn chỉnh với các môn học ví dụ đầy đủ thông tin
+ * @param {string} weekTitle 
+ * @returns {string} Markdown string
+ */
+export function generateSampleWeekMarkdown(weekTitle = 'Tuần mẫu') {
+  const cleanTitle = weekTitle.startsWith('Lịch học') ? weekTitle : `Lịch học ${weekTitle}`;
+  return `# ${cleanTitle}
+
+## Thứ 2
+### Tiếp thị Căn bản
+- Thời gian: 07:00 - 08:50
+- Phòng học: B4-303 (CS1)
+- Giảng viên: ThS. Nguyễn Văn A
+- Ghi chú: Mang theo giáo trình
+
+### Tiếng Nhật 7
+- Thời gian: 09:00 - 11:50
+- Phòng học: B9-202 (CS1)
+- Giảng viên: Sensei Tanaka
+
+## Thứ 3
+- Nghỉ.
+
+## Thứ 4
+### Học máy & Trí tuệ nhân tạo
+- Thời gian: 07:00 - 08:50
+- Phòng học: B1-305 (CS1)
+- Giảng viên: TS. Trần Văn B
+
+## Thứ 5
+- Nghỉ.
+
+## Thứ 6
+### Lập trình Web Cao cấp
+- Thời gian: 13:00 - 16:30
+- Phòng học: Lab 02 (CS2)
+- Giảng viên: ThS. Lê Thị C
+
+## Thứ 7
+- Nghỉ.
+
+## Chủ Nhật
+- Nghỉ.
+
+## Lưu ý nhỏ:
+- Bạn có thể chỉnh sửa trực tiếp tên môn, giờ học, phòng học theo lịch của mình.`;
+}
+

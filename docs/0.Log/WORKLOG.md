@@ -4,6 +4,23 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 11:10] - Nâng Cấp UX Chế Độ Nhập Nhanh Toàn Tuần (Markdown Quick Setup) Trong Modal Thêm Tuần ⚡📝
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng (UX)**:
+  - Tái cấu trúc khu vực nhập Markdown trong Modal Thêm Tuần thành **Chế độ Nhập Nhanh Toàn Tuần (Markdown Quick Setup)** với huy hiệu nổi bật và phụ đề hướng dẫn thân thiện.
+  - Tích hợp **3 nút thao tác nạp mẫu 1-click (1-Click Presets)**:
+    1. 📋 **Sao chép từ tuần này**: Sao chép thời khóa biểu tuần hiện tại.
+    2. ✨ **Nạp mẫu có sẵn môn**: Tự động điền thời khóa biểu mẫu hoàn chỉnh (đầy đủ tên môn, giờ học, phòng học, giảng viên) giúp người dùng dễ dàng chỉnh sửa theo lịch của mình.
+    3. 🔄 **Nạp tuần trống**: Khôi phục mẫu 7 ngày trống (`- Nghỉ.`).
+  - Tích hợp **Khung Hướng Dẫn Cú Pháp Siêu Nhanh (Accordion Cheat Sheet)**: Gợi ý rõ ràng từng thẻ cú pháp (`## Thứ [2-7]`, `### Tên Môn`, `- Thời gian: 07:00 - 08:50`, `- Phòng học: ...`, `- Giảng viên: ...`, `- Nghỉ.`).
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - [`src/2.Backend/services/TimetableParser.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/TimetableParser.js): Thêm và export hàm `generateSampleWeekMarkdown(weekTitle)`.
+  - [`src/1.Frontend/components/modals/AddWeekModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddWeekModal.js): Cập nhật DOM, các nút nạp mẫu và cheat sheet.
+  - [`src/1.Frontend/styles/6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css): Thêm style glassmorphism, chip tương tác mượt mà.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v82`.
+
+---
+
 ## 📅 [2026-09-06 11:05] - Bổ Sung Vạch Giờ Hiện Tại Màu Đỏ (Current Time Indicator) & Loại Bỏ Chú Thích Cường Độ Thừa Ở Tab Tuần 🔴✨
 
 - **🎯 Yêu cầu & Tinh chỉnh UX**:
