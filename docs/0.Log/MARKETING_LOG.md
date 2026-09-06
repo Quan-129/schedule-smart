@@ -5,6 +5,32 @@
 
 ---
 
+## 💎 ENTRY 4: [2026-09-06] - Chuẩn Hóa Toàn Diện 4 Ma Trận Heatmap Theo Phong Cách GitHub Contribution Matrix
+
+### 📌 Phân Loại & Tags:
+`#USP` `#GitHubMatrixStyle` `#DesignConsistency` `#DataVisualization` `#DevVibe`
+
+### 1. 🌟 Nỗi Đau & Giải Pháp Đột Phá (Pain Point vs Solution):
+- **Nỗi đau**: Giao diện bị đứt gãy trải nghiệm khi các chế độ xem thời gian có bố cục khác biệt nhau (bảng to, lịch tròn, thẻ card gây rối mắt).
+- **Giải pháp đột phá**: **Hệ thống 4 Ma Trận Contribution Matrix Đồng Bộ Tuyệt Đối**:
+  - **Tuần**: Ma trận 12 Tiết (Hàng) × 7 Ngày (Cột) = 84 ô vuông thời gian chi tiết.
+  - **Tháng**: Ma trận 7 Thứ × Các tuần trong tháng chuẩn ô vuông GitHub.
+  - **Học kỳ**: Ma trận 7 Thứ × 16–20 Cột Tuần kèm vạch neon tuần hiện tại.
+  - **Cả năm**: Ma trận 52 tuần × 7 ngày = 364 ô vuông toàn cảnh niên khóa.
+  - **Global Tooltip Popover**: Di chuột đến bất kỳ ô nào đều hiện thông tin lớp học mượt mà dạng kính mờ (Glassmorphism), click 1-chạm mở ngay lịch học.
+
+---
+
+### 2. 🎣 3 Viral Hooks Sắc Bén:
+1. **Developer Vibe Hook**:
+   > *"Khi lập trình viên thiết kế app thời khóa biểu: Cả 4 góc nhìn thời gian đều được chuẩn hóa thành GitHub Contribution Matrix siêu đẹp và trực quan!"*
+2. **Micro-to-Macro Zooming Hook**:
+   > *"Từ 12 tiết học mỗi ngày đến 364 ngày cả năm học: Mọi nỗ lực lên lớp đều trở thành từng ô vuông phát sáng màu tím neon rực rỡ!"*
+3. **Smart Glassmorphism Tooltip Hook**:
+   > *"Không cần click từng bảng: Chỉ cần lướt chuột qua các ô ma trận, toàn bộ môn học, phòng học và ca học tự động hiển thị mượt mà trên nền kính mờ."*
+
+---
+
 ## 💎 ENTRY 3: [2026-09-06] - Study Intensity Heatmap: Bản Đồ Nhiệt Cường Độ Học Tập & Năng Suất Đa Khung Thời Gian
 
 ### 📌 Phân Loại & Tags:

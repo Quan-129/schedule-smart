@@ -4,6 +4,27 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 08:30] - Chuẩn Hóa Toàn Diện Cả 4 Bảng Heatmap Theo Chuẩn GitHub Contribution Matrix 🚀
+
+- **🎯 Mục tiêu**:
+  - Đồng bộ toàn bộ 4 chế độ hiển thị Heatmap (Tuần, Tháng, Học kỳ, Cả năm) theo cùng một ngôn ngữ thiết kế **GitHub Contribution Matrix (Lưới ô vuông nhiệt độ)** tinh gọn, chuyên nghiệp và nhất quán tuyệt đối.
+  - Tối ưu UX/UI: loại bỏ sự lệch chuẩn layout giữa các chế độ, chuyển toàn bộ thông tin chi tiết vào **Global Glassmorphism Tooltip Popover** thông minh tự định vị theo con trỏ chuột.
+  - Tinh chỉnh tương tác: hỗ trợ chọn tuần xem nhanh, chuyển tháng mượt mà, và click 1-chạm vào bất kỳ ô vuông nào để mở ngay thời khóa biểu tuần tương ứng.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Frontend / View Module]` Cập nhật [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    1. **1. Tuần (Weekly Time-Slot Matrix)**: Ma trận 12 Tiết (Hàng dọc: Sáng T1-T6, Chiều/Tối T7-T12) × 7 Thứ (Cột ngang) = 84 ô vuông thời gian. Tích hợp bộ chọn tuần xem nhanh và highlight cột "Hôm nay".
+    2. **2. Tháng (Monthly Matrix)**: Ma trận 7 Thứ × các tuần trong tháng. Ô vuông hiển thị số ngày, tô màu cấp độ Level 0 $\rightarrow$ Level 4 theo số tiết học thực tế, viền neon ngày hôm nay, nút chuyển lùi/tiến tháng.
+    3. **3. Học Kỳ (Semester Matrix)**: Ma trận 7 Thứ × 16–20 Cột Tuần học kỳ. Highlight viền neon cột tuần hiện tại, tooltip hiển thị chi tiết tên môn học và tải tuần.
+    4. **4. Cả Năm (Yearly 52-Week Matrix)**: Ma trận 52 tuần × 7 ngày = 364 ô vuông toàn niên khóa kèm header 12 tháng.
+    5. **Global Tooltip Popover Engine**: Hệ thống tooltip nổi kính mờ tự động tính toán vị trí hiển thị chuẩn xác, chống tràn màn hình.
+  - `[Frontend / Styles Modular]` Cập nhật [`src/1.Frontend/styles/9.heatmap-view.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/9.heatmap-view.css):
+    - Đồng bộ hóa các class `.heatmap-matrix-card`, `.matrix-timeslot-cell`, `.monthly-matrix-square`, `.semester-square-item`, `.yearly-square-item`.
+    - Thiết kế hệ thống màu thang nhiệt độ Level 0 (trong suốt), Level 1 (xanh lam nhẹ), Level 2 (tím nhạt), Level 3 (tím đậm neon), Level 4 (gradient lửa cam-đỏ).
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v59` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-06 00:15] - Nâng Cấp Mục 2 Thành "Bản Đồ Nhiệt Cường Độ Học Tập & Năng Suất (Study Intensity Heatmap Matrix)" 🔥
 
 - **🎯 Mục tiêu**:

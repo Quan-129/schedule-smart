@@ -1,6 +1,7 @@
 /* ==========================================================================
    VIEW 2: STUDY INTENSITY HEATMAP & PRODUCTIVITY DASHBOARD
    src/1.Frontend/styles/9.heatmap-view.css
+   Đồng bộ 4 chế độ theo phong cách GitHub Contribution Matrix cao cấp
    ========================================================================== */
 
 .heatmap-view-wrapper {
@@ -30,8 +31,8 @@
    ========================================================================== */
 .heatmap-hero-banner {
   background: linear-gradient(135deg, rgba(30, 27, 75, 0.7) 0%, rgba(15, 23, 42, 0.8) 100%);
-  border: 1px solid var(--border-highlight);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-highlight, rgba(129, 140, 248, 0.3));
+  border-radius: var(--radius-lg, 16px);
   padding: 1.5rem;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -71,13 +72,13 @@
 .heatmap-title {
   font-size: 1.35rem;
   font-weight: 800;
-  color: var(--text-primary);
+  color: var(--text-primary, #ffffff);
   line-height: 1.2;
 }
 
 .heatmap-subtitle {
   font-size: 0.82rem;
-  color: var(--text-muted);
+  color: var(--text-muted, #94a3b8);
 }
 
 /* KPI Cards Grid */
@@ -89,8 +90,8 @@
 
 .heatmap-kpi-card {
   background: rgba(15, 23, 42, 0.6);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-md, 12px);
   padding: 0.95rem 1.15rem;
   display: flex;
   align-items: center;
@@ -125,109 +126,24 @@
 .heatmap-kpi-value {
   font-size: 1.15rem;
   font-weight: 800;
-  color: var(--text-primary);
-  font-family: var(--font-mono);
+  color: var(--text-primary, #ffffff);
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
 }
 
 .heatmap-kpi-label {
   font-size: 0.74rem;
-  color: var(--text-muted);
+  color: var(--text-muted, #94a3b8);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
 /* ==========================================================================
-   2. MODE SELECTOR TABS (TUẦN / THÁNG / HỌC KỲ / CẢ NĂM)
-   ========================================================================== */
-.heatmap-controls-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 0.65rem 1rem;
-}
-
-.heatmap-mode-tabs {
-  display: flex;
-  gap: 0.35rem;
-  background: rgba(15, 23, 42, 0.8);
-  padding: 0.3rem;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
-}
-
-.btn-heatmap-tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  padding: 0.45rem 0.85rem;
-  color: var(--text-secondary);
-  font-size: 0.82rem;
-  font-weight: 700;
-  font-family: var(--font-main);
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  user-select: none;
-}
-
-.btn-heatmap-tab:hover {
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.btn-heatmap-tab.active {
-  background: var(--accent-subtle);
-  color: var(--text-primary);
-  border-color: var(--accent-primary);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
-}
-
-.btn-heatmap-tab.active i {
-  color: var(--accent-primary);
-}
-
-/* Legend (Thang đo cường độ) */
-.heatmap-legend-row {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.74rem;
-  color: var(--text-muted);
-}
-
-.legend-scale-boxes {
-  display: flex;
-  gap: 0.3rem;
-  align-items: center;
-}
-
-.legend-box {
-  width: 14px;
-  height: 14px;
-  border-radius: 3px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.level-0 { background: rgba(255, 255, 255, 0.04); }
-.level-1 { background: rgba(99, 102, 241, 0.35); border-color: rgba(99, 102, 241, 0.5); }
-.level-2 { background: rgba(129, 140, 248, 0.7); border-color: #818cf8; }
-.level-3 { background: rgba(168, 85, 247, 0.9); border-color: #c084fc; }
-.level-4 { background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); border-color: #f87171; box-shadow: 0 0 8px rgba(239, 68, 68, 0.5); }
-
-/* ==========================================================================
-   3. TODAY QUICK FOCUS WIDGET
+   2. TODAY QUICK FOCUS WIDGET
    ========================================================================== */
 .today-focus-card {
   background: linear-gradient(135deg, rgba(30, 27, 75, 0.5) 0%, rgba(15, 23, 42, 0.6) 100%);
   border: 1px solid rgba(129, 140, 248, 0.25);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-lg, 16px);
   padding: 1.25rem 1.4rem;
   display: flex;
   flex-direction: column;
@@ -263,13 +179,13 @@
 
 .today-class-mini-card {
   background: rgba(15, 23, 42, 0.75);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-md, 12px);
   padding: 0.75rem 0.95rem;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  border-left: 4px solid var(--card-color, #6366f1);
+  border-left: 4px solid var(--accent-primary, #6366f1);
   transition: all 0.2s ease;
 }
 
@@ -291,7 +207,7 @@
 .today-mini-subject {
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text-primary, #ffffff);
   display: flex;
   align-items: center;
   gap: 0.45rem;
@@ -299,323 +215,507 @@
 
 .today-mini-room {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--text-muted, #94a3b8);
   display: flex;
   align-items: center;
   gap: 0.35rem;
 }
 
 /* ==========================================================================
-   4. CHẾ ĐỘ 1: TUẦN (WEEKLY 24H HEATMAP MATRIX)
+   3. MODE CONTROLS BAR & LEGEND SCALES
    ========================================================================== */
-.heatmap-weekly-container {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  overflow-x: auto;
-}
-
-.weekly-matrix-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0.4rem;
-  min-width: 650px;
-}
-
-.weekly-matrix-table th {
-  padding: 0.65rem 0.5rem;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-align: center;
-}
-
-.weekly-matrix-table th.is-today-col {
-  background: rgba(99, 102, 241, 0.25);
-  border-color: #818cf8;
-  color: #38bdf8;
-}
-
-.weekly-matrix-cell {
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 0.75rem 0.65rem;
-  min-height: 90px;
-  vertical-align: top;
-  transition: all 0.2s ease;
-}
-
-.weekly-matrix-cell.has-classes {
-  background: linear-gradient(135deg, rgba(30, 27, 75, 0.7) 0%, rgba(49, 46, 129, 0.5) 100%);
-  border-color: rgba(99, 102, 241, 0.4);
-}
-
-.weekly-matrix-cell.is-day-off {
-  background: rgba(15, 23, 42, 0.25);
-  border-style: dashed;
-}
-
-.weekly-cell-badge {
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.15rem 0.45rem;
-  border-radius: 12px;
-  display: inline-block;
-  margin-bottom: 0.45rem;
-}
-
-.weekly-cell-classes-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.weekly-cell-class-pill {
-  background: rgba(15, 23, 42, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-sm);
-  padding: 0.3rem 0.45rem;
-  font-size: 0.74rem;
-  color: #e2e8f0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-}
-
-.weekly-cell-class-pill strong {
-  color: #818cf8;
-}
-
-/* ==========================================================================
-   5. CHẾ ĐỘ 2: THÁNG (MONTHLY CALENDAR HEATMAP)
-   ========================================================================== */
-.heatmap-monthly-container {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.monthly-calendar-header {
+.heatmap-controls-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 0.25rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: var(--bg-card, rgba(30, 41, 59, 0.5));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-lg, 16px);
+  padding: 0.65rem 1rem;
 }
 
-.monthly-calendar-title {
+.heatmap-mode-tabs {
+  display: flex;
+  gap: 0.35rem;
+  background: rgba(15, 23, 42, 0.8);
+  padding: 0.3rem;
+  border-radius: var(--radius-md, 12px);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  flex-wrap: wrap;
+}
+
+.btn-heatmap-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm, 8px);
+  padding: 0.45rem 0.85rem;
+  color: var(--text-secondary, #94a3b8);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.btn-heatmap-tab:hover {
+  color: var(--text-primary, #ffffff);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-heatmap-tab.active {
+  background: var(--accent-subtle, rgba(99, 102, 241, 0.2));
+  color: var(--text-primary, #ffffff);
+  border-color: var(--accent-primary, #6366f1);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.btn-heatmap-tab.active i {
+  color: var(--accent-primary, #6366f1);
+}
+
+/* Thang đo mức nhiệt Level 0 -> 4 */
+.heatmap-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.74rem;
+  color: var(--text-muted, #94a3b8);
+}
+
+.legend-scale-boxes {
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.legend-box {
+  width: 13px;
+  height: 13px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.level-0 { 
+  background: rgba(255, 255, 255, 0.04); 
+  border-color: rgba(255, 255, 255, 0.06); 
+}
+.level-1 { 
+  background: rgba(99, 102, 241, 0.35); 
+  border-color: rgba(99, 102, 241, 0.5); 
+}
+.level-2 { 
+  background: rgba(129, 140, 248, 0.7); 
+  border-color: #818cf8; 
+}
+.level-3 { 
+  background: rgba(168, 85, 247, 0.9); 
+  border-color: #c084fc; 
+}
+.level-4 { 
+  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); 
+  border-color: #f87171; 
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5); 
+}
+
+/* ==========================================================================
+   4. CHUNG CHO CẢ 4 BẢNG MA TRẬN: .heatmap-matrix-card
+   ========================================================================== */
+.heatmap-matrix-card {
+  background: var(--bg-card, rgba(30, 41, 59, 0.5));
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-lg, 16px);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: var(--shadow-sm, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+}
+
+.heatmap-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 1rem;
+}
+
+.heatmap-card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.heatmap-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.15rem;
+}
+
+.heatmap-card-title {
+  font-size: 1.05rem;
   font-weight: 800;
-  color: var(--text-primary);
+  color: var(--text-primary, #ffffff);
+  line-height: 1.25;
+}
+
+.heatmap-card-sub {
+  font-size: 0.76rem;
+  color: var(--text-muted, #94a3b8);
+}
+
+.heatmap-card-actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.monthly-calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0.45rem;
-}
-
-.monthly-day-header {
-  text-align: center;
-  font-size: 0.76rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  padding: 0.35rem 0;
-  text-transform: uppercase;
-}
-
-.monthly-day-cell {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 0.55rem 0.5rem;
-  min-height: 80px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+.heatmap-select-filter {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+  color: var(--text-primary, #ffffff);
+  border-radius: var(--radius-sm, 8px);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  outline: none;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
 }
 
-.monthly-day-cell:hover {
-  transform: translateY(-2px);
-  border-color: #818cf8;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-  z-index: 2;
+.heatmap-select-filter:focus {
+  border-color: var(--accent-primary, #6366f1);
 }
 
-.monthly-day-cell.is-other-month {
-  opacity: 0.35;
-}
-
-.monthly-day-cell.is-today-cell {
-  border-color: #38bdf8;
-  box-shadow: 0 0 0 1px #38bdf8, 0 0 14px rgba(56, 189, 248, 0.35);
-}
-
-.monthly-day-number {
-  font-size: 0.85rem;
-  font-weight: 800;
-  color: var(--text-primary);
-}
-
-.monthly-day-status {
-  font-size: 0.68rem;
-  font-weight: 700;
-  border-radius: 4px;
-  padding: 0.1rem 0.35rem;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* ==========================================================================
-   6. CHẾ ĐỘ 3: QUÝ / HỌC KỲ (SEMESTER 16 - 20 WEEKS HEATMAP CARDS)
-   ========================================================================== */
-.heatmap-semester-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 0.85rem;
-}
-
-.semester-week-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 1rem 1.15rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-}
-
-.semester-week-card:hover {
-  border-color: var(--accent-primary);
-  background: rgba(30, 41, 59, 0.6);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-}
-
-.semester-week-card.is-current-viewed {
-  border-color: #818cf8;
-  box-shadow: 0 0 0 1px #818cf8, 0 4px 16px rgba(99, 102, 241, 0.25);
-}
-
-.semester-card-header {
+.heatmap-card-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.semester-week-title {
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: var(--text-primary);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 0.85rem;
 }
 
 .semester-workload-badge {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  padding: 0.15rem 0.5rem;
+  padding: 0.2rem 0.55rem;
   border-radius: 20px;
 }
 
-.semester-days-mini-strip {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0.3rem;
+/* ==========================================================================
+   5. BẢNG 1: CHẾ ĐỘ TUẦN (12 TIẾT × 7 NGÀY GITHUB TIME-SLOT MATRIX)
+   ========================================================================== */
+.weekly-timeslot-matrix-wrap {
+  overflow-x: auto;
+  padding: 0.25rem 0;
 }
 
-.semester-day-mini-box {
-  height: 28px;
-  border-radius: 4px;
+.weekly-timeslot-matrix-body {
+  display: flex;
+  gap: 0.75rem;
+  min-width: 650px;
+}
+
+.weekly-periods-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 58px;
+  flex-shrink: 0;
+}
+
+.period-header-corner {
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: transform 0.15s ease;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-muted, #94a3b8);
+  text-transform: uppercase;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 6px;
 }
 
-.semester-day-mini-box:hover {
-  transform: scale(1.15);
-  z-index: 2;
-}
-
-.semester-card-footer {
+.period-slot-label {
+  height: 28px;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  padding-top: 0.5rem;
+  justify-content: space-between;
+  padding: 0 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-secondary, #94a3b8);
 }
 
-.btn-open-week-direct {
-  background: transparent;
-  border: none;
-  color: #818cf8;
-  font-weight: 700;
+.period-slot-label.session-morning {
+  border-left: 2px solid #38bdf8;
+}
+
+.period-slot-label.session-afternoon {
+  border-left: 2px solid #a855f7;
+}
+
+.period-slot-label small {
+  font-size: 0.6rem;
+  color: var(--text-muted, #64748b);
+  font-family: var(--font-mono, monospace);
+}
+
+.weekly-days-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  flex: 1;
+}
+
+.weekly-day-matrix-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(15, 23, 42, 0.25);
+  border-radius: 8px;
+  padding: 2px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.weekly-day-matrix-col.is-today-column {
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.06);
+}
+
+.weekly-day-col-header {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.5rem;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
   font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-primary, #ffffff);
+}
+
+.weekly-day-col-header.is-today-header {
+  background: rgba(99, 102, 241, 0.25);
+  border-color: #818cf8;
+  color: #38bdf8;
+}
+
+.day-count {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted, #94a3b8);
+  font-family: var(--font-mono, monospace);
+}
+
+.weekly-day-slots-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.matrix-timeslot-cell {
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  justify-content: center;
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
 }
 
-.btn-open-week-direct:hover {
-  color: #38bdf8;
-  text-decoration: underline;
+.matrix-timeslot-cell.is-occupied {
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+}
+
+.matrix-timeslot-cell:hover {
+  transform: scale(1.08);
+  z-index: 5;
+  filter: brightness(1.25);
+  box-shadow: 0 0 10px rgba(129, 140, 248, 0.6);
+}
+
+.slot-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 6px #ffffff;
 }
 
 /* ==========================================================================
-   7. CHẾ ĐỘ 4: CẢ NĂM (YEARLY 52-WEEK GITHUB MATRIX)
+   6. BẢNG 2: CHẾ ĐỘ THÁNG (MONTHLY GITHUB CONTRIBUTION MATRIX)
    ========================================================================== */
-.heatmap-yearly-container {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
+.monthly-matrix-wrap {
   display: flex;
   flex-direction: column;
-  gap: 1.15rem;
+  gap: 0.5rem;
   overflow-x: auto;
 }
 
+.monthly-matrix-days-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  text-align: center;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--text-muted, #94a3b8);
+  text-transform: uppercase;
+}
+
+.monthly-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.monthly-matrix-square {
+  aspect-ratio: 1;
+  min-height: 48px;
+  max-height: 65px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.monthly-matrix-square:hover {
+  transform: scale(1.1);
+  z-index: 5;
+  filter: brightness(1.25);
+  border-color: #818cf8;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.monthly-matrix-square.is-other-month {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.monthly-matrix-square.is-today-square {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 1.5px #38bdf8, 0 0 12px rgba(56, 189, 248, 0.4);
+}
+
+.sq-day-num {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--text-primary, #ffffff);
+  font-family: var(--font-mono, monospace);
+}
+
+/* ==========================================================================
+   7. BẢNG 3: CHẾ ĐỘ HỌC KỲ (SEMESTER GITHUB CONTRIBUTION MATRIX)
+   ========================================================================== */
+.semester-matrix-scroll-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  overflow-x: auto;
+  padding: 0.25rem 0;
+}
+
+.semester-weeks-header-row {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 5px;
+  font-size: 0.68rem;
+  color: var(--text-muted, #94a3b8);
+  font-weight: 700;
+  padding-left: 28px;
+  text-align: center;
+}
+
+.semester-weeks-header-row span.is-current-week-header {
+  color: #38bdf8;
+  font-weight: 800;
+}
+
+.semester-matrix-body {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.semester-days-labels {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: var(--text-muted, #94a3b8);
+  font-weight: 700;
+  width: 24px;
+  padding: 2px 0;
+}
+
+.semester-squares-grid {
+  display: grid;
+  grid-template-rows: repeat(7, 20px);
+  grid-auto-flow: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.semester-square-item {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.semester-square-item.is-in-current-week {
+  border-color: rgba(56, 189, 248, 0.6);
+}
+
+.semester-square-item:hover {
+  transform: scale(1.35);
+  z-index: 10;
+  filter: brightness(1.3);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+}
+
+/* ==========================================================================
+   8. BẢNG 4: CHẾ ĐỘ CẢ NĂM (YEARLY 52-WEEK GITHUB MATRIX)
+   ========================================================================== */
 .yearly-matrix-scroll-wrap {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
   min-width: 820px;
+  overflow-x: auto;
+  padding: 0.25rem 0;
 }
 
 .yearly-months-row {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   font-size: 0.72rem;
-  color: var(--text-muted);
+  color: var(--text-muted, #94a3b8);
   font-weight: 600;
   padding-left: 28px;
 }
@@ -630,7 +730,7 @@
   flex-direction: column;
   justify-content: space-between;
   font-size: 0.65rem;
-  color: var(--text-muted);
+  color: var(--text-muted, #94a3b8);
   width: 24px;
   padding: 2px 0;
 }
@@ -660,29 +760,110 @@
   box-shadow: 0 0 8px rgba(129, 140, 248, 0.8);
 }
 
-/* Tooltip Popup */
+/* ==========================================================================
+   9. GLOBAL TOOLTIP POPOVER (GLASSMORPHISM & SMART POSITIONING)
+   ========================================================================== */
 .heatmap-tooltip-popover {
   position: fixed;
   background: rgba(15, 23, 42, 0.95);
-  border: 1px solid #818cf8;
-  border-radius: var(--radius-md);
-  padding: 0.6rem 0.85rem;
+  border: 1px solid rgba(129, 140, 248, 0.4);
+  border-radius: var(--radius-md, 12px);
+  padding: 0.65rem 0.95rem;
   font-size: 0.76rem;
   color: #ffffff;
   pointer-events: none;
   z-index: 99999;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(99, 102, 241, 0.4);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 15px rgba(99, 102, 241, 0.35);
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  max-width: 260px;
+  gap: 0.35rem;
+  max-width: 280px;
   transform: translate(-50%, -100%) translateY(-10px);
-  transition: opacity 0.15s ease;
+  transition: opacity 0.12s ease, transform 0.12s ease;
 }
 
 .heatmap-tooltip-popover.hidden {
   opacity: 0;
   visibility: hidden;
+  transform: translate(-50%, -100%) translateY(-5px);
+}
+
+.tooltip-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tooltip-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.tooltip-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 12px;
+}
+
+.tooltip-subtitle {
+  font-size: 0.76rem;
+  color: #a5b4fc;
+  font-weight: 600;
+}
+
+.tooltip-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.72rem;
+  color: #cbd5e1;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 0.3rem;
+}
+
+.tooltip-body .tt-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.tooltip-body .tt-row i {
+  color: #818cf8;
+  font-size: 0.7rem;
+}
+
+/* ==========================================================================
+   10. RESPONSIVE OPTIMIZATION
+   ========================================================================== */
+@media (max-width: 768px) {
+  .heatmap-view-wrapper {
+    gap: 1rem;
+    padding-bottom: 2rem;
+  }
+
+  .heatmap-hero-banner {
+    padding: 1.15rem;
+  }
+
+  .heatmap-title {
+    font-size: 1.15rem;
+  }
+
+  .heatmap-controls-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .heatmap-mode-tabs {
+    justify-content: center;
+  }
+
+  .monthly-matrix-square {
+    min-height: 38px;
+  }
 }
