@@ -315,39 +315,37 @@
 .week-navigation {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-}
-
-.week-picker-capsule {
-  display: inline-flex;
-  align-items: center;
   background: rgba(30, 41, 59, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-full);
   padding: 0.22rem 0.35rem;
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
-  gap: 0.15rem;
+  gap: 0.2rem;
+  flex-shrink: 0;
 }
 
-.week-actions-group {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
+.week-nav-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.16);
+  margin: 0 0.15rem;
+  flex-shrink: 0;
 }
 
 .btn-nav {
   background: transparent;
   border: none;
   color: var(--text-secondary);
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.2s ease;
+  flex-shrink: 0;
 }
 
 .btn-nav:hover {
@@ -359,14 +357,16 @@
 .week-dropdown-wrapper {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0 0.55rem;
+  gap: 0.45rem;
+  padding: 0 0.45rem;
   color: #818cf8;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  min-width: 0;
 }
 
 .week-dropdown-wrapper i {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  flex-shrink: 0;
 }
 
 .week-dropdown-wrapper select {
@@ -374,11 +374,11 @@
   border: none;
   color: var(--text-primary);
   font-family: var(--font-main);
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
   outline: none;
-  padding-right: 0.45rem;
+  padding-right: 0.3rem;
 }
 
 .week-dropdown-wrapper select option {
@@ -389,10 +389,10 @@
 /* Nút Ping Target Focus Hôm Nay */
 .btn-today-nav {
   color: #a5b4fc !important;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%) !important;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(168, 85, 247, 0.25) 100%) !important;
   border: 1px solid rgba(99, 102, 241, 0.4) !important;
-  width: 34px !important;
-  height: 34px !important;
+  width: 30px !important;
+  height: 30px !important;
   border-radius: 50%;
 }
 
@@ -409,8 +409,8 @@
   color: var(--accent-primary) !important;
   background: var(--accent-subtle) !important;
   border: 1px solid rgba(99, 102, 241, 0.3) !important;
-  width: 34px !important;
-  height: 34px !important;
+  width: 30px !important;
+  height: 30px !important;
   border-radius: 50%;
 }
 
@@ -424,10 +424,10 @@
 /* Nút Xóa Tuần */
 .btn-delete-week-nav {
   color: #f87171 !important;
-  background: rgba(239, 68, 68, 0.12) !important;
-  border: 1px solid rgba(239, 68, 68, 0.3) !important;
-  width: 34px !important;
-  height: 34px !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  width: 30px !important;
+  height: 30px !important;
   border-radius: 50%;
 }
 

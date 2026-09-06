@@ -4,6 +4,20 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 10:18] - Hợp Nhất Hoàn Chỉnh Toàn Bộ Cụm Điều Hướng Tuần Vào 1 Capsule Liền Mạch (Unified Pill Capsule) 🎨✨
+
+- **🎯 Vấn đề & Mong muốn của người dùng**:
+  - 3 nút chức năng (`[ 🎯 Focus Hôm nay ]`, `[ ➕ Thêm tuần ]`, `[ 🗑️ Xóa tuần ]`) bị nằm lơ lửng ngoài viên thuốc chọn tuần (`< Tuần 36 >`), tạo cảm giác "lòi ra ngoài".
+- **✅ Giải pháp thiết kế hợp nhất (Unified Seamless Capsule)**:
+  - **Đóng gói toàn bộ 6 phần tử vào trong đúng 1 Capsule duy nhất**:
+    `[ < ]` `[ 📅 Tuần 36 (31/08) v ]` `[ > ]` `| (vạch ngăn cách)` `[ 🎯 ]` `[ ➕ ]` `[ 🗑️ ]`
+  - Bo tròn khép kín 2 đầu ngoài cùng (`border-radius: var(--radius-full)`), bên trong hoàn toàn phẳng và liền mạch, không còn bất kỳ đường cong hay viền thừa nào cắt ngang.
+  - Vạch phân cách `.week-nav-divider` màu mờ tinh tế phân định rõ giữa khu vực Chọn Tuần và khu vực Nút Thao Tác.
+  - Cập nhật [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html), [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css), [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css).
+  - Nâng `CACHE_NAME` lên `smart-schedule-modular-v72` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-06 10:12] - Khắc Phục Triệt Để Hiện Tượng Navbar Tràn Lề Phải Khi Mở DevTools / Màn Hình Compact (< 1280px) 🚀🛡️
 
 - **🎯 Nguyên nhân sự cố**:
