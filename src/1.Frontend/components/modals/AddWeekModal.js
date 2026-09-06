@@ -22,7 +22,7 @@ export function ensureAddWeekModalDom() {
   const modalWrapper = document.createElement('div');
   modalWrapper.innerHTML = `
     <div id="add-week-modal" class="modal-backdrop hidden">
-      <div class="modal-card modal-card-md">
+      <div class="modal-card modal-card-add-week">
         <div class="modal-header">
           <div class="modal-title-group">
             <div class="modal-icon-glow" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
@@ -40,28 +40,31 @@ export function ensureAddWeekModalDom() {
         </div>
 
         <form id="add-week-form" class="modal-form">
-          <div style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1.1rem; overflow-y: auto; max-height: 540px;">
+          <div style="padding: 1.25rem 1.75rem; display: flex; flex-direction: column; gap: 1rem; overflow-y: auto; max-height: 78vh;">
             
-            <!-- Chọn hướng thêm tuần -->
-            <div class="form-group-styled">
-              <label><i class="fa-solid fa-arrows-up-down"></i> Vị trí & Hướng thêm tuần:</label>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
-                <button type="button" id="btn-week-dir-after" class="btn-days-mode active" style="justify-content: center; padding: 0.6rem;">
-                  <i class="fa-solid fa-arrow-down"></i>
-                  <span>Thêm Tuần Sau (+7 ngày)</span>
-                </button>
-                <button type="button" id="btn-week-dir-before" class="btn-days-mode" style="justify-content: center; padding: 0.6rem;">
-                  <i class="fa-solid fa-arrow-up"></i>
-                  <span>Thêm Tuần Trước (-7 ngày)</span>
-                </button>
+            <!-- Hàng 1: Hướng thêm tuần & Tên tuần hiển thị -->
+            <div class="modal-grid-2col">
+              <div class="form-group-styled">
+                <label><i class="fa-solid fa-arrows-up-down"></i> Vị trí & Hướng thêm tuần:</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                  <button type="button" id="btn-week-dir-after" class="btn-days-mode active" style="justify-content: center; padding: 0.55rem 0.4rem; font-size: 0.78rem;">
+                    <i class="fa-solid fa-arrow-down"></i>
+                    <span>Tuần Sau (+7 ngày)</span>
+                  </button>
+                  <button type="button" id="btn-week-dir-before" class="btn-days-mode" style="justify-content: center; padding: 0.55rem 0.4rem; font-size: 0.78rem;">
+                    <i class="fa-solid fa-arrow-up"></i>
+                    <span>Tuần Trước (-7 ngày)</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group-styled">
+                <label for="new-week-title-input"><i class="fa-solid fa-heading"></i> Tên tuần hiển thị <span class="required-star">*</span></label>
+                <input type="text" id="new-week-title-input" placeholder="Ví dụ: Tuần 36 (07-09 - 13-09)" required autofocus>
               </div>
             </div>
 
-            <div class="form-group-styled">
-              <label for="new-week-title-input"><i class="fa-solid fa-heading"></i> Tên tuần hiển thị <span class="required-star">*</span></label>
-              <input type="text" id="new-week-title-input" placeholder="Ví dụ: Tuần 36 (07-09 - 13-09)" required autofocus>
-            </div>
-
+            <!-- Hàng 2: Mã ID, Ngày bắt đầu & Ghi chú -->
             <div class="modal-grid-2col">
               <div class="form-group-styled">
                 <label for="new-week-id-input"><i class="fa-solid fa-fingerprint"></i> Mã định danh (ID) <span class="required-star">*</span></label>
@@ -73,11 +76,6 @@ export function ensureAddWeekModalDom() {
               </div>
             </div>
 
-            <div class="form-group-styled">
-              <label for="new-week-desc-input"><i class="fa-solid fa-align-left"></i> Ghi chú / Tiêu đề tuần</label>
-              <input type="text" id="new-week-desc-input" placeholder="Ví dụ: Lịch học Tuần 36, thi giữa kỳ, nộp bài...">
-            </div>
-
             <!-- Khung Chế Độ Nhập Nhanh Toàn Tuần (Markdown Quick Setup) -->
             <div class="quick-md-setup-container">
               <div class="quick-md-header">
@@ -85,7 +83,7 @@ export function ensureAddWeekModalDom() {
                   <span class="quick-md-badge">
                     <i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> Chế độ Nhập Nhanh Toàn Tuần (Markdown)
                   </span>
-                  <span class="quick-md-hint">Dán hoặc nhập lịch học cả tuần theo mẫu bên dưới, hoặc bấm tạo rồi thêm từng môn sau.</span>
+                  <span class="quick-md-hint">Dán hoặc nhập nhanh lịch học cả tuần theo mẫu bên dưới (hoặc bấm tạo rồi thêm từng môn sau).</span>
                 </div>
               </div>
 
@@ -105,10 +103,10 @@ export function ensureAddWeekModalDom() {
                 </button>
               </div>
 
-              <!-- Accordion Hướng Dẫn Cú Pháp Siêu Dễ Hiểu -->
+              <!-- Accordion Hướng Dẫn Cú Pháp Siêu Dễ Hiểu (2 Cột Rộng Rãi) -->
               <details class="quick-md-guide-accordion">
                 <summary class="quick-md-guide-summary">
-                  <span><i class="fa-regular fa-circle-question" style="color: #38bdf8;"></i> <strong>Hướng dẫn cú pháp nhập nhanh</strong> (Bấm để xem ví dụ)</span>
+                  <span><i class="fa-regular fa-circle-question" style="color: #38bdf8;"></i> <strong>Hướng dẫn cú pháp nhập nhanh</strong> (Bấm để xem mẫu ví dụ)</span>
                   <i class="fa-solid fa-chevron-down guide-toggle-icon"></i>
                 </summary>
                 <div class="quick-md-guide-content">
@@ -141,7 +139,7 @@ export function ensureAddWeekModalDom() {
                 </div>
               </details>
 
-              <textarea id="new-week-md-content" rows="6" class="quick-md-textarea" placeholder="# Lịch học Tuần mới&#10;&#10;## Thứ 2&#10;### Tiếp thị Căn bản&#10;- Thời gian: 07:00 - 08:50&#10;- Phòng học: B4-303 (CS1)&#10;&#10;## Thứ 3&#10;- Nghỉ."></textarea>
+              <textarea id="new-week-md-content" rows="11" class="quick-md-textarea" placeholder="# Lịch học Tuần mới&#10;&#10;## Thứ 2&#10;### Tiếp thị Căn bản&#10;- Thời gian: 07:00 - 08:50&#10;- Phòng học: B4-303 (CS1)&#10;&#10;## Thứ 3&#10;- Nghỉ."></textarea>
             </div>
 
           </div>

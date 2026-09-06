@@ -4,6 +4,21 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 11:15] - Mở Rộng Không Gian Modal & Tăng Kích Thước Khung Nhập Markdown Soạn Thảo Siêu Thoáng 📐🖥️
+
+- **🎯 Yêu cầu & Tối ưu hóa Layout**:
+  - Người dùng yêu cầu làm cho khung nhập to, rộng, dài ra để nhìn toàn bộ lịch tuần và thao tác chỉnh sửa dễ dàng.
+  - Tăng chiều rộng Modal Thêm Tuần (`.modal-card-add-week`) lên `860px` (thay vì 620px) và tối ưu form cuộn đến `78vh`.
+  - Tái bố cục các trường thông tin cơ bản phía trên thành **Grid 2 cột cân xứng**.
+  - Mở rộng khung Textarea Markdown: tăng chiều cao lên `min-height: 280px` (`height: 300px`, `rows="11"`), font size `0.84rem`, line-height `1.6` chuẩn Monospace cực kỳ dễ nhìn.
+  - Bảng hướng dẫn cú pháp Cheat Sheet tự động chia 2 cột responsive.
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - [`src/1.Frontend/components/modals/AddWeekModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddWeekModal.js): Chuyển class sang `modal-card-add-week`, chia grid 2 cột gọn gàng và tăng rows textarea.
+  - [`src/1.Frontend/styles/6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css): Thêm style `modal-card-add-week`, mở rộng textarea và 2-column syntax grid.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v83`.
+
+---
+
 ## 📅 [2026-09-06 11:10] - Nâng Cấp UX Chế Độ Nhập Nhanh Toàn Tuần (Markdown Quick Setup) Trong Modal Thêm Tuần ⚡📝
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng (UX)**:

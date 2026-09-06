@@ -52,6 +52,11 @@
   max-width: 720px;
 }
 
+.modal-card-add-week {
+  max-width: 860px;
+  width: 100%;
+}
+
 @keyframes modalPopIn {
   from {
     opacity: 0;
@@ -2649,16 +2654,16 @@ body.theme-light .form-group-styled textarea:hover {
 
 .guide-syntax-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.4rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.5rem 0.85rem;
 }
 
 .syntax-item {
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
-  font-size: 0.72rem;
-  line-height: 1.35;
+  font-size: 0.74rem;
+  line-height: 1.4;
 }
 
 .syntax-item code {
@@ -2668,7 +2673,7 @@ body.theme-light .form-group-styled textarea:hover {
   color: #38bdf8;
   background: rgba(56, 189, 248, 0.12);
   border: 1px solid rgba(56, 189, 248, 0.25);
-  padding: 0.08rem 0.35rem;
+  padding: 0.1rem 0.4rem;
   border-radius: 4px;
   white-space: nowrap;
   flex-shrink: 0;
@@ -2678,27 +2683,29 @@ body.theme-light .form-group-styled textarea:hover {
   color: #94a3b8;
 }
 
-/* Textarea Markdown Nhập Nhanh */
+/* Textarea Markdown Nhập Nhanh To Rộng Dài */
 .quick-md-textarea {
   width: 100%;
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
-  font-size: 0.78rem;
-  line-height: 1.5;
+  font-size: 0.84rem;
+  line-height: 1.6;
   color: #f1f5f9;
   background: rgba(10, 15, 29, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-sm, 8px);
-  padding: 0.65rem 0.85rem;
+  padding: 0.85rem 1rem;
   resize: vertical;
-  min-height: 110px;
+  min-height: 280px;
+  height: 300px;
   outline: none;
   transition: all 0.2s ease;
+  box-sizing: border-box;
 }
 
 .quick-md-textarea:focus {
   border-color: #38bdf8;
   background: rgba(10, 15, 29, 0.98);
-  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+  box-shadow: 0 0 0 3.5px rgba(56, 189, 248, 0.22);
 }
 
 .quick-md-textarea::placeholder {
