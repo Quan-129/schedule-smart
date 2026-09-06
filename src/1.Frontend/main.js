@@ -12,7 +12,7 @@ import { formatCurrentVietnameseDate, getMondayOfCurrentWeek, addDaysToDateStr, 
 import { renderBackpackView, enterJiggleMode, exitJiggleMode } from './views/BackpackView.js';
 import { renderGradesView, highlightGradeSlice } from './views/GradesView.js';
 import { renderTimetableGrid, renderTodayView, getSubjectColor } from './views/TimetableGrid.js';
-import { renderHeatmapView, preloadAllWeeksData } from './views/HeatmapView.js';
+import { renderHeatmapView, preloadAllWeeksData, focusTodayInHeatmap } from './views/HeatmapView.js';
 import { ensureEditSubjectModalDom, openEditSubjectModal, openEditDriveModal } from './components/modals/EditSubjectModal.js';
 import { ensureAddSubjectModalDom, openAddSubjectModal, initAddSubjectModal } from './components/modals/AddSubjectModal.js';
 import { ensureAddWeekModalDom, openAddWeekModal, initAddWeekModal } from './components/modals/AddWeekModal.js';
@@ -1044,13 +1044,21 @@ function persistCurrentSchedule() {
 }
 
 /**
- * Định vị & Focus vào ngày hôm nay trong Ma trận Thời khóa biểu (Mục 1)
+ * Định vị & Focus vào ngày hôm nay theo ngữ cảnh Tab hiện tại (Mục 1 vs Mục 2)
  */
 export async function focusTodayTarget() {
-  // 1. Chuyển sang Tab Thời khóa biểu nếu đang ở tab khác
-  switchTab('grid');
+  // 1. Nếu đang ở Mục 2 (Bản Đồ Nhiệt) -> Focus trực tiếp trong Mục 2 mà KHÔNG chuyển tab
+  if (state.currentTab === 'today') {
+    focusTodayInHeatmap();
+    return;
+  }
 
-  // 2. Kiểm tra nếu tuần đang xem không phải tuần hiện tại -> Chuyển về tuần hiện tại
+  // 2. Nếu đang ở các tab khác (không phải grid) -> Chuyển sang Tab 1 (Thời khóa biểu)
+  if (state.currentTab !== 'grid' && state.currentTab !== 'schedule') {
+    switchTab('grid');
+  }
+
+  // 3. Kiểm tra nếu tuần đang xem không phải tuần hiện tại -> Chuyển về tuần hiện tại
   const isCurrentWeek = checkIsCurrentWeek(currentWeekFile);
   if (!isCurrentWeek) {
     const todayWeekFile = getInitialWeekFilename();
@@ -1060,7 +1068,7 @@ export async function focusTodayTarget() {
     }
   }
 
-  // 3. Định vị và kích hoạt hiệu ứng Ping Target trên thẻ ngày Hôm Nay
+  // 4. Định vị và kích hoạt hiệu ứng Ping Target trên thẻ ngày Hôm Nay của Mục 1
   setTimeout(() => {
     const todayCard = document.querySelector('.day-card.is-today');
     if (todayCard) {

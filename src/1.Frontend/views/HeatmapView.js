@@ -11,6 +11,7 @@ import { parseScheduleMarkdown } from '../../2.Backend/services/TimetableParser.
 import { escapeHtml } from '../../4.Security/sanitizer.js';
 import { getSubjectColor } from './TimetableGrid.js';
 import { getDateForDayOfWeek } from '../../2.Backend/utils/dateHelpers.js';
+import { showToast } from '../components/Toast.js';
 
 /* ==========================================================================
    1. MODULE STATE & CONSTANTS
@@ -18,6 +19,10 @@ import { getDateForDayOfWeek } from '../../2.Backend/utils/dateHelpers.js';
 let currentHorizonMode = localStorage.getItem('smart_schedule_heatmap_mode') || 'week'; // 'week' | 'month' | 'semester'
 let currentMonthlyDate = new Date(); // Tháng đang xem trong chế độ Tháng
 let activeWeeklyFile = ''; // File tuần đang xem trong chế độ Tuần
+
+let storedAvailableWeeks = [];
+let storedCurrentWeekFile = '';
+let storedOnSelectWeek = null;
 
 // Bộ nhớ đệm dữ liệu tất cả các tuần trong học kỳ
 const weeksDataCache = new Map();
@@ -1076,6 +1081,10 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
   const container = document.getElementById('today-view-container');
   if (!container) return;
 
+  storedAvailableWeeks = availableWeeks;
+  storedCurrentWeekFile = currentWeekFile;
+  storedOnSelectWeek = onSelectWeek;
+
   activeWeeklyFile = currentWeekFile;
   const semesterWeeks = aggregateSemesterData(availableWeeks, currentWeekFile);
 
@@ -1108,42 +1117,30 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
   container.innerHTML = `
     <div class="heatmap-view-wrapper">
       
-      <!-- 1. HERO KPI BANNER & TỔNG QUAN HỌC TẬP (MẶC ĐỊNH THU GỌN) -->
+      <!-- 1. HERO BANNER THỐNG KÊ CƯỜNG ĐỘ HỌC TẬP -->
       <div class="heatmap-hero-banner ${isHeaderCollapsed ? 'is-collapsed' : ''}" id="heatmap-hero-banner">
-        <div class="heatmap-header-row">
-          <div class="heatmap-title-group">
-            <div class="heatmap-icon-glow">
-              <i class="fa-solid fa-fire-flame-curved"></i>
-            </div>
-            <div>
-              <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
-                <h2 class="heatmap-title">Bản Đồ Nhiệt Cường Độ Học Tập</h2>
-                <button type="button" id="btn-toggle-heatmap-banner" class="btn-toggle-heatmap-banner" title="${isHeaderCollapsed ? 'Mở rộng bảng thống kê chi tiết' : 'Thu gọn bảng thống kê'}">
-                  <i class="fa-solid ${isHeaderCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'}"></i>
-                  <span class="toggle-text">${isHeaderCollapsed ? 'Chi tiết' : 'Thu gọn'}</span>
-                </button>
-              </div>
-              <span class="heatmap-subtitle">Phân tích mật độ buổi học, theo dõi tải học tập & năng suất sinh viên</span>
-            </div>
+        <div class="heatmap-hero-header">
+          <div class="heatmap-badge-group">
+            <span class="heatmap-status-badge">
+              <i class="fa-solid fa-chart-simple"></i> Bản Đồ Cường Độ Học Tập
+            </span>
+            <span class="heatmap-version-badge">Timeline Google Calendar</span>
           </div>
 
-          <!-- Quick Summary Badges khi Thu Gọn -->
-          <div class="heatmap-collapsed-tags">
-            <span class="collapsed-tag" style="color: #818cf8; background: rgba(99, 102, 241, 0.15);"><i class="fa-solid fa-calendar-day"></i> Hôm nay: <strong>${todayClasses.length}b</strong></span>
-            <span class="collapsed-tag" style="color: #c084fc; background: rgba(168, 85, 247, 0.15);"><i class="fa-solid fa-book-bookmark"></i> Cả kỳ: <strong>${totalSemesterClasses}b</strong></span>
-            <span class="collapsed-tag" style="color: #f59e0b; background: rgba(245, 158, 11, 0.15);"><i class="fa-solid fa-bolt"></i> Cao điểm: <strong>${peakWeek ? `${peakWeek.title} (${peakWeek.totalClasses}b)` : 'N/A'}</strong></span>
-            <span class="collapsed-tag" style="color: #10b981; background: rgba(16, 185, 129, 0.15);"><i class="fa-solid fa-fire"></i> Lên lớp: <strong>${activeStudyDays} ngày</strong></span>
-          </div>
+          <button type="button" class="btn-toggle-hero" id="btn-toggle-heatmap-banner" title="${isHeaderCollapsed ? 'Mở rộng bảng thống kê chi tiết' : 'Thu gọn bảng thống kê'}">
+            <i class="fa-solid ${isHeaderCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'}"></i>
+            <span class="toggle-text">${isHeaderCollapsed ? 'Chi tiết' : 'Thu gọn'}</span>
+          </button>
+        </div>
 
-          <div class="heatmap-legend-row">
-            <span>Mật độ:</span>
-            <div class="legend-scale-boxes">
-              <div class="legend-box level-0" title="0 buổi (Nghỉ)"></div>
-              <div class="legend-box level-1" title="1 buổi (Nhẹ)"></div>
-              <div class="legend-box level-2" title="2 buổi (Vừa)"></div>
-              <div class="legend-box level-3" title="3 buổi (Dày)"></div>
-              <div class="legend-box level-4" title="4+ buổi (Cao điểm)"></div>
-            </div>
+        <div class="heatmap-hero-body">
+          <div class="heatmap-hero-main">
+            <h2 class="heatmap-main-title">
+              Nhịp Độ Học Tập & Không Gian Thời Gian ⏱️
+            </h2>
+            <p class="heatmap-sub-title">
+              Quan sát cường độ học tập dưới góc nhìn đa chiều: Lịch Google Calendar thời gian thực, Ma trận tháng GitHub và Tiến độ cả học kỳ.
+            </p>
           </div>
         </div>
 
@@ -1289,4 +1286,121 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
       renderActiveHorizonModeContent(semesterWeeks, currentWeekFile, onSelectWeek);
     };
   });
+}
+
+/**
+ * Định vị & Focus vào ngày hôm nay NGAY TRONG Bản Đồ Nhiệt (Mục 2)
+ * Tự động nhận diện chế độ xem hiện tại (Tuần / Tháng / Học kỳ) mà KHÔNG chuyển tab
+ */
+export async function focusTodayInHeatmap() {
+  const container = document.getElementById('today-view-container');
+  if (!container) return;
+
+  // 1. Chế độ TUẦN (Google Calendar Weekly Matrix)
+  if (currentHorizonMode === 'week') {
+    const todayWeekFile = storedCurrentWeekFile || state.currentWeekFile || '';
+    if (todayWeekFile && activeWeeklyFile !== todayWeekFile) {
+      activeWeeklyFile = todayWeekFile;
+      const semesterWeeks = aggregateSemesterData(storedAvailableWeeks, todayWeekFile);
+      renderActiveHorizonModeContent(semesterWeeks, todayWeekFile, storedOnSelectWeek);
+    }
+
+    setTimeout(() => {
+      const todayCol = container.querySelector('.cal-day-column.is-today-cal-column');
+      const todayHeader = container.querySelector('.cal-day-header-cell.is-today-cal-header');
+      const nowLine = container.querySelector('.cal-current-time-line');
+      const scrollArea = container.querySelector('.weekly-cal-unified-scroll-area');
+
+      if (todayCol || todayHeader) {
+        // Cuộn ngang tới cột hôm nay
+        if (todayCol && scrollArea) {
+          const colLeft = todayCol.offsetLeft;
+          const colWidth = todayCol.offsetWidth;
+          const targetScrollLeft = Math.max(0, colLeft - (scrollArea.clientWidth / 2) + (colWidth / 2));
+          scrollArea.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
+        }
+
+        // Cuộn dọc tới vạch giờ hiện tại nếu có
+        if (nowLine && scrollArea) {
+          const lineTop = nowLine.offsetTop;
+          scrollArea.scrollTo({ top: Math.max(0, lineTop - 120), behavior: 'smooth' });
+        } else if (todayCol) {
+          todayCol.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+
+        // Kích hoạt hiệu ứng Radar Ping
+        if (todayCol) {
+          todayCol.classList.remove('heatmap-focus-ping');
+          void todayCol.offsetWidth;
+          todayCol.classList.add('heatmap-focus-ping');
+        }
+        if (todayHeader) {
+          todayHeader.classList.remove('heatmap-focus-ping');
+          void todayHeader.offsetWidth;
+          todayHeader.classList.add('heatmap-focus-ping');
+        }
+
+        setTimeout(() => {
+          if (todayCol) todayCol.classList.remove('heatmap-focus-ping');
+          if (todayHeader) todayHeader.classList.remove('heatmap-focus-ping');
+        }, 2500);
+
+        showToast('Đã định vị ngày Hôm nay trên Lịch Tuần! 🎯');
+      } else {
+        showToast('Hôm nay không nằm trong tuần học đang hiển thị.');
+      }
+    }, 120);
+    return;
+  }
+
+  // 2. Chế độ THÁNG (Monthly Matrix)
+  if (currentHorizonMode === 'month') {
+    const today = new Date();
+    if (currentMonthlyDate.getFullYear() !== today.getFullYear() || currentMonthlyDate.getMonth() !== today.getMonth()) {
+      currentMonthlyDate = new Date();
+      const semesterWeeks = aggregateSemesterData(storedAvailableWeeks, storedCurrentWeekFile);
+      renderActiveHorizonModeContent(semesterWeeks, storedCurrentWeekFile, storedOnSelectWeek);
+    }
+
+    setTimeout(() => {
+      const todaySquare = container.querySelector('.monthly-matrix-square.is-today-square');
+      if (todaySquare) {
+        todaySquare.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        todaySquare.classList.remove('heatmap-focus-ping');
+        void todaySquare.offsetWidth;
+        todaySquare.classList.add('heatmap-focus-ping');
+
+        setTimeout(() => {
+          todaySquare.classList.remove('heatmap-focus-ping');
+        }, 2500);
+
+        showToast('Đã định vị ngày Hôm nay trên Lịch Tháng! 🎯');
+      } else {
+        showToast('Đã chuyển tới tháng hiện tại.');
+      }
+    }, 120);
+    return;
+  }
+
+  // 3. Chế độ HỌC KỲ (Semester Matrix)
+  if (currentHorizonMode === 'semester') {
+    const currentWeekSquare = container.querySelector('.semester-square-item.is-in-current-week');
+    if (currentWeekSquare) {
+      currentWeekSquare.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      const currentWeekSquares = container.querySelectorAll('.semester-square-item.is-in-current-week');
+      currentWeekSquares.forEach(sq => {
+        sq.classList.remove('heatmap-focus-ping');
+        void sq.offsetWidth;
+        sq.classList.add('heatmap-focus-ping');
+      });
+
+      setTimeout(() => {
+        currentWeekSquares.forEach(sq => sq.classList.remove('heatmap-focus-ping'));
+      }, 2500);
+
+      showToast('Đã định vị Tuần Hiện Tại trên Bản Đồ Học Kỳ! 🎯');
+    } else {
+      showToast('Tuần hiện tại không có trong danh sách học kỳ.');
+    }
+  }
 }

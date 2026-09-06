@@ -4,6 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 15:00] - Tách Biệt Hoàn Toàn Tính Năng Focus (Định Vị Hôm Nay 🎯) Theo Ngữ Cảnh Mục 1 & Mục 2 🧭✨
+
+- **🎯 Yêu cầu từ người dùng**:
+  - Tách biệt tính năng Focus (Hôm nay / Ping Target): Khi đang ở **Mục 2 (Bản Đồ Nhiệt / Heatmap & Timeline View)**, bấm nút Focus Hôm nay phải định vị và nháy sáng ngay trên giao diện Mục 2 mà **không bị tự động chuyển tab về Mục 1**.
+- **✅ Công việc đã hoàn thành**:
+  - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    - Xây dựng hàm [`focusTodayInHeatmap()`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js#L1297-L1414) nhận biết chế độ xem hiện tại (`week`, `month`, `semester`):
+      + **Chế độ Tuần (`week`)**: Tự động chuyển về tuần hiện tại (nếu đang xem tuần khác), cuộn ngang tới cột hôm nay (`.cal-day-column.is-today-cal-column`), cuộn dọc tới vạch giờ hiện tại (`.cal-current-time-line`), và kích hoạt hiệu ứng Radar Ping `.heatmap-focus-ping`.
+      + **Chế độ Tháng (`month`)**: Tự động chuyển về tháng hiện tại và cuộn/nháy sáng ô hôm nay (`.monthly-matrix-square.is-today-square`).
+      + **Chế độ Học kỳ (`semester`)**: Cuộn và nháy sáng ô tuần hiện tại (`.semester-square-item.is-in-current-week`).
+  - [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    - Cập nhật [`focusTodayTarget()`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js#L1048-L1085) kiểm tra `if (state.currentTab === 'today')` thì gọi `focusTodayInHeatmap()` trực tiếp mà không chuyển tab.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v98`.
+
+---
+
 ## 📅 [2026-09-06 14:55] - Chỉ Hiển Thị Bộ Chọn Chế Độ Ngày (1 Ngày / 3 Ngày / 7 Ngày) Khi Ở Mục 1 (Lưới Tuần Thời Khóa Biểu) 🎯✨
 
 - **🎯 Yêu cầu từ người dùng**:
