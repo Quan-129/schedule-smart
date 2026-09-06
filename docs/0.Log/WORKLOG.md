@@ -4,6 +4,21 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 16:18] - Chuẩn Hóa Giao Diện & Vị Trí Modal Không Gian Học Kỳ (SpaceModal UI Standards) 🎨💎
+
+- **🎯 Yêu cầu từ người dùng**: Sửa lỗi Modal Tạo / Chỉnh sửa Không Gian Học Kỳ bị nhảy xuống góc dưới bên trái màn hình và các ô input bị vỡ giao diện mặc định xấu.
+- **✅ Chi tiết sửa đổi**:
+  - [`src/1.Frontend/components/modals/SpaceModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/SpaceModal.js):
+    + Chuyển cấu trúc sang chuẩn hệ thống `.modal-backdrop` (căn giữa màn hình `position: fixed; inset: 0; z-index: 9999; backdrop-filter: blur(12px)`).
+    + Sử dụng khung `.modal-card modal-card-sm`, header `.modal-title-group`, `.modal-icon-glow` cao cấp.
+    + Áp dụng các trường `.form-group-styled`, `.input-with-icon`, nút `.btn-primary-gradient` và `.btn-ghost`.
+  - [`src/1.Frontend/styles/11.space-selector.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/11.space-selector.css):
+    + Viết styles chi tiết cho `.space-icon-picker`, `.space-icon-opt` (hiệu ứng hover scale, active glow), `.space-copy-banner` (kính mờ, viền dashed sang trọng).
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js):
+    + Nâng cache lên `smart-schedule-modular-v108`.
+
+---
+
 ## 📅 [2026-09-06 16:15] - Xử Lý Triệt Để Hiện Tượng Tràn Lề Mép Phải Navbar (Nav-Right Overflow Fix) 📐✨
 
 - **🎯 Yêu cầu từ người dùng**: Khắc phục tình trạng cụm nút bên phải (`.nav-right` gồm Week Navigation, Focus Today 🎯, Thêm Tuần ➕, Xóa Tuần 🗑️) bị lòi/tràn ra ngoài mép bo cong của thanh Navbar.

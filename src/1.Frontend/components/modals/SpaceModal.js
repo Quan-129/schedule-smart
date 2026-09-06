@@ -15,71 +15,82 @@ import { escapeHtml } from '../../../4.Security/sanitizer.js';
 const DEFAULT_ICONS = ['🎒', '📚', '🎓', '🏛️', '🔬', '💻', '💼', '🚀', '⭐', '✨'];
 
 /**
- * Tạo template HTML cho Modal Tạo/Sửa Space
+ * Tạo template HTML cho Modal Tạo/Sửa Space theo chuẩn Design System của ứng dụng
  * @param {Object} [space] - Đối tượng space nếu đang chỉnh sửa
  * @returns {string}
  */
 function createSpaceModalTemplate(space = null) {
   const isEdit = !!space;
-  const currentIcon = space ? (space.icon || '🎒') : '🎒';
+  const currentIcon = space ? (space.icon || '🎓') : '🎓';
 
   return `
-    <div id="space-modal" class="modal-overlay active">
-      <div class="modal-content space-modal-content">
+    <div id="space-modal" class="modal-backdrop">
+      <div class="modal-card modal-card-sm">
         <div class="modal-header">
-          <div class="modal-header-icon" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">
-            <i class="fa-solid ${isEdit ? 'fa-pen-to-square' : 'fa-folder-plus'}"></i>
-          </div>
-          <div class="modal-header-text">
-            <h3>${isEdit ? 'Chỉnh Sửa Bộ Lịch / Học Kỳ' : 'Tạo Bộ Lịch Học Kỳ Mới'}</h3>
-            <p>${isEdit ? 'Cập nhật thông tin học kỳ' : 'Lưu trữ học kỳ cũ trọn đời & tạo không gian mới độc lập'}</p>
+          <div class="modal-title-group">
+            <div class="modal-icon-glow" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);">
+              <i class="fa-solid ${isEdit ? 'fa-pen-to-square' : 'fa-folder-plus'}"></i>
+            </div>
+            <div>
+              <h3 class="modal-title" style="font-size: 1.15rem;">${isEdit ? 'Chỉnh Sửa Bộ Lịch / Học Kỳ' : 'Tạo Bộ Lịch Học Kỳ Mới'}</h3>
+              <span class="modal-subj-sub">${isEdit ? 'Cập nhật thông tin học kỳ' : 'Lưu trữ học kỳ cũ trọn đời & tạo không gian mới độc lập'}</span>
+            </div>
           </div>
           <button type="button" class="btn-modal-close" id="btn-close-space-modal" title="Đóng modal">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
 
-        <form id="space-modal-form" class="modal-body">
-          <div class="form-group">
-            <label for="space-name-input">Tên Học Kỳ / Bộ Lịch <span style="color: #ef4444;">*</span></label>
-            <input type="text" id="space-name-input" class="form-control" required
-              placeholder="VD: Học Kỳ 2 (2025-2026), Bằng 2, Thực tập..."
-              value="${space ? escapeHtml(space.name) : ''}">
-          </div>
-
-          <div class="form-group">
-            <label>Biểu tượng nhận diện</label>
-            <div class="space-icon-picker" id="space-icon-picker">
-              ${DEFAULT_ICONS.map(ic => `
-                <button type="button" class="space-icon-opt ${ic === currentIcon ? 'selected' : ''}" data-icon="${ic}">${ic}</button>
-              `).join('')}
+        <form id="space-modal-form" class="modal-form">
+          <div style="padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+            
+            <!-- TÊN HỌC KỲ / BỘ LỊCH -->
+            <div class="form-group-styled">
+              <label for="space-name-input"><i class="fa-solid fa-tag"></i> Tên Học Kỳ / Bộ Lịch <span class="required-star">*</span></label>
+              <div class="input-with-icon">
+                <i class="fa-solid fa-layer-group input-icon"></i>
+                <input type="text" id="space-name-input" placeholder="Ví dụ: Học Kỳ 2 (2026-2027), Bằng 2, Thực tập..." required value="${space ? escapeHtml(space.name) : ''}" autofocus autocomplete="off">
+              </div>
             </div>
-            <input type="hidden" id="space-icon-input" value="${currentIcon}">
-          </div>
 
-          <div class="form-group">
-            <label for="space-desc-input">Mô tả hoặc Ghi chú (tùy chọn)</label>
-            <input type="text" id="space-desc-input" class="form-control"
-              placeholder="VD: Học kỳ chính khóa tại trường..."
-              value="${space ? escapeHtml(space.description || '') : ''}">
-          </div>
-
-          ${!isEdit ? `
-            <div class="form-group" style="background: rgba(99, 102, 241, 0.08); padding: 0.85rem; border-radius: 8px; border: 1px dashed rgba(99, 102, 241, 0.3);">
-              <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin: 0; font-weight: 600;">
-                <input type="checkbox" id="space-copy-subjects" checked style="width: 16px; height: 16px; accent-color: var(--accent-primary, #6366f1);">
-                <span>Sao chép danh sách môn học Drive hiện tại sang kỳ này</span>
-              </label>
-              <p style="font-size: 0.76rem; color: var(--text-muted); margin: 0.35rem 0 0 1.5rem;">
-                Tiết kiệm thời gian nhập lại môn. Điểm số và Lịch học của mỗi kỳ vẫn được lưu hoàn toàn tách biệt.
-              </p>
+            <!-- CHỌN BIỂU TƯỢNG EMOJI -->
+            <div class="form-group-styled">
+              <label><i class="fa-solid fa-icons"></i> Biểu tượng nhận diện</label>
+              <div class="space-icon-picker" id="space-icon-picker">
+                ${DEFAULT_ICONS.map(ic => `
+                  <button type="button" class="space-icon-opt ${ic === currentIcon ? 'selected' : ''}" data-icon="${ic}">${ic}</button>
+                `).join('')}
+              </div>
+              <input type="hidden" id="space-icon-input" value="${currentIcon}">
             </div>
-          ` : ''}
 
-          <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)); display: flex; justify-content: flex-end; gap: 0.6rem;">
+            <!-- MÔ TẢ / GHI CHÚ -->
+            <div class="form-group-styled">
+              <label for="space-desc-input"><i class="fa-regular fa-comment-dots"></i> Mô tả hoặc Ghi chú (tùy chọn)</label>
+              <div class="input-with-icon">
+                <i class="fa-regular fa-note-sticky input-icon"></i>
+                <input type="text" id="space-desc-input" placeholder="Ví dụ: Học kỳ chính khóa tại trường..." value="${space ? escapeHtml(space.description || '') : ''}" autocomplete="off">
+              </div>
+            </div>
+
+            <!-- SAO CHÉP MÔN HỌC (CHỈ KHI TẠO MỚI) -->
+            ${!isEdit ? `
+              <div class="space-copy-banner">
+                <label class="space-checkbox-label">
+                  <input type="checkbox" id="space-copy-subjects" checked class="space-checkbox">
+                  <span class="space-checkbox-title">Sao chép danh sách môn học Drive hiện tại</span>
+                </label>
+                <p class="space-checkbox-desc">
+                  Tiết kiệm thời gian nhập lại môn. Điểm số và Lịch học của mỗi kỳ vẫn được lưu hoàn toàn tách biệt.
+                </p>
+              </div>
+            ` : ''}
+          </div>
+
+          <div class="modal-footer">
             <button type="button" class="btn-ghost" id="btn-cancel-space-modal">Hủy</button>
-            <button type="submit" class="btn-primary">
-              <i class="fa-solid fa-check"></i>
+            <button type="submit" class="btn-primary-gradient">
+              <i class="fa-solid ${isEdit ? 'fa-check' : 'fa-plus'}"></i>
               <span>${isEdit ? 'Lưu Thay Đổi' : 'Tạo Học Kỳ Mới'}</span>
             </button>
           </div>
@@ -116,7 +127,7 @@ export function openSpaceModal(spaceToEdit = null, onSaved = null) {
   const iconOpts = modalEl.querySelectorAll('.space-icon-opt');
 
   const closeModal = () => {
-    modalEl.classList.remove('active');
+    modalEl.classList.add('hidden');
     setTimeout(() => modalEl.remove(), 200);
   };
 
@@ -129,10 +140,11 @@ export function openSpaceModal(spaceToEdit = null, onSaved = null) {
 
   // Chọn Icon
   iconOpts.forEach(btn => {
-    btn.onclick = () => {
+    btn.onclick = (e) => {
+      e.preventDefault();
       iconOpts.forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
-      if (iconInput) iconInput.value = btn.getAttribute('data-icon') || '🎒';
+      if (iconInput) iconInput.value = btn.getAttribute('data-icon') || '🎓';
     };
   });
 
@@ -149,7 +161,7 @@ export function openSpaceModal(spaceToEdit = null, onSaved = null) {
       return;
     }
 
-    const icon = iconInput ? iconInput.value : '🎒';
+    const icon = iconInput ? iconInput.value : '🎓';
     const description = descInput ? descInput.value.trim() : '';
     const shouldCopySubjects = copySubjectsInput ? copySubjectsInput.checked : false;
 
