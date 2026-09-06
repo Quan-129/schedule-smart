@@ -4,6 +4,23 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 11:50] - Mặc Định Thu Gọn Banner Thống Kê & Lịch Học Hôm Nay Trong Bản Đồ Nhiệt Cường Độ Học Tập 🔥⚡
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng yêu cầu mặc định thu gọn phần Header (Bản Đồ Nhiệt Cường Độ Học Tập + 4 Thẻ KPI + Thẻ Lịch học Hôm nay) để khi mở tab Bản Đồ Nhiệt, giao diện lập tức hiển thị ngay 4 chế độ thời gian (`Lịch Tuần | Tháng | Học Kỳ | Cả Năm`) và Bản Đồ Nhiệt trực quan, không bị chiếm diện tích màn hình.
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    - Đặt mặc định `isHeaderCollapsed = true` (lưu vào `localStorage.getItem('smart_schedule_heatmap_banner_collapsed')`).
+    - Thêm nút Toggle `#btn-toggle-heatmap-banner` (`Chi tiết / Thu gọn`) cạnh tiêu đề.
+    - Thêm dải tóm tắt nhanh `.heatmap-collapsed-tags` hiển thị 4 chỉ số cốt lõi (`0b hôm nay • 140b cả kỳ • Cao điểm Tuần 44 • 74 ngày lên lớp`) trên 1 hàng mỏng nhẹ khi thu gọn.
+    - Tự động ẩn thẻ `today-focus-card` khi thu gọn để nhường chỗ tối đa cho Bản Đồ Nhiệt.
+  - [`src/1.Frontend/styles/9.heatmap-view.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/9.heatmap-view.css):
+    - Thêm CSS cho `.btn-toggle-heatmap-banner`, `.heatmap-collapsed-tags`, `.collapsed-tag`.
+    - Thiết lập `.heatmap-hero-banner.is-collapsed` co gọn padding (`0.75rem 1.15rem`), ẩn 4 thẻ KPI to và ẩn `.today-focus-card.is-collapsed`.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v90`.
+
+---
+
 ## 📅 [2026-09-06 11:46] - Sửa Triệt Để Lỗi Sticky Navbar Không Trượt Trên Điện Thoại (iOS Safari & Android Chrome) 📱🚀
 
 - **🎯 Yêu cầu & Phân tích nguyên nhân**:

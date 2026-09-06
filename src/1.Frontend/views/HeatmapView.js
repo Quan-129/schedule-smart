@@ -1092,21 +1092,38 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
   const todayStats = currentWeekObj ? currentWeekObj.days.find(d => d.dayName === todayName) : null;
   const todayClasses = todayStats ? todayStats.classes : [];
 
+  const isHeaderCollapsed = localStorage.getItem('smart_schedule_heatmap_banner_collapsed') !== 'false';
+
   container.innerHTML = `
     <div class="heatmap-view-wrapper">
       
-      <!-- 1. HERO KPI BANNER & TỔNG QUAN HỌC TẬP -->
-      <div class="heatmap-hero-banner">
+      <!-- 1. HERO KPI BANNER & TỔNG QUAN HỌC TẬP (MẶC ĐỊNH THU GỌN) -->
+      <div class="heatmap-hero-banner ${isHeaderCollapsed ? 'is-collapsed' : ''}" id="heatmap-hero-banner">
         <div class="heatmap-header-row">
           <div class="heatmap-title-group">
             <div class="heatmap-icon-glow">
               <i class="fa-solid fa-fire-flame-curved"></i>
             </div>
             <div>
-              <h2 class="heatmap-title">Bản Đồ Nhiệt Cường Độ Học Tập</h2>
+              <div style="display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap;">
+                <h2 class="heatmap-title">Bản Đồ Nhiệt Cường Độ Học Tập</h2>
+                <button type="button" id="btn-toggle-heatmap-banner" class="btn-toggle-heatmap-banner" title="${isHeaderCollapsed ? 'Mở rộng bảng thống kê chi tiết' : 'Thu gọn bảng thống kê'}">
+                  <i class="fa-solid ${isHeaderCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'}"></i>
+                  <span class="toggle-text">${isHeaderCollapsed ? 'Chi tiết' : 'Thu gọn'}</span>
+                </button>
+              </div>
               <span class="heatmap-subtitle">Phân tích mật độ buổi học, theo dõi tải học tập & năng suất sinh viên</span>
             </div>
           </div>
+
+          <!-- Quick Summary Badges khi Thu Gọn -->
+          <div class="heatmap-collapsed-tags">
+            <span class="collapsed-tag" style="color: #818cf8; background: rgba(99, 102, 241, 0.15);"><i class="fa-solid fa-calendar-day"></i> Hôm nay: <strong>${todayClasses.length}b</strong></span>
+            <span class="collapsed-tag" style="color: #c084fc; background: rgba(168, 85, 247, 0.15);"><i class="fa-solid fa-book-bookmark"></i> Cả kỳ: <strong>${totalSemesterClasses}b</strong></span>
+            <span class="collapsed-tag" style="color: #f59e0b; background: rgba(245, 158, 11, 0.15);"><i class="fa-solid fa-bolt"></i> Cao điểm: <strong>${peakWeek ? `${peakWeek.title} (${peakWeek.totalClasses}b)` : 'N/A'}</strong></span>
+            <span class="collapsed-tag" style="color: #10b981; background: rgba(16, 185, 129, 0.15);"><i class="fa-solid fa-fire"></i> Lên lớp: <strong>${activeStudyDays} ngày</strong></span>
+          </div>
+
           <div class="heatmap-legend-row">
             <span>Mật độ:</span>
             <div class="legend-scale-boxes">
@@ -1163,7 +1180,7 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
       </div>
 
       <!-- 2. TODAY QUICK FOCUS WIDGET -->
-      <div class="today-focus-card">
+      <div class="today-focus-card ${isHeaderCollapsed ? 'is-collapsed' : ''}" id="heatmap-today-focus-card">
         <div class="today-focus-header">
           <div style="display: flex; align-items: center; gap: 0.65rem;">
             <span class="today-focus-badge"><i class="fa-regular fa-clock"></i> Lịch học Hôm nay</span>
@@ -1229,6 +1246,31 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
   `;
 
   renderActiveHorizonModeContent(semesterWeeks, currentWeekFile, onSelectWeek);
+
+  // Gắn sự kiện nút Toggle Thu gọn / Mở rộng Banner
+  const toggleBannerBtn = container.querySelector('#btn-toggle-heatmap-banner');
+  const heroBannerEl = container.querySelector('#heatmap-hero-banner');
+  const todayFocusCardEl = container.querySelector('#heatmap-today-focus-card');
+  if (toggleBannerBtn && heroBannerEl) {
+    toggleBannerBtn.onclick = () => {
+      heroBannerEl.classList.toggle('is-collapsed');
+      if (todayFocusCardEl) {
+        todayFocusCardEl.classList.toggle('is-collapsed');
+      }
+      const isNowCollapsed = heroBannerEl.classList.contains('is-collapsed');
+      localStorage.setItem('smart_schedule_heatmap_banner_collapsed', isNowCollapsed ? 'true' : 'false');
+
+      const icon = toggleBannerBtn.querySelector('i');
+      const text = toggleBannerBtn.querySelector('.toggle-text');
+      if (icon) {
+        icon.className = isNowCollapsed ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-up';
+      }
+      if (text) {
+        text.textContent = isNowCollapsed ? 'Chi tiết' : 'Thu gọn';
+      }
+      toggleBannerBtn.title = isNowCollapsed ? 'Mở rộng bảng thống kê chi tiết' : 'Thu gọn bảng thống kê';
+    };
+  }
 
   container.querySelectorAll('.btn-heatmap-tab').forEach(btn => {
     btn.onclick = () => {
