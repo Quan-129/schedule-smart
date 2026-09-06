@@ -4,6 +4,24 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 17:22] - Khắc Phục Lỗi Đồng Bộ Thiết Bị Mới & Chuẩn Hóa Document ID Email Firestore 🔧✨🛡
+
+- **🎯 Vấn đề người dùng gặp phải**: Khi đăng nhập tài khoản trên thiết bị mới bị hiện Avatar là chữ 'K' (do bị fallback sang Khách khi mobile popup bị chặn) và không tải được data môn học (do lệch UID giữa Fast Owner Login và Google OAuth UID).
+- **🔍 Nguyên nhân & Giải pháp khắc phục**:
+  1. **Lệch Firestore Doc ID giữa các phương thức đăng nhập**:
+     - *Trước đây*: Firestore doc được trỏ theo `user.uid` (`owner-minhquan` khi đăng nhập nhanh trên PC vs Google Auth UID thật `V00v...` khi đăng nhập Google trên điện thoại), khiến dữ liệu từ máy tính không liên kết được với điện thoại.
+     - *Đã khắc phục*: Thêm hàm [`getFirestoreDocId(user)`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js#L44-L61) chuẩn hóa email thành Document ID cố định `user_${sanitizedEmail}`. Dù người dùng đăng nhập bằng Google Popup, Redirect hay nút Đăng nhập nhanh 1-chạm thì tất cả thiết bị đều trỏ về chính xác 1 Document Firestore duy nhất của tài khoản.
+  2. **Tự động gắn Firestore Listener cho Fast Owner Login**:
+     - [`handleOwnerFastLogin()`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js#L230-L260) nay tự động kích hoạt [`attachFirestoreListener()`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js#L430-L485) và đồng bộ Cloud ngay lập tức.
+  3. **Ngăn chặn lỗi Fallback sang Khách (Avatar 'K')**:
+     - Loại bỏ việc tự ý chuyển người dùng sang Khách (`handleGuestLogin`) khi Google popup bị chặn trên mobile; thay vào đó chuyển hướng redirect an toàn hoặc thông báo rõ ràng.
+     - Cập nhật avatar mặc định hiển thị chữ 'M' (Minh Quân) nếu không có `photoURL`.
+- **✅ Chi tiết thay đổi**:
+  - [`src/3.Database/auth/FirebaseAuthService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js): Cập nhật [`getFirestoreDocId()`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js#L44-L61), [`handleOwnerFastLogin()`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js#L230-L260), [`handleGoogleLogin()`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js#L275-L320), [`updateAuthUI()`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js#L350-L415), [`attachFirestoreListener()`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js#L430-L485), [`syncAllStateToCloud()`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js#L487-L535).
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache version lên `smart-schedule-modular-v121`.
+
+---
+
 ## 📅 [2026-09-06 17:15] - Phân Tách Độc Lập Giữa Dữ Liệu Học Tập (Data Domain) & Trạng Thái Giao Diện (UI/Session State) 🛡⚡📱💻
 
 - **🎯 Yêu cầu từ người dùng**: Bỏ lưu trạng thái cuối (Active Space, Tab, Tuần xem, Theme, Days Mode) lên Cloud. Giữa các thiết bị dùng chung 1 tài khoản Google hoạt động độc lập 100% về mặt phiên làm việc/giao diện, chỉ chia sẻ chung Dữ liệu học tập cốt lõi để loại bỏ hoàn toàn xung đột & tranh chấp phiên (Session Race Condition).

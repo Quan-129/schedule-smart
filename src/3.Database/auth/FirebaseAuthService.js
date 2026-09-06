@@ -44,6 +44,23 @@ export function isOwnerUser(user = currentUser) {
 }
 
 /**
+ * Lấy Document ID duy nhất trên Cloud Firestore dựa theo Email hoặc UID
+ * Đảm bảo các cách đăng nhập (Google OAuth, Redirect, Đăng nhập nhanh Chủ Sở Hữu) đều trỏ về cùng 1 document
+ * @param {Object|null} user 
+ * @returns {string|null}
+ */
+export function getFirestoreDocId(user) {
+  if (!user) return null;
+  if (user.email) {
+    return 'user_' + user.email.toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
+  }
+  if (user.uid) {
+    return 'user_' + user.uid.toLowerCase().trim().replace(/[^a-z0-9]/g, '_');
+  }
+  return null;
+}
+
+/**
  * Lấy đối tượng người dùng hiện tại
  * @returns {Object|null}
  */
@@ -74,7 +91,7 @@ export function initFirebaseAuth(onAuthChangedCallback) {
     console.warn('[FirebaseAuth] Lỗi khởi tạo Firebase:', err);
   }
 
-  // 1. Kiểm tra Local Owner Session trước
+  // 1. Kiểm tra Local Owner Session trước và tự động kết nối Firestore
   const localAuthRaw = localStorage.getItem('smart_schedule_local_auth');
   if (localAuthRaw) {
     try {
@@ -82,6 +99,7 @@ export function initFirebaseAuth(onAuthChangedCallback) {
       if (localUser && localUser.email) {
         currentUser = localUser;
         updateAuthUI(localUser);
+        attachFirestoreListener(localUser, onAuthChangedCallback);
         if (typeof onAuthChangedCallback === 'function') {
           onAuthChangedCallback(localUser);
         }
@@ -100,6 +118,7 @@ export function initFirebaseAuth(onAuthChangedCallback) {
         localStorage.removeItem('smart_schedule_guest_mode');
         localStorage.removeItem('smart_schedule_local_auth');
         updateAuthUI(result.user);
+        attachFirestoreListener(result.user, onAuthChangedCallback);
         showToast(`Đăng nhập thành công! Xin chào ${result.user.displayName || 'bạn'}.`);
         if (typeof onAuthChangedCallback === 'function') {
           onAuthChangedCallback(result.user);
@@ -124,16 +143,16 @@ export function initFirebaseAuth(onAuthChangedCallback) {
         localStorage.removeItem('smart_schedule_local_auth');
         updateAuthUI(user);
 
-        // Hủy listener cũ và gắn listener mới cho UID hiện tại
+        // Hủy listener cũ và gắn listener mới
         if (firestoreUnsubscribe) {
           firestoreUnsubscribe();
           firestoreUnsubscribe = null;
         }
 
-        attachFirestoreListener(user.uid, onAuthChangedCallback);
+        attachFirestoreListener(user, onAuthChangedCallback);
 
         if (isDifferentUser) {
-          showToast(`Xin chào, ${user.displayName || 'bạn'}! Đã kết nối Cloud an toàn.`);
+          showToast(`Xin chào, ${user.displayName || user.email || 'bạn'}! Đã kết nối Cloud an toàn.`);
         }
 
         if (typeof onAuthChangedCallback === 'function') {
@@ -146,7 +165,17 @@ export function initFirebaseAuth(onAuthChangedCallback) {
         }
 
         const localAuth = localStorage.getItem('smart_schedule_local_auth');
-        if (localAuth) return; // Giữ nguyên local auth nếu có
+        if (localAuth) {
+          try {
+            const localUser = JSON.parse(localAuth);
+            if (localUser && localUser.email) {
+              currentUser = localUser;
+              updateAuthUI(localUser);
+              attachFirestoreListener(localUser, onAuthChangedCallback);
+              return;
+            }
+          } catch (e) { }
+        }
 
         // Nếu đã từng chọn chế độ khách trước đó, tự động mở app
         const isGuest = localStorage.getItem('smart_schedule_guest_mode') === 'true';
@@ -202,13 +231,30 @@ export function handleOwnerFastLogin() {
   currentUser = {
     uid: 'owner-minhquan',
     email: 'minhquan12092005@gmail.com',
-    displayName: 'Minh Quân (Chủ Sở Hữu)',
+    displayName: 'Minh Quân',
     photoURL: ''
   };
   localStorage.setItem('smart_schedule_local_auth', JSON.stringify(currentUser));
   localStorage.removeItem('smart_schedule_guest_mode');
   updateAuthUI(currentUser);
-  showToast('Đã đăng nhập thành công với quyền Chủ Sở Hữu!');
+
+  // Gắn Firestore Listener đồng bộ Cloud
+  if (firestoreUnsubscribe) {
+    firestoreUnsubscribe();
+    firestoreUnsubscribe = null;
+  }
+  attachFirestoreListener(currentUser, globalAuthCallback);
+
+  // Nạp lại dữ liệu State
+  initApplicationState(currentUser);
+
+  // Nếu máy hiện tại đang có dữ liệu, đồng bộ ngay lên Cloud để các thiết bị khác nhận được
+  const backupData = exportFullBackupData(currentUser);
+  if (backupData.spaces.length > 1 || (state.driveSubjects && state.driveSubjects.length > 0)) {
+    syncAllStateToCloud(currentUser);
+  }
+
+  showToast('Đã kết nối tài khoản Chủ Sở Hữu (Minh Quân)! Dữ liệu Cloud đồng bộ tức thì. ✨');
   if (typeof globalAuthCallback === 'function') {
     globalAuthCallback(currentUser);
   }
@@ -268,17 +314,19 @@ export async function handleGoogleLogin() {
   } catch (err) {
     console.error('[FirebaseAuth] Lỗi đăng nhập Google Popup:', err);
 
-    // Nếu popup bị chặn hoặc gặp lỗi COOP Cross-Origin, tự động chuyển sang Redirect
-    showToast('Đang chuyển hướng đăng nhập an toàn qua Google Redirect...');
-    try {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      provider.setCustomParameters({ prompt: 'select_account' });
-      await auth.signInWithRedirect(provider);
-    } catch (redirectErr) {
-      console.error('[FirebaseAuth] Lỗi redirect fallback:', redirectErr);
-      showToast('Popup bị chặn bởi trình duyệt. Đã chuyển sang chế độ Khách.');
-      handleGuestLogin();
+    // Nếu popup bị chặn (trên mobile browser), tự động chuyển sang Redirect
+    if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request' || err.code === 'auth/popup-closed-by-user') {
+      showToast('Đang chuyển hướng đăng nhập an toàn qua Google...');
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
+        await auth.signInWithRedirect(provider);
+        return;
+      } catch (redirectErr) {
+        console.error('[FirebaseAuth] Lỗi redirect fallback:', redirectErr);
+      }
     }
+    showToast('Không thể mở popup Google. Vui lòng bấm Đăng nhập nhanh hoặc thử lại.');
   } finally {
     resetLoginButtons(landingBtn, authBtn, originalLandingHtml, originalAuthHtml);
   }
@@ -372,14 +420,15 @@ export function updateAuthUI(user) {
       if (user.photoURL) {
         userAvatar.src = user.photoURL;
       } else {
-        const initial = (user.displayName || user.email || 'S').charAt(0).toUpperCase();
+        const nameForInitial = user.displayName || user.email || 'Minh Quân';
+        const initial = nameForInitial.charAt(0).toUpperCase();
         userAvatar.src = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" rx="16" fill="%236366f1"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" fill="white" font-family="sans-serif" font-weight="bold" font-size="14">${initial}</text></svg>`;
       }
       userAvatar.style.display = 'inline-block';
       userAvatar.title = user.displayName || user.email || 'Sinh viên';
     }
     if (userDisplayName) {
-      userDisplayName.textContent = user.displayName || 'Sinh viên';
+      userDisplayName.textContent = user.displayName || (user.email ? user.email.split('@')[0] : 'Sinh viên');
     }
   } else {
     // CHƯA ĐĂNG NHẬP: Hiển thị Login Screen
@@ -404,13 +453,17 @@ export function updateAuthUI(user) {
 
 /**
  * Lắng nghe thay đổi dữ liệu thời gian thực từ Cloud Firestore theo User Scope
- * @param {string} uid 
+ * @param {Object|string} userOrUid 
  * @param {Function} onSyncCallback 
  */
-function attachFirestoreListener(uid, onSyncCallback) {
-  if (!db) return;
+function attachFirestoreListener(userOrUid, onSyncCallback) {
+  if (!db || !userOrUid) return;
 
-  const docRef = db.collection('users').doc(uid);
+  const targetUser = typeof userOrUid === 'object' ? userOrUid : (currentUser || { uid: userOrUid });
+  const docId = getFirestoreDocId(targetUser);
+  if (!docId) return;
+
+  const docRef = db.collection('users').doc(docId);
   firestoreUnsubscribe = docRef.onSnapshot((doc) => {
     if (doc.exists) {
       const data = doc.data();
@@ -425,12 +478,15 @@ function attachFirestoreListener(uid, onSyncCallback) {
           setApplyingRemoteUpdateFlag(true);
 
           // 2. Phục hồi toàn bộ Đa Không Gian & Dữ liệu Spaces từ Cloud (Chỉ nạp Data Domain)
-          if (data.spaces || data.spacesData || data.data) {
+          const cloudSpaces = Array.isArray(data.spaces) && data.spaces.length > 0 ? data.spaces : [];
+          const cloudData = data.spacesData || data.data || {};
+
+          if (cloudSpaces.length > 0 || Object.keys(cloudData).length > 0) {
             const importPayload = {
               app: 'ScheduleSmart',
               version: '2.1.0',
-              spaces: Array.isArray(data.spaces) ? data.spaces : [],
-              data: data.spacesData || data.data || {}
+              spaces: cloudSpaces,
+              data: cloudData
             };
             importFullBackupData(importPayload, currentUser, { isSilent: true });
           }
@@ -447,8 +503,12 @@ function attachFirestoreListener(uid, onSyncCallback) {
         }
       }
     } else {
-      // Thiết bị mới / lần đầu: Lưu toàn bộ dữ liệu hiện tại lên Cloud
-      syncAllStateToCloud(currentUser);
+      // Tài khoản mới chưa có trên Cloud: Chỉ đồng bộ nếu máy hiện tại thực sự có dữ liệu
+      const currentBackup = exportFullBackupData(targetUser);
+      const hasData = (currentBackup.spaces && currentBackup.spaces.length > 1) || (state.driveSubjects && state.driveSubjects.length > 0);
+      if (hasData) {
+        syncAllStateToCloud(targetUser);
+      }
     }
   }, (err) => {
     console.warn('[Firestore] Lỗi snapshot:', err);
@@ -467,11 +527,13 @@ export function syncAllStateToCloud(user = null) {
   }
 
   const activeUser = user || currentUser;
-  if (!db || !activeUser || !activeUser.uid) return;
+  if (!db || !activeUser) return;
+  const docId = getFirestoreDocId(activeUser);
+  if (!docId) return;
 
   try {
     const backupData = exportFullBackupData(activeUser);
-    const docRef = db.collection('users').doc(activeUser.uid);
+    const docRef = db.collection('users').doc(docId);
     
     // Đóng gói cấu trúc Data Domain thuần túy (Không đồng bộ trạng thái giao diện UI/Session)
     const cloudPayload = {
