@@ -8,6 +8,7 @@ import { state } from '../../3.Database/state.js';
 import { escapeHtml } from '../../4.Security/sanitizer.js';
 import { SUBJECT_COLORS } from '../../3.Database/storage/SeedData.js';
 import { showToast } from '../components/Toast.js';
+import { getDateForDayOfWeek } from '../../2.Backend/utils/dateHelpers.js';
 
 const subjectColorMap = new Map();
 
@@ -24,8 +25,9 @@ export function getSubjectColor(subjectName) {
  * Render ma trận thời khóa biểu theo chế độ 1 ngày / 3 ngày / 7 ngày
  * @param {Array<Object>} days 
  * @param {boolean} isCurrentWeek 
+ * @param {string} weekStartDate - Ngày bắt đầu tuần (Thứ Hai, YYYY-MM-DD)
  */
-export function renderTimetableGrid(days = [], isCurrentWeek = false) {
+export function renderTimetableGrid(days = [], isCurrentWeek = false, weekStartDate = '') {
   const scheduleGrid = document.getElementById('schedule-grid');
   if (!scheduleGrid) return;
 
@@ -98,6 +100,8 @@ export function renderTimetableGrid(days = [], isCurrentWeek = false) {
     }
 
     const isToday = isCurrentWeek && (day.dayOfWeekNumber === currentDayOfWeek);
+    const dateInfo = getDateForDayOfWeek(weekStartDate, day.dayOfWeekNumber);
+    const dateTagHtml = dateInfo ? `<span class="day-date-tag" title="Ngày ${escapeHtml(dateInfo.full)}"><i class="fa-regular fa-calendar"></i> ${escapeHtml(dateInfo.full)}</span>` : '';
 
     const dayCard = document.createElement('div');
     dayCard.className = `day-card ${isToday ? 'is-today' : ''}`;
@@ -160,10 +164,13 @@ export function renderTimetableGrid(days = [], isCurrentWeek = false) {
 
     dayCard.innerHTML = `
       <div class="day-header">
-        <h3 class="day-title">
-          <span>${escapeHtml(day.name)}</span>
+        <div class="day-title-group-header">
+          <h3 class="day-title">
+            <span>${escapeHtml(day.name)}</span>
+            ${dateTagHtml}
+          </h3>
           ${isToday ? `<span class="badge-today">Hôm nay</span>` : ''}
-        </h3>
+        </div>
         <span class="class-count-badge">${day.classes ? day.classes.length : 0} buổi</span>
       </div>
       ${classesHtml}

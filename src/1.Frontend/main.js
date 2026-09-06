@@ -8,7 +8,7 @@
 import { state, initApplicationState, persistDriveSubjects, persistDaysDisplayMode, setState } from '../3.Database/state.js';
 import { DEFAULT_WEEK_35_MD, DEFAULT_WEEK_36_MD } from '../3.Database/storage/SeedData.js';
 import { parseScheduleMarkdown, serializeScheduleToMarkdown, generateEmptyWeekMarkdown } from '../2.Backend/services/TimetableParser.js';
-import { formatCurrentVietnameseDate } from '../2.Backend/utils/dateHelpers.js';
+import { formatCurrentVietnameseDate, getMondayOfCurrentWeek, addDaysToDateStr, formatDateDDMM, formatDateDDMMYYYY } from '../2.Backend/utils/dateHelpers.js';
 import { renderBackpackView, enterJiggleMode, exitJiggleMode } from './views/BackpackView.js';
 import { renderGradesView, highlightGradeSlice } from './views/GradesView.js';
 import { renderTimetableGrid, renderTodayView, getSubjectColor } from './views/TimetableGrid.js';
@@ -103,19 +103,26 @@ async function initApp() {
       const isOwner = isOwnerUser(activeUser);
       const customWeeksKey = isOwner ? 'smart_schedule_custom_weeks' : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_custom_weeks`;
 
-      availableWeeks.push({
+      const newWeekItem = {
         id: newWeekData.id,
         title: newWeekData.title,
         startDate: newWeekData.startDate,
         filename: newWeekData.filename,
         description: newWeekData.desc
-      });
+      };
+
+      if (newWeekData.direction === 'before') {
+        availableWeeks.unshift(newWeekItem);
+      } else {
+        availableWeeks.push(newWeekItem);
+      }
+
       localStorage.setItem(`smart_schedule_custom_md_${newWeekData.filename}`, newWeekData.mdContent);
       const customWeeks = availableWeeks.filter(w => w.filename.startsWith('custom_'));
       localStorage.setItem(customWeeksKey, JSON.stringify(customWeeks));
       renderWeekDropdownOptions(newWeekData.filename);
       loadWeekSchedule(newWeekData.filename);
-      showToast(`Đã tạo thành công ${newWeekData.title}!`);
+      showToast(`Đã tạo thành công ${newWeekData.title}! 🎉`);
     }
   );
   initThemeToggle();
@@ -341,20 +348,25 @@ async function initWeekSelector(user = null) {
     }
   }
 
-  // NẾU LÀ NGƯỜI DÙNG MỚI (hoặc chưa có tuần nào): Khởi tạo 1 tuần trống tinh khôi (Tuần 1)
+  // NẾU LÀ NGƯỜI DÙNG MỚI (hoặc chưa có tuần nào): Khởi tạo 1 tuần trống tinh khôi gắn với ngày hôm nay
   if (availableWeeks.length === 0) {
+    const currentMonday = getMondayOfCurrentWeek();
+    const currentSunday = addDaysToDateStr(currentMonday, 6);
+    const formattedRange = `${formatDateDDMM(currentMonday)} - ${formatDateDDMM(currentSunday)}`;
     const initialCleanWeek = {
       id: 'tuan-1',
-      title: 'Tuần 1',
-      startDate: '',
+      title: `Tuần 1 (${formattedRange})`,
+      startDate: currentMonday,
       filename: 'custom_tuan-1.md',
       description: 'Tuần học đầu tiên'
     };
     availableWeeks.push(initialCleanWeek);
     const customMdKey = `smart_schedule_custom_md_${initialCleanWeek.filename}`;
     if (!localStorage.getItem(customMdKey)) {
-      localStorage.setItem(customMdKey, generateEmptyWeekMarkdown('Tuần 1'));
+      localStorage.setItem(customMdKey, generateEmptyWeekMarkdown(`Tuần 1 (${formattedRange})`));
     }
+    const customWeeksKey = isOwner ? 'smart_schedule_custom_weeks' : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_custom_weeks`;
+    localStorage.setItem(customWeeksKey, JSON.stringify([initialCleanWeek]));
   }
 
   renderWeekDropdownOptions();
@@ -362,9 +374,11 @@ async function initWeekSelector(user = null) {
 
   if (weekSelect) {
     weekSelect.onchange = () => {
-      if (weekSelect.value === '__ADD_NEW_WEEK__') {
-        openAddWeekModal(availableWeeks);
-        // Trả lại giá trị trước đó
+      if (weekSelect.value === '__ADD_PREV_WEEK__') {
+        openAddWeekModal(availableWeeks, 'before');
+        weekSelect.value = currentWeekFile || availableWeeks[0].filename;
+      } else if (weekSelect.value === '__ADD_NEXT_WEEK__' || weekSelect.value === '__ADD_NEW_WEEK__') {
+        openAddWeekModal(availableWeeks, 'after');
         weekSelect.value = currentWeekFile || availableWeeks[0].filename;
       } else {
         loadWeekSchedule(weekSelect.value);
@@ -540,10 +554,12 @@ function renderWeekDropdownOptions(selectedFilename) {
 
   const target = selectedFilename || currentWeekFile || (availableWeeks[0] ? availableWeeks[0].filename : '');
 
-  weekSelect.innerHTML = availableWeeks.map(w => `
+  weekSelect.innerHTML = `
+    <option value="__ADD_PREV_WEEK__" style="color: #38bdf8; font-weight: 700;">⬆️ ➕ Thêm tuần trước (-7 ngày)...</option>
+  ` + availableWeeks.map(w => `
     <option value="${w.filename}" ${w.filename === target ? 'selected' : ''}>${escapeHtml(w.title)}</option>
   `).join('') + `
-    <option value="__ADD_NEW_WEEK__" style="color: #10b981; font-weight: 700;">➕ Thêm tuần mới...</option>
+    <option value="__ADD_NEXT_WEEK__" style="color: #10b981; font-weight: 700;">⬇️ ➕ Thêm tuần sau (+7 ngày)...</option>
   `;
 }
 
@@ -601,7 +617,9 @@ async function loadWeekSchedule(filepath) {
 
   // 4. Render Grid & Heatmap View
   const isCurrentWeek = checkIsCurrentWeek(filepath);
-  renderTimetableGrid(parsed.days || [], isCurrentWeek);
+  const currentWeekObj = availableWeeks.find(w => w.filename === filepath);
+  const weekStartDate = currentWeekObj ? currentWeekObj.startDate : '';
+  renderTimetableGrid(parsed.days || [], isCurrentWeek, weekStartDate);
   if (state.currentTab === 'today') {
     renderHeatmapView(availableWeeks, currentWeekFile, handleSelectWeekFromHeatmap);
   }

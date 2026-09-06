@@ -10,6 +10,7 @@ import { state } from '../../3.Database/state.js';
 import { parseScheduleMarkdown } from '../../2.Backend/services/TimetableParser.js';
 import { escapeHtml } from '../../4.Security/sanitizer.js';
 import { getSubjectColor } from './TimetableGrid.js';
+import { getDateForDayOfWeek } from '../../2.Backend/utils/dateHelpers.js';
 
 /* ==========================================================================
    1. MODULE STATE & CONSTANTS
@@ -450,9 +451,13 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
           <div class="cal-days-header-grid">
             ${standardDays.map(d => {
               const isToday = dayIndexMap[d.dayName] === currentDayOfWeek && selectedWeek.filename === currentWeekFile;
+              const weekStartDate = selectedWeek.startDate || '';
+              const dateInfo = getDateForDayOfWeek(weekStartDate, dayIndexMap[d.dayName]);
+              const dateLabel = dateInfo ? dateInfo.full : '';
               return `
                 <div class="cal-day-header-cell ${isToday ? 'is-today-cal-header' : ''}">
                   <span class="cal-day-name">${escapeHtml(d.dayName)}</span>
+                  ${dateLabel ? `<span class="cal-day-date-tag">${escapeHtml(dateLabel)}</span>` : ''}
                   <span class="cal-day-classes-count">${d.classesCount > 0 ? `${d.classesCount} buổi` : 'Nghỉ'}</span>
                 </div>
               `;

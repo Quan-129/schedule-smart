@@ -4,6 +4,32 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 09:30] - Tự Động Định Vị Ngày Tuần Hiện Tại (DD-MM-YYYY), Hiển Thị Ngày Cạnh Thứ & Mở Rộng Thêm Tuần 2 Chiều (Cộng Trên / Cộng Dưới) 📅⚡
+
+- **🎯 Yêu cầu & Mục tiêu**:
+  - Tự động gán Thứ Hai của tuần thực tế hôm nay cho tài khoản mới (Acc mới / Tuần mẫu) để định vị đúng ngày hôm nay ngay lần đầu mở ứng dụng.
+  - Tự động tính toán ngày tháng cụ thể định dạng chuẩn `DD-MM-YYYY` (ví dụ `07-09-2026`) hiển thị kế bên tên Thứ trên cả ma trận lưới (Timetable Grid) và timeline Google Calendar.
+  - Hỗ trợ thêm tuần linh hoạt 2 chiều:
+    - **Cộng dưới (Tuần sau / Tương lai)**: Tự động cộng 7 ngày vào ngày bắt đầu của tuần cuối cùng.
+    - **Cộng trên (Tuần trước / Quá khứ)**: Tự động trừ 7 ngày từ ngày bắt đầu của tuần đầu tiên.
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - `[Backend Date Helpers]` [`src/2.Backend/utils/dateHelpers.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/utils/dateHelpers.js):
+    - Triển khai các hàm: `getMondayOfCurrentWeek()`, `formatDateDDMMYYYY()`, `formatDateDDMM()`, `addDaysToDateStr()`, `getDateForDayOfWeek()`.
+  - `[Frontend App Controller]` [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    - Khi người dùng mới chưa có tuần: Khởi tạo Tuần 1 gắn với Thứ Hai tuần hiện tại (`getMondayOfCurrentWeek()`) -> tự động highlight "Hôm nay".
+    - Dropdown điều hướng tuần tích hợp 2 tùy chọn nhanh: `⬆️ ➕ Thêm tuần trước (-7 ngày)...` và `⬇️ ➕ Thêm tuần sau (+7 ngày)...`.
+    - Truyền `weekStartDate` vào `renderTimetableGrid` để render ngày cụ thể.
+  - `[Frontend Views]`
+    - [`src/1.Frontend/views/TimetableGrid.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/TimetableGrid.js): Header thẻ ngày hiển thị Thứ kèm tag ngày `DD-MM-YYYY` (VD: `Thứ 2 [31-08-2026]`).
+    - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js): Cột Timeline Google Calendar hiển thị Thứ kèm tag ngày `DD-MM-YYYY`.
+  - `[Frontend Modal]` [`src/1.Frontend/components/modals/AddWeekModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddWeekModal.js):
+    - Bổ sung nút chuyển hướng: `Thêm Tuần Sau (+7 ngày)` hoặc `Thêm Tuần Trước (-7 ngày)` tự động tính trước ngày bắt đầu và tiêu đề tuần.
+  - `[Modular CSS]` [`src/1.Frontend/styles/3.timetable-grid.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/3.timetable-grid.css) & [`src/1.Frontend/styles/9.heatmap-view.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/9.heatmap-view.css):
+    - Tạo kiểu badge ngày tháng `.day-date-tag` và `.cal-day-date-tag` màu xám bạc monospaced tinh tế, nổi bật màu tím khi là ngày hôm nay.
+  - `[Performance / PWA]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v67` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-06 09:20] - Tích Hợp Nút "x" Xóa Ca Học Mẫu & Phòng Học Mẫu Bất Kỳ Trong Modal Thêm Tiết 🗑️✨
 
 - **🎯 Yêu cầu & Mục tiêu**:
