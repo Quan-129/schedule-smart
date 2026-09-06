@@ -29,37 +29,90 @@ let isPreloadingWeeks = false;
    ========================================================================== */
 
 /**
- * Tính toán mức độ nhiệt (Level 0 - 4) dựa trên số buổi học trong ngày
- * @param {number} classCount - Số buổi học / lớp học
+ * Tính toán thời lượng (theo giờ thập phân) của một lớp học / task
+ * Hỗ trợ cả startTime/endTime và timeRange (ví dụ '07:00 - 11:30' -> 4.5h)
+ * @param {Object} cls
+ * @returns {number}
+ */
+export function getClassDurationHours(cls) {
+  if (!cls) return 0;
+  let sh = 7, sm = 0, eh = 9, em = 0;
+  let hasValidTime = false;
+
+  if (cls.startTime && cls.endTime) {
+    const [h1, m1 = 0] = String(cls.startTime).split(':').map(Number);
+    const [h2, m2 = 0] = String(cls.endTime).split(':').map(Number);
+    if (!isNaN(h1) && !isNaN(h2)) {
+      sh = h1; sm = m1; eh = h2; em = m2;
+      hasValidTime = true;
+    }
+  } else if (cls.timeRange) {
+    const parts = String(cls.timeRange).split('-');
+    if (parts.length >= 2) {
+      const [h1, m1 = 0] = parts[0].trim().split(':').map(Number);
+      const [h2, m2 = 0] = parts[1].trim().split(':').map(Number);
+      if (!isNaN(h1) && !isNaN(h2)) {
+        sh = h1; sm = m1; eh = h2; em = m2;
+        hasValidTime = true;
+      }
+    }
+  }
+
+  if (!hasValidTime) {
+    return 1.5; // Mặc định 1 tiết học đại học 1.5 giờ
+  }
+
+  const startMin = sh * 60 + sm;
+  let endMin = eh * 60 + em;
+  if (endMin <= startMin) endMin = startMin + 90;
+
+  const durationMin = endMin - startMin;
+  return Math.round((durationMin / 60) * 10) / 10;
+}
+
+/**
+ * Tính tổng thời lượng (giờ) của tất cả các lớp trong ngày (cộng dồn kể cả trùng giờ)
+ * @param {Array<Object>} classes
+ * @returns {number}
+ */
+export function getDayTotalHours(classes = []) {
+  if (!classes || classes.length === 0) return 0;
+  const total = classes.reduce((sum, c) => sum + getClassDurationHours(c), 0);
+  return Math.round(total * 10) / 10;
+}
+
+/**
+ * Tính toán mức độ nhiệt (Level 0 - 4) dựa trên tổng số giờ học trong ngày
+ * @param {number} totalHours - Tổng số giờ học trong ngày
  * @returns {number} 0, 1, 2, 3, 4
  */
-export function getHeatmapLevel(classCount = 0) {
-  if (!classCount || classCount <= 0) return 0;
-  if (classCount === 1) return 1;
-  if (classCount === 2) return 2;
-  if (classCount === 3) return 3;
+export function getHeatmapLevel(totalHours = 0) {
+  if (!totalHours || totalHours <= 0) return 0;
+  if (totalHours <= 2.0) return 1;
+  if (totalHours <= 4.0) return 2;
+  if (totalHours <= 6.5) return 3;
   return 4;
 }
 
 /**
- * Đánh giá tải học tập của cả tuần (theo số buổi học)
- * @param {number} totalClasses - Tổng số buổi học trong tuần
+ * Đánh giá tải học tập của cả tuần (theo tổng số giờ học)
+ * @param {number} totalHours - Tổng số giờ học trong tuần
  * @returns {{ label: string, color: string, bg: string }}
  */
-export function evaluateWeekWorkload(totalClasses = 0) {
-  if (totalClasses === 0) {
+export function evaluateWeekWorkload(totalHours = 0) {
+  if (totalHours === 0) {
     return { label: 'Tuần nghỉ', color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.15)' };
   }
-  if (totalClasses <= 4) {
+  if (totalHours <= 10) {
     return { label: 'Nhẹ nhàng', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)' };
   }
-  if (totalClasses <= 8) {
+  if (totalHours <= 20) {
     return { label: 'Vừa phải', color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.15)' };
   }
-  if (totalClasses <= 12) {
+  if (totalHours <= 30) {
     return { label: 'Cao điểm', color: '#a855f7', bg: 'rgba(168, 85, 247, 0.15)' };
   }
-  return { label: 'Lịch học dày 🔥', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.2)' };
+  return { label: 'Cháy máy 🔥', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.2)' };
 }
 
 /**
@@ -161,23 +214,31 @@ export function aggregateSemesterData(availableWeeks = [], currentWeekFile = '')
     }
 
     let totalClasses = 0;
+    let totalHours = 0;
     const daysStats = [];
 
     const standardNames = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ Nhật'];
     standardNames.forEach(dayName => {
       const foundDay = (parsed.days || []).find(d => d.name === dayName);
-      const classesCount = foundDay && !foundDay.isDayOff && foundDay.classes ? foundDay.classes.length : 0;
+      const classes = foundDay && !foundDay.isDayOff && foundDay.classes ? foundDay.classes : [];
+      const classesCount = classes.length;
+      const dayHours = getDayTotalHours(classes);
+
       totalClasses += classesCount;
+      totalHours += dayHours;
+
       daysStats.push({
         dayName,
         classesCount,
-        level: getHeatmapLevel(classesCount),
-        classes: foundDay ? (foundDay.classes || []) : [],
+        totalHours: dayHours,
+        level: getHeatmapLevel(dayHours),
+        classes,
         isDayOff: !foundDay || foundDay.isDayOff || classesCount === 0
       });
     });
 
-    const workload = evaluateWeekWorkload(totalClasses);
+    totalHours = Math.round(totalHours * 10) / 10;
+    const workload = evaluateWeekWorkload(totalHours);
 
     weeksData.push({
       id: w.id || `week-${idx + 1}`,
@@ -186,6 +247,7 @@ export function aggregateSemesterData(availableWeeks = [], currentWeekFile = '')
       description: w.description || '',
       startDate: w.startDate || '',
       totalClasses,
+      totalHours,
       workload,
       days: daysStats,
       isCurrent: w.filename === currentWeekFile,
@@ -452,7 +514,7 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
 
         <div class="heatmap-card-actions">
           <span class="semester-workload-badge" style="background: ${selectedWeek.workload.bg}; color: ${selectedWeek.workload.color};">
-            ${selectedWeek.workload.label} (${selectedWeek.totalClasses} buổi học)
+            ${selectedWeek.workload.label} (${selectedWeek.totalHours || 0} giờ • ${selectedWeek.totalClasses} buổi)
           </span>
           <select id="select-weekly-matrix-week" class="heatmap-select-filter">
             ${semesterWeeks.map(w => `
@@ -479,95 +541,99 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
               return `
                 <div class="cal-day-header-cell ${isToday ? 'is-today-cal-header' : ''}">
                   <span class="cal-day-name">${escapeHtml(d.dayName)}</span>
-                  ${dateLabel ? `<span class="cal-day-date-tag">${escapeHtml(dateLabel)}</span>` : ''}
-                  <span class="cal-day-classes-count">${d.classesCount > 0 ? `${d.classesCount} buổi` : 'Nghỉ'}</span>
+                  ${dateLabel ? `<span class="cal-day-date">${escapeHtml(dateLabel)}</span>` : ''}
+                  <span class="cal-day-count-badge">${d.totalHours > 0 ? `${d.totalHours}h` : 'Nghỉ'}</span>
                 </div>
               `;
             }).join('')}
           </div>
         </div>
 
-        <!-- Khung Timeline Thân Lịch Cuộn Dọc / Ngang -->
-        <div class="weekly-cal-scroll-area">
-          <div class="weekly-cal-body-grid" style="height: ${totalTimelineHeight}px;">
-            <!-- Cột Trục Thời Gian Bên Trái (Time Axis) -->
-            <div class="cal-time-axis-col">
-              ${hoursList.map(h => `
-                <div class="cal-time-mark" style="top: ${(h - startHour) * HOUR_HEIGHT + TOP_PADDING}px;">
-                  <span>${String(h).padStart(2, '0')}:00</span>
-                </div>
-              `).join('')}
-            </div>
+        <!-- Thân Lịch Scale Thời Gian Thực -->
+        <div class="weekly-cal-body" style="height: ${totalTimelineHeight}px;">
+          <!-- Cột hiển thị mốc giờ bên trái -->
+          <div class="cal-time-axis-col">
+            ${hoursList.map(h => `
+              <div class="cal-hour-mark" style="top: ${(h - startHour) * HOUR_HEIGHT + TOP_PADDING}px;">
+                <span>${String(h).padStart(2, '0')}:00</span>
+              </div>
+            `).join('')}
+          </div>
 
-            <!-- 7 Cột Ngày dạng Timeline -->
-            <div class="cal-days-columns-grid">
-              ${standardDays.map(d => {
-                const isToday = dayIndexMap[d.dayName] === currentDayOfWeek && selectedWeek.filename === currentWeekFile;
-                const dayEvents = layoutDayEvents(d.classes);
+          <!-- Lưới 7 cột ngày của tuần -->
+          <div class="cal-days-columns-grid">
+            <!-- Các đường kẻ ngang chia giờ -->
+            ${hoursList.map(h => `
+              <div class="cal-hour-grid-line" style="top: ${(h - startHour) * HOUR_HEIGHT + TOP_PADDING}px;"></div>
+            `).join('')}
 
-                // Tính toán vạch thời gian hiện tại
-                const now = new Date();
-                const currentMinutesNow = now.getHours() * 60 + now.getMinutes();
-                const showNowLine = isToday && currentMinutesNow >= startHour * 60 && currentMinutesNow <= (endHour + 1) * 60;
-                const nowTop = (currentMinutesNow - startHour * 60) * pxPerMinute + TOP_PADDING;
+            ${standardDays.map(d => {
+              const dayEvents = layoutDayEvents(d.classes);
+              const isToday = dayIndexMap[d.dayName] === currentDayOfWeek && selectedWeek.filename === currentWeekFile;
 
-                return `
-                  <div class="cal-day-column ${isToday ? 'is-today-cal-column' : ''}">
-                    <!-- Các đường vạch giờ ngang -->
-                    ${hoursList.map(h => `
-                      <div class="cal-grid-hour-line" style="top: ${(h - startHour) * HOUR_HEIGHT + TOP_PADDING}px;"></div>
-                    `).join('')}
+              return `
+                <div class="cal-day-column ${isToday ? 'is-today-cal-column' : ''}">
+                  ${dayEvents.map(ev => {
+                    const color = getSubjectColor(ev.subject);
+                    const tooltipTitle = `${ev.subject} • ${d.dayName}`;
+                    const tooltipSub = `${ev.timeRange || ''} • ${selectedWeek.title}`;
+                    const tooltipBody = `
+                      <div class="tt-row"><strong>Thời gian:</strong> <span>${escapeHtml(ev.timeRange || 'Chưa xếp')}</span></div>
+                      <div class="tt-row"><strong>Thời lượng:</strong> <span>${getClassDurationHours(ev)} giờ</span></div>
+                      <div class="tt-row"><strong>Phòng học:</strong> <span>${escapeHtml(ev.room || 'Chưa xếp')}</span></div>
+                      ${ev.teacher ? `<div class="tt-row"><strong>Giảng viên:</strong> <span>${escapeHtml(ev.teacher)}</span></div>` : ''}
+                    `;
 
-                    <!-- Vạch chỉ thời gian hiện tại (Google Calendar Now Indicator) -->
-                    ${showNowLine ? `
-                      <div class="cal-current-time-line" style="top: ${nowTop}px;" title="Hiện tại: ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}">
-                        <span class="cal-current-time-dot"></span>
-                      </div>
-                    ` : ''}
-
-                    <!-- Thẻ sự kiện các môn học -->
-                    ${dayEvents.map(ev => {
-                      const color = getSubjectColor(ev.subject);
-                      const tooltipTitle = `${d.dayName} • ${escapeHtml(ev.timeRange)}`;
-                      const tooltipSub = escapeHtml(ev.subject);
-                      const tooltipBody = `<div class="tt-row"><i class="fa-solid fa-location-dot"></i> <span>Phòng: ${escapeHtml(ev.room || 'Chưa rõ')}</span></div>
-                                           <div class="tt-row"><i class="fa-regular fa-clock"></i> <span>Thời lượng: ${Math.round((ev.endMin - ev.startMin))} phút</span></div>`;
-
-                      return `
-                        <div class="cal-event-block ${ev.isOverlap ? 'is-overlap-event' : ''}"
-                          style="top: ${ev.top}px; height: ${ev.height}px; left: ${ev.left}; width: ${ev.width}; border-left: 4px solid ${color.border}; background: linear-gradient(135deg, ${color.bg || 'rgba(99, 102, 241, 0.25)'} 0%, rgba(15, 23, 42, 0.9) 100%);"
-                          data-heatmap-tooltip="true"
-                          data-tooltip-title="${escapeHtml(tooltipTitle)}"
-                          data-tooltip-sub="${escapeHtml(tooltipSub)}"
-                          data-tooltip-body="${escapeHtml(tooltipBody)}"
-                          data-tooltip-badge="${escapeHtml(ev.timeRange)}"
-                          data-tooltip-badge-bg="${color.border}"
-                          data-tooltip-badge-color="#ffffff">
-                          <div class="cal-event-title">${escapeHtml(ev.subject)}</div>
-                          <div class="cal-event-meta">
-                            <span class="cal-event-time"><i class="fa-regular fa-clock"></i> ${escapeHtml(ev.timeRange)}</span>
-                            ${ev.room ? `<span class="cal-event-room"><i class="fa-solid fa-location-dot"></i> ${escapeHtml(ev.room)}</span>` : ''}
-                          </div>
+                    return `
+                      <div class="cal-event-block ${ev.isOverlap ? 'is-overlap-event' : ''}"
+                        style="
+                          top: ${ev.top}px;
+                          height: ${ev.height}px;
+                          left: ${ev.left};
+                          width: ${ev.width};
+                          background: ${color.bg || 'rgba(99, 102, 241, 0.2)'};
+                          border-left: 3px solid ${color.border || '#818cf8'};
+                        "
+                        data-heatmap-tooltip="true"
+                        data-tooltip-title="${escapeHtml(tooltipTitle)}"
+                        data-tooltip-sub="${escapeHtml(tooltipSub)}"
+                        data-tooltip-body="${escapeHtml(tooltipBody)}"
+                        data-tooltip-badge="${getClassDurationHours(ev)}h"
+                        data-tooltip-badge-bg="${color.border || '#818cf8'}"
+                        data-tooltip-badge-color="#ffffff">
+                        <span class="cal-event-title">${escapeHtml(ev.subject)}</span>
+                        <div class="cal-event-meta">
+                          <span class="cal-event-time">
+                            <i class="fa-regular fa-clock"></i> ${escapeHtml(ev.timeRange || '')}
+                          </span>
+                          <span class="cal-event-room">
+                            <i class="fa-solid fa-location-dot"></i> ${escapeHtml(ev.room || 'Chưa xếp')}
+                          </span>
                         </div>
-                      `;
-                    }).join('')}
-                  </div>
-                `;
-              }).join('')}
-            </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              `;
+            }).join('')}
           </div>
         </div>
       </div>
 
       <div class="heatmap-card-footer">
-        <div style="display: flex; align-items: center; gap: 0.85rem; font-size: 0.74rem; color: var(--text-muted);">
-          <span><i class="fa-solid fa-layer-group" style="color: #818cf8;"></i> Tự động xếp chồng khi trùng giờ</span>
-          <span>•</span>
-          <span><i class="fa-regular fa-hand-pointer"></i> Di chuột vào thẻ để xem chi tiết môn</span>
+        <div class="heatmap-legend-row" style="font-size: 0.74rem;">
+          <span>Cường độ:</span>
+          <div class="legend-scale-boxes">
+            <div class="legend-box level-0" title="0h (Nghỉ)"></div>
+            <div class="legend-box level-1" title="≤ 2h (Nhẹ)"></div>
+            <div class="legend-box level-2" title="2h - 4h (Vừa)"></div>
+            <div class="legend-box level-3" title="4h - 6.5h (Dày)"></div>
+            <div class="legend-box level-4" title="> 6.5h+ (Cao điểm 🔥)"></div>
+          </div>
         </div>
 
-        <button type="button" class="btn-ghost btn-open-week-nav" data-week="${escapeHtml(selectedWeek.filename)}" style="font-size: 0.78rem; color: #818cf8;">
-          <span>Xem chi tiết lịch tuần</span> <i class="fa-solid fa-arrow-right"></i>
+        <button type="button" class="btn-ghost btn-open-week-nav" data-week="${escapeHtml(selectedWeek.filename)}" style="font-size: 0.76rem;">
+          <i class="fa-regular fa-calendar-check"></i> Mở Lưới Thời Khóa Biểu Tuần Này
         </button>
       </div>
     </div>
@@ -613,6 +679,7 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
 
   const cells = [];
   let totalMonthClasses = 0;
+  let totalMonthHours = 0;
 
   // Ngày tháng trước
   for (let i = startOffset - 1; i >= 0; i--) {
@@ -620,6 +687,7 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
       dayNum: daysInPrevMonth - i,
       isOtherMonth: true,
       classesCount: 0,
+      totalHours: 0,
       level: 0,
       classes: []
     });
@@ -634,6 +702,7 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
     const dDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 
     let count = 0;
+    let dayHours = 0;
     let classesList = [];
     
     let matchedWeek = semesterWeeks.find(w => {
@@ -654,11 +723,13 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
       const dayStat = matchedWeek.days.find(x => x.dayName === dName);
       if (dayStat) {
         count = dayStat.classesCount;
+        dayHours = dayStat.totalHours || getDayTotalHours(dayStat.classes || []);
         classesList = dayStat.classes || [];
       }
     }
 
     totalMonthClasses += count;
+    totalMonthHours += dayHours;
 
     cells.push({
       dayNum: d,
@@ -666,12 +737,15 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
       isOtherMonth: false,
       isToday: isThisMonth && today.getDate() === d,
       classesCount: count,
-      level: getHeatmapLevel(count),
+      totalHours: dayHours,
+      level: getHeatmapLevel(dayHours),
       classes: classesList,
       weekRef: matchedWeek ? matchedWeek.filename : '',
       weekTitle: matchedWeek ? matchedWeek.title : ''
     });
   }
+
+  totalMonthHours = Math.round(totalMonthHours * 10) / 10;
 
   const remaining = (7 - (cells.length % 7)) % 7;
   for (let j = 1; j <= remaining; j++) {
@@ -679,6 +753,7 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
       dayNum: j,
       isOtherMonth: true,
       classesCount: 0,
+      totalHours: 0,
       level: 0,
       classes: []
     });
@@ -693,7 +768,7 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
           </div>
           <div>
             <h3 class="heatmap-card-title">Bản Đồ Cường Độ ${monthNames[month]} Năm ${year}</h3>
-            <span class="heatmap-card-sub">Chuẩn GitHub Monthly Matrix • Tổng ${totalMonthClasses} buổi học trong tháng</span>
+            <span class="heatmap-card-sub">Chuẩn GitHub Monthly Matrix • Tổng ${totalMonthHours} giờ học (${totalMonthClasses} buổi)</span>
           </div>
         </div>
 
@@ -728,9 +803,9 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
             }
 
             const tooltipTitle = `Ngày ${c.dayNum}/${month + 1}/${year} • ${c.dayName}`;
-            const tooltipSub = c.classesCount > 0 ? `${c.classesCount} buổi học (${c.weekTitle})` : 'Nghỉ ngơi';
+            const tooltipSub = c.totalHours > 0 ? `${c.totalHours} giờ học (${c.classesCount} môn • ${c.weekTitle})` : 'Nghỉ ngơi';
             const tooltipBody = (c.classes || []).length > 0 
-              ? c.classes.map(cls => `<div class="tt-row"><strong>${escapeHtml(cls.subject)}</strong> <span>(${escapeHtml(cls.timeRange)})</span></div>`).join('')
+              ? c.classes.map(cls => `<div class="tt-row"><strong>${escapeHtml(cls.subject)}</strong> <span>(${escapeHtml(cls.timeRange)} • ${getClassDurationHours(cls)}h)</span></div>`).join('')
               : `<div style="color: var(--text-muted); font-size: 0.72rem;">Không có buổi học trong ngày này</div>`;
 
             return `
@@ -740,9 +815,9 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
                 data-tooltip-title="${escapeHtml(tooltipTitle)}"
                 data-tooltip-sub="${escapeHtml(tooltipSub)}"
                 data-tooltip-body="${escapeHtml(tooltipBody)}"
-                data-tooltip-badge="${c.classesCount > 0 ? `${c.classesCount} buổi` : 'Nghỉ'}"
-                data-tooltip-badge-bg="${c.classesCount > 0 ? 'rgba(56, 189, 248, 0.2)' : 'rgba(148, 163, 184, 0.15)'}"
-                data-tooltip-badge-color="${c.classesCount > 0 ? '#38bdf8' : '#94a3b8'}">
+                data-tooltip-badge="${c.totalHours > 0 ? `${c.totalHours}h` : 'Nghỉ'}"
+                data-tooltip-badge-bg="${c.totalHours > 0 ? 'rgba(56, 189, 248, 0.2)' : 'rgba(148, 163, 184, 0.15)'}"
+                data-tooltip-badge-color="${c.totalHours > 0 ? '#38bdf8' : '#94a3b8'}">
                 <span class="sq-day-num">${c.dayNum}</span>
               </div>
             `;
@@ -752,13 +827,13 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
 
       <div class="heatmap-card-footer">
         <div class="heatmap-legend-row" style="font-size: 0.74rem;">
-          <span>Mức nhiệt:</span>
+          <span>Cường độ:</span>
           <div class="legend-scale-boxes">
-            <div class="legend-box level-0" title="0 buổi (Nghỉ)"></div>
-            <div class="legend-box level-1" title="1 buổi (Nhẹ)"></div>
-            <div class="legend-box level-2" title="2 buổi (Vừa)"></div>
-            <div class="legend-box level-3" title="3 buổi (Dày)"></div>
-            <div class="legend-box level-4" title="4+ buổi (Cao điểm)"></div>
+            <div class="legend-box level-0" title="0h (Nghỉ)"></div>
+            <div class="legend-box level-1" title="≤ 2h (Nhẹ)"></div>
+            <div class="legend-box level-2" title="2h - 4h (Vừa)"></div>
+            <div class="legend-box level-3" title="4h - 6.5h (Dày)"></div>
+            <div class="legend-box level-4" title="> 6.5h+ (Cao điểm 🔥)"></div>
           </div>
         </div>
 
@@ -842,6 +917,7 @@ function renderSemesterMatrixView(container, semesterWeeks = [], currentWeekFile
         dayIdx: dIdx,
         dayName: d.dayName,
         classesCount: d.classesCount,
+        totalHours: d.totalHours || 0,
         level: d.level,
         classes: d.classes || [],
         workload: w.workload
@@ -889,9 +965,9 @@ function renderSemesterMatrixView(container, semesterWeeks = [], currentWeekFile
           <div class="semester-squares-grid" style="grid-template-columns: repeat(${totalWeeks}, 20px);">
             ${squares.map(sq => {
               const tooltipTitle = `${sq.weekTitle} • ${sq.dayName}`;
-              const tooltipSub = sq.classesCount > 0 ? `${sq.classesCount} buổi học (${sq.workload.label})` : 'Nghỉ ngơi';
+              const tooltipSub = sq.totalHours > 0 ? `${sq.totalHours} giờ học (${sq.classesCount} môn • ${sq.workload.label})` : 'Nghỉ ngơi';
               const tooltipBody = sq.classes.length > 0
-                ? sq.classes.map(c => `<div class="tt-row"><strong>${escapeHtml(c.subject)}</strong> <span>(${escapeHtml(c.timeRange)})</span></div>`).join('')
+                ? sq.classes.map(c => `<div class="tt-row"><strong>${escapeHtml(c.subject)}</strong> <span>(${escapeHtml(c.timeRange)} • ${getClassDurationHours(c)}h)</span></div>`).join('')
                 : `<div style="color: var(--text-muted); font-size: 0.72rem;">Không có buổi học trong ngày này</div>`;
 
               return `
@@ -904,9 +980,9 @@ function renderSemesterMatrixView(container, semesterWeeks = [], currentWeekFile
                   data-tooltip-title="${escapeHtml(tooltipTitle)}"
                   data-tooltip-sub="${escapeHtml(tooltipSub)}"
                   data-tooltip-body="${escapeHtml(tooltipBody)}"
-                  data-tooltip-badge="${sq.classesCount > 0 ? `${sq.classesCount} buổi` : 'Nghỉ'}"
-                  data-tooltip-badge-bg="${sq.classesCount > 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(148, 163, 184, 0.15)'}"
-                  data-tooltip-badge-color="${sq.classesCount > 0 ? '#10b981' : '#94a3b8'}">
+                  data-tooltip-badge="${sq.totalHours > 0 ? `${sq.totalHours}h` : 'Nghỉ'}"
+                  data-tooltip-badge-bg="${sq.totalHours > 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(148, 163, 184, 0.15)'}"
+                  data-tooltip-badge-color="${sq.totalHours > 0 ? '#10b981' : '#94a3b8'}">
                 </div>
               `;
             }).join('')}
@@ -916,13 +992,13 @@ function renderSemesterMatrixView(container, semesterWeeks = [], currentWeekFile
 
       <div class="heatmap-card-footer">
         <div class="heatmap-legend-row" style="font-size: 0.74rem;">
-          <span>Mức nhiệt:</span>
+          <span>Cường độ:</span>
           <div class="legend-scale-boxes">
-            <div class="legend-box level-0" title="0 buổi (Nghỉ)"></div>
-            <div class="legend-box level-1" title="1 buổi (Nhẹ)"></div>
-            <div class="legend-box level-2" title="2 buổi (Vừa)"></div>
-            <div class="legend-box level-3" title="3 buổi (Dày)"></div>
-            <div class="legend-box level-4" title="4+ buổi (Cao điểm)"></div>
+            <div class="legend-box level-0" title="0h (Nghỉ)"></div>
+            <div class="legend-box level-1" title="≤ 2h (Nhẹ)"></div>
+            <div class="legend-box level-2" title="2h - 4h (Vừa)"></div>
+            <div class="legend-box level-3" title="4h - 6.5h (Dày)"></div>
+            <div class="legend-box level-4" title="> 6.5h+ (Cao điểm 🔥)"></div>
           </div>
         </div>
 
@@ -984,18 +1060,22 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
   preloadAllWeeksData(availableWeeks, currentWeekFile, onSelectWeek);
 
   let totalSemesterClasses = 0;
+  let totalSemesterHours = 0;
   let peakWeek = null;
   let activeStudyDays = 0;
 
   semesterWeeks.forEach(w => {
     totalSemesterClasses += w.totalClasses;
-    if (!peakWeek || w.totalClasses > peakWeek.totalClasses) {
+    totalSemesterHours += (w.totalHours || 0);
+    if (!peakWeek || (w.totalHours || 0) > (peakWeek.totalHours || 0)) {
       peakWeek = w;
     }
     w.days.forEach(d => {
-      if (d.classesCount > 0) activeStudyDays++;
+      if (d.totalHours > 0 || d.classesCount > 0) activeStudyDays++;
     });
   });
+
+  totalSemesterHours = Math.round(totalSemesterHours * 10) / 10;
 
   const currentWeekObj = semesterWeeks.find(w => w.filename === currentWeekFile) || semesterWeeks[0];
   const currentDayOfWeek = new Date().getDay();
@@ -1004,6 +1084,7 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
   
   const todayStats = currentWeekObj ? currentWeekObj.days.find(d => d.dayName === todayName) : null;
   const todayClasses = todayStats ? todayStats.classes : [];
+  const todayTotalHours = todayStats ? (todayStats.totalHours || getDayTotalHours(todayClasses)) : getDayTotalHours(todayClasses);
 
   container.innerHTML = `
     <div class="heatmap-view-wrapper">
@@ -1017,17 +1098,17 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
             </div>
             <div>
               <h2 class="heatmap-title">Bản Đồ Nhiệt Cường Độ Học Tập</h2>
-              <span class="heatmap-subtitle">Phân tích mật độ buổi học, theo dõi tải học tập & năng suất sinh viên</span>
+              <span class="heatmap-subtitle">Phân tích mật độ thời gian học, theo dõi tải học tập & năng suất sinh viên</span>
             </div>
           </div>
           <div class="heatmap-legend-row">
-            <span>Mật độ:</span>
+            <span>Cường độ:</span>
             <div class="legend-scale-boxes">
-              <div class="legend-box level-0" title="0 buổi (Nghỉ)"></div>
-              <div class="legend-box level-1" title="1 buổi (Nhẹ)"></div>
-              <div class="legend-box level-2" title="2 buổi (Vừa)"></div>
-              <div class="legend-box level-3" title="3 buổi (Dày)"></div>
-              <div class="legend-box level-4" title="4+ buổi (Cao điểm)"></div>
+              <div class="legend-box level-0" title="0h (Nghỉ)"></div>
+              <div class="legend-box level-1" title="≤ 2h (Nhẹ)"></div>
+              <div class="legend-box level-2" title="2h - 4h (Vừa)"></div>
+              <div class="legend-box level-3" title="4h - 6.5h (Dày)"></div>
+              <div class="legend-box level-4" title="> 6.5h+ (Cao điểm 🔥)"></div>
             </div>
           </div>
         </div>
@@ -1038,8 +1119,8 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
               <i class="fa-solid fa-calendar-day"></i>
             </div>
             <div class="heatmap-kpi-info">
-              <span class="heatmap-kpi-value">${todayClasses.length} buổi</span>
-              <span class="heatmap-kpi-label">Hôm nay (${todayName})</span>
+              <span class="heatmap-kpi-value">${todayTotalHours} giờ</span>
+              <span class="heatmap-kpi-label">Hôm nay (${todayName} • ${todayClasses.length} môn)</span>
             </div>
           </div>
 
@@ -1048,8 +1129,8 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
               <i class="fa-solid fa-book-bookmark"></i>
             </div>
             <div class="heatmap-kpi-info">
-              <span class="heatmap-kpi-value">${totalSemesterClasses} buổi</span>
-              <span class="heatmap-kpi-label">Tổng buổi cả học kỳ</span>
+              <span class="heatmap-kpi-value">${totalSemesterHours} giờ</span>
+              <span class="heatmap-kpi-label">Tổng cả học kỳ (${totalSemesterClasses} buổi)</span>
             </div>
           </div>
 
@@ -1058,7 +1139,7 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
               <i class="fa-solid fa-bolt"></i>
             </div>
             <div class="heatmap-kpi-info">
-              <span class="heatmap-kpi-value">${peakWeek ? `${peakWeek.title} (${peakWeek.totalClasses}b)` : 'Chưa có'}</span>
+              <span class="heatmap-kpi-value">${peakWeek ? `${peakWeek.title} (${peakWeek.totalHours || 0}h)` : 'Chưa có'}</span>
               <span class="heatmap-kpi-label">Tuần cao điểm nhất</span>
             </div>
           </div>
@@ -1082,7 +1163,7 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
             <span class="today-focus-badge"><i class="fa-regular fa-clock"></i> Lịch học Hôm nay</span>
             <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">${todayName} • ${currentWeekObj ? currentWeekObj.title : ''}</span>
           </div>
-          <span style="font-size: 0.78rem; color: var(--text-muted);">${todayClasses.length > 0 ? `${todayClasses.length} buổi học đang chờ bạn` : 'Hôm nay bạn được nghỉ ngơi'}</span>
+          <span style="font-size: 0.78rem; color: var(--text-muted);">${todayClasses.length > 0 ? `${todayTotalHours} giờ học (${todayClasses.length} môn)` : 'Hôm nay bạn được nghỉ ngơi'}</span>
         </div>
 
         ${todayClasses.length > 0 ? `
@@ -1091,7 +1172,7 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
               <div class="today-class-mini-card">
                 <div class="today-mini-time">
                   <i class="fa-regular fa-clock"></i>
-                  <span>${escapeHtml(c.timeRange)}</span>
+                  <span>${escapeHtml(c.timeRange)} (${getClassDurationHours(c)}h)</span>
                 </div>
                 <div class="today-mini-subject">
                   <i class="fa-solid fa-book-open" style="color: #818cf8; font-size: 0.85rem;"></i>

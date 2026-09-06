@@ -4,6 +4,28 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 10:55] - Nâng Cấp Bản Đồ Nhiệt Theo Cơ Chế "Tổng Số Giờ Học" (Total Study Hours & Multi-Task Duration Aggregation) ⏰🔥
+
+- **🎯 Yêu cầu & Quyết định thiết kế**:
+  - Chuyển đổi toàn bộ cơ chế tính mức nhiệt (Heatmap Levels) và đánh giá tải học tập (Workload) từ "đếm số buổi học" sang **Tổng số giờ học thực tế (Total Study Hours)**:
+    - Cộng dồn toàn bộ thời lượng của từng lớp/task dựa trên khung giờ (`startTime`/`endTime` hoặc `timeRange`).
+    - Hỗ trợ đầy đủ trường hợp trùng giờ/đa nhiệm (Overlapping tasks): các môn trùng giờ được cộng dồn thời lượng phản ánh đúng 200% áp lực học tập thực tế.
+    - Thang mức nhiệt phân hóa rõ rệt:
+      - **Level 0**: `0h` (Nghỉ ngơi)
+      - **Level 1**: `≤ 2.0h` (Nhẹ nhàng)
+      - **Level 2**: `2.0h - 4.0h` (Vừa phải)
+      - **Level 3**: `4.0h - 6.5h` (Dày)
+      - **Level 4**: `> 6.5h+` (Cao điểm 🔥)
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    - Triển khai các hàm tính toán: `getClassDurationHours(cls)` và `getDayTotalHours(classes)`.
+    - Viết lại `getHeatmapLevel()` và `evaluateWeekWorkload()` tính toán theo số giờ.
+    - Cập nhật `aggregateSemesterData` tổng hợp `totalHours` cho từng ngày và từng tuần.
+    - Cập nhật toàn bộ Tooltip, Badge, Header và Hero KPI Banner phản ánh tổng số giờ học (`${todayTotalHours}h`, `${totalSemesterHours}h`).
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v79`.
+
+---
+
 ## 📅 [2026-09-06 10:49] - Tối Giản Bản Đồ Nhiệt: Giữ 3 Chế Độ (Tuần / Tháng / Học Kỳ) & Loại Bỏ Chế Độ Cả Năm 🎯⚡
 
 - **🎯 Yêu cầu & Quyết định thiết kế**:
