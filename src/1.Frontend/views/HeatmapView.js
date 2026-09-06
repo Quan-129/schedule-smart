@@ -525,7 +525,7 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
 
                         return `
                           <div class="cal-event-block ${ev.isOverlap ? 'is-overlap-event' : ''}"
-                            style="top: ${ev.top}px; height: ${ev.height}px; left: ${ev.left}; width: ${ev.width}; border-left: 4px solid ${color.border}; background: linear-gradient(135deg, ${color.bg || 'rgba(99, 102, 241, 0.25)'} 0%, rgba(15, 23, 42, 0.9) 100%);"
+                            style="top: ${ev.top}px; height: ${ev.height}px; left: ${ev.left}; width: ${ev.width}; --event-accent: ${color.border}; --event-bg: ${color.bg || 'rgba(99, 102, 241, 0.15)'};"
                             data-heatmap-tooltip="true"
                             data-tooltip-title="${escapeHtml(tooltipTitle)}"
                             data-tooltip-sub="${escapeHtml(tooltipSub)}"

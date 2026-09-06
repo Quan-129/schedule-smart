@@ -4,7 +4,26 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
-## 📅 [2026-09-06 15:10] - Khắc Phục Triệt Để Lỗi Tương Phản & Chìm Màu Của Theme Trắng Sáng (Clean Milk) ☀️✨
+## 📅 [2026-09-06 15:15] - Chuẩn Hóa Toàn Diện Mục 2 (Heatmap & Google Calendar Timeline) Cho Theme Trắng Sáng (Clean Milk) ☀️🗓️
+
+- **🎯 Vấn đề từ ảnh chụp thực tế**:
+  1. Header timeline (`.weekly-cal-sticky-header`, `.cal-day-header-cell`) và ô "GIỜ" ở góc (`.cal-time-corner-sticky`) bị nền đen tím tối sẫm `rgba(15, 23, 42)`, chữ xám chìm khó đọc.
+  2. Nền thân Timeline (`.weekly-cal-unified-scroll-area`) và cột trục giờ bên trái (`.cal-time-axis-col-sticky`) bị đen xì, đường kẻ giờ mờ.
+  3. Khối sự kiện môn học (`.cal-event-block`) bị hardcode inline gradient nền đen tím `rgba(15, 23, 42, 0.9)` làm ruột thẻ bị tối đen.
+  4. Thanh Mode Tabs (`.heatmap-mode-tabs`, `.btn-heatmap-tab`) và dropdown bộ lọc bị nền đen tối.
+  5. Các ô ngày nghỉ (level-0) trong Ma trận tháng và Học kỳ bị màu đen mờ.
+- **✅ Giải pháp kỹ thuật đã hoàn thành**:
+  - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    - Gỡ bỏ hoàn toàn chuỗi hardcode `background: linear-gradient(... rgba(15, 23, 42, 0.9) 100%)` trong inline style của `.cal-event-block`.
+    - Chuyển sang sử dụng CSS custom properties: `--event-accent: ${color.border}` và `--event-bg: ${color.bg}`.
+  - [`src/1.Frontend/styles/9.heatmap-view.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/9.heatmap-view.css):
+    - Chuẩn hóa toàn bộ Timeline Google Calendar: Sticky Header nền trắng `#ffffff`, ô "GIỜ" màu tím nổi bật, nền scroll area `#f8fafc` sạch sẽ, cột trục giờ `#ffffff` với nhãn giờ `#f1f5f9` chữ đậm `#334155`.
+    - Chuẩn hóa `.cal-event-block`: Nền trắng tinh khôi kết hợp pastel gradient môn học `linear-gradient(135deg, var(--event-bg) 0%, #ffffff 100%)`, viền cạnh trái nổi bật theo màu môn học, tiêu đề môn chữ đậm `#0f172a`, giờ học và phòng học sắc nét.
+    - Chuẩn hóa Mode Tabs & Filter: Nền tabs `#f1f5f9`, tab active nền trắng đổ bóng mượt, dropdown select nền trắng viền mỏng.
+    - Chuẩn hóa Ma trận tháng & Học kỳ: Level-0 nền `#f1f5f9`, tiêu đề thứ `#64748b`, popover tooltip nền trắng thủy tinh với chữ than đậm.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v101`.
+
+---
 
 - **🎯 Vấn đề phát hiện từ ảnh chụp màn hình của người dùng**:
   1. Chữ "Schedule" trong logo Navbar bị màu trắng tàng hình trên nền trắng (chỉ thấy chữ "Smart").
