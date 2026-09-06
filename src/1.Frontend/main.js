@@ -1265,8 +1265,8 @@ export function renderSpaceSelectorUi() {
     btn.onclick = (e) => {
       e.stopPropagation();
       const spaceId = btn.getAttribute('data-space-id');
-      handleDeleteSpace(spaceId, async () => {
-        if (state.activeSpaceId === spaceId) {
+      handleDeleteSpace(spaceId, async (wasActive) => {
+        if (wasActive) {
           await handleSwitchSpace('default');
         } else {
           renderSpaceSelectorUi();

@@ -4,6 +4,25 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 16:25] - Khắc Phục Lỗi Đồng Bộ State & Tự Động Khôi Phục Dữ Liệu Học Kỳ Cũ Khi Xóa Học Kỳ Mới (Live State Recovery) 🔄⚡
+
+- **🎯 Yêu cầu từ người dùng**: Giải thích lý do và khắc phục lỗi khi xóa học kỳ mới đang mở, hệ thống chuyển về học kỳ cũ nhưng dữ liệu thời khóa biểu & chiếc cặp Drive không hiển thị ngay mà phải F5 mới thấy.
+- **🔍 Nguyên nhân cốt lõi**:
+  1. Trong `deleteSpace(spaceId)` ở `state.js`, khi `state.activeSpaceId === spaceId`, hàm đã tự động đổi `state.activeSpaceId` thành `'default'`.
+  2. Khi callback xóa trong `main.js` chạy, điều kiện `if (state.activeSpaceId === spaceId)` so sánh `'default' === spaceId` bị `false`, dẫn đến bỏ qua `handleSwitchSpace('default')`.
+  3. Hậu quả là các hàm `initApplicationState()`, `initWeekSelector()`, `renderBackpackView()`, `renderGradesView()` không được gọi lại, khiến RAM State giữ dữ liệu của không gian vừa bị xóa cho đến khi người dùng F5 tải lại từ LocalStorage.
+- **✅ Chi tiết sửa đổi**:
+  - [`src/1.Frontend/components/modals/SpaceModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/SpaceModal.js):
+    + Lưu biến cờ `const wasActive = (state.activeSpaceId === spaceId)` trước khi xóa và truyền vào `onDone(wasActive)`.
+  - [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    + Nhận `wasActive` từ callback và kích hoạt ngay `await handleSwitchSpace('default')` để nạp và render lại 100% dữ liệu của học kỳ mặc định ngay lập tức mà không cần F5.
+  - [`src/3.Database/state.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/state.js):
+    + Đồng bộ `state.activeSpaceId` trong `deleteSpace` và đảm bảo `initApplicationState` nạp chuẩn xác cho cả Guest lẫn User trên không gian mặc định.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js):
+    + Nâng cache lên `smart-schedule-modular-v109`.
+
+---
+
 ## 📅 [2026-09-06 16:18] - Chuẩn Hóa Giao Diện & Vị Trí Modal Không Gian Học Kỳ (SpaceModal UI Standards) 🎨💎
 
 - **🎯 Yêu cầu từ người dùng**: Sửa lỗi Modal Tạo / Chỉnh sửa Không Gian Học Kỳ bị nhảy xuống góc dưới bên trái màn hình và các ô input bị vỡ giao diện mặc định xấu.

@@ -220,9 +220,10 @@ export function handleDeleteSpace(spaceId, onDone = null) {
   }
 
   if (confirm(`Bạn có chắc chắn muốn xóa vĩnh viễn học kỳ "${sp.name}" và toàn bộ lịch học, điểm số thuộc học kỳ này?`)) {
+    const wasActive = (state.activeSpaceId === spaceId);
     deleteSpace(spaceId);
     showToast(`Đã xóa vĩnh viễn học kỳ "${sp.name}" 🗑️`);
-    if (onDone) onDone();
+    if (onDone) onDone(wasActive);
   }
 }
 

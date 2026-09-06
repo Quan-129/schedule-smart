@@ -260,6 +260,7 @@ export function deleteSpace(spaceId, user = null) {
   // Nếu đang đứng ở space bị xóa, chuyển về space đầu tiên
   if (state.activeSpaceId === spaceId) {
     const fallbackSpace = spaces[0] || { id: 'default' };
+    state.activeSpaceId = fallbackSpace.id;
     setActiveSpaceId(fallbackSpace.id, user);
   }
 }
@@ -282,16 +283,18 @@ export function initApplicationState(user = null) {
   const driveKey = getScopedStorageKey(STORAGE_KEYS.DRIVE_SUBJECTS, activeUser, state.activeSpaceId);
   const savedSubjects = getStorageItem(driveKey, null);
 
-  if (isOwner && state.activeSpaceId === 'default') {
-    // CHỦ SỞ HỮU Ở SPACE GỐC: Nạp dữ liệu lịch học thực tế
+  if (state.activeSpaceId === 'default') {
+    // SPACE GỐC: Nạp dữ liệu lịch học thực tế hoặc seed data
     if (savedSubjects && Array.isArray(savedSubjects) && savedSubjects.length > 0) {
       state.driveSubjects = savedSubjects;
-    } else {
+    } else if (isOwner) {
       state.driveSubjects = JSON.parse(JSON.stringify(INITIAL_SUBJECT_DRIVE));
       setStorageItem(driveKey, state.driveSubjects);
+    } else {
+      state.driveSubjects = Array.isArray(savedSubjects) ? savedSubjects : [];
     }
   } else {
-    // CÁC SPACES KHÁC HOẶC GUEST: Dữ liệu độc lập
+    // CÁC SPACES KHÁC: Dữ liệu độc lập
     state.driveSubjects = Array.isArray(savedSubjects) ? savedSubjects : [];
   }
 
