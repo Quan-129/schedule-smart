@@ -662,13 +662,21 @@
   }
 
   /* Timeline Tuần Google Calendar trên Mobile */
-  .weekly-cal-scroll-area {
+  .weekly-cal-unified-scroll-area {
     -webkit-overflow-scrolling: touch;
     max-height: 520px;
   }
 
-  .weekly-cal-scroll-inner {
-    min-width: 680px;
+  .cal-days-mode-switcher {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .btn-cal-mode {
+    flex: 1;
+    justify-content: center;
+    padding: 0.25rem 0.35rem;
+    font-size: 0.7rem;
   }
 
   .cal-day-header-cell {

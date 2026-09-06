@@ -4,6 +4,24 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 12:00] - Triệt Tiêu Lỗi Lệch Cột Với Khung Cuộn Bảng Hợp Nhất (Unified Grid) & Chế Độ 1/3/7 Ngày Trên Mobile 📱⚡🗓️
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Khắc phục triệt để lỗi lưới thời gian bị lệch khỏi cột tiêu đề ngày (cột Chủ Nhật lệch nặng nhất do thanh cuộn dọc 17px trên Windows/Android).
+  - Giải quyết bài toán cuộn 2 trục (ngang & dọc) gây khó chịu trên màn hình điện thoại: Hỗ trợ chế độ xem **1 Ngày (Day View)** giúp cuộn 1 trục dọc mượt mà, thông tin môn học to rõ ràng, kết hợp bộ chọn linh hoạt **3 Ngày** và **7 Ngày**.
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    - Tái cấu trúc hàm `renderWeeklyMatrixView`: Đưa Header và Body vào chung **1 container cuộn duy nhất (`.weekly-cal-unified-scroll-area`)**, loại bỏ 100% độ lệch do scrollbar.
+    - Thêm bộ chuyển đổi chế độ xem `[1 Ngày] [3 Ngày] [7 Ngày]` (`.cal-days-mode-switcher`) lưu vào `localStorage`.
+    - Thêm thanh chọn ngày nhanh (`.cal-day-quick-nav`) với các pill `T2`, `T3`, `T4`, `T5`, `T6`, `T7`, `CN`, badge số buổi học, nút lùi/tiến ngày (`<` và `>`).
+  - [`src/1.Frontend/styles/9.heatmap-view.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/9.heatmap-view.css):
+    - Bổ sung CSS Sticky 2 chiều: `.weekly-cal-sticky-header` (Sticky Top `z-index: 30`), `.cal-time-axis-col-sticky` (Sticky Left `z-index: 25`), và `.cal-time-corner-sticky` (Sticky Top-Left `z-index: 40`).
+    - Dùng chung `grid-template-columns: repeat(var(--cal-cols), minmax(0, 1fr))` cho cả Header và Body giúp các cột thẳng tắp từng pixel.
+  - [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css): Tối ưu hiển thị responsive cho mobile.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v93`.
+
+---
+
 ## 📅 [2026-09-06 11:58] - Loại Bỏ Tab Chế Độ "4. Cả Năm" Trong Bản Đồ Nhiệt Cường Độ Học Tập 🎯🔥
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:

@@ -504,7 +504,7 @@
 }
 
 /* ==========================================================================
-   5. BẢNG 1: CHẾ ĐỘ TUẦN (GOOGLE CALENDAR SCALABLE TIMELINE VIEW)
+   5. BẢNG 1: CHẾ ĐỘ TUẦN (GOOGLE CALENDAR SCALABLE TIMELINE VIEW - UNIFIED GRID)
    ========================================================================== */
 .weekly-cal-scale-container {
   display: flex;
@@ -513,33 +513,214 @@
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: var(--radius-md, 12px);
   overflow: hidden;
+  position: relative;
 }
 
-.weekly-cal-header-row {
+/* Bộ chuyển đổi chế độ xem 1 Ngày / 3 Ngày / 7 Ngày */
+.cal-days-mode-switcher {
+  display: inline-flex;
+  background: rgba(30, 41, 59, 0.75);
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 3px;
+}
+
+.btn-cal-mode {
+  padding: 0.28rem 0.6rem;
+  border: none;
+  background: transparent;
+  color: var(--text-muted, #94a3b8);
+  font-size: 0.74rem;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-cal-mode:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.btn-cal-mode.is-active {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.45);
+}
+
+/* Thanh điều hướng chọn ngày nhanh (Day Quick Nav Bar) */
+.cal-day-quick-nav {
   display: flex;
-  background: rgba(15, 23, 42, 0.85);
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.65rem;
+  background: rgba(15, 23, 42, 0.75);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.btn-day-step {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 41, 59, 0.6);
+  color: var(--text-secondary, #cbd5e1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.btn-day-step:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: #818cf8;
+  color: #ffffff;
+}
+
+.cal-day-pills-row {
+  display: flex;
+  gap: 0.35rem;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.cal-day-pills-row::-webkit-scrollbar {
+  display: none;
+}
+
+.cal-day-nav-pill {
+  flex: 1;
+  min-width: 48px;
+  padding: 0.3rem 0.4rem;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(30, 41, 59, 0.45);
+  color: var(--text-secondary, #cbd5e1);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.cal-day-nav-pill:hover {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.3);
+  color: #ffffff;
+}
+
+.cal-day-nav-pill.is-active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.35) 0%, rgba(139, 92, 246, 0.25) 100%);
+  border-color: #818cf8;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+.cal-day-nav-pill.is-today {
+  border-color: rgba(56, 189, 248, 0.5);
+}
+
+.cal-day-nav-pill-top {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.cal-pill-name {
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.cal-pill-badge {
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 0.05rem 0.28rem;
+  border-radius: 10px;
+  background: rgba(99, 102, 241, 0.3);
+  color: #c7d2fe;
+}
+
+.cal-day-nav-pill.is-active .cal-pill-badge {
+  background: #818cf8;
+  color: #ffffff;
+}
+
+.cal-pill-date {
+  font-size: 0.62rem;
+  color: var(--text-muted, #94a3b8);
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+}
+
+/* ==========================================================================
+   KHUNG CUỘN DUY NHẤT (UNIFIED SINGLE SCROLL CONTAINER)
+   Header & Body cùng chung 1 container, dùng chung grid-template-columns.
+   Triệt tiêu 100% hiện tượng lệch cột do Scrollbar hay màn hình!
+   ========================================================================== */
+.weekly-cal-unified-scroll-area {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 620px;
+  position: relative;
+  background: rgba(15, 23, 42, 0.25);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) rgba(15, 23, 42, 0.5);
+  -webkit-overflow-scrolling: touch;
+}
+
+.weekly-cal-unified-grid {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+}
+
+/* Hàng Header Dính Đỉnh (Sticky Top) */
+.weekly-cal-sticky-header {
+  display: flex;
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 30;
 }
 
-.cal-time-corner {
-  width: 72px;
+/* Ô góc GIỜ dính 2 trục (Sticky Top + Left) */
+.cal-time-corner-sticky {
+  width: 64px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #a5b4fc;
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.98);
+  position: sticky;
+  left: 0;
+  top: 0;
+  z-index: 40;
 }
 
 .cal-days-header-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(var(--cal-cols, 7), minmax(0, 1fr));
   flex: 1;
 }
 
@@ -551,7 +732,7 @@
   justify-content: center;
   gap: 0.15rem;
   border-right: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(15, 23, 42, 0.4);
   transition: all 0.2s ease;
 }
 
@@ -560,7 +741,7 @@
 }
 
 .cal-day-header-cell.is-today-cal-header {
-  background: rgba(99, 102, 241, 0.2);
+  background: rgba(99, 102, 241, 0.18);
   border-bottom: 2px solid #818cf8;
 }
 
@@ -602,28 +783,24 @@
   color: #818cf8;
 }
 
-/* Thân lịch cuộn Timeline */
-.weekly-cal-scroll-area {
-  overflow-x: auto;
-  overflow-y: auto;
-  max-height: 650px;
-  position: relative;
-  background: rgba(15, 23, 42, 0.25);
-}
-
+/* Thân Lịch */
 .weekly-cal-body-grid {
   display: flex;
   position: relative;
-  min-width: 720px;
+  flex: 1;
 }
 
-/* Cột mốc thời gian trục Y */
-.cal-time-axis-col {
-  width: 72px;
+/* Cột mốc thời gian trục Y Dính Trái (Sticky Left) */
+.cal-time-axis-col-sticky {
+  width: 64px;
   flex-shrink: 0;
-  position: relative;
+  position: sticky;
+  left: 0;
+  z-index: 25;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .cal-time-mark {
@@ -643,15 +820,15 @@
   font-family: var(--font-mono, 'JetBrains Mono', monospace);
   background: rgba(30, 41, 59, 0.95);
   border: 1px solid rgba(129, 140, 248, 0.25);
-  padding: 0.15rem 0.4rem;
+  padding: 0.15rem 0.35rem;
   border-radius: 5px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* 7 Cột Ngày */
+/* Grid các cột ngày ở Body */
 .cal-days-columns-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(var(--cal-cols, 7), minmax(0, 1fr));
   flex: 1;
   position: relative;
 }
