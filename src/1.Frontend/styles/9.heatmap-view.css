@@ -787,7 +787,8 @@
 .weekly-cal-body-grid {
   display: flex;
   position: relative;
-  flex: 1;
+  width: 100%;
+  flex-shrink: 0;
 }
 
 /* Cột mốc thời gian trục Y Dính Trái (Sticky Left) */
@@ -801,6 +802,7 @@
   background: rgba(15, 23, 42, 0.95);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  height: 100%;
 }
 
 .cal-time-mark {

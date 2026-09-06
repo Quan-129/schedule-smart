@@ -4,6 +4,23 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 12:05] - Khắc Phục Lỗi Chiều Cao Thân Lịch Bị Thu Hẹp Về 0px & Tinh Giản Chế Độ 7 Ngày 🛠️📐✨
+
+- **🎯 Vấn đề phát hiện từ phản hồi của người dùng**:
+  - Khi xem bảng thời khóa biểu tuần, phần Thân Lịch Timeline Body (các mốc giờ 07:00, 08:00, ... và các khối thẻ môn học) bị biến mất/thu hẹp về 0px, chỉ hiện mỗi hàng Header ngày rồi nhảy thẳng xuống Footer.
+  - Ở chế độ 7 Ngày, thanh chọn ngày phụ (Day Quick Nav) bị hiển thị trùng lặp không cần thiết.
+- **✅ Nguyên nhân & Giải pháp kỹ thuật**:
+  - **Nguyên nhân**: `.weekly-cal-body-grid` có thuộc tính `flex: 1` bên trong Flexbox hướng dọc (`flex-direction: column`) khiến `height` inline bị ghi đè thành `flex-basis: 0%`. Do các phần tử con bên trong đều dùng `position: absolute`, chiều cao của container bị sụp đổ (collapse to 0px).
+  - **Khắc phục**:
+    - [`src/1.Frontend/styles/9.heatmap-view.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/9.heatmap-view.css): Thay `flex: 1` bằng `width: 100%; flex-shrink: 0;`, thêm `height: 100%` cho cột giờ `cal-time-axis-col-sticky`.
+    - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+      - Thêm `min-height: ${totalTimelineHeight}px;` cho `.weekly-cal-body-grid`.
+      - Ẩn thanh Day Quick Nav khi đang ở chế độ `7 Ngày` (chỉ hiển thị khi ở `1 Ngày` hoặc `3 Ngày` để tránh trùng lặp thông tin).
+      - Đảm bảo khoảng giờ tối thiểu luôn $\ge 6$ tiếng để khung nhìn thoáng đãng, đẹp mắt.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache lên `smart-schedule-modular-v94`.
+
+---
+
 ## 📅 [2026-09-06 12:00] - Triệt Tiêu Lỗi Lệch Cột Với Khung Cuộn Bảng Hợp Nhất (Unified Grid) & Chế Độ 1/3/7 Ngày Trên Mobile 📱⚡🗓️
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:

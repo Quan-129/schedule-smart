@@ -338,6 +338,7 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
   if (hasAnyClasses) {
     startHour = Math.max(6, Math.floor(earliestMin / 60)); // Giờ bắt đầu (tối thiểu 6h)
     endHour = Math.min(23, Math.ceil(latestMax / 60)); // Giờ kết thúc (tối đa 23h)
+    if (endHour - startHour < 6) endHour = Math.min(23, startHour + 6);
     if (endHour <= startHour) endHour = startHour + 8;
   }
 
@@ -493,37 +494,39 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
       </div>
 
       <div class="weekly-cal-scale-container">
-        <!-- THANH ĐIỀU HƯỚNG CHỌN NGÀY NHANH (DAY QUICK NAV) -->
-        <div class="cal-day-quick-nav">
-          <button type="button" class="btn-day-step btn-day-prev" title="Ngày trước">
-            <i class="fa-solid fa-chevron-left"></i>
-          </button>
+        <!-- THANH ĐIỀU HƯỚNG CHỌN NGÀY NHANH (CHỈ HIỂN THỊ KHI Ở CHẾ ĐỘ 1 NGÀY HOẶC 3 NGÀY) -->
+        ${weeklyCalDaysMode !== '7' ? `
+          <div class="cal-day-quick-nav">
+            <button type="button" class="btn-day-step btn-day-prev" title="Ngày trước">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
 
-          <div class="cal-day-pills-row">
-            ${standardDays.map((d, dIdx) => {
-              const isSelected = (weeklyCalDaysMode === '1' && d.dayName === weeklyCalActiveDayName) ||
-                                 (weeklyCalDaysMode === '3' && visibleDays.some(vd => vd.dayName === d.dayName));
-              const isToday = dayIndexMap[d.dayName] === currentDayOfWeek && selectedWeek.filename === currentWeekFile;
-              const weekStartDate = selectedWeek.startDate || '';
-              const dateInfo = getDateForDayOfWeek(weekStartDate, dayIndexMap[d.dayName]);
-              const dateShort = dateInfo ? dateInfo.short : '';
+            <div class="cal-day-pills-row">
+              ${standardDays.map((d, dIdx) => {
+                const isSelected = (weeklyCalDaysMode === '1' && d.dayName === weeklyCalActiveDayName) ||
+                                   (weeklyCalDaysMode === '3' && visibleDays.some(vd => vd.dayName === d.dayName));
+                const isToday = dayIndexMap[d.dayName] === currentDayOfWeek && selectedWeek.filename === currentWeekFile;
+                const weekStartDate = selectedWeek.startDate || '';
+                const dateInfo = getDateForDayOfWeek(weekStartDate, dayIndexMap[d.dayName]);
+                const dateShort = dateInfo ? dateInfo.short : '';
 
-              return `
-                <button type="button" class="cal-day-nav-pill ${isSelected ? 'is-active' : ''} ${isToday ? 'is-today' : ''}" data-day="${escapeHtml(d.dayName)}">
-                  <div class="cal-day-nav-pill-top">
-                    <span class="cal-pill-name">${escapeHtml(d.dayName.replace('Thứ ', 'T').replace('Chủ Nhật', 'CN'))}</span>
-                    ${d.classesCount > 0 ? `<span class="cal-pill-badge">${d.classesCount}</span>` : ''}
-                  </div>
-                  ${dateShort ? `<span class="cal-pill-date">${escapeHtml(dateShort)}</span>` : ''}
-                </button>
-              `;
-            }).join('')}
+                return `
+                  <button type="button" class="cal-day-nav-pill ${isSelected ? 'is-active' : ''} ${isToday ? 'is-today' : ''}" data-day="${escapeHtml(d.dayName)}">
+                    <div class="cal-day-nav-pill-top">
+                      <span class="cal-pill-name">${escapeHtml(d.dayName.replace('Thứ ', 'T').replace('Chủ Nhật', 'CN'))}</span>
+                      ${d.classesCount > 0 ? `<span class="cal-pill-badge">${d.classesCount}</span>` : ''}
+                    </div>
+                    ${dateShort ? `<span class="cal-pill-date">${escapeHtml(dateShort)}</span>` : ''}
+                  </button>
+                `;
+              }).join('')}
+            </div>
+
+            <button type="button" class="btn-day-step btn-day-next" title="Ngày kế tiếp">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
           </div>
-
-          <button type="button" class="btn-day-step btn-day-next" title="Ngày kế tiếp">
-            <i class="fa-solid fa-chevron-right"></i>
-          </button>
-        </div>
+        ` : ''}
 
         <!-- KHUNG CUỘN DUY NHẤT (UNIFIED SINGLE SCROLL CONTAINER - TRIỆT TIÊU 100% LỖI LỆCH CỘT) -->
         <div class="weekly-cal-unified-scroll-area">
@@ -552,7 +555,7 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
             </div>
 
             <!-- THÂN TIMELINE CÙNG CONTAINER (STICKY LEFT CHO CỘT GIỜ) -->
-            <div class="weekly-cal-body-grid" style="height: ${totalTimelineHeight}px;">
+            <div class="weekly-cal-body-grid" style="height: ${totalTimelineHeight}px; min-height: ${totalTimelineHeight}px;">
               <!-- Cột Trục Thời Gian Dính Trái (Sticky Left Axis) -->
               <div class="cal-time-axis-col-sticky">
                 ${hoursList.map(h => `
