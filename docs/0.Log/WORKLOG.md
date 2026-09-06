@@ -4,6 +4,24 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 16:51] - Đồng Bộ Toàn Bộ Trạng Thái State & Đa Không Gian Lên Cloud Đa Thiết Bị (Omnichannel Cloud Sync) ☁️🔄📱
+
+- **🎯 Yêu cầu từ người dùng**: Đảm bảo cùng 1 tài khoản khi chuyển sang thiết bị mới (từ Máy tính sang Điện thoại hoặc ngược lại) thì toàn bộ trạng thái State cuối cùng (Học kỳ đang chọn, Tab đang mở, Tuần đang xem, Môn học, Điểm số) phải được lưu trữ và khôi phục 100% tự động.
+- **🔍 Phân tích nguyên nhân trước đó**:
+  - Cơ chế đồng bộ Firestore trước đây chỉ lưu các trường phẳng của không gian mặc định (`driveSubjects`, `studentGrades`), chưa lưu danh sách `spaces` và `activeSpaceId` cũng như dữ liệu phân vùng theo từng Học kỳ (`spacesData`).
+  - Khi đăng nhập trên thiết bị mới, thiết bị mới chỉ nạp không gian mặc định, làm mất danh sách học kỳ khác và không nhớ được học kỳ / tab đang đứng.
+- **✅ Chi tiết giải pháp đồng bộ 2 chiều**:
+  - [`src/3.Database/auth/FirebaseAuthService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js):
+    + Nâng cấp `syncAllStateToCloud(user)`: Đóng gói toàn bộ `spaces`, `activeSpaceId`, `spacesData` (môn học, điểm số, custom weeks, custom mds của tất cả các học kỳ) và `settings` (theme, days mode, last active tab, last selected week) lên Firestore document `users/{uid}`.
+    + Nâng cấp `attachFirestoreListener`: Tự động khôi phục trọn vẹn toàn bộ các Không gian học kỳ, trạng thái Tab & Học kỳ cuối cùng trên thiết bị mới và kích hoạt re-render tức thì.
+    + Đăng ký global sync hook `window.__scheduleSmartSyncToCloud`.
+  - [`src/3.Database/state.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/state.js):
+    + Tích hợp hàm `triggerCloudSync(user)` tự động kích hoạt đồng bộ nền lên Cloud mỗi khi người dùng: tạo / sửa / xóa / chuyển học kỳ (`persistSpacesList`, `setActiveSpaceId`), thêm / sửa môn học (`persistDriveSubjects`), cập nhật điểm số (`persistGrades`), đổi Tab (`persistLastActiveTab`), đổi Tuần (`persistLastSelectedWeek`), đổi chế độ ngày (`persistDaysDisplayMode`).
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js):
+    + Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v115`.
+
+---
+
 ## 📅 [2026-09-06 16:47] - Khôi Phục & Nâng Cấp Toàn Diện Tính Năng Thông Minh Cho Modal Thêm Tuần Học (Smart Auto-Inherit & Presets) 🧠✨
 
 - **🎯 Yêu cầu từ người dùng**: Khôi phục và hoàn thiện các tính năng thông minh khi tạo tuần học mới ("ý tưởng thông minh của cái này đâu mất rồi").

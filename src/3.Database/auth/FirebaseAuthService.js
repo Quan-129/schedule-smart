@@ -5,7 +5,7 @@
  * ==========================================================================
  */
 
-import { state, persistDriveSubjects, persistGrades, initApplicationState } from '../state.js';
+import { state, persistDriveSubjects, persistGrades, initApplicationState, exportFullBackupData, importFullBackupData } from '../state.js';
 import { showToast } from '../../1.Frontend/components/Toast.js';
 
 export const firebaseConfig = {
@@ -393,24 +393,26 @@ function attachFirestoreListener(uid, onSyncCallback) {
     if (doc.exists) {
       const data = doc.data();
       if (data) {
-        if (Array.isArray(data.driveSubjects)) {
-          state.driveSubjects = data.driveSubjects;
-          persistDriveSubjects();
+        // 1. Phục hồi toàn bộ Đa Không Gian & Dữ liệu Spaces từ Cloud
+        if (data.spaces || data.spacesData || data.data) {
+          const importPayload = {
+            app: 'ScheduleSmart',
+            version: '2.1.0',
+            settings: data.settings || {},
+            spaces: Array.isArray(data.spaces) ? data.spaces : [],
+            data: data.spacesData || data.data || {}
+          };
+          importFullBackupData(importPayload, currentUser);
         }
-        if (data.studentGrades && typeof data.studentGrades === 'object') {
-          state.studentGrades = data.studentGrades;
-          persistGrades();
+
+        // 2. Khôi phục Active Space ID (Học kỳ đang chọn cuối cùng)
+        if (data.activeSpaceId) {
+          state.activeSpaceId = data.activeSpaceId;
+        } else if (data.settings && data.settings.activeSpaceId) {
+          state.activeSpaceId = data.settings.activeSpaceId;
         }
-        if (Array.isArray(data.customWeeks)) {
-          const customKey = isOwnerUser(currentUser) ? 'smart_schedule_custom_weeks' : `smart_schedule_${currentUser.uid}_custom_weeks`;
-          localStorage.setItem(customKey, JSON.stringify(data.customWeeks));
-        }
-        if (data.customMds && typeof data.customMds === 'object') {
-          Object.keys(data.customMds).forEach(k => {
-            localStorage.setItem(k, data.customMds[k]);
-          });
-        }
-        // Đồng bộ Settings từ Cloud
+
+        // 3. Khôi phục Settings (Theme, DaysMode, LastActiveTab, LastSelectedWeek)
         if (data.settings && typeof data.settings === 'object') {
           if (data.settings.theme) localStorage.setItem('smart_schedule_theme', data.settings.theme);
           if (data.settings.daysDisplayMode) {
@@ -418,28 +420,24 @@ function attachFirestoreListener(uid, onSyncCallback) {
             localStorage.setItem('smart_schedule_days_mode', data.settings.daysDisplayMode);
           }
           if (data.settings.lastActiveTab) {
+            state.lastActiveTab = data.settings.lastActiveTab;
             const lastTabKey = isOwnerUser(currentUser) ? 'smart_schedule_last_active_tab' : `smart_schedule_${currentUser.uid}_smart_schedule_last_active_tab`;
             localStorage.setItem(lastTabKey, data.settings.lastActiveTab);
           }
+          if (data.settings.lastSelectedWeek) {
+            state.lastSelectedWeek = data.settings.lastSelectedWeek;
+          }
         }
+
+        // 4. Khởi tạo lại Application State
+        initApplicationState(currentUser);
+
+        // 5. Thông báo re-render cho UI
         if (typeof onSyncCallback === 'function') onSyncCallback(currentUser);
       }
     } else {
-      // Lưu dữ liệu khởi tạo lên Cloud lần đầu
-      const initialDoc = {
-        email: currentUser.email,
-        displayName: currentUser.displayName,
-        photoURL: currentUser.photoURL,
-        driveSubjects: state.driveSubjects || [],
-        studentGrades: state.studentGrades || {},
-        settings: {
-          theme: localStorage.getItem('smart_schedule_theme') || 'violet',
-          daysDisplayMode: state.daysDisplayMode || '7',
-          lastActiveTab: state.lastActiveTab || 'grid'
-        },
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      };
-      docRef.set(initialDoc, { merge: true });
+      // Thiết bị mới / lần đầu: Lưu toàn bộ state hiện tại lên Cloud
+      syncAllStateToCloud(currentUser);
     }
   }, (err) => {
     console.warn('[Firestore] Lỗi snapshot:', err);
@@ -447,46 +445,62 @@ function attachFirestoreListener(uid, onSyncCallback) {
 }
 
 /**
- * Đồng bộ danh sách môn học và dữ liệu lên Cloud Firestore
+ * Đồng bộ toàn bộ trạng thái State cuối cùng và toàn bộ các Spaces lên Cloud Firestore
+ * @param {Object|null} user 
  */
-export function syncDriveSubjectsToCloud() {
-  if (!db || !currentUser) return;
-  const docRef = db.collection('users').doc(currentUser.uid);
-  docRef.set({
-    driveSubjects: state.driveSubjects || [],
-    studentGrades: state.studentGrades || {},
-    settings: {
-      theme: localStorage.getItem('smart_schedule_theme') || 'violet',
-      daysDisplayMode: state.daysDisplayMode || '7',
-      lastActiveTab: state.lastActiveTab || 'grid'
-    },
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-  }, { merge: true }).catch(err => {
-    console.warn('[Firestore] Lỗi đồng bộ Cloud:', err);
-  });
+export function syncAllStateToCloud(user = null) {
+  const activeUser = user || currentUser;
+  if (!db || !activeUser || !activeUser.uid) return;
+
+  try {
+    const backupData = exportFullBackupData(activeUser);
+    const docRef = db.collection('users').doc(activeUser.uid);
+    
+    // Đóng gói cấu trúc đầy đủ cho Cloud
+    const cloudPayload = {
+      email: activeUser.email || '',
+      displayName: activeUser.displayName || 'Sinh viên',
+      photoURL: activeUser.photoURL || '',
+      activeSpaceId: state.activeSpaceId || backupData.settings?.activeSpaceId || 'default',
+      spaces: backupData.spaces || [],
+      spacesData: backupData.data || {},
+      settings: {
+        theme: localStorage.getItem('smart_schedule_theme') || 'violet',
+        daysDisplayMode: state.daysDisplayMode || '7',
+        lastActiveTab: state.lastActiveTab || 'grid',
+        lastSelectedWeek: state.lastSelectedWeek || '',
+        activeSpaceId: state.activeSpaceId || 'default'
+      },
+      // Tương thích ngược với các trường cũ
+      driveSubjects: state.driveSubjects || [],
+      studentGrades: state.studentGrades || {},
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+
+    docRef.set(cloudPayload, { merge: true }).catch(err => {
+      console.warn('[Firestore] Lỗi đồng bộ State lên Cloud:', err);
+    });
+  } catch (err) {
+    console.error('[Firestore] Lỗi export & sync lên Cloud:', err);
+  }
 }
 
 /**
- * Đồng bộ toàn bộ dữ liệu người dùng lên Cloud Firestore
+ * Đồng bộ danh sách môn học và dữ liệu lên Cloud Firestore (Hỗ trợ tương thích ngược)
+ */
+export function syncDriveSubjectsToCloud() {
+  syncAllStateToCloud();
+}
+
+/**
+ * Đồng bộ toàn bộ dữ liệu người dùng lên Cloud Firestore (Hỗ trợ tương thích ngược)
  * @param {Array} customWeeks 
  * @param {Object} customMds 
  */
 export function syncUserDataToCloud(customWeeks = [], customMds = {}) {
-  if (!db || !currentUser) return;
-  const docRef = db.collection('users').doc(currentUser.uid);
-  docRef.set({
-    driveSubjects: state.driveSubjects || [],
-    studentGrades: state.studentGrades || {},
-    customWeeks: customWeeks || [],
-    customMds: customMds || {},
-    settings: {
-      theme: localStorage.getItem('smart_schedule_theme') || 'violet',
-      daysDisplayMode: state.daysDisplayMode || '7',
-      lastActiveTab: state.lastActiveTab || 'grid',
-      lastSelectedWeek: state.lastSelectedWeek || ''
-    },
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-  }, { merge: true }).catch(err => {
-    console.warn('[Firestore] Lỗi đồng bộ toàn bộ dữ liệu:', err);
-  });
+  syncAllStateToCloud();
+}
+
+if (typeof window !== 'undefined') {
+  window.__scheduleSmartSyncToCloud = syncAllStateToCloud;
 }

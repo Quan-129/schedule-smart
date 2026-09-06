@@ -159,6 +159,20 @@ export function getActiveSpace(user = null) {
 }
 
 /**
+ * Kích hoạt đồng bộ State lên Cloud trong nền
+ * @param {Object|null} user 
+ */
+export function triggerCloudSync(user = null) {
+  try {
+    if (typeof window !== 'undefined' && typeof window.__scheduleSmartSyncToCloud === 'function') {
+      window.__scheduleSmartSyncToCloud(user);
+    }
+  } catch (e) {
+    console.warn('[State] Cloud Sync Trigger Warning:', e);
+  }
+}
+
+/**
  * Lưu danh sách Spaces vào Storage
  * @param {Array<Object>} spacesList 
  * @param {Object|null} user 
@@ -168,6 +182,7 @@ export function persistSpacesList(spacesList, user = null) {
   const spacesKey = isOwnerUser(activeUser) ? STORAGE_KEYS.SPACES_LIST : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_spaces_list`;
   state.spaces = spacesList;
   setStorageItem(spacesKey, spacesList);
+  triggerCloudSync(activeUser);
 }
 
 /**
@@ -180,6 +195,7 @@ export function setActiveSpaceId(spaceId, user = null) {
   const activeSpaceKey = isOwnerUser(activeUser) ? STORAGE_KEYS.ACTIVE_SPACE_ID : `smart_schedule_${activeUser ? activeUser.uid : 'guest'}_active_space_id`;
   state.activeSpaceId = spaceId;
   setStorageItem(activeSpaceKey, spaceId);
+  triggerCloudSync(activeUser);
 }
 
 /**
@@ -322,8 +338,10 @@ export function initApplicationState(user = null) {
  * @param {Object|null} user 
  */
 export function persistDriveSubjects(user = null) {
-  const driveKey = getScopedStorageKey(STORAGE_KEYS.DRIVE_SUBJECTS, user, state.activeSpaceId);
+  const activeUser = user || getCurrentUser();
+  const driveKey = getScopedStorageKey(STORAGE_KEYS.DRIVE_SUBJECTS, activeUser, state.activeSpaceId);
   setStorageItem(driveKey, state.driveSubjects);
+  triggerCloudSync(activeUser);
 }
 
 /**
@@ -331,8 +349,10 @@ export function persistDriveSubjects(user = null) {
  * @param {Object|null} user 
  */
 export function persistGrades(user = null) {
-  const gradesKey = getScopedStorageKey(STORAGE_KEYS.GRADES, user, state.activeSpaceId);
+  const activeUser = user || getCurrentUser();
+  const gradesKey = getScopedStorageKey(STORAGE_KEYS.GRADES, activeUser, state.activeSpaceId);
   setStorageItem(gradesKey, state.studentGrades);
+  triggerCloudSync(activeUser);
 }
 
 /**
@@ -340,6 +360,7 @@ export function persistGrades(user = null) {
  */
 export function persistDaysDisplayMode() {
   setStorageItem(STORAGE_KEYS.DAYS_DISPLAY_MODE, state.daysDisplayMode);
+  triggerCloudSync(getCurrentUser());
 }
 
 /**
@@ -348,9 +369,11 @@ export function persistDaysDisplayMode() {
  * @param {Object|null} user 
  */
 export function persistLastActiveTab(tabName, user = null) {
+  const activeUser = user || getCurrentUser();
   state.lastActiveTab = tabName;
-  const lastTabKey = getScopedStorageKey(STORAGE_KEYS.LAST_ACTIVE_TAB, user);
+  const lastTabKey = getScopedStorageKey(STORAGE_KEYS.LAST_ACTIVE_TAB, activeUser);
   setStorageItem(lastTabKey, tabName);
+  triggerCloudSync(activeUser);
 }
 
 /**
@@ -359,12 +382,14 @@ export function persistLastActiveTab(tabName, user = null) {
  * @param {Object|null} user 
  */
 export function persistLastSelectedWeek(weekFilename, user = null) {
+  const activeUser = user || getCurrentUser();
   state.lastSelectedWeek = weekFilename;
-  const lastWeekKey = getScopedStorageKey(STORAGE_KEYS.LAST_SELECTED_WEEK, user, state.activeSpaceId);
+  const lastWeekKey = getScopedStorageKey(STORAGE_KEYS.LAST_SELECTED_WEEK, activeUser, state.activeSpaceId);
   setStorageItem(lastWeekKey, weekFilename);
 
   // Cập nhật vào đối tượng Space
-  updateSpace(state.activeSpaceId, { lastSelectedWeek: weekFilename }, user);
+  updateSpace(state.activeSpaceId, { lastSelectedWeek: weekFilename }, activeUser);
+  triggerCloudSync(activeUser);
 }
 
 /**
