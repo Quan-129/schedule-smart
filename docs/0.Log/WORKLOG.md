@@ -4,6 +4,16 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 15:26] - Loại Bỏ Badge "BK TP.HCM • Học Kỳ 1 2026-2027" Trên Màn Hình Đăng Nhập 🧹✨
+
+- **🎯 Yêu cầu từ người dùng**: Gỡ bỏ badge `BK TP.HCM • Học Kỳ 1 2026-2027` trên màn hình Landing / Login Screen.
+- **✅ Chi tiết thay đổi**:
+  - [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html): Xóa `<div class="login-badge">` trong Landing Screen card.
+  - [`src/1.Frontend/components/layout/LoginScreen.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/layout/LoginScreen.js): Xóa `.login-badge` trong template render động.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v104`.
+
+---
+
 ## 📅 [2026-09-06 15:25] - Tinh Gọn Logo Navbar (Xóa Badge "HK1 2026-2027") 🧹✨
 
 - **🎯 Yêu cầu từ người dùng**: Loại bỏ badge `HK1 2026-2027` nằm dưới logo ScheduleSmart trên thanh Navbar để giao diện tối giản và thanh thoát hơn.
