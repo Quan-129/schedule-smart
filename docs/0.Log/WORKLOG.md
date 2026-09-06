@@ -4,6 +4,18 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 11:58] - Loại Bỏ Tab Chế Độ "4. Cả Năm" Trong Bản Đồ Nhiệt Cường Độ Học Tập 🎯🔥
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng yêu cầu loại bỏ chế độ xem `4. Cả Năm` khỏi thanh Horizon Tabs của Bản Đồ Nhiệt, giữ lại 3 chế độ xem thiết thực và tập trung nhất: `1. Lịch Tuần`, `2. Tháng`, `3. Học Kỳ / Quý`.
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    - Xóa nút `data-mode="year"` khỏi thanh điều khiển `.heatmap-mode-tabs`.
+    - Giữ trọn bộ 3 tab cân xứng, trực quan và dễ theo dõi.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v92`.
+
+---
+
 ## 📅 [2026-09-06 11:55] - Tinh Giản & Thu Nhỏ Thanh Header Tỉ Lệ Điểm & Chiếc Cặp Google Drive (Ultra-Slim Headers) 📊🎒✨
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:

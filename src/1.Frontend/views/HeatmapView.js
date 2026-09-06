@@ -1228,9 +1228,6 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
           <button type="button" class="btn-heatmap-tab ${currentHorizonMode === 'semester' ? 'active' : ''}" data-mode="semester">
             <i class="fa-solid fa-layer-group"></i> <span>3. Học Kỳ / Quý</span>
           </button>
-          <button type="button" class="btn-heatmap-tab ${currentHorizonMode === 'year' ? 'active' : ''}" data-mode="year">
-            <i class="fa-solid fa-chart-line"></i> <span>4. Cả Năm</span>
-          </button>
         </div>
 
         <span style="font-size: 0.76rem; color: var(--text-muted);">
