@@ -4,6 +4,24 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 16:30] - Cố Định Tuyệt Đối Thanh Điều Hướng 4 Tab (Floating Island Center Dock) ⚓🏝️
+
+- **🎯 Yêu cầu từ người dùng**: Cố định thanh điều hướng 4 Tab (Thời khóa biểu / Hôm nay / Bảng điểm / Chiếc cặp Drive) để không bị rung lắc, giật sang trái/phải khi chuyển đổi qua lại giữa các Tab.
+- **🔍 Phân tích nguyên nhân**:
+  - Tại Tab Lưới tuần, khu vực bên phải `.nav-right` hiển thị thêm bộ chọn chế độ ngày (`#days-mode-selector`), làm độ rộng bên phải đạt ~`380px`.
+  - Khi chuyển sang Tab khác, bộ chọn ngày bị ẩn (`display: none`), làm `.nav-right` hụt mất ~`180px`.
+  - Do Flexbox `justify-content: space-between`, khoảng trống thay đổi kéo giật `.nav-center` lệch sang phải ~`90px` và giật lại khi quay về Lưới tuần.
+- **✅ Chi tiết triển khai**:
+  - [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css):
+    + Định vị `.nav-center` ở chế độ **Floating Island Dock** với `position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 10;`.
+    + Đảm bảo thanh 4 Icon Tab luôn luôn nằm đúng chính giữa tâm màn hình và thanh Header, cố định 100% không xê dịch 1 pixel nào dù các nút bên trái hay bên phải có ẩn/hiện hoặc đổi kích thước.
+  - [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css):
+    + Tinh chỉnh mượt mà tại các breakpoint tablet (< 1150px) và mobile (< 768px): tự động reset `position: static; transform: none;` để dàn đều tương thích tối ưu trên mọi kích thước màn hình.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js):
+    + Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v110`.
+
+---
+
 ## 📅 [2026-09-06 16:25] - Khắc Phục Lỗi Đồng Bộ State & Tự Động Khôi Phục Dữ Liệu Học Kỳ Cũ Khi Xóa Học Kỳ Mới (Live State Recovery) 🔄⚡
 
 - **🎯 Yêu cầu từ người dùng**: Giải thích lý do và khắc phục lỗi khi xóa học kỳ mới đang mở, hệ thống chuyển về học kỳ cũ nhưng dữ liệu thời khóa biểu & chiếc cặp Drive không hiển thị ngay mà phải F5 mới thấy.

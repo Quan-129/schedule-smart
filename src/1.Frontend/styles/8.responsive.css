@@ -112,8 +112,11 @@
   }
 
   .nav-center {
+    position: static;
+    transform: none;
     flex: 0 0 auto;
     margin-left: auto;
+    z-index: auto;
   }
 
   /* Hàng 2: Bộ chọn Ngày & Tuần dàn đều sang trọng */
@@ -333,9 +336,13 @@
 
   /* Hàng 2: 4 Tab chuyển chế độ xem 100% */
   .nav-center {
+    position: static;
+    transform: none;
     order: 2;
     width: 100%;
     display: flex;
+    margin: 0;
+    z-index: auto;
   }
 
   .view-toggles {
