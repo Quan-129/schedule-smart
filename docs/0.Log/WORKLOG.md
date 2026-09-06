@@ -4,7 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
-## 📅 [2026-09-06 11:20] - Tối Ưu Hóa Giao Diện Responsive Toàn Diện Cho Điện Thoại & Thiết Bị Di Động (Mobile-First UX) 📱✨
+## 📅 [2026-09-06 11:22] - Khắc Phục Lỗi Tràn Hàng Navbar Trên Mobile & Tự Động Ẩn Days Mode Selector Khi Đổi Tab 📱🎯
+
+- **🎯 Yêu cầu & Phân tích nguyên nhân**:
+  - Người dùng gửi ảnh chụp màn hình iPhone cho thấy: Thanh chọn tuần và nút "3 Ngày, 7 Ngày" bị dồn chung trên 1 hàng ngang, làm tràn viền 2 bên màn hình điện thoại (bị cắt cụt nút `3 Ngày`, `Tuần 36` và nút `+`).
+  - **Nguyên nhân**: `.days-mode-selector` và `.week-navigation` cùng nằm trong `.nav-right` với `flex-direction: row` khiến tổng chiều rộng vượt quá 500px, và `.days-mode-selector` hiển thị cả ở tab Chiếc Cặp Drive (nơi không cần dùng đến).
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js): Trong `switchTab(tabName)`, tự động ẩn `.days-mode-selector` khi ở các tab khác (Chiếc Cặp, Tính Điểm, Bản Đồ Nhiệt) và chỉ hiển thị khi ở tab Lịch Học.
+  - [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css):
+    - Tách Navbar Mobile thành các hàng độc lập:
+      - **Hàng 1 (`order: 1`)**: Logo `ScheduleSmart` + Actions.
+      - **Hàng 2 (`order: 2`)**: 4 Tab chuyển đổi View (`.view-toggles`) dàn đều 4 cột.
+      - **Hàng 3 (`order: 3`)**: Thanh chọn Tuần (`.week-navigation`) chiếm 100% full-width, nút `<` `>` `Focus` `+` vừa khít 100% không bao giờ bị tràn.
+      - **Hàng 4 (chỉ ở tab Lịch học)**: `.days-mode-selector` dàn đều 3 cột (`1 Ngày | 3 Ngày | 7 Ngày`).
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v85`.
+
+---
 
 - **🎯 Yêu cầu & Trải nghiệm di động**:
   - Người dùng yêu cầu hoàn thiện responsive toàn diện trên mọi màn hình điện thoại (Smartphones từ 320px đến 600px và Tablets).

@@ -212,61 +212,9 @@
     font-size: 0.7rem;
   }
 
-  /* Hàng 2: Thanh Tuần Học 100% */
-  .nav-right {
-    order: 2;
-    width: 100%;
-    display: flex;
-  }
-
-  .week-navigation {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.2rem 0.35rem;
-    background: var(--bg-secondary);
-  }
-
-  .btn-nav {
-    width: 30px;
-    height: 30px;
-    font-size: 0.8rem;
-    flex-shrink: 0;
-  }
-
-  .week-dropdown-wrapper {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 0.35rem;
-    min-width: 0;
-  }
-
-  .week-dropdown-wrapper i {
-    font-size: 0.75rem;
-    flex-shrink: 0;
-  }
-
-  .week-select {
-    font-size: 0.82rem;
-    font-weight: 700;
-    width: 100%;
-    text-align: center;
-    text-overflow: ellipsis;
-  }
-
-  .btn-add-week-nav {
-    width: 30px;
-    height: 30px;
-    font-size: 0.85rem;
-    flex-shrink: 0;
-  }
-
-  /* Hàng 3: 4 Tab chuyển chế độ xem 100% */
+  /* Hàng 2: 4 Tab chuyển chế độ xem 100% */
   .nav-center {
-    order: 3;
+    order: 2;
     width: 100%;
     display: flex;
   }
@@ -276,14 +224,96 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 0.25rem;
-    padding: 0.2rem;
+    padding: 0.25rem 0.35rem;
+    border-radius: var(--radius-md);
   }
 
   .toggle-btn {
     width: 100%;
-    height: 36px;
-    font-size: 0.95rem;
+    height: 38px;
+    font-size: 1.05rem;
     border-radius: var(--radius-sm);
+  }
+
+  /* Hàng 3: Thanh Tuần Học & Chế Độ Ngày (Xếp dọc gọn gàng 100%) */
+  .nav-right {
+    order: 3;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .week-navigation {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.22rem 0.35rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+  }
+
+  .btn-nav {
+    width: 28px;
+    height: 28px;
+    font-size: 0.78rem;
+    flex-shrink: 0;
+  }
+
+  .week-dropdown-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.2rem;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .week-dropdown-wrapper i {
+    font-size: 0.72rem;
+    flex-shrink: 0;
+  }
+
+  .week-select {
+    font-size: 0.78rem;
+    font-weight: 700;
+    width: 100%;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    padding: 0.2rem 0;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+  }
+
+  .btn-add-week-nav {
+    width: 28px;
+    height: 28px;
+    font-size: 0.78rem;
+    flex-shrink: 0;
+  }
+
+  .days-mode-selector {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.2rem;
+    padding: 0.2rem 0.3rem;
+    box-sizing: border-box;
+  }
+
+  .btn-days-mode {
+    justify-content: center;
+    padding: 0.35rem 0.2rem;
+    font-size: 0.72rem;
+    width: 100%;
   }
 
   /* Hero Banner trên Mobile */

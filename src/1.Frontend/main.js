@@ -283,6 +283,13 @@ export function switchTab(tabName) {
     panel.style.display = isTarget ? 'block' : 'none';
   });
 
+  // Tự động ẩn/hiện bộ chọn chế độ ngày (chỉ dành cho Tab Thời khóa biểu)
+  const daysModeSelector = document.getElementById('days-mode-selector');
+  if (daysModeSelector) {
+    const isGridTab = tabName === 'grid' || tabName === 'schedule';
+    daysModeSelector.style.display = isGridTab ? '' : 'none';
+  }
+
   // Cập nhật tooltip động thông minh theo ngữ cảnh cho nút Focus Hôm Nay
   const focusNavBtn = document.getElementById('btn-focus-today');
   const currentDateBadge = document.getElementById('current-date-badge');
