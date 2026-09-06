@@ -4,6 +4,24 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 09:20] - Tích Hợp Nút "x" Xóa Ca Học Mẫu & Phòng Học Mẫu Bất Kỳ Trong Modal Thêm Tiết 🗑️✨
+
+- **🎯 Yêu cầu & Mục tiêu**:
+  - Người dùng có thể chủ động bấm nút dấu `x` để xóa bất kỳ ca học mẫu hoặc phòng học mẫu nào (cả ca mặc định lẫn ca tùy tạo) trực tiếp trên giao diện gợi ý.
+  - Danh sách sau khi xóa được cập nhật và lưu bền vững vào LocalStorage (`smart_schedule_active_time_presets` và `smart_schedule_active_room_presets`).
+  - Loại bỏ hoàn toàn hiển thị tiết học trong các ca mẫu theo đúng định hướng thời khóa biểu tự do theo giờ.
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - `[Frontend Modal]` [`src/1.Frontend/components/modals/AddClassModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddClassModal.js):
+    - Chuyển `getTimePresets()` và `getRoomPresets()` thành mảng động đọc/ghi toàn bộ vào LocalStorage kèm fallback và migration an toàn.
+    - Cập nhật `renderTimePresets()`: render nút xóa `<button class="btn-delete-time-preset"><i class="fa-solid fa-xmark"></i></button>` cho mọi ca học mẫu.
+    - Cập nhật `renderRoomPresets()`: render nút xóa `<button class="btn-delete-room-preset"><i class="fa-solid fa-xmark"></i></button>` cho mọi phòng học mẫu.
+    - Ngăn nổi bọt sự kiện (`e.stopPropagation()`), xóa phần tử theo index, lưu LocalStorage, re-render và hiển thị Toast thông báo.
+  - `[Modular CSS]` [`src/1.Frontend/styles/6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css):
+    - Tạo kiểu nút dấu `x` hình tròn màu đỏ tinh tế, bo góc, hiệu ứng hover scale mượt mà và bóng đổ sang trọng.
+  - `[Performance / PWA]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v66` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-06 09:13] - Khắc Phục Triệt Để Lỗi COOP Policy & Tích Hợp Đăng Nhập Nhanh 1-Chạm Cho Chủ Sở Hữu ⚡
 
 - **🎯 Nguyên nhân sự cố**:

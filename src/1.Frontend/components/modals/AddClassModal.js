@@ -1005,88 +1005,116 @@ export function renderSmartIconSuggestions(wrapEl, chipsEl, suggestions = [], cu
   });
 }
 
-const TIME_PRESETS = [
-  { time: '07:00 - 08:50', period: 'Tiết 2 - 3', label: 'Sáng: Tiết 2-3 (7h-8h50)' },
-  { time: '09:00 - 11:50', period: 'Tiết 4 - 6', label: 'Sáng: Tiết 4-6 (9h-11h50)' },
-  { time: '07:00 - 09:50', period: 'Tiết 1 - 3', label: 'Sáng: Tiết 1-3 (7h-9h50)' },
-  { time: '10:00 - 11:50', period: 'Tiết 5 - 6', label: 'Sáng: Tiết 5-6 (10h-11h50)' },
-  { time: '13:00 - 14:50', period: 'Tiết 8 - 9', label: 'Chiều: Tiết 8-9 (13h-14h50)' },
-  { time: '15:00 - 16:50', period: 'Tiết 10 - 11', label: 'Chiều: Tiết 10-11 (15h-16h50)' },
-  { time: '13:00 - 15:50', period: 'Tiết 7 - 9', label: 'Chiều: Tiết 7-9 (13h-15h50)' },
-  { time: '14:00 - 15:50', period: 'Tiết 9 - 10', label: 'Chiều: Tiết 9-10 (14h-15h50)' }
+const DEFAULT_TIME_PRESETS = [
+  { time: '07:00 - 08:50', label: '07:00 - 08:50' },
+  { time: '09:00 - 11:50', label: '09:00 - 11:50' },
+  { time: '07:00 - 09:50', label: '07:00 - 09:50' },
+  { time: '10:00 - 11:50', label: '10:00 - 11:50' },
+  { time: '13:00 - 14:50', label: '13:00 - 14:50' },
+  { time: '15:00 - 16:50', label: '15:00 - 16:50' },
+  { time: '13:00 - 15:50', label: '13:00 - 15:50' },
+  { time: '14:00 - 15:50', label: '14:00 - 15:50' }
 ];
 
-const ROOM_PRESETS = ['B1-305 (CS1)', 'B4-505 (CS1)', 'B9-202 (CS1)', 'C4-402 (CS1)', 'B4-301 (CS1)', 'B1-212 (CS1)', 'B4-303 (CS1)'];
-const CUSTOM_TIME_PRESETS_KEY = 'smart_schedule_custom_time_presets';
-const CUSTOM_ROOM_PRESETS_KEY = 'smart_schedule_custom_room_presets';
+const DEFAULT_ROOM_PRESETS = ['B1-305 (CS1)', 'B4-505 (CS1)', 'B9-202 (CS1)', 'C4-402 (CS1)', 'B4-301 (CS1)', 'B1-212 (CS1)', 'B4-303 (CS1)'];
+const ACTIVE_TIME_PRESETS_KEY = 'smart_schedule_active_time_presets';
+const ACTIVE_ROOM_PRESETS_KEY = 'smart_schedule_active_room_presets';
 
 /**
- * Đọc danh sách ca học tùy chỉnh do người dùng lưu
+ * Đọc danh sách ca học mẫu từ LocalStorage (hoặc fallback mặc định)
  * @returns {Array<Object>}
  */
-function getCustomTimePresets() {
+function getTimePresets() {
   try {
-    const raw = localStorage.getItem(CUSTOM_TIME_PRESETS_KEY);
-    if (raw) {
+    const raw = localStorage.getItem(ACTIVE_TIME_PRESETS_KEY);
+    if (raw !== null) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) return parsed;
     }
+    // Migrate nếu trước đó có custom presets
+    const legacyCustom = localStorage.getItem('smart_schedule_custom_time_presets');
+    const list = DEFAULT_TIME_PRESETS.map(p => ({ ...p }));
+    if (legacyCustom) {
+      try {
+        const customParsed = JSON.parse(legacyCustom);
+        if (Array.isArray(customParsed)) {
+          customParsed.forEach(c => {
+            if (c && c.time && !list.some(p => p.time === c.time)) {
+              list.push({ time: c.time, label: c.label || c.time });
+            }
+          });
+        }
+      } catch (e) {}
+    }
+    return list;
   } catch (e) {
-    console.error('Lỗi đọc custom time presets:', e);
+    console.error('Lỗi đọc time presets:', e);
+    return DEFAULT_TIME_PRESETS.map(p => ({ ...p }));
   }
-  return [];
 }
 
 /**
- * Lưu danh sách ca học tùy chỉnh vào LocalStorage
+ * Lưu danh sách ca học mẫu vào LocalStorage
  * @param {Array<Object>} presets 
  */
-function saveCustomTimePresets(presets) {
+function saveTimePresets(presets) {
   try {
-    localStorage.setItem(CUSTOM_TIME_PRESETS_KEY, JSON.stringify(presets));
+    localStorage.setItem(ACTIVE_TIME_PRESETS_KEY, JSON.stringify(presets));
   } catch (e) {
-    console.error('Lỗi lưu custom time presets:', e);
+    console.error('Lỗi lưu time presets:', e);
   }
 }
 
 /**
- * Đọc danh sách phòng học tùy chỉnh do người dùng lưu
+ * Đọc danh sách phòng học mẫu từ LocalStorage (hoặc fallback mặc định)
  * @returns {Array<string>}
  */
-function getCustomRoomPresets() {
+function getRoomPresets() {
   try {
-    const raw = localStorage.getItem(CUSTOM_ROOM_PRESETS_KEY);
-    if (raw) {
+    const raw = localStorage.getItem(ACTIVE_ROOM_PRESETS_KEY);
+    if (raw !== null) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) return parsed;
     }
+    // Migrate nếu trước đó có custom rooms
+    const legacyCustom = localStorage.getItem('smart_schedule_custom_room_presets');
+    const list = [...DEFAULT_ROOM_PRESETS];
+    if (legacyCustom) {
+      try {
+        const customParsed = JSON.parse(legacyCustom);
+        if (Array.isArray(customParsed)) {
+          customParsed.forEach(r => {
+            if (r && !list.includes(r)) list.push(r);
+          });
+        }
+      } catch (e) {}
+    }
+    return list;
   } catch (e) {
-    console.error('Lỗi đọc custom room presets:', e);
+    console.error('Lỗi đọc room presets:', e);
+    return [...DEFAULT_ROOM_PRESETS];
   }
-  return [];
 }
 
 /**
- * Lưu danh sách phòng học tùy chỉnh vào LocalStorage
+ * Lưu danh sách phòng học mẫu vào LocalStorage
  * @param {Array<string>} presets 
  */
-function saveCustomRoomPresets(presets) {
+function saveRoomPresets(presets) {
   try {
-    localStorage.setItem(CUSTOM_ROOM_PRESETS_KEY, JSON.stringify(presets));
+    localStorage.setItem(ACTIVE_ROOM_PRESETS_KEY, JSON.stringify(presets));
   } catch (e) {
-    console.error('Lỗi lưu custom room presets:', e);
+    console.error('Lỗi lưu room presets:', e);
   }
 }
 
 /**
- * Tự động tìm tên Tiết học từ khung giờ nếu khớp với ca học chuẩn
- * @param {string} timeRange 
+ * Hàm hỗ trợ lấy period (không còn dùng)
+ * @param {string} _timeRange 
  * @returns {string}
  */
-function getPeriodFromTimeRange(timeRange = '') {
-  const allPresets = [...TIME_PRESETS, ...getCustomTimePresets()];
-  const matched = allPresets.find(p => p.time.trim() === timeRange.trim());
-  return matched ? (matched.period || '') : '';
+function getPeriodFromTimeRange(_timeRange = '') {
+  return '';
 }
 
 // ============================================================================
@@ -1181,14 +1209,14 @@ export function ensureAddClassModalDom() {
           </div>
         </div>
 
-        <!-- SECTION 2: KHUNG GIỜ & CA HỌC CHUẨN ĐHBK & TỰ TẠO -->
+        <!-- SECTION 2: KHUNG GIỜ & CA HỌC MẪU -->
         <div class="form-group-styled">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <label><i class="fa-solid fa-clock"></i> Ca học mẫu (Chuẩn ĐHBK & Tự tạo):</label>
-            <span style="font-size: 0.72rem; color: var(--text-muted);">Bấm để chọn nhanh</span>
+            <label><i class="fa-solid fa-clock"></i> Ca học mẫu:</label>
+            <span style="font-size: 0.72rem; color: var(--text-muted);">Bấm để chọn nhanh hoặc xóa</span>
           </div>
           <div class="preset-buttons-grid" id="time-presets-grid">
-            <!-- Render động từ TIME_PRESETS + Custom Presets -->
+            <!-- Render động từ danh sách ca học mẫu -->
           </div>
           
           <!-- Hàng Chọn Giờ Con Lăn 3D Chuẩn iOS Alarm + Nút Lưu Ca Mẫu -->
@@ -1705,36 +1733,36 @@ function highlightActivePreset() {
 }
 
 /**
- * Render danh sách Ca học mẫu (Chuẩn ĐHBK + Ca Tùy Chỉnh do người dùng tạo)
+ * Render danh sách Ca học mẫu
  * @param {string} activeTime - Thời gian đang được chọn
  */
 function renderTimePresets(activeTime = '') {
   const container = document.getElementById('time-presets-grid');
   if (!container) return;
 
-  const customPresets = getCustomTimePresets();
-  const allPresets = [
-    ...TIME_PRESETS.map(p => ({ ...p, isCustom: false })),
-    ...customPresets.map(p => ({ ...p, isCustom: true }))
-  ];
+  const allPresets = getTimePresets();
+
+  if (allPresets.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); font-size: 0.8rem; padding: 0.6rem 0; font-style: italic;">
+        Chưa có ca mẫu nào. Chọn giờ bên dưới rồi bấm "Lưu ca mẫu" để thêm.
+      </div>
+    `;
+    return;
+  }
 
   container.innerHTML = allPresets.map((p, idx) => {
-    const isCustom = p.isCustom;
-    const customIdx = isCustom ? (idx - TIME_PRESETS.length) : -1;
     const isActive = activeTime && (p.time.trim() === activeTime.trim());
     return `
-      <div class="time-preset-wrapper ${isCustom ? 'is-custom' : ''}">
+      <div class="time-preset-wrapper">
         <button type="button" class="btn-time-preset ${isActive ? 'active' : ''}" 
           data-time="${escapeHtml(p.time)}" 
           title="${escapeHtml(p.label || p.time)}">
           <span class="preset-time-title">${escapeHtml(p.time)}</span>
-          ${p.period ? `<span class="preset-time-period">${escapeHtml(p.period)}</span>` : ''}
         </button>
-        ${isCustom ? `
-          <button type="button" class="btn-delete-custom-preset" data-custom-idx="${customIdx}" title="Xóa ca mẫu tự tạo này">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        ` : ''}
+        <button type="button" class="btn-delete-time-preset" data-idx="${idx}" title="Xóa ca mẫu ${escapeHtml(p.time)}">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
     `;
   }).join('');
@@ -1748,15 +1776,16 @@ function renderTimePresets(activeTime = '') {
     };
   });
 
-  // Gắn sự kiện xóa ca tự tạo
-  container.querySelectorAll('.btn-delete-custom-preset').forEach(delBtn => {
+  // Gắn sự kiện xóa ca mẫu (có dấu x)
+  container.querySelectorAll('.btn-delete-time-preset').forEach(delBtn => {
     delBtn.onclick = (e) => {
+      e.preventDefault();
       e.stopPropagation();
-      const customIdx = parseInt(delBtn.dataset.customIdx, 10);
-      const currentList = getCustomTimePresets();
-      if (currentList[customIdx]) {
-        const removed = currentList.splice(customIdx, 1)[0];
-        saveCustomTimePresets(currentList);
+      const idx = parseInt(delBtn.dataset.idx, 10);
+      const currentList = getTimePresets();
+      if (currentList[idx]) {
+        const removed = currentList.splice(idx, 1)[0];
+        saveTimePresets(currentList);
         renderTimePresets(getCurrentTimeRangeString());
         showToast(`Đã xóa ca mẫu "${removed.time}" 🗑️`);
       }
@@ -1765,35 +1794,35 @@ function renderTimePresets(activeTime = '') {
 }
 
 /**
- * Render danh sách Gợi ý phòng học (Chuẩn + Tự tạo)
+ * Render danh sách Gợi ý phòng học
  * @param {string} selectedRoom 
  */
 function renderRoomPresets(selectedRoom = '') {
   const container = document.getElementById('room-presets-row');
   if (!container) return;
 
-  const customRooms = getCustomRoomPresets();
-  const allRooms = [
-    ...ROOM_PRESETS.map(r => ({ room: r, isCustom: false })),
-    ...customRooms.map(r => ({ room: r, isCustom: true }))
-  ];
+  const allRooms = getRoomPresets();
+
+  if (allRooms.length === 0) {
+    container.innerHTML = `
+      <span class="room-preset-label">Gợi ý phòng:</span>
+      <span style="font-size: 0.74rem; color: var(--text-muted); font-style: italic;">Chưa có phòng mẫu. Nhập phòng rồi bấm "Lưu phòng" để thêm.</span>
+    `;
+    return;
+  }
 
   container.innerHTML = `
     <span class="room-preset-label">Gợi ý phòng:</span>
-    ${allRooms.map((r, idx) => {
-      const isCustom = r.isCustom;
-      const customIdx = isCustom ? (idx - ROOM_PRESETS.length) : -1;
-      const isActive = selectedRoom && (r.room.trim().toLowerCase() === selectedRoom.trim().toLowerCase());
+    ${allRooms.map((roomName, idx) => {
+      const isActive = selectedRoom && (roomName.trim().toLowerCase() === selectedRoom.trim().toLowerCase());
       return `
-        <div class="room-preset-tag-wrapper ${isCustom ? 'is-custom-room' : ''}">
-          <button type="button" class="btn-room-preset ${isActive ? 'active' : ''}" data-room="${escapeHtml(r.room)}">
-            ${escapeHtml(r.room)}
+        <div class="room-preset-tag-wrapper">
+          <button type="button" class="btn-room-preset ${isActive ? 'active' : ''}" data-room="${escapeHtml(roomName)}">
+            ${escapeHtml(roomName)}
           </button>
-          ${isCustom ? `
-            <button type="button" class="btn-delete-custom-room" data-custom-idx="${customIdx}" title="Xóa phòng mẫu này">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-          ` : ''}
+          <button type="button" class="btn-delete-room-preset" data-idx="${idx}" title="Xóa phòng mẫu ${escapeHtml(roomName)}">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
         </div>
       `;
     }).join('')}
@@ -1812,15 +1841,16 @@ function renderRoomPresets(selectedRoom = '') {
     };
   });
 
-  // Gắn sự kiện xóa phòng tự tạo
-  container.querySelectorAll('.btn-delete-custom-room').forEach(delBtn => {
+  // Gắn sự kiện xóa phòng mẫu (có dấu x)
+  container.querySelectorAll('.btn-delete-room-preset').forEach(delBtn => {
     delBtn.onclick = (e) => {
+      e.preventDefault();
       e.stopPropagation();
-      const customIdx = parseInt(delBtn.dataset.customIdx, 10);
-      const currentList = getCustomRoomPresets();
-      if (currentList[customIdx] !== undefined) {
-        const removed = currentList.splice(customIdx, 1)[0];
-        saveCustomRoomPresets(currentList);
+      const idx = parseInt(delBtn.dataset.idx, 10);
+      const currentList = getRoomPresets();
+      if (currentList[idx] !== undefined) {
+        const removed = currentList.splice(idx, 1)[0];
+        saveRoomPresets(currentList);
         const roomInput = document.getElementById('class-room-input');
         renderRoomPresets(roomInput ? roomInput.value : '');
         showToast(`Đã xóa phòng mẫu "${removed}" 🗑️`);
@@ -2206,9 +2236,8 @@ function bindAddClassModalEvents() {
         return;
       }
 
-      const customList = getCustomTimePresets();
-      const isDuplicate = TIME_PRESETS.some(p => p.time.trim() === timeVal) ||
-                          customList.some(p => p.time.trim() === timeVal);
+      const list = getTimePresets();
+      const isDuplicate = list.some(p => p.time.trim() === timeVal);
       if (isDuplicate) {
         showToast('Ca học này đã có sẵn trong danh sách mẫu!');
         renderTimePresets(timeVal);
@@ -2217,12 +2246,11 @@ function bindAddClassModalEvents() {
 
       const newPreset = {
         time: timeVal,
-        period: '',
-        label: `Tùy chỉnh: ${timeVal}`
+        label: timeVal
       };
 
-      customList.push(newPreset);
-      saveCustomTimePresets(customList);
+      list.push(newPreset);
+      saveTimePresets(list);
       renderTimePresets(timeVal);
       showToast(`Đã lưu ca mẫu: ${timeVal} 🎉`);
     };
@@ -2237,22 +2265,21 @@ function bindAddClassModalEvents() {
       const roomVal = roomInput ? roomInput.value.trim() : '';
 
       if (!roomVal) {
-        showToast('Vui lòng nhập tên phòng học trước (VD: H6-204)!');
+        showToast('Vui lòng nhập tên phòng học trước (VD: B1-305)!');
         if (roomInput) roomInput.focus();
         return;
       }
 
-      const customList = getCustomRoomPresets();
-      const isDuplicate = ROOM_PRESETS.some(r => r.toLowerCase() === roomVal.toLowerCase()) ||
-                          customList.some(r => r.toLowerCase() === roomVal.toLowerCase());
+      const list = getRoomPresets();
+      const isDuplicate = list.some(r => r.toLowerCase() === roomVal.toLowerCase());
       if (isDuplicate) {
         showToast('Phòng học này đã có trong danh sách gợi ý!');
         renderRoomPresets(roomVal);
         return;
       }
 
-      customList.push(roomVal);
-      saveCustomRoomPresets(customList);
+      list.push(roomVal);
+      saveRoomPresets(list);
       renderRoomPresets(roomVal);
       showToast(`Đã lưu phòng mẫu: "${roomVal}" 🎉`);
     };
