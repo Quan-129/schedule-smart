@@ -217,3 +217,41 @@ export function generateEmptyWeekMarkdown(weekTitle = 'Tuần mới') {
 - Bấm "+ Thêm buổi học" hoặc nhấn giữ ô ngày để thêm lịch học nhanh.`;
 }
 
+/**
+ * Sinh chuỗi Markdown mẫu hoàn chỉnh với các môn học gợi ý
+ * @param {string} weekTitle - Tên tuần
+ * @returns {string} Markdown string
+ */
+export function generateSampleWeekMarkdown(weekTitle = 'Tuần mới') {
+  const cleanTitle = weekTitle.startsWith('Lịch học') ? weekTitle : `Lịch học ${weekTitle}`;
+  return `# ${cleanTitle}
+
+## Thứ 2
+- 07:00 - 08:50: Toán Rời Rạc | P.A201
+- 09:00 - 11:30: Lập Trình Web Nâng Cao | P.Lab03
+
+## Thứ 3
+- 13:00 - 15:30: Cấu Trúc Dữ Liệu & Giải Thuật | P.B102
+
+## Thứ 4
+- 07:00 - 09:30: Cơ Sở Dữ Liệu | P.A105
+- 13:30 - 16:00: Mạng Máy Tính | P.Lab01
+
+## Thứ 5
+- Nghỉ.
+
+## Thứ 6
+- 07:00 - 09:30: Trí Tuệ Nhân Tạo | P.C301
+- 09:45 - 11:30: Tiếng Anh Chuyên Ngành | P.B204
+
+## Thứ 7
+- 08:00 - 11:00: Thực Tập Đồ Án Chuyên Ngành | P.Lab05
+
+## Chủ Nhật
+- Nghỉ.
+
+## Lưu ý nhỏ:
+- Chuẩn bị slide thuyết trình nhóm môn Lập trình Web.
+- Nộp bài tập lớn Cơ sở dữ liệu trước 23:59 Chủ Nhật.`;
+}
+

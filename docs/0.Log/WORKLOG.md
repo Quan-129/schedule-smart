@@ -4,6 +4,30 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 16:47] - Khôi Phục & Nâng Cấp Toàn Diện Tính Năng Thông Minh Cho Modal Thêm Tuần Học (Smart Auto-Inherit & Presets) 🧠✨
+
+- **🎯 Yêu cầu từ người dùng**: Khôi phục và hoàn thiện các tính năng thông minh khi tạo tuần học mới ("ý tưởng thông minh của cái này đâu mất rồi").
+- **🔍 Vấn đề trước đó**:
+  - Khi mở Modal Thêm Tuần, hệ thống mặc định nạp mẫu 7 ngày trống (`- Nghỉ.`), xóa mất lịch học của tuần hiện tại.
+  - Nút sao chép tuần cũ chỉ copy nguyên văn mà không tự động đổi dòng tiêu đề `# Lịch học Tuần [Cũ]` sang `# Lịch học Tuần [Mới] ([Khoảng ngày mới])`.
+  - Thiếu các preset nạp mẫu nhanh (mẫu có môn học, tuần trống) và hướng dẫn cú pháp Cheat Sheet.
+- **✅ Giải pháp thông minh đã triển khai**:
+  - [`src/2.Backend/services/TimetableParser.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/TimetableParser.js):
+    + Bổ sung và export hàm `generateSampleWeekMarkdown(weekTitle)` sinh thời khóa biểu mẫu hoàn chỉnh với các môn học gợi ý phong phú.
+  - [`src/1.Frontend/components/modals/AddWeekModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/AddWeekModal.js):
+    + **Kế thừa thông minh khi mở modal**: Tự động lấy lịch học từ tuần hiện tại và **tự động cập nhật tiêu đề `# Lịch học Tuần N (ngày-tháng)`** tương ứng với tuần mới được tính toán (chỉ cần 1-click tạo tuần là xong!).
+    + **3 Nút Presets 1-Chạm**:
+      1. 📋 **Sao chép từ tuần này**: Giữ nguyên môn học và tự động cập nhật ngày tháng tuần mới.
+      2. ✨ **Mẫu có môn**: Điền mẫu thời khóa biểu có sẵn môn học mẫu.
+      3. 🔄 **Tuần trống**: Khởi tạo 7 ngày trống nghỉ.
+    + **Đồng bộ tự động tiêu đề**: Bắt sự kiện gõ ô "Tên tuần hiển thị" hoặc đổi hướng Trước/Sau để tự động thay đổi dòng `# ...` trong Markdown mà không làm mất các môn học đã nhập.
+    + **Cheat Sheet cú pháp**: Tích hợp bảng hướng dẫn cú pháp Markdown lịch học mở rộng trực quan dạng Accordion.
+    + **Mở rộng không gian**: Modal `modal-card-lg` (`820px`), textarea `rows="10"` font Monospace thoáng đãng.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js):
+    + Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v114`.
+
+---
+
 ## 📅 [2026-09-06 16:42] - Sửa Lỗi Cú Pháp Media Query (CSS Selector Expected Lint Fix) 🩺✨
 
 - **🎯 Vấn đề phát hiện**: Lỗi cú pháp CSS `at-rule or selector expected` tại dòng 1026 trong `src/1.Frontend/styles/8.responsive.css`.
