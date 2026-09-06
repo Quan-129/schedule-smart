@@ -4,6 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 16:33] - Khắc Phục Lỗi Xê Dịch Nhẹ Sang Phải Khi Chuyển Sang Tab Chiếc Cặp Drive (Scrollbar Gutter Stabilization) 📏🎯
+
+- **🎯 Yêu cầu từ người dùng**: Sửa triệt để hiện tượng 3 Tab đầu rất ổn định nhưng khi bấm Tab cuối cùng (Chiếc cặp Drive) thì thanh tab vẫn bị xê dịch nhẹ sang phải.
+- **🔍 Phân tích nguyên nhân cốt lõi**:
+  - **Scrollbar Layout Shift**: 3 Tab đầu (Thời khóa biểu, Bản đồ nhiệt, Tỉ lệ điểm) có nội dung dài, làm xuất hiện thanh cuộn dọc (Vertical Scrollbar chiếm ~`15px - 17px` ở mép phải màn hình).
+  - Tab thứ 4 (Chiếc cặp Drive) có nội dung ngắn, không vượt quá chiều cao màn hình nên trình duyệt tự động ẩn thanh cuộn dọc.
+  - Khi thanh cuộn biến mất, khung nhìn (`viewport`) đột ngột nở rộng thêm ~`17px`, khiến toàn bộ `body`, `.app-wrapper` và vị trí `left: 50%` bị đẩy dịch sang phải một đoạn `~8.5px`.
+- **✅ Chi tiết giải pháp**:
+  - [`src/1.Frontend/styles/1.variables.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/1.variables.css):
+    + Kích hoạt `scrollbar-gutter: stable;` và `overflow-y: scroll;` cho thẻ `html`. Cố định sẵn rãnh thanh cuộn cho mọi kích thước nội dung, ngăn chặn 100% hiện tượng xê dịch/giật màn hình khi chuyển giữa tab dài và tab ngắn.
+    + Bổ sung bộ custom scrollbar toàn trang thanh thoát, mờ ảo sang trọng (`8px`), đồng bộ với phong cách Dark/Light Theme.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js):
+    + Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v111`.
+
+---
+
 ## 📅 [2026-09-06 16:30] - Cố Định Tuyệt Đối Thanh Điều Hướng 4 Tab (Floating Island Center Dock) ⚓🏝️
 
 - **🎯 Yêu cầu từ người dùng**: Cố định thanh điều hướng 4 Tab (Thời khóa biểu / Hôm nay / Bảng điểm / Chiếc cặp Drive) để không bị rung lắc, giật sang trái/phải khi chuyển đổi qua lại giữa các Tab.
