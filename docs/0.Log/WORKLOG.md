@@ -4,6 +4,23 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 11:42] - Thích Ứng Đa Tầng Cho Mọi Mức Zoom Trình Duyệt (100% - 140%+): Chống Tràn/Lòi Bố Cục 🔍🛡
+
+- **🎯 Yêu cầu & Phân tích nguyên nhân**:
+  - Khi người dùng phóng to (Zoom trình duyệt 110%, 125%, 140%) hoặc sử dụng trên Laptop 13–15 inch có Display Scale 125%–150%, chiều rộng viewport hiệu dụng bị giảm xuống dải 950px – 1300px.
+  - Trước đây ở dải kích thước này, Navbar bị ép trên 1 hàng ngang với tổng chiều rộng các phần tử vượt quá 1200px, khiến các nút bên phải bị dồn ép và tràn lòi ra ngoài viền kính.
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css):
+    - **Tầng 1 (Zoom 110%–125% hoặc màn hình < 1360px)**: Co gọn padding, font chữ, icon button và ẩn badge phụ `HK1` để các phần tử co về chỉ ~900px, giữ trọn vẹn 1 hàng phẳng đẹp không bao giờ tràn.
+    - **Tầng 2 (Zoom 130%–150% hoặc màn hình < 1150px)**: Tự động chuyển đổi sang layout **2 Hàng Cân Đối & Đẳng Cấp (Smart 2-Row Flow)**:
+      - Hàng 1: Brand Info (Logo ScheduleSmart + Quick actions) ở bên trái $\leftrightarrow$ View Toggles Dock ở bên phải.
+      - Hàng 2: Bộ chọn Ngày + Bộ chọn Tuần dàn đều sang trọng, có viền kính mờ ngăn cách tinh tế.
+  - [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css):
+    - Bổ sung `box-sizing: border-box; max-width: 100%; min-width: 0;` cho toàn bộ container `.navbar`, `.navbar-brand-row`, `.nav-left`, `.nav-center`, `.nav-right`.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v88`.
+
+---
+
 ## 📅 [2026-09-06 11:38] - Tối Giản Capsule User Profile: Ẩn Chữ Tên Người Dùng Để Chống Lòi/Vỡ Bố Cục Navbar 👤✨
 
 - **🎯 Yêu cầu & Phân tích hiện tượng**:

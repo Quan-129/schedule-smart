@@ -2,49 +2,141 @@
    RESPONSIVE LAYOUT OPTIMIZATION (TABLET, MOBILE & PRINT STYLES)
    ========================================================================== */
 
-/* Tablet & Smaller Screens (< 900px) */
-@media (max-width: 900px) {
+/* ==========================================================================
+   1. LAPTOP / DESKTOP ZOOM 110% - 125% (< 1360px)
+   Co gọn các khoảng trống để giữ trọn vẹn 1 hàng ngang phẳng đẹp không tràn
+   ========================================================================== */
+@media (max-width: 1360px) {
   .navbar {
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
+    padding: 0.6rem 0.95rem;
+    gap: 0.65rem;
   }
 
   .navbar-brand-row {
-    width: 100%;
-    justify-content: space-between;
+    gap: 0.65rem;
   }
 
-  .nav-center {
-    order: 3;
-    width: 100%;
-    display: flex;
-    justify-content: center;
+  .nav-left {
+    gap: 0.55rem;
+  }
+
+  .brand-logo {
+    width: 36px;
+    height: 36px;
+    font-size: 1.05rem;
+    border-radius: 10px;
+  }
+
+  .brand-info h1 {
+    font-size: 1.05rem;
+  }
+
+  .badge-git {
+    display: none; /* Ẩn badge phụ để nhường diện tích cho các công cụ điều khiển */
+  }
+
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 0.85rem;
   }
 
   .view-toggles {
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
+    padding: 0.25rem 0.35rem;
+    gap: 0.25rem;
   }
 
   .toggle-btn {
-    flex: 1;
-    display: flex;
-    justify-content: center;
+    width: 34px;
+    height: 34px;
+    font-size: 0.95rem;
   }
 
   .nav-right {
-    order: 2;
-    width: 100%;
-    display: flex;
-    justify-content: center;
+    gap: 0.45rem;
+  }
+
+  .days-mode-selector {
+    padding: 0.2rem 0.25rem;
+    gap: 0.15rem;
+  }
+
+  .btn-days-mode {
+    padding: 0.28rem 0.55rem;
+    font-size: 0.74rem;
+    gap: 0.25rem;
   }
 
   .week-navigation {
+    padding: 0.25rem 0.35rem;
+    gap: 0.2rem;
+  }
+
+  .btn-nav,
+  .btn-today-nav,
+  .btn-add-week-nav,
+  .btn-delete-week-nav {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 0.78rem;
+  }
+
+  .week-dropdown-wrapper {
+    padding: 0 0.45rem;
+    gap: 0.35rem;
+  }
+
+  .week-dropdown-wrapper select {
+    font-size: 0.84rem;
+    max-width: 135px;
+  }
+}
+
+/* ==========================================================================
+   2. MEDIUM LAPTOP / TABLET / ZOOM 130% - 150% (< 1150px)
+   Tự động tách 2 hàng cân xứng, sang trọng và rộng rãi tuyệt đối
+   ========================================================================== */
+@media (max-width: 1150px) {
+  .navbar {
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    padding: 0.65rem 1rem;
+  }
+
+  /* Hàng 1: Brand Info bên trái + View Toggles Dock bên phải */
+  .navbar-brand-row {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .nav-center {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  /* Hàng 2: Bộ chọn Ngày & Tuần dàn đều sang trọng */
+  .nav-right {
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-top: 0.45rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .days-mode-selector {
+    flex: 0 1 auto;
+  }
+
+  .week-navigation {
+    flex: 1 1 auto;
     max-width: 480px;
     justify-content: space-between;
+    margin-left: auto;
   }
 
   .hero-banner {
