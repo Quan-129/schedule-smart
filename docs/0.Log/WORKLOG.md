@@ -4,6 +4,25 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 11:00] - Khắc Phục Lỗi Lệch Cột & Tràn Cắt Đáy Bảng Thời Khóa Biểu Tuần (Google Calendar Timeline View) 📐✨
+
+- **🎯 Yêu cầu & Phân tích nguyên nhân**:
+  - Người dùng báo lỗi giao diện Timeline Tuần bị lệch cột (các môn Thứ 5 bị dịch sang cột Thứ 4, Thứ 6 bị dịch sang cột Thứ 5) và các thẻ học ở khung giờ trưa (11:50) bị tràn đáy / cắt cụt.
+  - **Nguyên nhân gốc rễ**:
+    1. Thiếu rule CSS `display: flex` cho `.weekly-cal-body` và `.cal-timeline-content` (do CSS cũ đặt tên `.weekly-cal-body-grid`), khiến khung 7 cột bị nhảy xuống dưới cột trục giờ và chiếm 100% chiều rộng từ mép trái, làm lệch đúng 1 cột so với Header.
+    2. Các đường kẻ ngang giờ trước đó nằm chung trong grid 7 cột làm chiếm các slot con.
+    3. Cần thêm buffer đệm cho khung timeline để thẻ học tới 11:50 hoặc 12:00 không bị tràn đáy container.
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    - Đóng gói Header và Body vào chung một container cuộn `.weekly-cal-scroll-inner` (min-width: 720px) với Header `position: sticky; top: 0` giúp Header và Body luôn đồng bộ 100% vị trí cột khi cuộn dọc lẫn cuộn ngang.
+    - Chuẩn hóa tách lớp vạch kẻ ngang `.cal-grid-lines-layer` (position: absolute) độc lập với 7 cột ngày `.cal-days-columns-grid`.
+    - Thêm +1h buffer cho `endHour` và tăng padding đáy `BOTTOM_PADDING = 30px` giúp các môn học kết thúc lúc 11:50 - 12:00 hiển thị trọn vẹn, không bị cắt text.
+  - [`src/1.Frontend/styles/9.heatmap-view.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/9.heatmap-view.css):
+    - Khai báo CSS hoàn chỉnh cho `.weekly-cal-scroll-inner`, `.weekly-cal-body`, `.cal-timeline-content`, `.cal-grid-lines-layer`, `.cal-days-columns-grid`.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v80`.
+
+---
+
 ## 📅 [2026-09-06 10:55] - Nâng Cấp Bản Đồ Nhiệt Theo Cơ Chế "Tổng Số Giờ Học" (Total Study Hours & Multi-Task Duration Aggregation) ⏰🔥
 
 - **🎯 Yêu cầu & Quyết định thiết kế**:

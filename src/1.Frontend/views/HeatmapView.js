@@ -388,7 +388,7 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
 
   if (hasAnyClasses) {
     startHour = Math.max(6, Math.floor(earliestMin / 60)); // Giờ bắt đầu (tối thiểu 6h)
-    endHour = Math.min(23, Math.ceil(latestMax / 60)); // Giờ kết thúc (tối đa 23h)
+    endHour = Math.min(23, Math.ceil(latestMax / 60) + 1); // Giờ kết thúc (tối đa 23h, cộng 1h đệm)
     if (endHour <= startHour) endHour = startHour + 8;
   }
 
@@ -527,95 +527,104 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
       </div>
 
       <div class="weekly-cal-scale-container">
-        <!-- Hàng Header Thứ -->
-        <div class="weekly-cal-header-row">
-          <div class="cal-time-corner">
-            <span><i class="fa-regular fa-clock"></i> GIỜ</span>
-          </div>
-          <div class="cal-days-header-grid">
-            ${standardDays.map(d => {
-              const isToday = dayIndexMap[d.dayName] === currentDayOfWeek && selectedWeek.filename === currentWeekFile;
-              const weekStartDate = selectedWeek.startDate || '';
-              const dateInfo = getDateForDayOfWeek(weekStartDate, dayIndexMap[d.dayName]);
-              const dateLabel = dateInfo ? dateInfo.full : '';
-              return `
-                <div class="cal-day-header-cell ${isToday ? 'is-today-cal-header' : ''}">
-                  <span class="cal-day-name">${escapeHtml(d.dayName)}</span>
-                  ${dateLabel ? `<span class="cal-day-date">${escapeHtml(dateLabel)}</span>` : ''}
-                  <span class="cal-day-count-badge">${d.totalHours > 0 ? `${d.totalHours}h` : 'Nghỉ'}</span>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        </div>
-
-        <!-- Thân Lịch Scale Thời Gian Thực -->
-        <div class="weekly-cal-body" style="height: ${totalTimelineHeight}px;">
-          <!-- Cột hiển thị mốc giờ bên trái -->
-          <div class="cal-time-axis-col">
-            ${hoursList.map(h => `
-              <div class="cal-hour-mark" style="top: ${(h - startHour) * HOUR_HEIGHT + TOP_PADDING}px;">
-                <span>${String(h).padStart(2, '0')}:00</span>
+        <!-- Vùng cuộn Timeline & Header Đồng Bộ -->
+        <div class="weekly-cal-scroll-area">
+          <div class="weekly-cal-scroll-inner">
+            <!-- Hàng Header Thứ (Sticky Top) -->
+            <div class="weekly-cal-header-row">
+              <div class="cal-time-corner">
+                <span><i class="fa-regular fa-clock"></i> GIỜ</span>
               </div>
-            `).join('')}
-          </div>
+              <div class="cal-days-header-grid">
+                ${standardDays.map(d => {
+                  const isToday = dayIndexMap[d.dayName] === currentDayOfWeek && selectedWeek.filename === currentWeekFile;
+                  const weekStartDate = selectedWeek.startDate || '';
+                  const dateInfo = getDateForDayOfWeek(weekStartDate, dayIndexMap[d.dayName]);
+                  const dateLabel = dateInfo ? dateInfo.full : '';
+                  return `
+                    <div class="cal-day-header-cell ${isToday ? 'is-today-cal-header' : ''}">
+                      <span class="cal-day-name">${escapeHtml(d.dayName)}</span>
+                      ${dateLabel ? `<span class="cal-day-date-tag">${escapeHtml(dateLabel)}</span>` : ''}
+                      <span class="cal-day-classes-count">${d.totalHours > 0 ? `${d.totalHours}h` : 'Nghỉ'}</span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
 
-          <!-- Lưới 7 cột ngày của tuần -->
-          <div class="cal-days-columns-grid">
-            <!-- Các đường kẻ ngang chia giờ -->
-            ${hoursList.map(h => `
-              <div class="cal-hour-grid-line" style="top: ${(h - startHour) * HOUR_HEIGHT + TOP_PADDING}px;"></div>
-            `).join('')}
+            <!-- Thân Lịch Scale Thời Gian Thực -->
+            <div class="weekly-cal-body" style="height: ${totalTimelineHeight}px;">
+              <!-- Cột hiển thị mốc giờ bên trái -->
+              <div class="cal-time-axis-col">
+                ${hoursList.map(h => `
+                  <div class="cal-time-mark" style="top: ${(h - startHour) * HOUR_HEIGHT + TOP_PADDING}px;">
+                    <span>${String(h).padStart(2, '0')}:00</span>
+                  </div>
+                `).join('')}
+              </div>
 
-            ${standardDays.map(d => {
-              const dayEvents = layoutDayEvents(d.classes);
-              const isToday = dayIndexMap[d.dayName] === currentDayOfWeek && selectedWeek.filename === currentWeekFile;
-
-              return `
-                <div class="cal-day-column ${isToday ? 'is-today-cal-column' : ''}">
-                  ${dayEvents.map(ev => {
-                    const color = getSubjectColor(ev.subject);
-                    const tooltipTitle = `${ev.subject} • ${d.dayName}`;
-                    const tooltipSub = `${ev.timeRange || ''} • ${selectedWeek.title}`;
-                    const tooltipBody = `
-                      <div class="tt-row"><strong>Thời gian:</strong> <span>${escapeHtml(ev.timeRange || 'Chưa xếp')}</span></div>
-                      <div class="tt-row"><strong>Thời lượng:</strong> <span>${getClassDurationHours(ev)} giờ</span></div>
-                      <div class="tt-row"><strong>Phòng học:</strong> <span>${escapeHtml(ev.room || 'Chưa xếp')}</span></div>
-                      ${ev.teacher ? `<div class="tt-row"><strong>Giảng viên:</strong> <span>${escapeHtml(ev.teacher)}</span></div>` : ''}
-                    `;
-
-                    return `
-                      <div class="cal-event-block ${ev.isOverlap ? 'is-overlap-event' : ''}"
-                        style="
-                          top: ${ev.top}px;
-                          height: ${ev.height}px;
-                          left: ${ev.left};
-                          width: ${ev.width};
-                          background: ${color.bg || 'rgba(99, 102, 241, 0.2)'};
-                          border-left: 3px solid ${color.border || '#818cf8'};
-                        "
-                        data-heatmap-tooltip="true"
-                        data-tooltip-title="${escapeHtml(tooltipTitle)}"
-                        data-tooltip-sub="${escapeHtml(tooltipSub)}"
-                        data-tooltip-body="${escapeHtml(tooltipBody)}"
-                        data-tooltip-badge="${getClassDurationHours(ev)}h"
-                        data-tooltip-badge-bg="${color.border || '#818cf8'}"
-                        data-tooltip-badge-color="#ffffff">
-                        <span class="cal-event-title">${escapeHtml(ev.subject)}</span>
-                        <div class="cal-event-meta">
-                          <span class="cal-event-time">
-                            <i class="fa-regular fa-clock"></i> ${escapeHtml(ev.timeRange || '')}
-                          </span>
-                          <span class="cal-event-room">
-                            <i class="fa-solid fa-location-dot"></i> ${escapeHtml(ev.room || 'Chưa xếp')}
-                          </span>
-                        </div>
-                      </div>
-                    `;
-                  }).join('')}
+              <!-- Khung Lưới Timeline chứa vạch ngang và 7 cột -->
+              <div class="cal-timeline-content">
+                <!-- Lớp vạch kẻ giờ ngang trải dài từ T2 đến CN -->
+                <div class="cal-grid-lines-layer">
+                  ${hoursList.map(h => `
+                    <div class="cal-grid-hour-line" style="top: ${(h - startHour) * HOUR_HEIGHT + TOP_PADDING}px;"></div>
+                  `).join('')}
                 </div>
-              `;
-            }).join('')}
+
+                <!-- Lưới đúng 7 cột ngày của tuần -->
+                <div class="cal-days-columns-grid">
+                ${standardDays.map(d => {
+                  const dayEvents = layoutDayEvents(d.classes);
+                  const isToday = dayIndexMap[d.dayName] === currentDayOfWeek && selectedWeek.filename === currentWeekFile;
+
+                  return `
+                    <div class="cal-day-column ${isToday ? 'is-today-cal-column' : ''}">
+                      ${dayEvents.map(ev => {
+                        const color = getSubjectColor(ev.subject);
+                        const tooltipTitle = `${ev.subject} • ${d.dayName}`;
+                        const tooltipSub = `${ev.timeRange || ''} • ${selectedWeek.title}`;
+                        const tooltipBody = `
+                          <div class="tt-row"><strong>Thời gian:</strong> <span>${escapeHtml(ev.timeRange || 'Chưa xếp')}</span></div>
+                          <div class="tt-row"><strong>Thời lượng:</strong> <span>${getClassDurationHours(ev)} giờ</span></div>
+                          <div class="tt-row"><strong>Phòng học:</strong> <span>${escapeHtml(ev.room || 'Chưa xếp')}</span></div>
+                          ${ev.teacher ? `<div class="tt-row"><strong>Giảng viên:</strong> <span>${escapeHtml(ev.teacher)}</span></div>` : ''}
+                        `;
+
+                        return `
+                          <div class="cal-event-block ${ev.isOverlap ? 'is-overlap-event' : ''}"
+                            style="
+                              top: ${ev.top}px;
+                              height: ${ev.height}px;
+                              left: ${ev.left};
+                              width: ${ev.width};
+                              background: ${color.bg || 'rgba(99, 102, 241, 0.2)'};
+                              border-left: 3px solid ${color.border || '#818cf8'};
+                            "
+                            data-heatmap-tooltip="true"
+                            data-tooltip-title="${escapeHtml(tooltipTitle)}"
+                            data-tooltip-sub="${escapeHtml(tooltipSub)}"
+                            data-tooltip-body="${escapeHtml(tooltipBody)}"
+                            data-tooltip-badge="${getClassDurationHours(ev)}h"
+                            data-tooltip-badge-bg="${color.border || '#818cf8'}"
+                            data-tooltip-badge-color="#ffffff">
+                            <span class="cal-event-title">${escapeHtml(ev.subject)}</span>
+                            <div class="cal-event-meta">
+                              <span class="cal-event-time">
+                                <i class="fa-regular fa-clock"></i> ${escapeHtml(ev.timeRange || '')}
+                              </span>
+                              <span class="cal-event-room">
+                                <i class="fa-solid fa-location-dot"></i> ${escapeHtml(ev.room || 'Chưa xếp')}
+                              </span>
+                            </div>
+                          </div>
+                        `;
+                      }).join('')}
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
           </div>
         </div>
       </div>
