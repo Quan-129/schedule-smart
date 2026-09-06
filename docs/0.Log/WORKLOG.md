@@ -4,6 +4,27 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 08:48] - Tái Cấu Trúc Toàn Diện: Loại Bỏ Hoàn Toàn Khái Niệm "Tiết Học", Chuyển Sang Khung Giờ 24h & Buổi Học 🌐
+
+- **🎯 Lý do thay đổi & Mục tiêu**:
+  - Không phải trường học nào cũng có quy định phân bổ "Tiết học" giống nhau (tiết 1–12, tiết 1–16, hoặc không dùng tiết).
+  - Loại bỏ hoàn toàn sự phụ thuộc vào khái niệm "tiết" / "tiết học" / `period` / `(Tiết X - Y)` trên toàn bộ hệ thống Front-end và Back-end.
+  - Chuẩn hóa toàn bộ hệ thống dữ liệu, giao diện, bảng thống kê và ma trận nhiệt theo **Khung giờ thực tế (Time-Blocks: `07:00 - 08:50`, `14:00 - 15:50`...)** và **Số Buổi Học / Lớp Học (Classes / Sessions)**.
+
+- **✅ Công việc đã hoàn thành**:
+  - `[Backend / Parser]` [`src/2.Backend/services/TimetableParser.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/TimetableParser.js):
+    - Tách bỏ hoàn toàn trường `period` khỏi mô hình dữ liệu parse và serialize.
+    - Cú pháp lưu trữ Markdown chuẩn gọn: `- 07:00 - 08:50: Tên môn | Phòng: ABC`.
+  - `[Frontend / Timetable View]` [`src/1.Frontend/views/TimetableGrid.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/TimetableGrid.js):
+    - Chuyển đổi toàn bộ nhãn, nút bấm và badge từ "tiết học" sang "buổi học" (`+ Thêm buổi học`, `${day.classes.length} buổi`...).
+    - Xóa bỏ việc hiển thị badge `class-period`.
+  - `[Frontend / Heatmap Suite]` [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    - **1. Tuần (Weekly Matrix)**: Chuyển sang **24h Time-Block Matrix (16 Khung Giờ: 06h $\rightarrow$ 21h)**. Môn học tự động phủ sáng các block giờ mà thời gian lớp học diễn ra.
+    - **2. Tháng / 3. Học kỳ / 4. Cả năm**: Mức nhiệt độ (Level 0 $\rightarrow$ 4) và các chỉ số KPI tính hoàn toàn theo **Số buổi học** (Classes count) và số ngày lên lớp.
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v61` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-06 08:38] - Khắc Phục Triệt Để Lỗi Thiếu Tiết Học, Khung Giờ & Nạp Dữ Liệu Toàn Học Kỳ 🎯
 
 - **🎯 Nguyên nhân sự cố**:

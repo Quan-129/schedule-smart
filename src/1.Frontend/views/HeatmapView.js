@@ -1,8 +1,8 @@
 /**
  * ==========================================================================
  * FRONTEND VIEW - STUDY INTENSITY HEATMAP & PRODUCTIVITY DASHBOARD
- * Bản đồ nhiệt cường độ học tập & mật độ tiết học (Tuần / Tháng / Học kỳ / Cả năm)
- * Đồng bộ toàn diện theo phong cách GitHub Contribution Matrix
+ * Bản đồ nhiệt cường độ học tập & mật độ buổi học (Tuần / Tháng / Học kỳ / Cả năm)
+ * Hoàn toàn theo chuẩn Khung giờ học (Time-Slots 24h) - Không phụ thuộc Tiết học
  * ==========================================================================
  */
 
@@ -11,7 +11,7 @@ import { parseScheduleMarkdown } from '../../2.Backend/services/TimetableParser.
 import { escapeHtml } from '../../4.Security/sanitizer.js';
 
 /* ==========================================================================
-   1. MODULE STATE & CONSTANTS (HCMUT STANDARD SCHEDULE: 16 PERIODS)
+   1. MODULE STATE & CONSTANTS (HOURLY TIME-BLOCKS 06:00 -> 21:00)
    ========================================================================== */
 let currentHorizonMode = 'semester'; // 'week' | 'month' | 'semester' | 'year'
 let currentMonthlyDate = new Date(); // Tháng đang xem trong chế độ Tháng
@@ -21,119 +21,94 @@ let activeWeeklyFile = ''; // File tuần đang xem trong chế độ Tuần
 const weeksDataCache = new Map();
 let isPreloadingWeeks = false;
 
-// 16 Tiết học chuẩn ĐH Bách Khoa TP.HCM (Ca Sáng: 1-6, Ca Chiều: 7-12, Ca Tối: 13-16)
-const PERIOD_TIME_MAP = {
-  1: { start: '06:00', end: '06:50', session: 'Sáng', code: 'T1' },
-  2: { start: '07:00', end: '07:50', session: 'Sáng', code: 'T2' },
-  3: { start: '08:00', end: '08:50', session: 'Sáng', code: 'T3' },
-  4: { start: '09:00', end: '09:50', session: 'Sáng', code: 'T4' },
-  5: { start: '10:00', end: '10:50', session: 'Sáng', code: 'T5' },
-  6: { start: '11:00', end: '11:50', session: 'Sáng', code: 'T6' },
-  7: { start: '12:00', end: '12:50', session: 'Chiều', code: 'T7' },
-  8: { start: '13:00', end: '13:50', session: 'Chiều', code: 'T8' },
-  9: { start: '14:00', end: '14:50', session: 'Chiều', code: 'T9' },
-  10: { start: '15:00', end: '15:50', session: 'Chiều', code: 'T10' },
-  11: { start: '16:00', end: '16:50', session: 'Chiều', code: 'T11' },
-  12: { start: '17:00', end: '17:50', session: 'Chiều', code: 'T12' },
-  13: { start: '18:00', end: '18:50', session: 'Tối', code: 'T13' },
-  14: { start: '18:50', end: '19:40', session: 'Tối', code: 'T14' },
-  15: { start: '19:45', end: '20:35', session: 'Tối', code: 'T15' },
-  16: { start: '20:35', end: '21:25', session: 'Tối', code: 'T16' }
-};
+// 16 Khung giờ chuẩn theo ngày (06:00 -> 21:00)
+const HOURLY_TIME_SLOTS = [
+  { hour: 6, label: '06h', timeRange: '06:00 - 06:59', session: 'morning' },
+  { hour: 7, label: '07h', timeRange: '07:00 - 07:59', session: 'morning' },
+  { hour: 8, label: '08h', timeRange: '08:00 - 08:59', session: 'morning' },
+  { hour: 9, label: '09h', timeRange: '09:00 - 09:59', session: 'morning' },
+  { hour: 10, label: '10h', timeRange: '10:00 - 10:59', session: 'morning' },
+  { hour: 11, label: '11h', timeRange: '11:00 - 11:59', session: 'morning' },
+  { hour: 12, label: '12h', timeRange: '12:00 - 12:59', session: 'afternoon' },
+  { hour: 13, label: '13h', timeRange: '13:00 - 13:59', session: 'afternoon' },
+  { hour: 14, label: '14h', timeRange: '14:00 - 14:59', session: 'afternoon' },
+  { hour: 15, label: '15h', timeRange: '15:00 - 15:59', session: 'afternoon' },
+  { hour: 16, label: '16h', timeRange: '16:00 - 16:59', session: 'afternoon' },
+  { hour: 17, label: '17h', timeRange: '17:00 - 17:59', session: 'afternoon' },
+  { hour: 18, label: '18h', timeRange: '18:00 - 18:59', session: 'evening' },
+  { hour: 19, label: '19h', timeRange: '19:00 - 19:59', session: 'evening' },
+  { hour: 20, label: '20h', timeRange: '20:00 - 20:59', session: 'evening' },
+  { hour: 21, label: '21h', timeRange: '21:00 - 21:59', session: 'evening' }
+];
 
 /* ==========================================================================
    2. HELPER FUNCTIONS & DATA AGGREGATOR
    ========================================================================== */
 
 /**
- * Tính toán mức độ nhiệt (Level 0 - 4) dựa trên số tiết học trong ngày
- * @param {number} classCount 
+ * Tính toán mức độ nhiệt (Level 0 - 4) dựa trên số buổi học trong ngày
+ * @param {number} classCount - Số buổi học / lớp học
  * @returns {number} 0, 1, 2, 3, 4
  */
 export function getHeatmapLevel(classCount = 0) {
   if (!classCount || classCount <= 0) return 0;
-  if (classCount <= 2) return 1;
-  if (classCount <= 4) return 2;
-  if (classCount <= 6) return 3;
+  if (classCount === 1) return 1;
+  if (classCount === 2) return 2;
+  if (classCount === 3) return 3;
   return 4;
 }
 
 /**
- * Đánh giá tải học tập của cả tuần
- * @param {number} totalClasses 
+ * Đánh giá tải học tập của cả tuần (theo số buổi học)
+ * @param {number} totalClasses - Tổng số buổi học trong tuần
  * @returns {{ label: string, color: string, bg: string }}
  */
 export function evaluateWeekWorkload(totalClasses = 0) {
   if (totalClasses === 0) {
     return { label: 'Tuần nghỉ', color: '#94a3b8', bg: 'rgba(148, 163, 184, 0.15)' };
   }
-  if (totalClasses <= 8) {
+  if (totalClasses <= 4) {
     return { label: 'Nhẹ nhàng', color: '#10b981', bg: 'rgba(16, 185, 129, 0.15)' };
   }
-  if (totalClasses <= 16) {
+  if (totalClasses <= 8) {
     return { label: 'Vừa phải', color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.15)' };
   }
-  if (totalClasses <= 24) {
+  if (totalClasses <= 12) {
     return { label: 'Cao điểm', color: '#a855f7', bg: 'rgba(168, 85, 247, 0.15)' };
   }
-  return { label: 'Cháy Deadline 🔥', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.2)' };
+  return { label: 'Lịch học dày 🔥', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.2)' };
 }
 
 /**
- * Phân bổ các môn học trong ngày vào 16 tiết chuẩn
+ * Phân bổ các buổi học trong ngày vào 16 khung giờ (06:00 -> 21:00)
  * @param {Array<Object>} classes 
- * @returns {Array<Object|null>} 16 phần tử (index 0 -> 15 đại diện Tiết 1 -> 16)
+ * @returns {Array<Object|null>} 16 phần tử tương ứng với 16 khung giờ
  */
-export function mapDayClassesToPeriods(classes = []) {
-  const TOTAL_PERIODS = 16;
-  const slots = Array(TOTAL_PERIODS).fill(null);
+export function mapDayClassesToHourlySlots(classes = []) {
+  const slots = Array(HOURLY_TIME_SLOTS.length).fill(null);
   
   (classes || []).forEach(cls => {
-    let periods = [];
+    let startH = 7;
+    let endH = 9;
 
-    // 1. Phân tích từ trường period: "Tiết 5 - 6", "Tiết 13 - 14", "Tiết 4-6", "Tiết 2,3"
-    if (cls.period) {
-      const nums = cls.period.match(/\d+/g);
-      if (nums && nums.length >= 2) {
-        const start = parseInt(nums[0], 10);
-        const end = parseInt(nums[nums.length - 1], 10);
-        for (let p = Math.min(start, end); p <= Math.max(start, end); p++) {
-          if (p >= 1 && p <= TOTAL_PERIODS) periods.push(p);
-        }
-      } else if (nums && nums.length === 1) {
-        const p = parseInt(nums[0], 10);
-        if (p >= 1 && p <= TOTAL_PERIODS) periods.push(p);
+    if (cls.startTime && cls.endTime) {
+      const [sh] = cls.startTime.split(':').map(Number);
+      const [eh, em = 0] = cls.endTime.split(':').map(Number);
+      if (!isNaN(sh)) startH = sh;
+      if (!isNaN(eh)) endH = em > 0 ? eh : eh - 1; // Nếu kết thúc 08:50 -> chiếm đến 8h
+    } else if (cls.timeRange) {
+      const parts = cls.timeRange.split('-');
+      if (parts.length >= 2) {
+        const [sh] = parts[0].trim().split(':').map(Number);
+        const [eh, em = 0] = parts[1].trim().split(':').map(Number);
+        if (!isNaN(sh)) startH = sh;
+        if (!isNaN(eh)) endH = em > 0 ? eh : eh - 1;
       }
     }
 
-    // 2. Nếu không có period, phân tích từ startTime và endTime
-    if (periods.length === 0 && cls.startTime) {
-      const [startH, startM = 0] = cls.startTime.split(':').map(Number);
-      const [endH = startH + 2, endM = 0] = (cls.endTime || '').split(':').map(Number);
-      
-      const startMinutes = startH * 60 + startM;
-      const endMinutes = endH * 60 + endM;
-
-      for (let p = 1; p <= TOTAL_PERIODS; p++) {
-        const pInfo = PERIOD_TIME_MAP[p];
-        const [pH, pM = 0] = pInfo.start.split(':').map(Number);
-        const pStartMin = pH * 60 + pM;
-        const pEndMin = pStartMin + 50;
-
-        if (startMinutes < pEndMin && endMinutes > pStartMin) {
-          periods.push(p);
-        }
-      }
-    }
-
-    // 3. Fallback an toàn nếu không xác định được
-    if (periods.length === 0) {
-      periods = [2, 3];
-    }
-
-    periods.forEach(p => {
-      if (p >= 1 && p <= TOTAL_PERIODS) {
-        slots[p - 1] = cls;
+    HOURLY_TIME_SLOTS.forEach((slot, slotIdx) => {
+      if (slot.hour >= startH && slot.hour <= endH) {
+        slots[slotIdx] = cls;
       }
     });
   });
@@ -335,7 +310,7 @@ function setupHeatmapTooltips() {
    ========================================================================== */
 
 /**
- * 1️⃣ CHẾ ĐỘ TUẦN: Ma trận Tiết Học Trong Tuần (16 Tiết × 7 Ngày GitHub Matrix)
+ * 1️⃣ CHẾ ĐỘ TUẦN: Ma trận Khung Giờ Trong Tuần (24h Time-Block Matrix)
  */
 function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile = '', onSelectWeek = null) {
   if (!activeWeeklyFile) {
@@ -360,14 +335,14 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
             <i class="fa-solid fa-table-columns"></i>
           </div>
           <div>
-            <h3 class="heatmap-card-title">Ma Trận Tiết Học Trong Tuần (16 Tiết × 7 Ngày)</h3>
-            <span class="heatmap-card-sub">Chuẩn GitHub Time-Slot Matrix • ${escapeHtml(selectedWeek.title)}</span>
+            <h3 class="heatmap-card-title">Ma Trận Khung Giờ Trong Tuần (24h Time-Block Matrix)</h3>
+            <span class="heatmap-card-sub">Chuẩn GitHub Time-Block Matrix • ${escapeHtml(selectedWeek.title)}</span>
           </div>
         </div>
 
         <div class="heatmap-card-actions">
           <span class="semester-workload-badge" style="background: ${selectedWeek.workload.bg}; color: ${selectedWeek.workload.color};">
-            ${selectedWeek.workload.label} (${selectedWeek.totalClasses} tiết)
+            ${selectedWeek.workload.label} (${selectedWeek.totalClasses} buổi học)
           </span>
           <select id="select-weekly-matrix-week" class="heatmap-select-filter">
             ${semesterWeeks.map(w => `
@@ -381,44 +356,38 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
 
       <div class="weekly-timeslot-matrix-wrap">
         <div class="weekly-timeslot-matrix-body">
-          <!-- Cột nhãn Tiết học (1 - 16) -->
+          <!-- Cột nhãn Giờ (06:00 -> 21:00) -->
           <div class="weekly-periods-col">
-            <div class="period-header-corner">Tiết</div>
-            ${Array.from({ length: 16 }, (_, i) => {
-              const p = i + 1;
-              const info = PERIOD_TIME_MAP[p] || {};
-              const sessionClass = p <= 6 ? 'session-morning' : (p <= 12 ? 'session-afternoon' : 'session-evening');
-              return `
-                <div class="period-slot-label ${sessionClass}" title="Tiết ${p} (${info.start} - ${info.end})">
-                  <span>T${p}</span>
-                  <small>${info.start}</small>
-                </div>
-              `;
-            }).join('')}
+            <div class="period-header-corner">Giờ</div>
+            ${HOURLY_TIME_SLOTS.map(slot => `
+              <div class="period-slot-label session-${slot.session}" title="${slot.timeRange}">
+                <span>${slot.label}</span>
+                <small>${slot.hour}:00</small>
+              </div>
+            `).join('')}
           </div>
 
           <!-- 7 Cột Ngày trong tuần -->
           <div class="weekly-days-matrix-grid">
             ${standardDays.map(d => {
               const isToday = dayIndexMap[d.dayName] === currentDayOfWeek && selectedWeek.filename === currentWeekFile;
-              const daySlots = mapDayClassesToPeriods(d.classes);
+              const daySlots = mapDayClassesToHourlySlots(d.classes);
 
               return `
                 <div class="weekly-day-matrix-col ${isToday ? 'is-today-column' : ''}">
                   <div class="weekly-day-col-header ${isToday ? 'is-today-header' : ''}">
                     <span class="day-code">${d.dayName.replace('Thứ ', 'T').replace('Chủ Nhật', 'CN')}</span>
-                    <span class="day-count">${d.classesCount}t</span>
+                    <span class="day-count">${d.classesCount} buổi</span>
                   </div>
 
                   <div class="weekly-day-slots-list">
                     ${daySlots.map((cls, slotIdx) => {
-                      const periodNum = slotIdx + 1;
-                      const periodInfo = PERIOD_TIME_MAP[periodNum] || {};
+                      const slotInfo = HOURLY_TIME_SLOTS[slotIdx];
                       const hasClass = !!cls;
                       const level = hasClass ? 3 : 0;
 
-                      const tooltipTitle = `${d.dayName} • Tiết ${periodNum} (${periodInfo.start} - ${periodInfo.end})`;
-                      const tooltipSub = hasClass ? cls.subject : 'Tiết trống';
+                      const tooltipTitle = `${d.dayName} • Khung ${slotInfo.timeRange}`;
+                      const tooltipSub = hasClass ? cls.subject : 'Khung giờ trống';
                       const tooltipBody = hasClass 
                         ? `<div class="tt-row"><i class="fa-regular fa-clock"></i> <span>${escapeHtml(cls.timeRange)}</span></div>
                            <div class="tt-row"><i class="fa-solid fa-location-dot"></i> <span>Phòng: ${escapeHtml(cls.room || 'Chưa rõ')}</span></div>`
@@ -450,9 +419,9 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
           <span>Phân bố:</span>
           <div class="legend-scale-boxes">
             <div class="legend-box level-0" title="Trống"></div>
-            <div class="legend-box level-3" title="Có tiết học"></div>
+            <div class="legend-box level-3" title="Có lịch học"></div>
           </div>
-          <span style="margin-left: 0.5rem; color: var(--text-muted); font-size: 0.72rem;">(Sáng: Tiết 1-6 • Chiều: Tiết 7-12 • Tối: Tiết 13-16)</span>
+          <span style="margin-left: 0.5rem; color: var(--text-muted); font-size: 0.72rem;">(Sáng: 06h-11h • Chiều: 12h-17h • Tối: 18h-21h)</span>
         </div>
 
         <button type="button" class="btn-ghost btn-open-week-nav" data-week="${escapeHtml(selectedWeek.filename)}" style="font-size: 0.78rem; color: #818cf8;">
@@ -485,7 +454,7 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
 }
 
 /**
- * 2️⃣ CHẾ ĐỘ THÁNG: Ma trận Nhiệt Tháng (Monthly Contribution Matrix)
+ * 2️⃣ CHẾ ĐỘ THÁNG: Ma trận Cường Độ Tháng (Monthly Contribution Matrix)
  */
 function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek = null) {
   const year = currentMonthlyDate.getFullYear();
@@ -585,7 +554,7 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
           </div>
           <div>
             <h3 class="heatmap-card-title">Bản Đồ Cường Độ ${monthNames[month]} Năm ${year}</h3>
-            <span class="heatmap-card-sub">Chuẩn GitHub Monthly Matrix • Tổng ${totalMonthClasses} tiết học trong tháng</span>
+            <span class="heatmap-card-sub">Chuẩn GitHub Monthly Matrix • Tổng ${totalMonthClasses} buổi học trong tháng</span>
           </div>
         </div>
 
@@ -620,10 +589,10 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
             }
 
             const tooltipTitle = `Ngày ${c.dayNum}/${month + 1}/${year} • ${c.dayName}`;
-            const tooltipSub = c.classesCount > 0 ? `${c.classesCount} tiết học (${c.weekTitle})` : 'Nghỉ ngơi';
+            const tooltipSub = c.classesCount > 0 ? `${c.classesCount} buổi học (${c.weekTitle})` : 'Nghỉ ngơi';
             const tooltipBody = (c.classes || []).length > 0 
               ? c.classes.map(cls => `<div class="tt-row"><strong>${escapeHtml(cls.subject)}</strong> <span>(${escapeHtml(cls.timeRange)})</span></div>`).join('')
-              : `<div style="color: var(--text-muted); font-size: 0.72rem;">Không có tiết học trong ngày này</div>`;
+              : `<div style="color: var(--text-muted); font-size: 0.72rem;">Không có buổi học trong ngày này</div>`;
 
             return `
               <div class="monthly-matrix-square level-${c.level} ${c.isToday ? 'is-today-square' : ''}"
@@ -632,7 +601,7 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
                 data-tooltip-title="${escapeHtml(tooltipTitle)}"
                 data-tooltip-sub="${escapeHtml(tooltipSub)}"
                 data-tooltip-body="${escapeHtml(tooltipBody)}"
-                data-tooltip-badge="${c.classesCount > 0 ? `${c.classesCount}t` : 'Nghỉ'}"
+                data-tooltip-badge="${c.classesCount > 0 ? `${c.classesCount} buổi` : 'Nghỉ'}"
                 data-tooltip-badge-bg="${c.classesCount > 0 ? 'rgba(56, 189, 248, 0.2)' : 'rgba(148, 163, 184, 0.15)'}"
                 data-tooltip-badge-color="${c.classesCount > 0 ? '#38bdf8' : '#94a3b8'}">
                 <span class="sq-day-num">${c.dayNum}</span>
@@ -646,11 +615,11 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
         <div class="heatmap-legend-row" style="font-size: 0.74rem;">
           <span>Mức nhiệt:</span>
           <div class="legend-scale-boxes">
-            <div class="legend-box level-0" title="0 tiết"></div>
-            <div class="legend-box level-1" title="1-2 tiết"></div>
-            <div class="legend-box level-2" title="3-4 tiết"></div>
-            <div class="legend-box level-3" title="5-6 tiết"></div>
-            <div class="legend-box level-4" title="7+ tiết"></div>
+            <div class="legend-box level-0" title="0 buổi (Nghỉ)"></div>
+            <div class="legend-box level-1" title="1 buổi (Nhẹ)"></div>
+            <div class="legend-box level-2" title="2 buổi (Vừa)"></div>
+            <div class="legend-box level-3" title="3 buổi (Dày)"></div>
+            <div class="legend-box level-4" title="4+ buổi (Cao điểm)"></div>
           </div>
         </div>
 
@@ -770,10 +739,10 @@ function renderSemesterMatrixView(container, semesterWeeks = [], currentWeekFile
           <div class="semester-squares-grid" style="grid-template-columns: repeat(${totalWeeks}, 20px);">
             ${squares.map(sq => {
               const tooltipTitle = `${sq.weekTitle} • ${sq.dayName}`;
-              const tooltipSub = sq.classesCount > 0 ? `${sq.classesCount} tiết học (${sq.workload.label})` : 'Nghỉ ngơi';
+              const tooltipSub = sq.classesCount > 0 ? `${sq.classesCount} buổi học (${sq.workload.label})` : 'Nghỉ ngơi';
               const tooltipBody = sq.classes.length > 0
                 ? sq.classes.map(c => `<div class="tt-row"><strong>${escapeHtml(c.subject)}</strong> <span>(${escapeHtml(c.timeRange)})</span></div>`).join('')
-                : `<div style="color: var(--text-muted); font-size: 0.72rem;">Không có tiết học trong ngày này</div>`;
+                : `<div style="color: var(--text-muted); font-size: 0.72rem;">Không có buổi học trong ngày này</div>`;
 
               return `
                 <div class="semester-square-item level-${sq.level} ${sq.isCurrentWeek ? 'is-in-current-week' : ''}"
@@ -782,7 +751,7 @@ function renderSemesterMatrixView(container, semesterWeeks = [], currentWeekFile
                   data-tooltip-title="${escapeHtml(tooltipTitle)}"
                   data-tooltip-sub="${escapeHtml(tooltipSub)}"
                   data-tooltip-body="${escapeHtml(tooltipBody)}"
-                  data-tooltip-badge="${sq.classesCount > 0 ? `${sq.classesCount}t` : 'Nghỉ'}"
+                  data-tooltip-badge="${sq.classesCount > 0 ? `${sq.classesCount} buổi` : 'Nghỉ'}"
                   data-tooltip-badge-bg="${sq.classesCount > 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(148, 163, 184, 0.15)'}"
                   data-tooltip-badge-color="${sq.classesCount > 0 ? '#10b981' : '#94a3b8'}">
                 </div>
@@ -796,11 +765,11 @@ function renderSemesterMatrixView(container, semesterWeeks = [], currentWeekFile
         <div class="heatmap-legend-row" style="font-size: 0.74rem;">
           <span>Mức nhiệt:</span>
           <div class="legend-scale-boxes">
-            <div class="legend-box level-0" title="0 tiết"></div>
-            <div class="legend-box level-1" title="1-2 tiết"></div>
-            <div class="legend-box level-2" title="3-4 tiết"></div>
-            <div class="legend-box level-3" title="5-6 tiết"></div>
-            <div class="legend-box level-4" title="7+ tiết"></div>
+            <div class="legend-box level-0" title="0 buổi (Nghỉ)"></div>
+            <div class="legend-box level-1" title="1 buổi (Nhẹ)"></div>
+            <div class="legend-box level-2" title="2 buổi (Vừa)"></div>
+            <div class="legend-box level-3" title="3 buổi (Dày)"></div>
+            <div class="legend-box level-4" title="4+ buổi (Cao điểm)"></div>
           </div>
         </div>
 
@@ -894,10 +863,10 @@ function renderYearlyMatrixView(container, semesterWeeks = [], onSelectWeek = nu
           <div class="yearly-squares-grid" id="yearly-squares-grid">
             ${squares.map(sq => {
               const tooltipTitle = `Tuần ${sq.weekIdx} • ${sq.dayName}`;
-              const tooltipSub = sq.classesCount > 0 ? `${sq.classesCount} tiết học` : 'Nghỉ ngơi';
+              const tooltipSub = sq.classesCount > 0 ? `${sq.classesCount} buổi học` : 'Nghỉ ngơi';
               const tooltipBody = sq.classes.length > 0
                 ? sq.classes.map(c => `<div class="tt-row"><strong>${escapeHtml(c.subject)}</strong> <span>(${escapeHtml(c.timeRange)})</span></div>`).join('')
-                : `<div style="color: var(--text-muted); font-size: 0.72rem;">Không có tiết học</div>`;
+                : `<div style="color: var(--text-muted); font-size: 0.72rem;">Không có buổi học</div>`;
 
               return `
                 <div class="yearly-square-item level-${sq.level}" 
@@ -923,11 +892,11 @@ function renderYearlyMatrixView(container, semesterWeeks = [], onSelectWeek = nu
         <div class="heatmap-legend-row" style="font-size: 0.74rem;">
           <span>Mức nhiệt:</span>
           <div class="legend-scale-boxes">
-            <div class="legend-box level-0" title="0 tiết"></div>
-            <div class="legend-box level-1" title="1-2 tiết"></div>
-            <div class="legend-box level-2" title="3-4 tiết"></div>
-            <div class="legend-box level-3" title="5-6 tiết"></div>
-            <div class="legend-box level-4" title="7+ tiết"></div>
+            <div class="legend-box level-0" title="0 buổi (Nghỉ)"></div>
+            <div class="legend-box level-1" title="1 buổi (Nhẹ)"></div>
+            <div class="legend-box level-2" title="2 buổi (Vừa)"></div>
+            <div class="legend-box level-3" title="3 buổi (Dày)"></div>
+            <div class="legend-box level-4" title="4+ buổi (Cao điểm)"></div>
           </div>
         </div>
 
@@ -1026,17 +995,17 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
             </div>
             <div>
               <h2 class="heatmap-title">Bản Đồ Nhiệt Cường Độ Học Tập</h2>
-              <span class="heatmap-subtitle">Phân tích mật độ tiết học, theo dõi tải học tập & năng suất sinh viên</span>
+              <span class="heatmap-subtitle">Phân tích mật độ buổi học, theo dõi tải học tập & năng suất sinh viên</span>
             </div>
           </div>
           <div class="heatmap-legend-row">
             <span>Mật độ:</span>
             <div class="legend-scale-boxes">
-              <div class="legend-box level-0" title="0 tiết (Nghỉ)"></div>
-              <div class="legend-box level-1" title="1-2 tiết (Nhẹ)"></div>
-              <div class="legend-box level-2" title="3-4 tiết (Vừa)"></div>
-              <div class="legend-box level-3" title="5-6 tiết (Dày)"></div>
-              <div class="legend-box level-4" title="7+ tiết (Cao điểm / Thi)"></div>
+              <div class="legend-box level-0" title="0 buổi (Nghỉ)"></div>
+              <div class="legend-box level-1" title="1 buổi (Nhẹ)"></div>
+              <div class="legend-box level-2" title="2 buổi (Vừa)"></div>
+              <div class="legend-box level-3" title="3 buổi (Dày)"></div>
+              <div class="legend-box level-4" title="4+ buổi (Cao điểm)"></div>
             </div>
           </div>
         </div>
@@ -1047,7 +1016,7 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
               <i class="fa-solid fa-calendar-day"></i>
             </div>
             <div class="heatmap-kpi-info">
-              <span class="heatmap-kpi-value">${todayClasses.length} tiết</span>
+              <span class="heatmap-kpi-value">${todayClasses.length} buổi</span>
               <span class="heatmap-kpi-label">Hôm nay (${todayName})</span>
             </div>
           </div>
@@ -1057,8 +1026,8 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
               <i class="fa-solid fa-book-bookmark"></i>
             </div>
             <div class="heatmap-kpi-info">
-              <span class="heatmap-kpi-value">${totalSemesterClasses} tiết</span>
-              <span class="heatmap-kpi-label">Tổng tiết cả học kỳ</span>
+              <span class="heatmap-kpi-value">${totalSemesterClasses} buổi</span>
+              <span class="heatmap-kpi-label">Tổng buổi cả học kỳ</span>
             </div>
           </div>
 
@@ -1067,7 +1036,7 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
               <i class="fa-solid fa-bolt"></i>
             </div>
             <div class="heatmap-kpi-info">
-              <span class="heatmap-kpi-value">${peakWeek ? `${peakWeek.title} (${peakWeek.totalClasses}t)` : 'Chưa có'}</span>
+              <span class="heatmap-kpi-value">${peakWeek ? `${peakWeek.title} (${peakWeek.totalClasses}b)` : 'Chưa có'}</span>
               <span class="heatmap-kpi-label">Tuần cao điểm nhất</span>
             </div>
           </div>
@@ -1088,7 +1057,7 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
       <div class="today-focus-card">
         <div class="today-focus-header">
           <div style="display: flex; align-items: center; gap: 0.65rem;">
-            <span class="today-focus-badge"><i class="fa-regular fa-clock"></i> Tiết học Hôm nay</span>
+            <span class="today-focus-badge"><i class="fa-regular fa-clock"></i> Lịch học Hôm nay</span>
             <span style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary);">${todayName} • ${currentWeekObj ? currentWeekObj.title : ''}</span>
           </div>
           <span style="font-size: 0.78rem; color: var(--text-muted);">${todayClasses.length > 0 ? `${todayClasses.length} buổi học đang chờ bạn` : 'Hôm nay bạn được nghỉ ngơi'}</span>
@@ -1101,7 +1070,6 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
                 <div class="today-mini-time">
                   <i class="fa-regular fa-clock"></i>
                   <span>${escapeHtml(c.timeRange)}</span>
-                  ${c.period ? `<span style="opacity: 0.75;">(${escapeHtml(c.period)})</span>` : ''}
                 </div>
                 <div class="today-mini-subject">
                   <i class="fa-solid fa-book-open" style="color: #818cf8; font-size: 0.85rem;"></i>

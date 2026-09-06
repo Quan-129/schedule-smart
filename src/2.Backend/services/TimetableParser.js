@@ -165,9 +165,8 @@ export function serializeScheduleToMarkdown(scheduleData) {
       lines.push('- Nghỉ.');
     } else {
       day.classes.forEach(c => {
-        const periodText = c.period ? ` (${c.period})` : '';
         const roomText = c.room ? ` | Phòng: ${c.room}` : '';
-        lines.push(`- ${c.timeRange}${periodText}: ${c.subject}${roomText}`);
+        lines.push(`- ${c.timeRange}: ${c.subject}${roomText}`);
       });
     }
     lines.push('');
@@ -215,6 +214,6 @@ export function generateEmptyWeekMarkdown(weekTitle = 'Tuần mới') {
 - Nghỉ.
 
 ## Lưu ý nhỏ:
-- Bấm "+ Thêm tiết" hoặc nhấn giữ ô ngày để thêm lịch học nhanh.`;
+- Bấm "+ Thêm buổi học" hoặc nhấn giữ ô ngày để thêm lịch học nhanh.`;
 }
 

@@ -108,9 +108,9 @@ export function renderTimetableGrid(days = [], isCurrentWeek = false) {
       classesHtml = `
         <div class="day-off-card day-empty-box" data-day="${escapeHtml(day.name)}">
           <div class="day-off-icon"><i class="fa-solid fa-mug-hot"></i></div>
-          <div class="day-off-text">${escapeHtml(day.dayOffText || 'Chưa có tiết học')}</div>
-          <button type="button" class="btn-quick-add-class" data-day="${escapeHtml(day.name)}" title="Thêm tiết học vào ${escapeHtml(day.name)}">
-            <i class="fa-solid fa-plus"></i> <span>Thêm tiết học</span>
+          <div class="day-off-text">${escapeHtml(day.dayOffText || 'Chưa có lịch học')}</div>
+          <button type="button" class="btn-quick-add-class" data-day="${escapeHtml(day.name)}" title="Thêm buổi học vào ${escapeHtml(day.name)}">
+            <i class="fa-solid fa-plus"></i> <span>Thêm buổi học</span>
           </button>
         </div>
       `;
@@ -124,13 +124,12 @@ export function renderTimetableGrid(days = [], isCurrentWeek = false) {
             <div class="class-time-row">
               <div class="class-time-badge-group">
                 <span class="class-time"><i class="fa-regular fa-clock"></i> ${escapeHtml(c.timeRange)}</span>
-                ${c.period ? `<span class="class-period">${escapeHtml(c.period)}</span>` : ''}
               </div>
               <div class="class-edit-actions">
-                <button type="button" class="btn-mini-action btn-edit-class-item" title="Chỉnh sửa tiết học này" data-day="${escapeHtml(day.name)}" data-idx="${cIdx}">
+                <button type="button" class="btn-mini-action btn-edit-class-item" title="Chỉnh sửa buổi học này" data-day="${escapeHtml(day.name)}" data-idx="${cIdx}">
                   <i class="fa-solid fa-pen"></i>
                 </button>
-                <button type="button" class="btn-mini-action btn-delete-class-item" title="Xóa tiết học này" data-day="${escapeHtml(day.name)}" data-idx="${cIdx}">
+                <button type="button" class="btn-mini-action btn-delete-class-item" title="Xóa buổi học này" data-day="${escapeHtml(day.name)}" data-idx="${cIdx}">
                   <i class="fa-solid fa-trash-can"></i>
                 </button>
               </div>
@@ -145,7 +144,7 @@ export function renderTimetableGrid(days = [], isCurrentWeek = false) {
                 <button class="btn-view-subject-backpack" title="Mở nhanh Google Drive môn ${escapeHtml(c.subject)}" data-subject="${escapeHtml(c.subject)}">
                   <i class="fa-brands fa-google-drive"></i>
                 </button>
-                <button class="btn-copy-info" title="Sao chép thông tin tiết học" data-subject="${escapeHtml(c.subject)}" data-time="${escapeHtml(c.timeRange)}" data-room="${escapeHtml(c.room)}">
+                <button class="btn-copy-info" title="Sao chép thông tin buổi học" data-subject="${escapeHtml(c.subject)}" data-time="${escapeHtml(c.timeRange)}" data-room="${escapeHtml(c.room)}">
                   <i class="fa-regular fa-copy"></i>
                 </button>
               </div>
@@ -153,8 +152,8 @@ export function renderTimetableGrid(days = [], isCurrentWeek = false) {
           </div>
         `;
       }).join('') + `
-        <button type="button" class="btn-add-more-class" data-day="${escapeHtml(day.name)}" title="Thêm tiết học vào ${escapeHtml(day.name)}">
-          <i class="fa-solid fa-plus"></i> <span>Thêm tiết vào ${escapeHtml(day.name)}</span>
+        <button type="button" class="btn-add-more-class" data-day="${escapeHtml(day.name)}" title="Thêm buổi học vào ${escapeHtml(day.name)}">
+          <i class="fa-solid fa-plus"></i> <span>Thêm buổi học vào ${escapeHtml(day.name)}</span>
         </button>
       </div>`;
     }
@@ -165,7 +164,7 @@ export function renderTimetableGrid(days = [], isCurrentWeek = false) {
           <span>${escapeHtml(day.name)}</span>
           ${isToday ? `<span class="badge-today">Hôm nay</span>` : ''}
         </h3>
-        <span class="class-count-badge">${day.classes ? day.classes.length : 0} tiết</span>
+        <span class="class-count-badge">${day.classes ? day.classes.length : 0} buổi</span>
       </div>
       ${classesHtml}
     `;
@@ -332,7 +331,6 @@ export function renderTodayView(days = [], isCurrentWeek = false) {
     item.innerHTML = `
       <div class="class-time-row">
         <span class="class-time"><i class="fa-regular fa-clock"></i> ${escapeHtml(c.timeRange)}</span>
-        ${c.period ? `<span class="class-period">${escapeHtml(c.period)}</span>` : ''}
       </div>
       <h3 style="color: ${color.text || 'inherit'}; font-size: 1.15rem; font-weight: 700;">${escapeHtml(c.subject)}</h3>
       <div class="class-room-row">
