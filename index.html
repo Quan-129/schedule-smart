@@ -1,25 +1,30 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lịch Học Thông Minh & Chiếc Cặp Google Drive</title>
-  
+
   <!-- PWA & SEO Meta Tags -->
-  <meta name="description" content="Thời khóa biểu tự động, tỷ lệ điểm chi tiết và Chiếc Cặp Google Drive quản lý tài liệu học tập theo dạng App Launcher Node cực đẹp.">
+  <meta name="description"
+    content="Thời khóa biểu tự động, tỷ lệ điểm chi tiết và Chiếc Cặp Google Drive quản lý tài liệu học tập theo dạng App Launcher Node cực đẹp.">
   <meta name="theme-color" content="#4f46e5">
   <link rel="manifest" href="manifest.json">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎒</text></svg>">
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎒</text></svg>">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
 
   <!-- Google Fonts: Inter & Outfit -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
   <!-- FontAwesome 6 Free -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  
+
   <!-- Modular CSS Architecture (Zero-Dependency Native Architecture) -->
   <link rel="stylesheet" href="src/1.Frontend/styles/1.variables.css">
   <link rel="stylesheet" href="src/1.Frontend/styles/2.navbar.css">
@@ -30,8 +35,8 @@
   <link rel="stylesheet" href="src/1.Frontend/styles/7.markdown-editor.css">
   <link rel="stylesheet" href="src/1.Frontend/styles/8.responsive.css">
   <link rel="stylesheet" href="src/1.Frontend/styles/9.heatmap-view.css">
-  <link rel="stylesheet" href="src/1.Frontend/styles/10.onboarding-tour.css">
 </head>
+
 <body class="theme-dark">
   <!-- Background Glow Accents -->
   <div class="bg-glow glow-1"></div>
@@ -100,22 +105,28 @@
       <div class="login-actions">
         <button id="landing-login-btn" class="btn-google-login-large">
           <svg class="google-icon-svg" viewBox="0 0 48 48" width="22" height="22">
-            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+            <path fill="#EA4335"
+              d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+            <path fill="#4285F4"
+              d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+            <path fill="#FBBC05"
+              d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+            <path fill="#34A853"
+              d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
           </svg>
           <span class="btn-login-text">Đăng nhập bằng tài khoản Google</span>
         </button>
 
-        <button type="button" id="landing-guest-btn" class="btn-guest-login-large" title="Vào xem và chỉnh sửa thời khóa biểu ngay không cần tài khoản">
+        <button type="button" id="landing-guest-btn" class="btn-guest-login-large"
+          title="Vào xem và chỉnh sửa thời khóa biểu ngay không cần tài khoản">
           <i class="fa-solid fa-arrow-right-to-bracket"></i>
           <span>Dùng ngay với tư cách Khách (Lưu Offline)</span>
         </button>
       </div>
 
       <div class="login-footer-note">
-        <i class="fa-solid fa-shield-halved"></i> Đăng nhập an toàn • Mỗi người dùng có một không gian lưu trữ riêng biệt
+        <i class="fa-solid fa-shield-halved"></i> Đăng nhập an toàn • Mỗi người dùng có một không gian lưu trữ riêng
+        biệt
       </div>
     </div>
   </div>
@@ -136,11 +147,9 @@
         </div>
 
         <div class="nav-quick-actions">
-          <!-- Hướng dẫn sử dụng Spotlight Tour -->
-          <button id="btn-restart-onboarding" class="btn-icon btn-help-nav" title="Xem hướng dẫn sử dụng từng bước (Tour)"><i class="fa-solid fa-circle-question"></i></button>
-
           <!-- Theme Toggle -->
-          <button id="theme-toggle-btn" class="btn-icon" title="Đổi giao diện Sáng / Tối"><i class="fa-solid fa-sun"></i></button>
+          <button id="theme-toggle-btn" class="btn-icon" title="Đổi giao diện Sáng / Tối"><i
+              class="fa-solid fa-sun"></i></button>
 
           <!-- User Auth & Cloud Sync Widget -->
           <div class="user-auth-group">
@@ -151,7 +160,8 @@
             <div id="user-profile-widget" class="user-profile-widget hidden" style="display: none;">
               <img id="user-avatar" class="user-avatar" src="" alt="Avatar" referrerpolicy="no-referrer">
               <span id="user-display-name" class="user-display-name">Sinh viên</span>
-              <button id="auth-logout-btn" class="btn-auth-logout" title="Đăng xuất tài khoản"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+              <button id="auth-logout-btn" class="btn-auth-logout" title="Đăng xuất tài khoản"><i
+                  class="fa-solid fa-arrow-right-from-bracket"></i></button>
             </div>
           </div>
         </div>
@@ -160,10 +170,12 @@
       <div class="nav-center">
         <!-- View Switcher Tabs (Icon-only Navigation Dock) -->
         <div class="view-toggles">
-          <button id="view-grid-btn" class="toggle-btn active" title="Lưới tuần (Thời khóa biểu)" aria-label="Lưới tuần">
+          <button id="view-grid-btn" class="toggle-btn active" title="Lưới tuần (Thời khóa biểu)"
+            aria-label="Lưới tuần">
             <i class="fa-solid fa-table-columns"></i>
           </button>
-          <button id="view-today-btn" class="toggle-btn" title="Bản Đồ Nhiệt Cường Độ Học Tập (Tuần / Tháng / Quý / Năm)" aria-label="Bản Đồ Nhiệt">
+          <button id="view-today-btn" class="toggle-btn"
+            title="Bản Đồ Nhiệt Cường Độ Học Tập (Tuần / Tháng / Quý / Năm)" aria-label="Bản Đồ Nhiệt">
             <i class="fa-solid fa-fire-flame-curved"></i>
           </button>
           <button id="view-grades-btn" class="toggle-btn" title="Tỉ lệ điểm thành phần" aria-label="Tỉ lệ điểm">
@@ -193,8 +205,9 @@
         </div>
 
         <!-- Week Selector Nav -->
-        <div class="week-navigation" id="week-navigation">
-          <button id="prev-week-btn" class="btn-nav" title="Tuần trước"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="week-navigation">
+          <button id="prev-week-btn" class="btn-nav" title="Tuần trước"><i
+              class="fa-solid fa-chevron-left"></i></button>
           <div class="week-dropdown-wrapper">
             <i class="fa-regular fa-calendar"></i>
             <select id="week-select" title="Chọn tuần học">
@@ -202,12 +215,12 @@
             </select>
           </div>
           <button id="next-week-btn" class="btn-nav" title="Tuần sau"><i class="fa-solid fa-chevron-right"></i></button>
-
-          <div class="week-nav-divider"></div>
-
-          <button id="btn-focus-today" class="btn-nav btn-today-nav" title="Ping Target: Định vị & Cuộn tới ngày Hôm nay"><i class="fa-solid fa-crosshairs"></i></button>
-          <button id="btn-add-week-modal" class="btn-nav btn-add-week-nav" title="Thêm tuần học mới"><i class="fa-solid fa-plus"></i></button>
-          <button id="btn-delete-week" class="btn-nav btn-delete-week-nav" title="Xóa tuần học này"><i class="fa-solid fa-trash-can"></i></button>
+          <button id="btn-focus-today" class="btn-nav btn-today-nav"
+            title="Ping Target: Định vị & Cuộn tới ngày Hôm nay"><i class="fa-solid fa-crosshairs"></i></button>
+          <button id="btn-add-week-modal" class="btn-nav btn-add-week-nav" title="Thêm tuần học mới"><i
+              class="fa-solid fa-plus"></i></button>
+          <button id="btn-delete-week" class="btn-nav btn-delete-week-nav" title="Xóa tuần học này"><i
+              class="fa-solid fa-trash-can"></i></button>
         </div>
       </div>
     </header>
@@ -221,11 +234,15 @@
         <div class="hero-banner is-collapsed" id="hero-banner">
           <div class="hero-left">
             <div class="hero-title-row">
-              <div class="date-badge" id="current-date-badge" title="Bấm để định vị nhanh ngày Hôm nay" style="cursor: pointer;"><i class="fa-regular fa-calendar"></i> <span id="current-date-text">--</span></div>
+              <div class="date-badge" id="current-date-badge" title="Bấm để định vị nhanh ngày Hôm nay"
+                style="cursor: pointer;"><i class="fa-regular fa-calendar"></i> <span id="current-date-text">--</span>
+              </div>
               <h2 id="schedule-title" class="schedule-main-title">Lịch học</h2>
               <div class="hero-quick-tags">
-                <span class="hero-stat-tag"><i class="fa-solid fa-graduation-cap"></i> <span id="stat-total-subjects">-- môn</span></span>
-                <span class="hero-stat-tag"><i class="fa-solid fa-book-open"></i> <span id="stat-total-classes">-- tiết</span></span>
+                <span class="hero-stat-tag"><i class="fa-solid fa-graduation-cap"></i> <span id="stat-total-subjects">--
+                    môn</span></span>
+                <span class="hero-stat-tag"><i class="fa-solid fa-book-open"></i> <span id="stat-total-classes">--
+                    tiết</span></span>
               </div>
             </div>
             <p id="schedule-subtitle" class="schedule-subtitle">Đang tải dữ liệu thời khóa biểu...</p>
@@ -243,7 +260,8 @@
               </div>
             </div>
             <div class="stats-row">
-              <button class="stat-pill btn-print" id="print-schedule-btn" title="In thời khóa biểu"><i class="fa-solid fa-print"></i> In lịch</button>
+              <button class="stat-pill btn-print" id="print-schedule-btn" title="In thời khóa biểu"><i
+                  class="fa-solid fa-print"></i> In lịch</button>
               <button class="btn-toggle-hero" id="btn-toggle-hero" title="Thu gọn / Mở rộng thông tin tuần">
                 <span class="toggle-hero-text">Chi tiết</span>
                 <i class="fa-solid fa-chevron-down toggle-hero-icon"></i>
@@ -256,9 +274,12 @@
         <div class="filter-bar">
           <div class="search-box">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" id="search-input" placeholder="Tìm môn học, phòng học, ca học hoặc thứ (VD: Thứ 2, B1-305, Học máy)..." autocomplete="off">
-            <button id="clear-search-btn" class="btn-clear hidden" title="Xóa tìm kiếm"><i class="fa-solid fa-xmark"></i></button>
-            <button type="button" id="btn-ping-today-search" class="btn-ping-target-pill" title="Định vị nhanh ngày Hôm nay (Ping Target)">
+            <input type="text" id="search-input"
+              placeholder="Tìm môn học, phòng học, ca học hoặc thứ (VD: Thứ 2, B1-305, Học máy)..." autocomplete="off">
+            <button id="clear-search-btn" class="btn-clear hidden" title="Xóa tìm kiếm"><i
+                class="fa-solid fa-xmark"></i></button>
+            <button type="button" id="btn-ping-today-search" class="btn-ping-target-pill"
+              title="Định vị nhanh ngày Hôm nay (Ping Target)">
               <i class="fa-solid fa-crosshairs"></i> <span>Hôm nay</span>
             </button>
           </div>
@@ -282,7 +303,8 @@
                 <span class="notes-summary-hint">(Bấm để xem)</span>
               </div>
               <div class="notes-summary-right">
-                <button type="button" id="btn-edit-weekly-notes" class="btn-edit-notes-pill" title="Chỉnh sửa Lưu ý & Ghi chú tuần này">
+                <button type="button" id="btn-edit-weekly-notes" class="btn-edit-notes-pill"
+                  title="Chỉnh sửa Lưu ý & Ghi chú tuần này">
                   <i class="fa-solid fa-pen-to-square"></i>
                   <span>Sửa ghi chú</span>
                 </button>
@@ -294,7 +316,8 @@
                 <!-- Notes list parsed from MD -->
               </div>
               <div class="notes-footer-actions">
-                <button type="button" id="btn-quick-edit-notes-bottom" class="btn-notes-action-pill" title="Chỉnh sửa Lưu ý & Ghi chú tuần">
+                <button type="button" id="btn-quick-edit-notes-bottom" class="btn-notes-action-pill"
+                  title="Chỉnh sửa Lưu ý & Ghi chú tuần">
                   <i class="fa-solid fa-pen-to-square"></i>
                   <span>Chỉnh sửa nội dung ghi chú</span>
                 </button>
@@ -315,11 +338,13 @@
           <div class="grades-header-info">
             <div class="badge-grades"><i class="fa-solid fa-pie-chart"></i> Đề Cương Học Phần Chuẩn</div>
             <h2 class="grades-main-title">Tỉ Lệ Điểm Thành Phần Các Môn Học</h2>
-            <p class="grades-subtitle">Biểu đồ tròn trực quan hóa trọng số đánh giá, kiểm tra giữa kỳ, bài tập lớn, thi cuối kỳ và quy chế môn học</p>
+            <p class="grades-subtitle">Biểu đồ tròn trực quan hóa trọng số đánh giá, kiểm tra giữa kỳ, bài tập lớn, thi
+              cuối kỳ và quy chế môn học</p>
           </div>
           <div class="grades-filter-box">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="grades-search-input" placeholder="Lọc môn học theo tên, mã môn..." autocomplete="off">
+            <input type="text" id="grades-search-input" placeholder="Lọc môn học theo tên, mã môn..."
+              autocomplete="off">
           </div>
         </div>
 
@@ -334,15 +359,18 @@
           <div class="backpack-header-info">
             <div class="badge-backpack"><i class="fa-brands fa-google-drive"></i> Chiếc Cặp Google Drive 🎒</div>
             <h2 class="backpack-main-title">Phím Tắt Google Drive Môn Học</h2>
-            <p class="backpack-subtitle">Mỗi nút tròn là một môn học kèm vòng % điểm. Bấm trực tiếp để mở Google Drive 1-chạm. Nhấn giữ để chỉnh sửa hoặc xóa.</p>
+            <p class="backpack-subtitle">Mỗi nút tròn là một môn học kèm vòng % điểm. Bấm trực tiếp để mở Google Drive
+              1-chạm. Nhấn giữ để chỉnh sửa hoặc xóa.</p>
           </div>
           <div class="backpack-header-actions">
             <div class="backpack-filter-box">
               <i class="fa-solid fa-magnifying-glass"></i>
               <input type="text" id="backpack-search-input" placeholder="Tìm môn học..." autocomplete="off">
-              <button id="bp-clear-search-btn" class="btn-clear hidden" title="Xóa tìm kiếm"><i class="fa-solid fa-xmark"></i></button>
+              <button id="bp-clear-search-btn" class="btn-clear hidden" title="Xóa tìm kiếm"><i
+                  class="fa-solid fa-xmark"></i></button>
             </div>
-            <button id="bp-done-jiggle-btn" class="btn-bp-action btn-bp-done" style="display: none;" title="Hoàn tất chỉnh sửa">
+            <button id="bp-done-jiggle-btn" class="btn-bp-action btn-bp-done" style="display: none;"
+              title="Hoàn tất chỉnh sửa">
               <i class="fa-solid fa-check"></i> <span>Xong</span>
             </button>
             <button id="bp-add-subject-btn" class="btn-bp-action btn-bp-primary" title="Tạo thêm môn học mới">
@@ -351,7 +379,9 @@
           </div>
         </div>
 
-        <p class="bp-hint-text" id="backpack-hint-text"><i class="fa-solid fa-hand-pointer"></i> <span><em>Mẹo: <strong>Nhấn giữ ô tròn</strong> để bật chế độ chỉnh sửa (hiện nút cây bút ✏️ và nút xóa -).</em></span></p>
+        <p class="bp-hint-text" id="backpack-hint-text"><i class="fa-solid fa-hand-pointer"></i> <span><em>Mẹo:
+              <strong>Nhấn giữ ô tròn</strong> để bật chế độ chỉnh sửa (hiện nút cây bút ✏️ và nút xóa -).</em></span>
+        </p>
 
         <!-- App Launcher Grid: Lưới các nút môn học -->
         <div class="bp-launcher-grid" id="backpack-launcher-grid">
@@ -380,7 +410,8 @@
             </div>
           </div>
           <div class="raw-editor-container">
-            <textarea id="markdown-raw-content" spellcheck="false" placeholder="Nội dung lịch học dạng Markdown..."></textarea>
+            <textarea id="markdown-raw-content" spellcheck="false"
+              placeholder="Nội dung lịch học dạng Markdown..."></textarea>
           </div>
         </div>
       </section>
@@ -402,4 +433,9 @@
   <!-- Modular 5-Tier Architecture Entry Point -->
   <script type="module" src="./src/1.Frontend/main.js"></script>
 </body>
+
+</html>
+<script type="module" src="./src/1.Frontend/main.js"></script>
+</body>
+
 </html>

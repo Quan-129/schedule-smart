@@ -21,7 +21,6 @@ import { ensureSubjectDetailModalDom, openSubjectDetailModal } from './component
 import { ensureAddClassModalDom, openAddClassModal, openEditClassModal } from './components/modals/AddClassModal.js';
 import { ensureEditWeeklyNotesModalDom, openEditWeeklyNotesModal } from './components/modals/EditWeeklyNotesModal.js';
 import { showToast, initToastContainer } from './components/Toast.js';
-import { initOnboardingTour, startOnboardingTour, hasCompletedOnboarding } from './components/onboarding/OnboardingTour.js';
 import { initPWA, promptPWAInstall } from '../5.Performance/pwaManager.js';
 import { initVisibilityOptimizer } from '../5.Performance/visibilityOptimizer.js';
 import { formatSafeUrl } from '../4.Security/urlValidator.js';
@@ -132,15 +131,6 @@ async function initApp() {
   initHeroToggle();
   initRawMarkdownEditor();
   initWeeklyNotesEditor();
-  initOnboardingTour();
-
-  // Nút xem lại Hướng Dẫn Từng Bước (Spotlight Tour)
-  const helpTourBtn = document.getElementById('btn-restart-onboarding');
-  if (helpTourBtn) {
-    helpTourBtn.onclick = () => {
-      startOnboardingTour(true);
-    };
-  }
 
   // 11. Tối ưu hiệu năng khi chuyển tab trình duyệt
   initVisibilityOptimizer(
@@ -152,13 +142,6 @@ async function initApp() {
   const urlParams = new URLSearchParams(window.location.search);
   const targetTab = urlParams.get('tab') || 'backpack';
   switchTab(targetTab);
-
-  // 13. Tự động kích hoạt Onboarding Tour cho tài khoản mới chưa xem lần nào
-  setTimeout(() => {
-    if (!hasCompletedOnboarding()) {
-      startOnboardingTour(false);
-    }
-  }, 900);
 }
 
 /**
@@ -175,8 +158,8 @@ function setupWindowHelpers() {
   };
 
   window.viewSubjectBackpack = (subjectName) => {
-    const matchedSubject = (state.driveSubjects || []).find(s => 
-      s.name.toLowerCase() === (subjectName || '').toLowerCase() || 
+    const matchedSubject = (state.driveSubjects || []).find(s =>
+      s.name.toLowerCase() === (subjectName || '').toLowerCase() ||
       (subjectName || '').toLowerCase().includes(s.name.toLowerCase()) ||
       s.code.toLowerCase() === (subjectName || '').toLowerCase()
     );
@@ -328,7 +311,7 @@ async function initWeekSelector(user = null) {
   try {
     const delRaw = localStorage.getItem(deletedKey);
     if (delRaw) deletedWeekIds = JSON.parse(delRaw);
-  } catch (e) {}
+  } catch (e) { }
 
   availableWeeks = [];
 
@@ -479,7 +462,7 @@ function handleDeleteCurrentWeek(weekObj) {
   try {
     const raw = localStorage.getItem(customWeeksKey);
     if (raw) customWeeks = JSON.parse(raw);
-  } catch (e) {}
+  } catch (e) { }
   customWeeks = customWeeks.filter(w => w.filename !== weekObj.filename && w.id !== weekObj.id);
   localStorage.setItem(customWeeksKey, JSON.stringify(customWeeks));
 
@@ -488,7 +471,7 @@ function handleDeleteCurrentWeek(weekObj) {
   try {
     const delRaw = localStorage.getItem(deletedKey);
     if (delRaw) deletedWeekIds = JSON.parse(delRaw);
-  } catch (e) {}
+  } catch (e) { }
   if (!deletedWeekIds.includes(weekObj.id)) deletedWeekIds.push(weekObj.id);
   if (!deletedWeekIds.includes(weekObj.filename)) deletedWeekIds.push(weekObj.filename);
   localStorage.setItem(deletedKey, JSON.stringify(deletedWeekIds));
@@ -512,7 +495,7 @@ function handleDeleteCurrentWeek(weekObj) {
 
   // 6. Xác định tuần tiếp theo để hiển thị
   const nextWeek = availableWeeks[deletedIndex] || availableWeeks[deletedIndex - 1] || availableWeeks[0];
-  
+
   // 7. Render lại Dropdown và load tuần mới
   renderWeekDropdownOptions(nextWeek.filename);
   loadWeekSchedule(nextWeek.filename);
@@ -971,8 +954,8 @@ function handleDeleteClass(dayName, classIndex, classData = null) {
   if (!state.scheduleData || !state.scheduleData.days) return;
 
   // 1. Tìm ngày linh hoạt (khớp chính xác hoặc khớp tương đối)
-  let day = state.scheduleData.days.find(d => 
-    d.name === dayName || 
+  let day = state.scheduleData.days.find(d =>
+    d.name === dayName ||
     (d.name && dayName && (d.name.toLowerCase() === dayName.toLowerCase() || d.name.includes(dayName) || dayName.includes(d.name)))
   );
 
@@ -985,8 +968,8 @@ function handleDeleteClass(dayName, classIndex, classData = null) {
 
   // 2. Ưu tiên tìm theo đối tượng classData nếu có
   if (classData && classData.subject) {
-    const idx = day.classes.findIndex(c => 
-      c.subject === classData.subject && 
+    const idx = day.classes.findIndex(c =>
+      c.subject === classData.subject &&
       (c.timeRange === classData.timeRange || c.startTime === classData.startTime)
     );
     if (idx !== -1) {
@@ -1144,7 +1127,7 @@ function initThemeToggle() {
     state.isDarkTheme = !state.isDarkTheme;
     document.body.classList.toggle('theme-light', !state.isDarkTheme);
     document.body.classList.toggle('theme-dark', state.isDarkTheme);
-    
+
     themeBtn.innerHTML = state.isDarkTheme ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
     showToast(state.isDarkTheme ? 'Đã bật chế độ Dark Theme 🌙' : 'Đã bật chế độ Light Theme ☀️');
   };

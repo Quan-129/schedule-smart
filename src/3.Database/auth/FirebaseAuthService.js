@@ -346,10 +346,14 @@ export function updateAuthUI(user) {
     }
     if (userAvatar && user.photoURL) {
       userAvatar.src = user.photoURL;
+      userAvatar.title = user.displayName ? `${user.displayName} (${user.email || ''})` : (user.email || 'Sinh viên');
       userAvatar.style.display = 'inline-block';
     }
     if (userDisplayName) {
       userDisplayName.textContent = user.displayName || 'Sinh viên';
+    }
+    if (userProfileWidget) {
+      userProfileWidget.title = user.displayName ? `${user.displayName} (${user.email || ''})` : (user.email || 'Sinh viên');
     }
   } else {
     // CHƯA ĐĂNG NHẬP: Hiển thị Login Screen

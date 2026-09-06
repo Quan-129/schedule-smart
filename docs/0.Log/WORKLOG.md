@@ -4,92 +4,16 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
-## 📅 [2026-09-06 10:21] - Triển Khai Bố Cục Grid 2 Hàng Thông Minh Cho Navbar Chống Tràn Tuyệt Đối (< 1380px) 🚀🎨
+## 📅 [2026-09-06 10:24] - Tối Giản Widget Tài Khoản: Chỉ Hiển Thị Avatar Tròn & Nút Đăng Xuất (Không Hiện Tên) 🎨✨
 
-- **🎯 Vấn đề giải quyết**:
-  - Trên màn hình Laptop và khi mở DevTools / chia đôi cửa sổ (`< 1380px`), thanh điều hướng tuần và các nút bị thiếu không gian nên đâm thủng mép phải của thanh Navbar.
-- **✅ Giải pháp Grid 2 Hàng Sang Trọng**:
-  - **Hàng 1**: Logo & Tài Khoản (bên trái) + 4 Tab Chế Độ Xem (bên phải).
-  - **Hàng 2**: Bộ chọn Ngày (`1N / 3N / 7N`) + Cụm Điều Hướng Tuần (`< Tuần 36 > | 🎯 + 🗑`) dàn đều ở Hàng 2 với đường phân cách `border-top: 1px solid rgba(255, 255, 255, 0.08)`.
-  - Cập nhật [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css) và [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css).
-  - Nâng `CACHE_NAME` lên `smart-schedule-modular-v73` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
-
----
-
-## 📅 [2026-09-06 10:18] - Hợp Nhất Hoàn Chỉnh Toàn Bộ Cụm Điều Hướng Tuần Vào 1 Capsule Liền Mạch (Unified Pill Capsule) 🎨✨
-
-- **🎯 Vấn đề & Mong muốn của người dùng**:
-  - 3 nút chức năng (`[ 🎯 Focus Hôm nay ]`, `[ ➕ Thêm tuần ]`, `[ 🗑️ Xóa tuần ]`) bị nằm lơ lửng ngoài viên thuốc chọn tuần (`< Tuần 36 >`), tạo cảm giác "lòi ra ngoài".
-- **✅ Giải pháp thiết kế hợp nhất (Unified Seamless Capsule)**:
-  - **Đóng gói toàn bộ 6 phần tử vào trong đúng 1 Capsule duy nhất**:
-    `[ < ]` `[ 📅 Tuần 36 (31/08) v ]` `[ > ]` `| (vạch ngăn cách)` `[ 🎯 ]` `[ ➕ ]` `[ 🗑️ ]`
-  - Bo tròn khép kín 2 đầu ngoài cùng (`border-radius: var(--radius-full)`), bên trong hoàn toàn phẳng và liền mạch, không còn bất kỳ đường cong hay viền thừa nào cắt ngang.
-  - Vạch phân cách `.week-nav-divider` màu mờ tinh tế phân định rõ giữa khu vực Chọn Tuần và khu vực Nút Thao Tác.
-  - Cập nhật [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html), [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css), [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css).
-  - Nâng `CACHE_NAME` lên `smart-schedule-modular-v72` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
-
----
-
-## 📅 [2026-09-06 10:12] - Khắc Phục Triệt Để Hiện Tượng Navbar Tràn Lề Phải Khi Mở DevTools / Màn Hình Compact (< 1280px) 🚀🛡️
-
-- **🎯 Nguyên nhân sự cố**:
-  - Khi người dùng mở DevTools hoặc thu nhỏ cửa sổ trình duyệt (chiều rộng hiển thị rơi vào khoảng 950px - 1250px), breakpoint cũ chỉ kích hoạt ở `< 900px`, khiến Navbar ở trạng thái `flex-wrap: nowrap`.
-  - Tổng chiều rộng của 3 cụm Brand + View Toggles + Mode Selector & Week Navigation (~1200px) vượt quá kích thước khung hiển thị, đẩy cụm `.nav-right` tràn qua mép bo tròn bên phải của Navbar và gây hiện tượng cắt góc lòi viền.
-- **✅ Giải pháp khắc phục**:
-  - **Mở rộng dải Breakpoint Responsive**:
-    - `@media (max-width: 1280px)`: Tự động bẻ dòng sang layout 2 hàng thông minh (Hàng 1: Brand Info & User Auth; Hàng 2: View Toggles & Week Navigation dàn 2 bên).
-    - `@media (max-width: 992px)`: Chuyển sang bố cục dọc Tablet với Days Mode + Week Navigation chiếm trọn hàng giữa.
-    - `@media (max-width: 640px)`: Xếp tầng Mobile tối ưu 100% không gian.
-  - Thêm `min-width: 0; max-width: 100%;` cho `.nav-right` và `.navbar` để chống tràn cứng.
-  - Nâng `CACHE_NAME` lên `smart-schedule-modular-v71` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
-
----
-
-## 📅 [2026-09-06 10:05] - Tái Cấu Trúc Thanh Điều Hướng Tuần: Xử Lý Lỗi Viền Capsule Bị Lòi Ra Ngoài 🎨✨
-
-- **🎯 Vấn đề người dùng phản ánh**:
-  - Cụm điều hướng tuần học trên thanh Navbar hiển thị lỗi "lòi ra" (đường viền cong bo tròn cắt ngang giữa nút mũi tên `>` và 3 nút hành động `[Target]`, `[+]`, `[Trash]`, tạo ra 2 mảng capsule lồng nhau cọc cạch).
-- **✅ Giải pháp kỹ thuật & Tinh chỉnh thẩm mỹ**:
-  - **Tách bạch 2 khối chức năng độc lập**:
-    1. `.week-picker-capsule`: Capsule chọn tuần hoàn chỉnh chứa `<` + Dropdown tên tuần + `>`, bo tròn khép kín 2 đầu với nền Glassmorphism `rgba(30, 41, 59, 0.85)` và viền sáng mờ tinh tế.
-    2. `.week-actions-group`: Cụm 3 nút tròn thao tác nhanh độc lập (`[ 🎯 Focus Hôm nay ]`, `[ ➕ Thêm tuần ]`, `[ 🗑️ Xóa tuần ]`), đứng kế bên capsule chọn tuần với khoảng cách chuẩn `gap: 0.35rem`, không còn bất kỳ viền thừa nào bị lòi hay cắt ngang.
-  - **Cập nhật mã nguồn**:
-    - [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html): Chia cấu trúc DOM bên trong `.week-navigation` thành `.week-picker-capsule` và `.week-actions-group`.
-    - [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css): Tối ưu CSS capsule chọn tuần, loại bỏ margin thủ công, chuẩn hóa flexbox gap.
-    - [`src/1.Frontend/styles/8.responsive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/8.responsive.css): Điều chỉnh co giãn mượt mà trên cả Tablet và Mobile (< 480px).
-    - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v70`.
-
----
-
-## 📅 [2026-09-06 09:56] - Khắc Phục Lỗi 404 Relative Import Path Trong OnboardingTour.js 🛠️
-
-- **🎯 Nguyên nhân sự cố**:
-  - File `OnboardingTour.js` nằm trong thư mục con `src/1.Frontend/components/onboarding/` (độ sâu 3 cấp), nhưng đường dẫn import `FirebaseAuthService.js` và `sanitizer.js` chỉ dùng `../../` thay vì `../../../`.
-  - Dẫn đến trình duyệt gửi request tới `src/1.Frontend/3.Database/...` gây lỗi `404 Not Found` và làm gián đoạn tiến trình khởi tạo script đăng nhập.
-- **✅ Giải pháp khắc phục**:
-  - Cập nhật chính xác đường dẫn import thành `../../../3.Database/auth/FirebaseAuthService.js` và `../../../4.Security/sanitizer.js` trong [`OnboardingTour.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/onboarding/OnboardingTour.js).
-  - Nâng `CACHE_NAME` lên `smart-schedule-modular-v69` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
-
----
-
-## 📅 [2026-09-06 09:55] - Triển Khai Tính Năng Interactive Spotlight Onboarding Tour (Hướng Dẫn Tương Tác Rọi Sáng Từng Bước) 🚀✨
-
-- **🎯 Yêu cầu & Mục tiêu**:
-  - Khi một tài khoản mới đăng nhập hoặc truy cập lần đầu, ứng dụng tự động hiển thị hướng dẫn tương tác từng bước (Spotlight Onboarding Tour) với hiệu ứng rọi sáng zoom vào phần tử UI và thẻ chú thích thông minh.
-  - Hướng dẫn 5 bước trọng tâm: 4 góc nhìn thời khóa biểu, Quản lý tuần & ngày hôm nay, Tùy chỉnh chế độ xem, Thêm tiết học siêu tốc với con lăn iOS, Chiếc cặp Google Drive.
-  - Lưu trạng thái hoàn thành vào LocalStorage (`smart_schedule_onboarding_done_${uid}`) để không làm phiền người dùng cũ.
-  - Cung cấp nút bấm `[ ❓ Hướng dẫn ]` trên Navbar để người dùng có thể mở lại tour bất kỳ lúc nào.
-- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
-  - `[Frontend Component]` [`src/1.Frontend/components/onboarding/OnboardingTour.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/onboarding/OnboardingTour.js):
-    - Xây dựng component độc lập quản lý 5 bước tour, tính toán toạ độ `getBoundingClientRect()` chuẩn xác, tự động cuộn màn hình (`scrollIntoView`), định vị thẻ popover thông minh chống tràn mép màn hình mobile/desktop.
-    - Hỗ trợ phím tắt bàn phím (`ArrowRight`, `ArrowLeft`, `Enter`, `Escape`), thanh tiến trình Dots và nút Skip.
-  - `[Modular CSS]` [`src/1.Frontend/styles/10.onboarding-tour.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/10.onboarding-tour.css):
-    - Thiết kế khung rọi sáng `.onboarding-spotlight-box` với bóng tối khổng lồ `box-shadow: 0 0 0 9999px rgba(8, 12, 28, 0.82)`, viền phát sáng neon, hiệu ứng nhịp thở pulse và thẻ popover Glassmorphism sang trọng.
-  - `[HTML & Navbar]` [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html):
-    - Nạp file `10.onboarding-tour.css` và bổ sung nút `#btn-restart-onboarding` (`<i class="fa-solid fa-circle-question"></i>`) trên thanh Navbar.
-  - `[App Controller]` [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
-    - Tích hợp `initOnboardingTour()`, tự động kích hoạt sau khi khởi động app nếu chưa từng xem, gắn sự kiện cho nút xem lại.
-  - `[Performance / PWA]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v68` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+- **🎯 Yêu cầu & Quyết định thiết kế**:
+  - Không hiển thị chữ tên người dùng (`user-display-name`) trên Navbar sau khi đăng nhập để tránh phình to kích thước thanh điều hướng.
+  - Chỉ hiển thị Avatar tròn nhỏ gọn (`28px`) + Nút icon Đăng xuất, di chuột vào avatar để xem Tooltip tên đầy đủ.
+  - Widget tài khoản sau khi đăng nhập chỉ chiếm đúng ~`60px`, hoàn toàn đồng nhất và gọn gàng như tài khoản khách.
+- **✅ Công việc đã hoàn thành**:
+  - [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css): Ẩn `.user-display-name`, tinh chỉnh padding `.user-profile-widget`.
+  - [`src/3.Database/auth/FirebaseAuthService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js): Bổ sung `title` tooltip cho `#user-avatar` và `#user-profile-widget`.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v75`.
 
 ---
 
