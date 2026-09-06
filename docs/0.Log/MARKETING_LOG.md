@@ -5,6 +5,30 @@
 
 ---
 
+## 💎 ENTRY 5: [2026-09-06] - Google Calendar Timeline View: Tự Động Co Giãn Trục Thời Gian & Xếp Lớp Trùng Giờ
+
+### 📌 Phân Loại & Tags:
+`#GoogleCalendarStyle` `#DynamicTimeline` `#OverlappingEvents` `#TimeClustering` `#SmartUI`
+
+### 1. 🌟 Nỗi Đau & Giải Pháp Đột Phá (Pain Point vs Solution):
+- **Nỗi đau**: Các ứng dụng lịch sinh viên thường có bảng thời gian cứng nhắc, nếu học buổi tối thì bị cắt mất hoặc nếu chỉ học sáng thì bảng bị trống cả buổi chiều gây lãng phí diện tích màn hình; khi có 2 môn trùng giờ hoặc học bù thì đè mất chữ của nhau.
+- **Giải pháp đột phá**: **Trục Thời Gian Tự Động Co Giãn (Dynamic Bounds) & Thuật Toán Xếp Lớp Trùng Giờ (Overlapping Event Clusters)**:
+  - Tự động phát hiện khoảng thời gian thực tế của tuần (`startHour` $\rightarrow$ `endHour`) để scale trục thời gian vừa vặn nhất.
+  - Tự động chia cột con song song (`totalCols`) và xếp tầng mượt mà khi phát hiện trùng giờ, hover nổi bật `z-index` để đọc trọn vẹn thông tin.
+  - Tích hợp **Vạch thời gian hiện tại (Now Indicator)** màu neon phát sáng thời gian thực.
+
+---
+
+### 2. 🎣 3 Viral Hooks Sắc Bén:
+1. **Google Calendar Experience Hook**:
+   > *"Trải nghiệm xem lịch học chuẩn Google Calendar: Tự động scale khung giờ học thực tế và tự chia cột thông minh khi các môn bị trùng giờ!"*
+2. **Zero Waste Layout Hook**:
+   > *"Không còn những khoảng trống vô tận trên bảng lịch: Trục thời gian tự động co giãn theo đúng khung giờ bạn có tiết học trong tuần!"*
+3. **Smart Overlap Stacking Hook**:
+   > *"Trùng giờ học bù hay đăng ký nhầm môn? Thuật toán tự động xếp cạnh nhau và phóng to mượt mà khi bạn di chuột qua."*
+
+---
+
 ## 💎 ENTRY 4: [2026-09-06] - Chuẩn Hóa Toàn Diện 4 Ma Trận Heatmap Theo Phong Cách GitHub Contribution Matrix
 
 ### 📌 Phân Loại & Tags:

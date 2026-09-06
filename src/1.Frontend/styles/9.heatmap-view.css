@@ -414,156 +414,251 @@
 }
 
 /* ==========================================================================
-   5. BẢNG 1: CHẾ ĐỘ TUẦN (12 TIẾT × 7 NGÀY GITHUB TIME-SLOT MATRIX)
+   5. BẢNG 1: CHẾ ĐỘ TUẦN (GOOGLE CALENDAR SCALABLE TIMELINE VIEW)
    ========================================================================== */
-.weekly-timeslot-matrix-wrap {
-  overflow-x: auto;
-  padding: 0.25rem 0;
-}
-
-.weekly-timeslot-matrix-body {
-  display: flex;
-  gap: 0.75rem;
-  min-width: 650px;
-}
-
-.weekly-periods-col {
+.weekly-cal-scale-container {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  width: 58px;
-  flex-shrink: 0;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-md, 12px);
+  overflow: hidden;
 }
 
-.period-header-corner {
-  height: 32px;
+.weekly-cal-header-row {
+  display: flex;
+  background: rgba(15, 23, 42, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.cal-time-corner {
+  width: 60px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.72rem;
-  font-weight: 800;
   color: var(--text-muted, #94a3b8);
-  text-transform: uppercase;
-  background: rgba(15, 23, 42, 0.5);
-  border-radius: 6px;
+  font-size: 0.85rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.period-slot-label {
-  height: 28px;
-  background: rgba(15, 23, 42, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 0.35rem;
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--text-secondary, #94a3b8);
-}
-
-.period-slot-label.session-morning {
-  border-left: 2px solid #38bdf8;
-}
-
-.period-slot-label.session-afternoon {
-  border-left: 2px solid #a855f7;
-}
-
-.period-slot-label.session-evening {
-  border-left: 2px solid #f59e0b;
-}
-
-.period-slot-label small {
-  font-size: 0.6rem;
-  color: var(--text-muted, #64748b);
-  font-family: var(--font-mono, monospace);
-}
-
-.weekly-days-matrix-grid {
+.cal-days-header-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
   flex: 1;
 }
 
-.weekly-day-matrix-col {
+.cal-day-header-cell {
+  padding: 0.65rem 0.5rem;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  background: rgba(15, 23, 42, 0.25);
-  border-radius: 8px;
-  padding: 2px;
-  border: 1px solid transparent;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(15, 23, 42, 0.5);
   transition: all 0.2s ease;
 }
 
-.weekly-day-matrix-col.is-today-column {
-  border-color: rgba(99, 102, 241, 0.4);
-  background: rgba(99, 102, 241, 0.06);
+.cal-day-header-cell:last-child {
+  border-right: none;
 }
 
-.weekly-day-col-header {
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 0.5rem;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
-  font-size: 0.75rem;
+.cal-day-header-cell.is-today-cal-header {
+  background: rgba(99, 102, 241, 0.2);
+  border-bottom: 2px solid #818cf8;
+}
+
+.cal-day-name {
+  font-size: 0.82rem;
   font-weight: 800;
   color: var(--text-primary, #ffffff);
 }
 
-.weekly-day-col-header.is-today-header {
-  background: rgba(99, 102, 241, 0.25);
-  border-color: #818cf8;
-  color: #38bdf8;
-}
-
-.day-count {
+.cal-day-classes-count {
   font-size: 0.68rem;
   font-weight: 600;
   color: var(--text-muted, #94a3b8);
-  font-family: var(--font-mono, monospace);
 }
 
-.weekly-day-slots-list {
+.is-today-cal-header .cal-day-name {
+  color: #38bdf8;
+}
+
+.is-today-cal-header .cal-day-classes-count {
+  color: #818cf8;
+}
+
+/* Thân lịch cuộn Timeline */
+.weekly-cal-scroll-area {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 650px;
+  position: relative;
+  background: rgba(15, 23, 42, 0.25);
+}
+
+.weekly-cal-body-grid {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  position: relative;
+  min-width: 680px;
 }
 
-.matrix-timeslot-cell {
-  height: 28px;
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  cursor: pointer;
+/* Cột mốc thời gian trục Y */
+.cal-time-axis-col {
+  width: 60px;
+  flex-shrink: 0;
+  position: relative;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.cal-time-mark {
+  position: absolute;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
 }
 
-.matrix-timeslot-cell.is-occupied {
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+.cal-time-mark span {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted, #94a3b8);
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  background: rgba(15, 23, 42, 0.8);
+  padding: 0.1rem 0.3rem;
+  border-radius: 4px;
 }
 
-.matrix-timeslot-cell:hover {
-  transform: scale(1.08);
-  z-index: 5;
-  filter: brightness(1.25);
-  box-shadow: 0 0 10px rgba(129, 140, 248, 0.6);
+/* 7 Cột Ngày */
+.cal-days-columns-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  flex: 1;
+  position: relative;
 }
 
-.slot-dot {
-  width: 6px;
-  height: 6px;
+.cal-day-column {
+  position: relative;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  height: 100%;
+}
+
+.cal-day-column:last-child {
+  border-right: none;
+}
+
+.cal-day-column.is-today-cal-column {
+  background: rgba(99, 102, 241, 0.04);
+}
+
+/* Đường kẻ ngang mỗi mốc giờ */
+.cal-grid-hour-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.04);
+  pointer-events: none;
+}
+
+/* Vạch chỉ giờ hiện tại (Current Time Indicator) */
+.cal-current-time-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #ef4444 0%, #f43f5e 100%);
+  z-index: 20;
+  pointer-events: none;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+.cal-current-time-dot {
+  position: absolute;
+  left: -4px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 0 6px #ffffff;
+  background: #ef4444;
+  box-shadow: 0 0 10px #ef4444;
+}
+
+/* Khối Thẻ Sự Kiện Môn Học (Google Calendar Event Block) */
+.cal-event-block {
+  position: absolute;
+  border-radius: 6px;
+  padding: 0.35rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.15rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  z-index: 2;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cal-event-block:hover {
+  transform: scale(1.03);
+  z-index: 50 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 15px rgba(129, 140, 248, 0.5);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.cal-event-block.is-overlap-event {
+  opacity: 0.95;
+}
+
+.cal-event-block.is-overlap-event:hover {
+  opacity: 1;
+}
+
+.cal-event-title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cal-event-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-size: 0.68rem;
+  color: #cbd5e1;
+}
+
+.cal-event-time {
+  font-weight: 600;
+  color: #a5b4fc;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.cal-event-room {
+  color: var(--text-muted, #94a3b8);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ==========================================================================

@@ -4,6 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 08:58] - Nâng Cấp Chế Độ Tuần Thành Google Calendar Timeline View (Tự Động Scale Khung Giờ & Xếp Lớp Trùng Giờ) ⚡
+
+- **🎯 Yêu cầu & Mục tiêu**:
+  - Người dùng yêu cầu cột bên trái tự động scale theo thời gian thực tế như Google Calendar (không cố định cứng nhắc), và các môn học có thể tự động xếp đè lên nhau hoặc chia cột song song nếu trùng giờ.
+- **✅ Giải pháp kỹ thuật & Công việc đã hoàn thành**:
+  - `[Frontend / Weekly Timeline View]` [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    - **Tự động Scale Trục Thời Gian (Dynamic Time Bounds)**: Quét giờ bắt đầu sớm nhất (`earliestMin`) và kết thúc muộn nhất (`latestMax`) của toàn bộ các môn trong tuần để tự động co giãn trục thời gian Y (`startHour` $\rightarrow$ `endHour`).
+    - **Thuật toán Xếp Lớp Trùng Giờ (Overlapping Event Clusters)**: Sử dụng thuật toán Interval Clustering + Greedy Graph Coloring, gom các môn trùng giờ vào cùng cluster, gán `colIndex` và `totalCols`, tự động tính `width: calc(${100/totalCols}% - 4px)` và `left: ${(colIndex/totalCols)*100}%` chuẩn Google Calendar.
+    - **Vạch Thời Gian Hiện Tại (Now Indicator)**: Bổ sung thanh vạch đỏ hồng neon phát sáng hiển thị chính xác vị trí thời gian hiện tại trong ngày (`showNowLine`).
+  - `[Frontend / Modular CSS]` [`src/1.Frontend/styles/9.heatmap-view.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/9.heatmap-view.css):
+    - Hoàn thiện styling cho `.cal-time-axis-col`, `.cal-time-mark`, `.cal-event-block`, `.is-overlap-event`, `.cal-current-time-line` và `.cal-current-time-dot`.
+    - Hiệu ứng Hover card nổi bật (`z-index: 50`, `scale(1.03)`, `box-shadow`) giúp người dùng đọc trọn vẹn chi tiết môn học khi bị xếp chồng.
+  - `[Performance / PWA]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v62` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-06 08:48] - Tái Cấu Trúc Toàn Diện: Loại Bỏ Hoàn Toàn Khái Niệm "Tiết Học", Chuyển Sang Khung Giờ 24h & Buổi Học 🌐
 
 - **🎯 Lý do thay đổi & Mục tiêu**:

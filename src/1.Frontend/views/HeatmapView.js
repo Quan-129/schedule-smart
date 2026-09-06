@@ -2,16 +2,17 @@
  * ==========================================================================
  * FRONTEND VIEW - STUDY INTENSITY HEATMAP & PRODUCTIVITY DASHBOARD
  * Bản đồ nhiệt cường độ học tập & mật độ buổi học (Tuần / Tháng / Học kỳ / Cả năm)
- * Hoàn toàn theo chuẩn Khung giờ học (Time-Slots 24h) - Không phụ thuộc Tiết học
+ * Tự động scale thời gian thực & Xếp lớp trùng giờ chuẩn Google Calendar
  * ==========================================================================
  */
 
 import { state } from '../../3.Database/state.js';
 import { parseScheduleMarkdown } from '../../2.Backend/services/TimetableParser.js';
 import { escapeHtml } from '../../4.Security/sanitizer.js';
+import { getSubjectColor } from './TimetableGrid.js';
 
 /* ==========================================================================
-   1. MODULE STATE & CONSTANTS (HOURLY TIME-BLOCKS 06:00 -> 21:00)
+   1. MODULE STATE & CONSTANTS
    ========================================================================== */
 let currentHorizonMode = 'semester'; // 'week' | 'month' | 'semester' | 'year'
 let currentMonthlyDate = new Date(); // Tháng đang xem trong chế độ Tháng
@@ -20,26 +21,6 @@ let activeWeeklyFile = ''; // File tuần đang xem trong chế độ Tuần
 // Bộ nhớ đệm dữ liệu tất cả các tuần trong học kỳ
 const weeksDataCache = new Map();
 let isPreloadingWeeks = false;
-
-// 16 Khung giờ chuẩn theo ngày (06:00 -> 21:00)
-const HOURLY_TIME_SLOTS = [
-  { hour: 6, label: '06h', timeRange: '06:00 - 06:59', session: 'morning' },
-  { hour: 7, label: '07h', timeRange: '07:00 - 07:59', session: 'morning' },
-  { hour: 8, label: '08h', timeRange: '08:00 - 08:59', session: 'morning' },
-  { hour: 9, label: '09h', timeRange: '09:00 - 09:59', session: 'morning' },
-  { hour: 10, label: '10h', timeRange: '10:00 - 10:59', session: 'morning' },
-  { hour: 11, label: '11h', timeRange: '11:00 - 11:59', session: 'morning' },
-  { hour: 12, label: '12h', timeRange: '12:00 - 12:59', session: 'afternoon' },
-  { hour: 13, label: '13h', timeRange: '13:00 - 13:59', session: 'afternoon' },
-  { hour: 14, label: '14h', timeRange: '14:00 - 14:59', session: 'afternoon' },
-  { hour: 15, label: '15h', timeRange: '15:00 - 15:59', session: 'afternoon' },
-  { hour: 16, label: '16h', timeRange: '16:00 - 16:59', session: 'afternoon' },
-  { hour: 17, label: '17h', timeRange: '17:00 - 17:59', session: 'afternoon' },
-  { hour: 18, label: '18h', timeRange: '18:00 - 18:59', session: 'evening' },
-  { hour: 19, label: '19h', timeRange: '19:00 - 19:59', session: 'evening' },
-  { hour: 20, label: '20h', timeRange: '20:00 - 20:59', session: 'evening' },
-  { hour: 21, label: '21h', timeRange: '21:00 - 21:59', session: 'evening' }
-];
 
 /* ==========================================================================
    2. HELPER FUNCTIONS & DATA AGGREGATOR
@@ -80,43 +61,6 @@ export function evaluateWeekWorkload(totalClasses = 0) {
 }
 
 /**
- * Phân bổ các buổi học trong ngày vào 16 khung giờ (06:00 -> 21:00)
- * @param {Array<Object>} classes 
- * @returns {Array<Object|null>} 16 phần tử tương ứng với 16 khung giờ
- */
-export function mapDayClassesToHourlySlots(classes = []) {
-  const slots = Array(HOURLY_TIME_SLOTS.length).fill(null);
-  
-  (classes || []).forEach(cls => {
-    let startH = 7;
-    let endH = 9;
-
-    if (cls.startTime && cls.endTime) {
-      const [sh] = cls.startTime.split(':').map(Number);
-      const [eh, em = 0] = cls.endTime.split(':').map(Number);
-      if (!isNaN(sh)) startH = sh;
-      if (!isNaN(eh)) endH = em > 0 ? eh : eh - 1; // Nếu kết thúc 08:50 -> chiếm đến 8h
-    } else if (cls.timeRange) {
-      const parts = cls.timeRange.split('-');
-      if (parts.length >= 2) {
-        const [sh] = parts[0].trim().split(':').map(Number);
-        const [eh, em = 0] = parts[1].trim().split(':').map(Number);
-        if (!isNaN(sh)) startH = sh;
-        if (!isNaN(eh)) endH = em > 0 ? eh : eh - 1;
-      }
-    }
-
-    HOURLY_TIME_SLOTS.forEach((slot, slotIdx) => {
-      if (slot.hour >= startH && slot.hour <= endH) {
-        slots[slotIdx] = cls;
-      }
-    });
-  });
-
-  return slots;
-}
-
-/**
  * Tự động nạp trước (preload) và cache nội dung tất cả các tuần học
  * @param {Array<Object>} availableWeeks 
  * @param {string} currentWeekFile 
@@ -129,14 +73,12 @@ export async function preloadAllWeeksData(availableWeeks = [], currentWeekFile =
   const fetchPromises = availableWeeks.map(async (w) => {
     if (weeksDataCache.has(w.filename)) return;
 
-    // 1. Kiểm tra custom md trong LocalStorage
     const customMd = localStorage.getItem(`smart_schedule_custom_md_${w.filename}`);
     if (customMd) {
       weeksDataCache.set(w.filename, parseScheduleMarkdown(customMd));
       return;
     }
 
-    // 2. Fetch từ file tĩnh nếu chưa có
     try {
       const res = await fetch(w.filename);
       if (res.ok) {
@@ -151,7 +93,6 @@ export async function preloadAllWeeksData(availableWeeks = [], currentWeekFile =
   await Promise.allSettled(fetchPromises);
   isPreloadingWeeks = false;
 
-  // Re-render lại Heatmap nếu đang hiển thị
   const container = document.getElementById('today-view-container');
   if (container && document.getElementById('heatmap-dynamic-content-area')) {
     const semesterWeeks = aggregateSemesterData(availableWeeks, currentWeekFile);
@@ -310,7 +251,7 @@ function setupHeatmapTooltips() {
    ========================================================================== */
 
 /**
- * 1️⃣ CHẾ ĐỘ TUẦN: Ma trận Khung Giờ Trong Tuần (24h Time-Block Matrix)
+ * 1️⃣ CHẾ ĐỘ TUẦN: Lịch Tuần Scale Theo Khung Giờ Thực & Xếp Lớp Trùng Giờ (Google Calendar Style)
  */
 function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile = '', onSelectWeek = null) {
   if (!activeWeeklyFile) {
@@ -327,16 +268,160 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
   const dayIndexMap = { 'Thứ 2': 1, 'Thứ 3': 2, 'Thứ 4': 3, 'Thứ 5': 4, 'Thứ 6': 5, 'Thứ 7': 6, 'Chủ Nhật': 0 };
   const standardDays = selectedWeek.days || [];
 
+  // 1. TỰ ĐỘNG SCALE THỜI GIAN THEO TUẦN (Dynamic Time Bounds)
+  let earliestMin = 24 * 60;
+  let latestMax = 0;
+  let hasAnyClasses = false;
+
+  standardDays.forEach(d => {
+    (d.classes || []).forEach(c => {
+      hasAnyClasses = true;
+      let sh = 7, sm = 0, eh = 9, em = 0;
+      if (c.startTime && c.endTime) {
+        const [h1, m1 = 0] = c.startTime.split(':').map(Number);
+        const [h2, m2 = 0] = c.endTime.split(':').map(Number);
+        if (!isNaN(h1)) { sh = h1; sm = m1; }
+        if (!isNaN(h2)) { eh = h2; em = m2; }
+      } else if (c.timeRange) {
+        const parts = c.timeRange.split('-');
+        if (parts.length >= 2) {
+          const [h1, m1 = 0] = parts[0].trim().split(':').map(Number);
+          const [h2, m2 = 0] = parts[1].trim().split(':').map(Number);
+          if (!isNaN(h1)) { sh = h1; sm = m1; }
+          if (!isNaN(h2)) { eh = h2; em = m2; }
+        }
+      }
+      const sMin = sh * 60 + sm;
+      const eMin = eh * 60 + em;
+      earliestMin = Math.min(earliestMin, sMin);
+      latestMax = Math.max(latestMax, eMin);
+    });
+  });
+
+  let startHour = 7;
+  let endHour = 18;
+
+  if (hasAnyClasses) {
+    startHour = Math.max(6, Math.floor(earliestMin / 60)); // Giờ bắt đầu (tối thiểu 6h)
+    endHour = Math.min(23, Math.ceil(latestMax / 60)); // Giờ kết thúc (tối đa 23h)
+    if (endHour <= startHour) endHour = startHour + 8;
+  }
+
+  const HOUR_HEIGHT = 58; // px cho mỗi giờ
+  const pxPerMinute = HOUR_HEIGHT / 60;
+  const totalHours = endHour - startHour + 1;
+  const totalTimelineHeight = totalHours * HOUR_HEIGHT;
+
+  const hoursList = [];
+  for (let h = startHour; h <= endHour; h++) {
+    hoursList.push(h);
+  }
+
+  // 2. THUẬT TOÁN XẾP LỚP TRÙNG GIỜ (Google Calendar Overlapping Algorithm)
+  function layoutDayEvents(classes) {
+    if (!classes || classes.length === 0) return [];
+
+    const events = classes.map((c, idx) => {
+      let sh = 7, sm = 0, eh = 9, em = 0;
+      if (c.startTime && c.endTime) {
+        const [h1, m1 = 0] = c.startTime.split(':').map(Number);
+        const [h2, m2 = 0] = c.endTime.split(':').map(Number);
+        if (!isNaN(h1)) { sh = h1; sm = m1; }
+        if (!isNaN(h2)) { eh = h2; em = m2; }
+      } else if (c.timeRange) {
+        const parts = c.timeRange.split('-');
+        if (parts.length >= 2) {
+          const [h1, m1 = 0] = parts[0].trim().split(':').map(Number);
+          const [h2, m2 = 0] = parts[1].trim().split(':').map(Number);
+          if (!isNaN(h1)) { sh = h1; sm = m1; }
+          if (!isNaN(h2)) { eh = h2; em = m2; }
+        }
+      }
+      let startMin = sh * 60 + sm;
+      let endMin = eh * 60 + em;
+      if (endMin <= startMin) endMin = startMin + 90;
+
+      const top = Math.max(0, (startMin - startHour * 60) * pxPerMinute);
+      const height = Math.max(36, (endMin - startMin) * pxPerMinute);
+
+      return {
+        ...c,
+        id: `ev-${idx}`,
+        startMin,
+        endMin,
+        top,
+        height
+      };
+    });
+
+    events.sort((a, b) => a.startMin - b.startMin || (b.endMin - b.startMin) - (a.endMin - a.startMin));
+
+    const clusters = [];
+    let currentCluster = [];
+    let clusterEnd = -1;
+
+    events.forEach(ev => {
+      if (currentCluster.length === 0) {
+        currentCluster.push(ev);
+        clusterEnd = ev.endMin;
+      } else {
+        if (ev.startMin < clusterEnd) {
+          currentCluster.push(ev);
+          clusterEnd = Math.max(clusterEnd, ev.endMin);
+        } else {
+          clusters.push(currentCluster);
+          currentCluster = [ev];
+          clusterEnd = ev.endMin;
+        }
+      }
+    });
+    if (currentCluster.length > 0) clusters.push(currentCluster);
+
+    const result = [];
+    clusters.forEach(cluster => {
+      const cols = [];
+      cluster.forEach(ev => {
+        let placed = false;
+        for (let i = 0; i < cols.length; i++) {
+          if (ev.startMin >= cols[i]) {
+            cols[i] = ev.endMin;
+            ev.colIndex = i;
+            placed = true;
+            break;
+          }
+        }
+        if (!placed) {
+          ev.colIndex = cols.length;
+          cols.push(ev.endMin);
+        }
+      });
+
+      const totalCols = cols.length;
+      cluster.forEach(ev => {
+        const widthPct = (100 / totalCols);
+        const leftPct = ev.colIndex * widthPct;
+        result.push({
+          ...ev,
+          left: `${leftPct}%`,
+          width: totalCols > 1 ? `calc(${widthPct}% - 4px)` : `calc(100% - 6px)`,
+          isOverlap: totalCols > 1
+        });
+      });
+    });
+
+    return result;
+  }
+
   container.innerHTML = `
     <div class="heatmap-matrix-card">
       <div class="heatmap-card-header">
         <div class="heatmap-card-title-group">
           <div class="heatmap-card-icon" style="background: rgba(99, 102, 241, 0.15); color: #818cf8;">
-            <i class="fa-solid fa-table-columns"></i>
+            <i class="fa-solid fa-calendar-week"></i>
           </div>
           <div>
-            <h3 class="heatmap-card-title">Ma Trận Khung Giờ Trong Tuần (24h Time-Block Matrix)</h3>
-            <span class="heatmap-card-sub">Chuẩn GitHub Time-Block Matrix • ${escapeHtml(selectedWeek.title)}</span>
+            <h3 class="heatmap-card-title">Thời Khóa Biểu Tuần (Google Calendar Style)</h3>
+            <span class="heatmap-card-sub">Khung giờ tự động scale từ ${String(startHour).padStart(2, '0')}:00 đến ${String(endHour).padStart(2, '0')}:00 • ${escapeHtml(selectedWeek.title)}</span>
           </div>
         </div>
 
@@ -354,74 +439,102 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
         </div>
       </div>
 
-      <div class="weekly-timeslot-matrix-wrap">
-        <div class="weekly-timeslot-matrix-body">
-          <!-- Cột nhãn Giờ (06:00 -> 21:00) -->
-          <div class="weekly-periods-col">
-            <div class="period-header-corner">Giờ</div>
-            ${HOURLY_TIME_SLOTS.map(slot => `
-              <div class="period-slot-label session-${slot.session}" title="${slot.timeRange}">
-                <span>${slot.label}</span>
-                <small>${slot.hour}:00</small>
-              </div>
-            `).join('')}
+      <div class="weekly-cal-scale-container">
+        <!-- Hàng Header Thứ -->
+        <div class="weekly-cal-header-row">
+          <div class="cal-time-corner">
+            <i class="fa-regular fa-clock"></i>
           </div>
-
-          <!-- 7 Cột Ngày trong tuần -->
-          <div class="weekly-days-matrix-grid">
+          <div class="cal-days-header-grid">
             ${standardDays.map(d => {
               const isToday = dayIndexMap[d.dayName] === currentDayOfWeek && selectedWeek.filename === currentWeekFile;
-              const daySlots = mapDayClassesToHourlySlots(d.classes);
-
               return `
-                <div class="weekly-day-matrix-col ${isToday ? 'is-today-column' : ''}">
-                  <div class="weekly-day-col-header ${isToday ? 'is-today-header' : ''}">
-                    <span class="day-code">${d.dayName.replace('Thứ ', 'T').replace('Chủ Nhật', 'CN')}</span>
-                    <span class="day-count">${d.classesCount} buổi</span>
-                  </div>
-
-                  <div class="weekly-day-slots-list">
-                    ${daySlots.map((cls, slotIdx) => {
-                      const slotInfo = HOURLY_TIME_SLOTS[slotIdx];
-                      const hasClass = !!cls;
-                      const level = hasClass ? 3 : 0;
-
-                      const tooltipTitle = `${d.dayName} • Khung ${slotInfo.timeRange}`;
-                      const tooltipSub = hasClass ? cls.subject : 'Khung giờ trống';
-                      const tooltipBody = hasClass 
-                        ? `<div class="tt-row"><i class="fa-regular fa-clock"></i> <span>${escapeHtml(cls.timeRange)}</span></div>
-                           <div class="tt-row"><i class="fa-solid fa-location-dot"></i> <span>Phòng: ${escapeHtml(cls.room || 'Chưa rõ')}</span></div>`
-                        : `<div style="color: var(--text-muted); font-size: 0.72rem;">Không có lịch học trong khung giờ này</div>`;
-
-                      return `
-                        <div class="matrix-timeslot-cell level-${level} ${hasClass ? 'is-occupied' : 'is-empty'}"
-                          data-heatmap-tooltip="true"
-                          data-tooltip-title="${escapeHtml(tooltipTitle)}"
-                          data-tooltip-sub="${escapeHtml(tooltipSub)}"
-                          data-tooltip-body="${escapeHtml(tooltipBody)}"
-                          data-tooltip-badge="${hasClass ? 'Có lớp' : 'Trống'}"
-                          data-tooltip-badge-bg="${hasClass ? 'rgba(99, 102, 241, 0.2)' : 'rgba(148, 163, 184, 0.15)'}"
-                          data-tooltip-badge-color="${hasClass ? '#818cf8' : '#94a3b8'}">
-                          ${hasClass ? `<span class="slot-dot"></span>` : ''}
-                        </div>
-                      `;
-                    }).join('')}
-                  </div>
+                <div class="cal-day-header-cell ${isToday ? 'is-today-cal-header' : ''}">
+                  <span class="cal-day-name">${escapeHtml(d.dayName)}</span>
+                  <span class="cal-day-classes-count">${d.classesCount > 0 ? `${d.classesCount} buổi` : 'Nghỉ'}</span>
                 </div>
               `;
             }).join('')}
           </div>
         </div>
+
+        <!-- Khung Timeline Thân Lịch Cuộn Dọc / Ngang -->
+        <div class="weekly-cal-scroll-area">
+          <div class="weekly-cal-body-grid" style="height: ${totalTimelineHeight}px;">
+            <!-- Cột Trục Thời Gian Bên Trái (Time Axis) -->
+            <div class="cal-time-axis-col">
+              ${hoursList.map(h => `
+                <div class="cal-time-mark" style="top: ${(h - startHour) * HOUR_HEIGHT}px;">
+                  <span>${String(h).padStart(2, '0')}:00</span>
+                </div>
+              `).join('')}
+            </div>
+
+            <!-- 7 Cột Ngày dạng Timeline -->
+            <div class="cal-days-columns-grid">
+              ${standardDays.map(d => {
+                const isToday = dayIndexMap[d.dayName] === currentDayOfWeek && selectedWeek.filename === currentWeekFile;
+                const dayEvents = layoutDayEvents(d.classes);
+
+                // Tính toán vạch thời gian hiện tại
+                const now = new Date();
+                const currentMinutesNow = now.getHours() * 60 + now.getMinutes();
+                const showNowLine = isToday && currentMinutesNow >= startHour * 60 && currentMinutesNow <= (endHour + 1) * 60;
+                const nowTop = (currentMinutesNow - startHour * 60) * pxPerMinute;
+
+                return `
+                  <div class="cal-day-column ${isToday ? 'is-today-cal-column' : ''}">
+                    <!-- Các đường vạch giờ ngang -->
+                    ${hoursList.map(h => `
+                      <div class="cal-grid-hour-line" style="top: ${(h - startHour) * HOUR_HEIGHT}px;"></div>
+                    `).join('')}
+
+                    <!-- Vạch chỉ thời gian hiện tại (Google Calendar Now Indicator) -->
+                    ${showNowLine ? `
+                      <div class="cal-current-time-line" style="top: ${nowTop}px;" title="Hiện tại: ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}">
+                        <span class="cal-current-time-dot"></span>
+                      </div>
+                    ` : ''}
+
+                    <!-- Thẻ sự kiện các môn học -->
+                    ${dayEvents.map(ev => {
+                      const color = getSubjectColor(ev.subject);
+                      const tooltipTitle = `${d.dayName} • ${escapeHtml(ev.timeRange)}`;
+                      const tooltipSub = escapeHtml(ev.subject);
+                      const tooltipBody = `<div class="tt-row"><i class="fa-solid fa-location-dot"></i> <span>Phòng: ${escapeHtml(ev.room || 'Chưa rõ')}</span></div>
+                                           <div class="tt-row"><i class="fa-regular fa-clock"></i> <span>Thời lượng: ${Math.round((ev.endMin - ev.startMin))} phút</span></div>`;
+
+                      return `
+                        <div class="cal-event-block ${ev.isOverlap ? 'is-overlap-event' : ''}"
+                          style="top: ${ev.top}px; height: ${ev.height}px; left: ${ev.left}; width: ${ev.width}; border-left: 4px solid ${color.border}; background: linear-gradient(135deg, ${color.bg || 'rgba(99, 102, 241, 0.25)'} 0%, rgba(15, 23, 42, 0.9) 100%);"
+                          data-heatmap-tooltip="true"
+                          data-tooltip-title="${escapeHtml(tooltipTitle)}"
+                          data-tooltip-sub="${escapeHtml(tooltipSub)}"
+                          data-tooltip-body="${escapeHtml(tooltipBody)}"
+                          data-tooltip-badge="${escapeHtml(ev.timeRange)}"
+                          data-tooltip-badge-bg="${color.border}"
+                          data-tooltip-badge-color="#ffffff">
+                          <div class="cal-event-title">${escapeHtml(ev.subject)}</div>
+                          <div class="cal-event-meta">
+                            <span class="cal-event-time"><i class="fa-regular fa-clock"></i> ${escapeHtml(ev.timeRange)}</span>
+                            ${ev.room ? `<span class="cal-event-room"><i class="fa-solid fa-location-dot"></i> ${escapeHtml(ev.room)}</span>` : ''}
+                          </div>
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="heatmap-card-footer">
-        <div class="heatmap-legend-row" style="font-size: 0.74rem;">
-          <span>Phân bố:</span>
-          <div class="legend-scale-boxes">
-            <div class="legend-box level-0" title="Trống"></div>
-            <div class="legend-box level-3" title="Có lịch học"></div>
-          </div>
-          <span style="margin-left: 0.5rem; color: var(--text-muted); font-size: 0.72rem;">(Sáng: 06h-11h • Chiều: 12h-17h • Tối: 18h-21h)</span>
+        <div style="display: flex; align-items: center; gap: 0.85rem; font-size: 0.74rem; color: var(--text-muted);">
+          <span><i class="fa-solid fa-layer-group" style="color: #818cf8;"></i> Tự động xếp chồng khi trùng giờ</span>
+          <span>•</span>
+          <span><i class="fa-regular fa-hand-pointer"></i> Di chuột vào thẻ để xem chi tiết môn</span>
         </div>
 
         <button type="button" class="btn-ghost btn-open-week-nav" data-week="${escapeHtml(selectedWeek.filename)}" style="font-size: 0.78rem; color: #818cf8;">
@@ -431,7 +544,6 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
     </div>
   `;
 
-  // Gắn sự kiện đổi tuần trong dropdown
   const selectWeek = container.querySelector('#select-weekly-matrix-week');
   if (selectWeek) {
     selectWeek.onchange = (e) => {
@@ -441,7 +553,6 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
     };
   }
 
-  // Gắn sự kiện mở tuần
   const navBtn = container.querySelector('.btn-open-week-nav');
   if (navBtn) {
     navBtn.onclick = () => {
@@ -496,7 +607,6 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
     let count = 0;
     let classesList = [];
     
-    // Tìm tuần khớp theo ngày thực tế
     let matchedWeek = semesterWeeks.find(w => {
       if (!w.startDate) return false;
       const start = new Date(w.startDate);
@@ -630,7 +740,6 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
     </div>
   `;
 
-  // Gắn sự kiện chuyển tháng
   const prevBtn = container.querySelector('#btn-prev-month');
   const thisBtn = container.querySelector('#btn-this-month');
   const nextBtn = container.querySelector('#btn-next-month');
@@ -657,7 +766,6 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
     };
   }
 
-  // Click vào ngày -> Mở tuần tương ứng
   container.querySelectorAll('.monthly-matrix-square:not(.is-other-month)').forEach(sq => {
     sq.onclick = () => {
       const fn = sq.dataset.week;
@@ -720,7 +828,6 @@ function renderSemesterMatrixView(container, semesterWeeks = [], currentWeekFile
       </div>
 
       <div class="semester-matrix-scroll-wrap">
-        <!-- Hàng Header Tên Tuần -->
         <div class="semester-weeks-header-row" style="grid-template-columns: repeat(${totalWeeks}, 20px);">
           ${semesterWeeks.map((w, idx) => `
             <span class="${w.filename === currentWeekFile ? 'is-current-week-header' : ''}" title="${escapeHtml(w.title)}">
@@ -730,12 +837,10 @@ function renderSemesterMatrixView(container, semesterWeeks = [], currentWeekFile
         </div>
 
         <div class="semester-matrix-body">
-          <!-- Cột Nhãn Thứ -->
           <div class="semester-days-labels">
             ${dayLabels.map(l => `<span>${l}</span>`).join('')}
           </div>
 
-          <!-- Lưới các ô vuông -->
           <div class="semester-squares-grid" style="grid-template-columns: repeat(${totalWeeks}, 20px);">
             ${squares.map(sq => {
               const tooltipTitle = `${sq.weekTitle} • ${sq.dayName}`;
@@ -780,7 +885,6 @@ function renderSemesterMatrixView(container, semesterWeeks = [], currentWeekFile
     </div>
   `;
 
-  // Click vào ô -> Mở tuần tương ứng
   container.querySelectorAll('.semester-square-item').forEach(sq => {
     sq.onclick = () => {
       const fn = sq.dataset.filename;
@@ -957,10 +1061,8 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
   activeWeeklyFile = currentWeekFile;
   const semesterWeeks = aggregateSemesterData(availableWeeks, currentWeekFile);
 
-  // Kích hoạt nạp trước toàn bộ các tuần trong học kỳ (nếu chưa có trong cache)
   preloadAllWeeksData(availableWeeks, currentWeekFile, onSelectWeek);
 
-  // Tính các chỉ số thống kê KPI
   let totalSemesterClasses = 0;
   let peakWeek = null;
   let activeStudyDays = 0;
@@ -1022,7 +1124,7 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
           </div>
 
           <div class="heatmap-kpi-card">
-            <div class="heatmap-kpi-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
+            <div class="heatmap-kpi-icon" style="background: rgba(168, 85, 247, 0.15); color: #c084fc;">
               <i class="fa-solid fa-book-bookmark"></i>
             </div>
             <div class="heatmap-kpi-info">
@@ -1042,7 +1144,7 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
           </div>
 
           <div class="heatmap-kpi-card">
-            <div class="heatmap-kpi-icon" style="background: rgba(168, 85, 247, 0.15); color: #c084fc;">
+            <div class="heatmap-kpi-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">
               <i class="fa-solid fa-fire"></i>
             </div>
             <div class="heatmap-kpi-info">
@@ -1094,7 +1196,7 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
       <div class="heatmap-controls-bar">
         <div class="heatmap-mode-tabs">
           <button type="button" class="btn-heatmap-tab ${currentHorizonMode === 'week' ? 'active' : ''}" data-mode="week">
-            <i class="fa-solid fa-table-columns"></i> <span>1. Tuần</span>
+            <i class="fa-solid fa-calendar-week"></i> <span>1. Lịch Tuần</span>
           </button>
           <button type="button" class="btn-heatmap-tab ${currentHorizonMode === 'month' ? 'active' : ''}" data-mode="month">
             <i class="fa-solid fa-calendar-days"></i> <span>2. Tháng</span>
