@@ -11,25 +11,34 @@ import { parseScheduleMarkdown } from '../../2.Backend/services/TimetableParser.
 import { escapeHtml } from '../../4.Security/sanitizer.js';
 
 /* ==========================================================================
-   1. MODULE STATE & CONSTANTS
+   1. MODULE STATE & CONSTANTS (HCMUT STANDARD SCHEDULE: 16 PERIODS)
    ========================================================================== */
 let currentHorizonMode = 'semester'; // 'week' | 'month' | 'semester' | 'year'
 let currentMonthlyDate = new Date(); // Tháng đang xem trong chế độ Tháng
 let activeWeeklyFile = ''; // File tuần đang xem trong chế độ Tuần
 
+// Bộ nhớ đệm dữ liệu tất cả các tuần trong học kỳ
+const weeksDataCache = new Map();
+let isPreloadingWeeks = false;
+
+// 16 Tiết học chuẩn ĐH Bách Khoa TP.HCM (Ca Sáng: 1-6, Ca Chiều: 7-12, Ca Tối: 13-16)
 const PERIOD_TIME_MAP = {
-  1: { start: '06:45', end: '07:35', session: 'Sáng' },
-  2: { start: '07:45', end: '08:35', session: 'Sáng' },
-  3: { start: '08:45', end: '09:35', session: 'Sáng' },
-  4: { start: '09:45', end: '10:35', session: 'Sáng' },
-  5: { start: '10:45', end: '11:35', session: 'Sáng' },
-  6: { start: '11:45', end: '12:35', session: 'Sáng' },
-  7: { start: '12:45', end: '13:35', session: 'Chiều' },
-  8: { start: '13:45', end: '14:35', session: 'Chiều' },
-  9: { start: '14:45', end: '15:35', session: 'Chiều' },
-  10: { start: '15:45', end: '16:35', session: 'Chiều' },
-  11: { start: '16:45', end: '17:35', session: 'Tối' },
-  12: { start: '17:45', end: '18:35', session: 'Tối' }
+  1: { start: '06:00', end: '06:50', session: 'Sáng', code: 'T1' },
+  2: { start: '07:00', end: '07:50', session: 'Sáng', code: 'T2' },
+  3: { start: '08:00', end: '08:50', session: 'Sáng', code: 'T3' },
+  4: { start: '09:00', end: '09:50', session: 'Sáng', code: 'T4' },
+  5: { start: '10:00', end: '10:50', session: 'Sáng', code: 'T5' },
+  6: { start: '11:00', end: '11:50', session: 'Sáng', code: 'T6' },
+  7: { start: '12:00', end: '12:50', session: 'Chiều', code: 'T7' },
+  8: { start: '13:00', end: '13:50', session: 'Chiều', code: 'T8' },
+  9: { start: '14:00', end: '14:50', session: 'Chiều', code: 'T9' },
+  10: { start: '15:00', end: '15:50', session: 'Chiều', code: 'T10' },
+  11: { start: '16:00', end: '16:50', session: 'Chiều', code: 'T11' },
+  12: { start: '17:00', end: '17:50', session: 'Chiều', code: 'T12' },
+  13: { start: '18:00', end: '18:50', session: 'Tối', code: 'T13' },
+  14: { start: '18:50', end: '19:40', session: 'Tối', code: 'T14' },
+  15: { start: '19:45', end: '20:35', session: 'Tối', code: 'T15' },
+  16: { start: '20:35', end: '21:25', session: 'Tối', code: 'T16' }
 };
 
 /* ==========================================================================
@@ -71,56 +80,108 @@ export function evaluateWeekWorkload(totalClasses = 0) {
 }
 
 /**
- * Phân bổ các môn học trong ngày vào 12 tiết chuẩn
+ * Phân bổ các môn học trong ngày vào 16 tiết chuẩn
  * @param {Array<Object>} classes 
- * @returns {Array<Object|null>} 12 phần tử (index 0 -> 11 đại diện Tiết 1 -> 12)
+ * @returns {Array<Object|null>} 16 phần tử (index 0 -> 15 đại diện Tiết 1 -> 16)
  */
 export function mapDayClassesToPeriods(classes = []) {
-  const slots = Array(12).fill(null);
+  const TOTAL_PERIODS = 16;
+  const slots = Array(TOTAL_PERIODS).fill(null);
   
   (classes || []).forEach(cls => {
     let periods = [];
+
+    // 1. Phân tích từ trường period: "Tiết 5 - 6", "Tiết 13 - 14", "Tiết 4-6", "Tiết 2,3"
     if (cls.period) {
       const nums = cls.period.match(/\d+/g);
       if (nums && nums.length >= 2) {
         const start = parseInt(nums[0], 10);
         const end = parseInt(nums[nums.length - 1], 10);
         for (let p = Math.min(start, end); p <= Math.max(start, end); p++) {
-          if (p >= 1 && p <= 12) periods.push(p);
+          if (p >= 1 && p <= TOTAL_PERIODS) periods.push(p);
         }
       } else if (nums && nums.length === 1) {
         const p = parseInt(nums[0], 10);
-        if (p >= 1 && p <= 12) periods.push(p);
+        if (p >= 1 && p <= TOTAL_PERIODS) periods.push(p);
       }
     }
 
-    // Nếu không parse được từ text tiết, ước lượng từ startTime
+    // 2. Nếu không có period, phân tích từ startTime và endTime
     if (periods.length === 0 && cls.startTime) {
-      const [h] = cls.startTime.split(':').map(Number);
-      if (!isNaN(h)) {
-        if (h <= 7) periods = [1, 2, 3];
-        else if (h === 8) periods = [2, 3, 4];
-        else if (h === 9) periods = [4, 5, 6];
-        else if (h === 10) periods = [5, 6];
-        else if (h === 12 || h === 13) periods = [7, 8, 9];
-        else if (h === 14) periods = [8, 9, 10];
-        else if (h === 15) periods = [9, 10, 11];
-        else if (h >= 16) periods = [10, 11, 12];
+      const [startH, startM = 0] = cls.startTime.split(':').map(Number);
+      const [endH = startH + 2, endM = 0] = (cls.endTime || '').split(':').map(Number);
+      
+      const startMinutes = startH * 60 + startM;
+      const endMinutes = endH * 60 + endM;
+
+      for (let p = 1; p <= TOTAL_PERIODS; p++) {
+        const pInfo = PERIOD_TIME_MAP[p];
+        const [pH, pM = 0] = pInfo.start.split(':').map(Number);
+        const pStartMin = pH * 60 + pM;
+        const pEndMin = pStartMin + 50;
+
+        if (startMinutes < pEndMin && endMinutes > pStartMin) {
+          periods.push(p);
+        }
       }
     }
 
+    // 3. Fallback an toàn nếu không xác định được
     if (periods.length === 0) {
-      periods = [1, 2];
+      periods = [2, 3];
     }
 
     periods.forEach(p => {
-      if (p >= 1 && p <= 12) {
+      if (p >= 1 && p <= TOTAL_PERIODS) {
         slots[p - 1] = cls;
       }
     });
   });
 
   return slots;
+}
+
+/**
+ * Tự động nạp trước (preload) và cache nội dung tất cả các tuần học
+ * @param {Array<Object>} availableWeeks 
+ * @param {string} currentWeekFile 
+ * @param {Function} onSelectWeek 
+ */
+export async function preloadAllWeeksData(availableWeeks = [], currentWeekFile = '', onSelectWeek = null) {
+  if (isPreloadingWeeks || !availableWeeks || availableWeeks.length === 0) return;
+  isPreloadingWeeks = true;
+
+  const fetchPromises = availableWeeks.map(async (w) => {
+    if (weeksDataCache.has(w.filename)) return;
+
+    // 1. Kiểm tra custom md trong LocalStorage
+    const customMd = localStorage.getItem(`smart_schedule_custom_md_${w.filename}`);
+    if (customMd) {
+      weeksDataCache.set(w.filename, parseScheduleMarkdown(customMd));
+      return;
+    }
+
+    // 2. Fetch từ file tĩnh nếu chưa có
+    try {
+      const res = await fetch(w.filename);
+      if (res.ok) {
+        const text = await res.text();
+        weeksDataCache.set(w.filename, parseScheduleMarkdown(text));
+      }
+    } catch (e) {
+      console.warn(`[Heatmap] Không thể nạp ${w.filename}:`, e);
+    }
+  });
+
+  await Promise.allSettled(fetchPromises);
+  isPreloadingWeeks = false;
+
+  // Re-render lại Heatmap nếu đang hiển thị
+  const container = document.getElementById('today-view-container');
+  if (container && document.getElementById('heatmap-dynamic-content-area')) {
+    const semesterWeeks = aggregateSemesterData(availableWeeks, currentWeekFile);
+    renderActiveHorizonModeContent(semesterWeeks, currentWeekFile, onSelectWeek);
+  }
 }
 
 /**
@@ -141,6 +202,8 @@ export function aggregateSemesterData(availableWeeks = [], currentWeekFile = '')
       const customMd = localStorage.getItem(`smart_schedule_custom_md_${w.filename}`);
       if (customMd) {
         parsed = parseScheduleMarkdown(customMd);
+      } else if (weeksDataCache.has(w.filename)) {
+        parsed = weeksDataCache.get(w.filename);
       }
     }
 
@@ -245,7 +308,7 @@ function setupHeatmapTooltips() {
   });
 
   function updateTooltipPos(e) {
-    const tooltipW = tooltip.offsetWidth || 220;
+    const tooltipW = tooltip.offsetWidth || 240;
     const tooltipH = tooltip.offsetHeight || 80;
     const padding = 12;
 
@@ -272,7 +335,7 @@ function setupHeatmapTooltips() {
    ========================================================================== */
 
 /**
- * 1️⃣ CHẾ ĐỘ TUẦN: Ma trận Tiết Học Trong Tuần (12 Tiết × 7 Ngày GitHub Matrix)
+ * 1️⃣ CHẾ ĐỘ TUẦN: Ma trận Tiết Học Trong Tuần (16 Tiết × 7 Ngày GitHub Matrix)
  */
 function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile = '', onSelectWeek = null) {
   if (!activeWeeklyFile) {
@@ -297,7 +360,7 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
             <i class="fa-solid fa-table-columns"></i>
           </div>
           <div>
-            <h3 class="heatmap-card-title">Ma Trận Tiết Học Trong Tuần (12 Tiết × 7 Ngày)</h3>
+            <h3 class="heatmap-card-title">Ma Trận Tiết Học Trong Tuần (16 Tiết × 7 Ngày)</h3>
             <span class="heatmap-card-sub">Chuẩn GitHub Time-Slot Matrix • ${escapeHtml(selectedWeek.title)}</span>
           </div>
         </div>
@@ -318,14 +381,15 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
 
       <div class="weekly-timeslot-matrix-wrap">
         <div class="weekly-timeslot-matrix-body">
-          <!-- Cột nhãn Tiết học (1 - 12) -->
+          <!-- Cột nhãn Tiết học (1 - 16) -->
           <div class="weekly-periods-col">
             <div class="period-header-corner">Tiết</div>
-            ${Array.from({ length: 12 }, (_, i) => {
+            ${Array.from({ length: 16 }, (_, i) => {
               const p = i + 1;
               const info = PERIOD_TIME_MAP[p] || {};
+              const sessionClass = p <= 6 ? 'session-morning' : (p <= 12 ? 'session-afternoon' : 'session-evening');
               return `
-                <div class="period-slot-label ${p <= 6 ? 'session-morning' : 'session-afternoon'}" title="Tiết ${p} (${info.start} - ${info.end})">
+                <div class="period-slot-label ${sessionClass}" title="Tiết ${p} (${info.start} - ${info.end})">
                   <span>T${p}</span>
                   <small>${info.start}</small>
                 </div>
@@ -366,7 +430,7 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
                           data-tooltip-title="${escapeHtml(tooltipTitle)}"
                           data-tooltip-sub="${escapeHtml(tooltipSub)}"
                           data-tooltip-body="${escapeHtml(tooltipBody)}"
-                          data-tooltip-badge="${hasClass ? 'Có lớp' : 'Nghỉ'}"
+                          data-tooltip-badge="${hasClass ? 'Có lớp' : 'Trống'}"
                           data-tooltip-badge-bg="${hasClass ? 'rgba(99, 102, 241, 0.2)' : 'rgba(148, 163, 184, 0.15)'}"
                           data-tooltip-badge-color="${hasClass ? '#818cf8' : '#94a3b8'}">
                           ${hasClass ? `<span class="slot-dot"></span>` : ''}
@@ -388,7 +452,7 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
             <div class="legend-box level-0" title="Trống"></div>
             <div class="legend-box level-3" title="Có tiết học"></div>
           </div>
-          <span style="margin-left: 0.5rem; color: var(--text-muted); font-size: 0.72rem;">(Sáng: Tiết 1-6 • Chiều/Tối: Tiết 7-12)</span>
+          <span style="margin-left: 0.5rem; color: var(--text-muted); font-size: 0.72rem;">(Sáng: Tiết 1-6 • Chiều: Tiết 7-12 • Tối: Tiết 13-16)</span>
         </div>
 
         <button type="button" class="btn-ghost btn-open-week-nav" data-week="${escapeHtml(selectedWeek.filename)}" style="font-size: 0.78rem; color: #818cf8;">
@@ -433,7 +497,6 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const daysInPrevMonth = new Date(year, month, 0).getDate();
 
-  // Chuyển start day: Thứ 2 = index 0
   const startOffset = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
 
   const today = new Date();
@@ -453,15 +516,32 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
     });
   }
 
-  // Ngày tháng hiện tại
+  // Ngày tháng hiện tại: Khớp theo startDate thực tế của từng tuần trong kỳ
   for (let d = 1; d <= daysInMonth; d++) {
-    const dayOfWeek = new Date(year, month, d).getDay();
+    const dDate = new Date(year, month, d);
+    const dayOfWeek = dDate.getDay();
     const dayNameMap = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
     const dName = dayNameMap[dayOfWeek];
+    const dDateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 
     let count = 0;
     let classesList = [];
-    const matchedWeek = semesterWeeks[d % semesterWeeks.length] || semesterWeeks[0];
+    
+    // Tìm tuần khớp theo ngày thực tế
+    let matchedWeek = semesterWeeks.find(w => {
+      if (!w.startDate) return false;
+      const start = new Date(w.startDate);
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      const startStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`;
+      const endStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')}`;
+      return dDateStr >= startStr && dDateStr <= endStr;
+    });
+
+    if (!matchedWeek) {
+      matchedWeek = semesterWeeks[d % semesterWeeks.length] || semesterWeeks[0];
+    }
+
     if (matchedWeek) {
       const dayStat = matchedWeek.days.find(x => x.dayName === dName);
       if (dayStat) {
@@ -485,7 +565,6 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
     });
   }
 
-  // Bổ sung các ô cuối để đủ hàng hoàn chỉnh
   const remaining = (7 - (cells.length % 7)) % 7;
   for (let j = 1; j <= remaining; j++) {
     cells.push({
@@ -524,7 +603,6 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
       </div>
 
       <div class="monthly-matrix-wrap">
-        <!-- Hàng nhãn Thứ -->
         <div class="monthly-matrix-days-header">
           <span>T2</span>
           <span>T3</span>
@@ -535,7 +613,6 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
           <span>CN</span>
         </div>
 
-        <!-- Lưới ô vuông tháng -->
         <div class="monthly-matrix-grid">
           ${cells.map(c => {
             if (c.isOtherMonth) {
@@ -555,7 +632,7 @@ function renderMonthlyCalendarView(container, semesterWeeks = [], onSelectWeek =
                 data-tooltip-title="${escapeHtml(tooltipTitle)}"
                 data-tooltip-sub="${escapeHtml(tooltipSub)}"
                 data-tooltip-body="${escapeHtml(tooltipBody)}"
-                data-tooltip-badge="${c.classesCount > 0 ? `Level ${c.level}` : 'Nghỉ'}"
+                data-tooltip-badge="${c.classesCount > 0 ? `${c.classesCount}t` : 'Nghỉ'}"
                 data-tooltip-badge-bg="${c.classesCount > 0 ? 'rgba(56, 189, 248, 0.2)' : 'rgba(148, 163, 184, 0.15)'}"
                 data-tooltip-badge-color="${c.classesCount > 0 ? '#38bdf8' : '#94a3b8'}">
                 <span class="sq-day-num">${c.dayNum}</span>
@@ -635,7 +712,6 @@ function renderSemesterMatrixView(container, semesterWeeks = [], currentWeekFile
   const totalWeeks = semesterWeeks.length;
   const currentWeekIndex = semesterWeeks.findIndex(w => w.filename === currentWeekFile);
 
-  // Tạo ma trận N tuần × 7 ngày
   const squares = [];
   semesterWeeks.forEach((w, wIdx) => {
     w.days.forEach((d, dIdx) => {
@@ -806,18 +882,15 @@ function renderYearlyMatrixView(container, semesterWeeks = [], onSelectWeek = nu
       </div>
 
       <div class="yearly-matrix-scroll-wrap">
-        <!-- Hàng tên tháng -->
         <div class="yearly-months-row">
           ${months.map(m => `<span>${m}</span>`).join('')}
         </div>
 
         <div class="yearly-matrix-body">
-          <!-- Nhãn thứ -->
           <div class="yearly-days-labels">
             ${dayLabels.map(l => `<span>${l}</span>`).join('')}
           </div>
 
-          <!-- Lưới 364 ô vuông -->
           <div class="yearly-squares-grid" id="yearly-squares-grid">
             ${squares.map(sq => {
               const tooltipTitle = `Tuần ${sq.weekIdx} • ${sq.dayName}`;
@@ -865,7 +938,6 @@ function renderYearlyMatrixView(container, semesterWeeks = [], onSelectWeek = nu
     </div>
   `;
 
-  // Click vào ô vuông -> Mở tuần tương ứng
   container.querySelectorAll('.yearly-square-item').forEach(sq => {
     sq.onclick = () => {
       const fn = sq.dataset.filename;
@@ -896,7 +968,6 @@ function renderActiveHorizonModeContent(semesterWeeks = [], currentWeekFile = ''
     renderSemesterMatrixView(contentArea, semesterWeeks, currentWeekFile, onSelectWeek);
   }
 
-  // Cài đặt Tooltip Popover cho tất cả các ô trong ma trận
   setupHeatmapTooltips();
 }
 
@@ -917,6 +988,9 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
   activeWeeklyFile = currentWeekFile;
   const semesterWeeks = aggregateSemesterData(availableWeeks, currentWeekFile);
 
+  // Kích hoạt nạp trước toàn bộ các tuần trong học kỳ (nếu chưa có trong cache)
+  preloadAllWeeksData(availableWeeks, currentWeekFile, onSelectWeek);
+
   // Tính các chỉ số thống kê KPI
   let totalSemesterClasses = 0;
   let peakWeek = null;
@@ -932,9 +1006,8 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
     });
   });
 
-  // Tìm các tiết học hôm nay từ tuần hiện tại
   const currentWeekObj = semesterWeeks.find(w => w.filename === currentWeekFile) || semesterWeeks[0];
-  const currentDayOfWeek = new Date().getDay(); // 0: CN, 1: T2, ..., 6: T7
+  const currentDayOfWeek = new Date().getDay();
   const todayDayNameMap = ['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
   const todayName = todayDayNameMap[currentDayOfWeek];
   
@@ -1078,10 +1151,8 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
     </div>
   `;
 
-  // Render nội dung theo chế độ hiện tại
   renderActiveHorizonModeContent(semesterWeeks, currentWeekFile, onSelectWeek);
 
-  // Gắn sự kiện chuyển chế độ Tab
   container.querySelectorAll('.btn-heatmap-tab').forEach(btn => {
     btn.onclick = () => {
       container.querySelectorAll('.btn-heatmap-tab').forEach(b => b.classList.remove('active'));

@@ -470,6 +470,10 @@
   border-left: 2px solid #a855f7;
 }
 
+.period-slot-label.session-evening {
+  border-left: 2px solid #f59e0b;
+}
+
 .period-slot-label small {
   font-size: 0.6rem;
   color: var(--text-muted, #64748b);

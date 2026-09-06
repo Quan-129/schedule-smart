@@ -12,7 +12,7 @@ import { formatCurrentVietnameseDate } from '../2.Backend/utils/dateHelpers.js';
 import { renderBackpackView, enterJiggleMode, exitJiggleMode } from './views/BackpackView.js';
 import { renderGradesView, highlightGradeSlice } from './views/GradesView.js';
 import { renderTimetableGrid, renderTodayView, getSubjectColor } from './views/TimetableGrid.js';
-import { renderHeatmapView } from './views/HeatmapView.js';
+import { renderHeatmapView, preloadAllWeeksData } from './views/HeatmapView.js';
 import { ensureEditSubjectModalDom, openEditSubjectModal, openEditDriveModal } from './components/modals/EditSubjectModal.js';
 import { ensureAddSubjectModalDom, openAddSubjectModal, initAddSubjectModal } from './components/modals/AddSubjectModal.js';
 import { ensureAddWeekModalDom, openAddWeekModal, initAddWeekModal } from './components/modals/AddWeekModal.js';
@@ -342,6 +342,7 @@ async function initWeekSelector() {
   }
 
   renderWeekDropdownOptions();
+  preloadAllWeeksData(availableWeeks, currentWeekFile, handleSelectWeekFromHeatmap);
 
   if (weekSelect) {
     weekSelect.onchange = () => {

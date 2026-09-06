@@ -64,13 +64,16 @@ export function parseScheduleMarkdown(markdownText) {
     }
 
     if (currentDay) {
-      if (/^(?:[-*]\s*)?Nghỉ/i.test(rawLine)) {
+      // Làm sạch markdown formatting (in đậm **, in nghiêng *, gạch chân __) để bắt chính xác
+      const sanitizedLine = rawLine.replace(/[\*_]{2,}/g, '').trim();
+
+      if (/^(?:[-*]\s*)?Nghỉ/i.test(sanitizedLine)) {
         currentDay.isDayOff = true;
-        currentDay.dayOffText = rawLine.replace(/^[-*]\s*/, '').trim();
+        currentDay.dayOffText = sanitizedLine.replace(/^[-*]\s*/, '').trim();
         continue;
       }
 
-      const classMatch = rawLine.match(classItemRegex);
+      const classMatch = sanitizedLine.match(classItemRegex);
       if (classMatch) {
         const timeRange = classMatch[1].trim();
         const period = classMatch[2] ? classMatch[2].trim() : '';
@@ -80,7 +83,7 @@ export function parseScheduleMarkdown(markdownText) {
 
         currentDay.classes.push({ timeRange, startTime, endTime, period, subject, room });
       } else {
-        const cleanText = rawLine.replace(/^[-*]\s*/, '').trim();
+        const cleanText = sanitizedLine.replace(/^[-*]\s*/, '').trim();
         if (cleanText) currentDay.rawNotes.push(cleanText);
       }
     }

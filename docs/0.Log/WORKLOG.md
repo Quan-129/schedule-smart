@@ -4,6 +4,27 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 08:38] - Khắc Phục Triệt Để Lỗi Thiếu Tiết Học, Khung Giờ & Nạp Dữ Liệu Toàn Học Kỳ 🎯
+
+- **🎯 Nguyên nhân sự cố**:
+  1. **Regex Parser bị nghẽn**: Khi dòng môn học có định dạng in đậm `**` (ví dụ `**18:00 - 19:39 (Tiết 13 - 14): Nhập môn TTNT**` ở Tuần 44), parser cũ không bắt được nên bị bỏ sót.
+  2. **Giới hạn 12 tiết**: Cấu hình ma trận cũ chỉ có 12 tiết, trong khi sinh viên ĐH Bách Khoa có ca học tối (Tiết 13–16 từ 18:00–21:25) dẫn đến các tiết tối bị cắt mất.
+  3. **Thiếu cơ chế Pre-fetch đa tuần**: `aggregateSemesterData` trước đây chỉ đọc 1 tuần hiện tại trong `state.scheduleData`, khiến 15 tuần còn lại trong kỳ bị rỗng (0 tiết) trên chế độ Tháng, Học Kỳ và Cả Năm.
+  4. **Lệch mốc giờ**: Bảng giờ học cũ lệch so với giờ thực tế của trường.
+
+- **✅ Giải pháp đã triển khai hoàn tất**:
+  - `[Backend / Parser]` Cập nhật [`src/2.Backend/services/TimetableParser.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/TimetableParser.js):
+    - Làm sạch markdown formatting (`**`, `__`, `*`) trước khi match `classItemRegex`, nhận diện 100% các dòng in đậm/in nghiêng.
+  - `[Frontend / View Module]` Cập nhật [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    - Mở rộng ma trận tuần lên **16 Tiết chuẩn ĐH Bách Khoa TP.HCM** (Ca Sáng: T1–T6, Ca Chiều: T7–T12, Ca Tối: T13–T16).
+    - Viết lại `mapDayClassesToPeriods()` thông minh: phân tích chính xác các dải tiết kéo dài (`Tiết 4 - 6`, `Tiết 13 - 14`, `Tiết 5 - 6`...) và tự động map theo range giờ `startTime - endTime`.
+    - Thêm cơ chế **Preload & Cache ngầm đa tuần (`preloadAllWeeksData`)**: Tự động nạp và cache nội dung tất cả 16 tuần từ `schedules/` ngay khi mở app.
+  - `[Frontend / Styles]` Cập nhật [`src/1.Frontend/styles/9.heatmap-view.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/9.heatmap-view.css):
+    - Thêm style cho `.period-slot-label.session-evening` (Ca Tối cam/hồng neon).
+  - `[Performance / Service Worker]` Nâng `CACHE_NAME` lên `smart-schedule-modular-v60` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-06 08:30] - Chuẩn Hóa Toàn Diện Cả 4 Bảng Heatmap Theo Chuẩn GitHub Contribution Matrix 🚀
 
 - **🎯 Mục tiêu**:
