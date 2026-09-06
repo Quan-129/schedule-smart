@@ -5,7 +5,7 @@
  * ==========================================================================
  */
 
-import { state, initApplicationState, persistDriveSubjects, persistDaysDisplayMode, setState } from '../3.Database/state.js';
+import { state, initApplicationState, persistDriveSubjects, persistDaysDisplayMode, persistLastActiveTab, persistLastSelectedWeek, setState } from '../3.Database/state.js';
 import { DEFAULT_WEEK_35_MD, DEFAULT_WEEK_36_MD } from '../3.Database/storage/SeedData.js';
 import { parseScheduleMarkdown, serializeScheduleToMarkdown, generateEmptyWeekMarkdown } from '../2.Backend/services/TimetableParser.js';
 import { formatCurrentVietnameseDate, getMondayOfCurrentWeek, addDaysToDateStr, formatDateDDMM, formatDateDDMMYYYY } from '../2.Backend/utils/dateHelpers.js';
@@ -20,6 +20,7 @@ import { ensureDeleteWeekModalDom, openDeleteWeekModal } from './components/moda
 import { ensureSubjectDetailModalDom, openSubjectDetailModal } from './components/modals/SubjectDetailModal.js';
 import { ensureAddClassModalDom, openAddClassModal, openEditClassModal } from './components/modals/AddClassModal.js';
 import { ensureEditWeeklyNotesModalDom, openEditWeeklyNotesModal } from './components/modals/EditWeeklyNotesModal.js';
+import { openBackupModal } from './components/modals/BackupModal.js';
 import { showToast, initToastContainer } from './components/Toast.js';
 import { initPWA, promptPWAInstall } from '../5.Performance/pwaManager.js';
 import { initVisibilityOptimizer } from '../5.Performance/visibilityOptimizer.js';
@@ -67,6 +68,7 @@ async function initApp() {
     await initWeekSelector(user);
     renderBackpackView();
     renderGradesView();
+    switchTab(state.lastActiveTab || 'grid');
     if (state.currentTab === 'today') {
       renderHeatmapView(availableWeeks, currentWeekFile, handleSelectWeekFromHeatmap);
     }
@@ -90,9 +92,10 @@ async function initApp() {
   // 8. Khởi tạo công cụ tìm kiếm và bộ lọc
   initSearchAndFilters();
 
-  // 9. Render các Views ban đầu
+  // 9. Render các Views ban đầu và tự động khôi phục Tab cuối cùng của người dùng
   renderBackpackView();
   renderGradesView();
+  switchTab(state.lastActiveTab || 'grid');
 
   // 10. Gắn các sự kiện Modal Thêm Môn, Thêm Tuần, Theme, Print, Raw Editor & Hero Toggle
   initAddSubjectModal();
@@ -230,6 +233,14 @@ function initTabNavigation() {
     }
   });
 
+  // Nút mở Modal Sao Lưu & Khôi Phục (3 Cấp Độ)
+  const backupBtn = document.getElementById('btn-open-backup-modal');
+  if (backupBtn) {
+    backupBtn.onclick = () => {
+      openBackupModal();
+    };
+  }
+
   // Nút thêm môn trong Chiếc Cặp
   const addSubjBtn = document.getElementById('bp-add-subject-btn');
   if (addSubjBtn) {
@@ -260,6 +271,7 @@ export function handleSelectWeekFromHeatmap(targetFilename) {
 
 export function switchTab(tabName) {
   state.currentTab = tabName;
+  persistLastActiveTab(tabName);
 
   const tabMapping = {
     'grid': { btnId: 'view-grid-btn', viewId: 'grid-view-container' },
@@ -534,10 +546,17 @@ export function checkIsCurrentWeek(filepath) {
 }
 
 /**
- * Tìm file tuần học tương ứng với ngày hôm nay
+ * Tìm file tuần học tương ứng với ngày hôm nay (hoặc tuần người dùng đã chọn trước đó)
  * @returns {string}
  */
 function getInitialWeekFilename() {
+  // 1. Ưu tiên tuần đã được người dùng chọn xem dở gần nhất (Cấp độ 1 & Tips)
+  if (state.lastSelectedWeek) {
+    const matched = availableWeeks.find(w => w.filename === state.lastSelectedWeek);
+    if (matched) return matched.filename;
+  }
+
+  // 2. Tìm tuần hiện tại theo ngày thực tế
   const currentWeekObj = availableWeeks.find(w => {
     if (!w.startDate) return false;
     const today = new Date();
@@ -577,6 +596,7 @@ function renderWeekDropdownOptions(selectedFilename) {
  */
 async function loadWeekSchedule(filepath) {
   currentWeekFile = filepath;
+  persistLastSelectedWeek(filepath);
   let mdText = '';
 
   // 1. Kiểm tra trong LocalStorage nếu là tuần tự tạo

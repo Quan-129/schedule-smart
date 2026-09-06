@@ -4,7 +4,33 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
-## 📅 [2026-09-06 15:15] - Chuẩn Hóa Toàn Diện Mục 2 (Heatmap & Google Calendar Timeline) Cho Theme Trắng Sáng (Clean Milk) ☀️🗓️
+## 📅 [2026-09-06 15:20] - Xây Dựng Hệ Thống Lưu Trữ & Khôi Phục Toàn Diện Trạng Thái Setup 3 Cấp Độ (Auto-Restore & Backup Engine) 💾✨
+
+- **🎯 Yêu cầu & Mục tiêu**:
+  - Thực hiện toàn diện 3 cấp độ lưu trữ trạng thái setup của người dùng:
+    1. **Cấp độ 1 & Tips (Auto-Persistence LocalStorage)**: Tự động ghi nhớ Tab đang đứng cuối cùng (`smart_schedule_last_active_tab`), Tuần đang xem dở (`smart_schedule_last_selected_week`), Chế độ hiển thị ngày (1/3/7), Theme (7 tone màu), Chế độ Heatmap. Khi F5 hoặc mở lại trình duyệt sẽ khôi phục ngay lập tức 100%.
+    2. **Cấp độ 2 (Cloud Sync Firestore)**: Đồng bộ đầy đủ các cấu hình giao diện và trạng thái thiết lập cùng dữ liệu môn học, điểm số, lịch tự tạo lên đám mây.
+    3. **Cấp độ 3 (Export / Import JSON)**: Bổ sung công cụ Sao Lưu & Phục Hồi 1-chạm (Xuất file JSON an toàn và Nhập khôi phục tức thì với Schema Validation).
+- **✅ Chi tiết triển khai mã nguồn**:
+  - [`src/3.Database/state.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/state.js):
+    - Thêm `STORAGE_KEYS.LAST_ACTIVE_TAB`, `STORAGE_KEYS.LAST_SELECTED_WEEK`.
+    - Bổ sung `persistLastActiveTab()`, `persistLastSelectedWeek()`.
+    - Xây dựng `exportFullBackupData()` đóng gói toàn bộ state, theme, drive, grades, custom weeks và custom markdowns ra file JSON chuẩn.
+    - Xây dựng `importFullBackupData()` kiểm tra tính hợp lệ và ghi đè an toàn vào Storage.
+  - [`src/3.Database/auth/FirebaseAuthService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js):
+    - Mở rộng payload đồng bộ `settings: { theme, daysDisplayMode, lastActiveTab, lastSelectedWeek }` hai chiều với Cloud Firestore.
+  - [`src/1.Frontend/components/modals/BackupModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/BackupModal.js):
+    - Tạo Modal Sao Lưu & Khôi Phục Dữ Liệu chuẩn Glassmorphism gồm 3 card chức năng: Xuất JSON, Nhập JSON (Dropzone kéo thả) và Đồng bộ Cloud.
+  - [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html):
+    - Thêm nút Quick Action `#btn-open-backup-modal` trên Navbar cạnh bảng màu Theme.
+  - [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    - Tự động ghi nhớ tab trong `switchTab()`, tuần trong `loadWeekSchedule()`.
+    - Tự động khôi phục tuần trong `getInitialWeekFilename()` và tab trong `initApp()` / `initFirebaseAuth()`.
+  - [`src/1.Frontend/styles/6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css):
+    - Bổ sung style cho Backup Modal, drag-and-drop file upload zone và badges.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v102`.
+
+---
 
 - **🎯 Vấn đề từ ảnh chụp thực tế**:
   1. Header timeline (`.weekly-cal-sticky-header`, `.cal-day-header-cell`) và ô "GIỜ" ở góc (`.cal-time-corner-sticky`) bị nền đen tím tối sẫm `rgba(15, 23, 42)`, chữ xám chìm khó đọc.

@@ -410,6 +410,18 @@ function attachFirestoreListener(uid, onSyncCallback) {
             localStorage.setItem(k, data.customMds[k]);
           });
         }
+        // Đồng bộ Settings từ Cloud
+        if (data.settings && typeof data.settings === 'object') {
+          if (data.settings.theme) localStorage.setItem('smart_schedule_theme', data.settings.theme);
+          if (data.settings.daysDisplayMode) {
+            state.daysDisplayMode = data.settings.daysDisplayMode;
+            localStorage.setItem('smart_schedule_days_mode', data.settings.daysDisplayMode);
+          }
+          if (data.settings.lastActiveTab) {
+            const lastTabKey = isOwnerUser(currentUser) ? 'smart_schedule_last_active_tab' : `smart_schedule_${currentUser.uid}_smart_schedule_last_active_tab`;
+            localStorage.setItem(lastTabKey, data.settings.lastActiveTab);
+          }
+        }
         if (typeof onSyncCallback === 'function') onSyncCallback(currentUser);
       }
     } else {
@@ -420,6 +432,11 @@ function attachFirestoreListener(uid, onSyncCallback) {
         photoURL: currentUser.photoURL,
         driveSubjects: state.driveSubjects || [],
         studentGrades: state.studentGrades || {},
+        settings: {
+          theme: localStorage.getItem('smart_schedule_theme') || 'violet',
+          daysDisplayMode: state.daysDisplayMode || '7',
+          lastActiveTab: state.lastActiveTab || 'grid'
+        },
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       };
       docRef.set(initialDoc, { merge: true });
@@ -438,6 +455,11 @@ export function syncDriveSubjectsToCloud() {
   docRef.set({
     driveSubjects: state.driveSubjects || [],
     studentGrades: state.studentGrades || {},
+    settings: {
+      theme: localStorage.getItem('smart_schedule_theme') || 'violet',
+      daysDisplayMode: state.daysDisplayMode || '7',
+      lastActiveTab: state.lastActiveTab || 'grid'
+    },
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   }, { merge: true }).catch(err => {
     console.warn('[Firestore] Lỗi đồng bộ Cloud:', err);
@@ -457,6 +479,12 @@ export function syncUserDataToCloud(customWeeks = [], customMds = {}) {
     studentGrades: state.studentGrades || {},
     customWeeks: customWeeks || [],
     customMds: customMds || {},
+    settings: {
+      theme: localStorage.getItem('smart_schedule_theme') || 'violet',
+      daysDisplayMode: state.daysDisplayMode || '7',
+      lastActiveTab: state.lastActiveTab || 'grid',
+      lastSelectedWeek: state.lastSelectedWeek || ''
+    },
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   }, { merge: true }).catch(err => {
     console.warn('[Firestore] Lỗi đồng bộ toàn bộ dữ liệu:', err);
