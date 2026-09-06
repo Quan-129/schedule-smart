@@ -307,10 +307,12 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
     if (endHour <= startHour) endHour = startHour + 8;
   }
 
-  const HOUR_HEIGHT = 58; // px cho mỗi giờ
+  const HOUR_HEIGHT = 60; // px cho mỗi giờ
   const pxPerMinute = HOUR_HEIGHT / 60;
-  const totalHours = endHour - startHour + 1;
-  const totalTimelineHeight = totalHours * HOUR_HEIGHT;
+  const TOP_PADDING = 20; // Khoảng đệm trên đỉnh để mốc giờ đầu tiên không bị che
+  const BOTTOM_PADDING = 24; // Khoảng đệm dưới đáy
+  const totalHours = endHour - startHour;
+  const totalTimelineHeight = totalHours * HOUR_HEIGHT + TOP_PADDING + BOTTOM_PADDING;
 
   const hoursList = [];
   for (let h = startHour; h <= endHour; h++) {
@@ -341,8 +343,8 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
       let endMin = eh * 60 + em;
       if (endMin <= startMin) endMin = startMin + 90;
 
-      const top = Math.max(0, (startMin - startHour * 60) * pxPerMinute);
-      const height = Math.max(36, (endMin - startMin) * pxPerMinute);
+      const top = Math.max(0, (startMin - startHour * 60) * pxPerMinute) + TOP_PADDING;
+      const height = Math.max(38, (endMin - startMin) * pxPerMinute);
 
       return {
         ...c,
@@ -443,7 +445,7 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
         <!-- Hàng Header Thứ -->
         <div class="weekly-cal-header-row">
           <div class="cal-time-corner">
-            <i class="fa-regular fa-clock"></i>
+            <span><i class="fa-regular fa-clock"></i> GIỜ</span>
           </div>
           <div class="cal-days-header-grid">
             ${standardDays.map(d => {
@@ -464,7 +466,7 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
             <!-- Cột Trục Thời Gian Bên Trái (Time Axis) -->
             <div class="cal-time-axis-col">
               ${hoursList.map(h => `
-                <div class="cal-time-mark" style="top: ${(h - startHour) * HOUR_HEIGHT}px;">
+                <div class="cal-time-mark" style="top: ${(h - startHour) * HOUR_HEIGHT + TOP_PADDING}px;">
                   <span>${String(h).padStart(2, '0')}:00</span>
                 </div>
               `).join('')}
@@ -480,13 +482,13 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
                 const now = new Date();
                 const currentMinutesNow = now.getHours() * 60 + now.getMinutes();
                 const showNowLine = isToday && currentMinutesNow >= startHour * 60 && currentMinutesNow <= (endHour + 1) * 60;
-                const nowTop = (currentMinutesNow - startHour * 60) * pxPerMinute;
+                const nowTop = (currentMinutesNow - startHour * 60) * pxPerMinute + TOP_PADDING;
 
                 return `
                   <div class="cal-day-column ${isToday ? 'is-today-cal-column' : ''}">
                     <!-- Các đường vạch giờ ngang -->
                     ${hoursList.map(h => `
-                      <div class="cal-grid-hour-line" style="top: ${(h - startHour) * HOUR_HEIGHT}px;"></div>
+                      <div class="cal-grid-hour-line" style="top: ${(h - startHour) * HOUR_HEIGHT + TOP_PADDING}px;"></div>
                     `).join('')}
 
                     <!-- Vạch chỉ thời gian hiện tại (Google Calendar Now Indicator) -->

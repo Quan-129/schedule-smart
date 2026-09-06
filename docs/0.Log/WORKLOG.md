@@ -4,6 +4,21 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 09:03] - Khắc Phục Triệt Để Hiện Tượng Che Khuất Mốc Giờ Đầu Tiên & Mở Rộng Trục Thời Gian Timeline 🛠
+
+- **🎯 Nguyên nhân**:
+  - Khi mốc giờ đầu tiên (ví dụ `07:00`) nằm ở `top: 0px`, thuộc tính `transform: translateY(-50%)` khiến 50% chiều cao chữ bị trồi lên ngoài mép trên và bị container `overflow: hidden` cắt mất.
+- **✅ Giải pháp khắc phục**:
+  - Bổ sung hằng số khoảng đệm an toàn `TOP_PADDING = 20px` và `BOTTOM_PADDING = 24px` vào công thức tính toán tọa độ trục Y cho:
+    + Toàn bộ các mốc giờ `.cal-time-mark`.
+    + Toàn bộ các đường vạch ngang `.cal-grid-hour-line`.
+    + Vạch chỉ giờ hiện tại `.cal-current-time-line`.
+    + Tất cả các khối thẻ môn học `.cal-event-block`.
+  - Mở rộng cột mốc thời gian từ `60px` lên `72px`, tăng kích thước font monospace và độ tương phản của badge giờ (`#cbd5e1`, viền tím sáng).
+  - Nâng `CACHE_NAME` lên `smart-schedule-modular-v63` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
+---
+
 ## 📅 [2026-09-06 08:58] - Nâng Cấp Chế Độ Tuần Thành Google Calendar Timeline View (Tự Động Scale Khung Giờ & Xếp Lớp Trùng Giờ) ⚡
 
 - **🎯 Yêu cầu & Mục tiêu**:
