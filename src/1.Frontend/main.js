@@ -1133,20 +1133,82 @@ function initDaysModeSelector() {
 }
 
 /**
- * Khởi tạo Đổi Theme Sáng/Tối
+ * Khởi tạo Hệ thống Bảng màu Giao diện (7 Tone Màu: Tím Đen, Đen Tuyền, Trắng, Vàng, Hồng, Xanh Dương, Xanh Lá)
  */
 function initThemeToggle() {
+  const wrapper = document.getElementById('theme-palette-wrapper');
   const themeBtn = document.getElementById('theme-toggle-btn');
-  if (!themeBtn) return;
+  const dropdown = document.getElementById('theme-palette-dropdown');
+  if (!themeBtn || !dropdown) return;
 
-  themeBtn.onclick = () => {
-    state.isDarkTheme = !state.isDarkTheme;
-    document.body.classList.toggle('theme-light', !state.isDarkTheme);
-    document.body.classList.toggle('theme-dark', state.isDarkTheme);
+  const THEMES = [
+    { key: 'violet', name: 'Tím Đen (Midnight)', icon: 'fa-solid fa-moon' },
+    { key: 'black', name: 'Đen Tuyền (AMOLED)', icon: 'fa-solid fa-circle' },
+    { key: 'white', name: 'Trắng Sáng (Clean Milk)', icon: 'fa-solid fa-sun' },
+    { key: 'gold', name: 'Vàng (Amber Gold)', icon: 'fa-solid fa-bolt' },
+    { key: 'pink', name: 'Hồng (Neon Sakura)', icon: 'fa-solid fa-heart' },
+    { key: 'blue', name: 'Xanh Dương (Sapphire)', icon: 'fa-solid fa-water' },
+    { key: 'green', name: 'Xanh Lá (Emerald Mint)', icon: 'fa-solid fa-leaf' }
+  ];
 
-    themeBtn.innerHTML = state.isDarkTheme ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
-    showToast(state.isDarkTheme ? 'Đã bật chế độ Dark Theme 🌙' : 'Đã bật chế độ Light Theme ☀️');
+  const savedTheme = localStorage.getItem('smart_schedule_theme') || 'violet';
+
+  function applyTheme(themeKey, notify = false) {
+    const matched = THEMES.find(t => t.key === themeKey) || THEMES[0];
+
+    // Gỡ bỏ tất cả các class theme cũ
+    THEMES.forEach(t => {
+      document.body.classList.remove(`theme-${t.key}`);
+    });
+    document.body.classList.remove('theme-light', 'theme-dark');
+
+    // Gán class theme mới
+    document.body.classList.add(`theme-${matched.key}`);
+    if (matched.key === 'white') {
+      document.body.classList.add('theme-light');
+      state.isDarkTheme = false;
+    } else {
+      document.body.classList.add('theme-dark');
+      state.isDarkTheme = true;
+    }
+
+    // Cập nhật trạng thái active trong dropdown
+    dropdown.querySelectorAll('.theme-opt-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.theme === matched.key);
+    });
+
+    localStorage.setItem('smart_schedule_theme', matched.key);
+
+    if (notify) {
+      showToast(`Đã chuyển sang tone màu ${matched.name} ✨`);
+    }
+  }
+
+  // Khởi chạy theme ban đầu
+  applyTheme(savedTheme, false);
+
+  // Toggle Dropdown
+  themeBtn.onclick = (e) => {
+    e.stopPropagation();
+    dropdown.classList.toggle('hidden');
   };
+
+  // Bấm chọn theme trong dropdown
+  dropdown.querySelectorAll('.theme-opt-btn').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const selected = btn.dataset.theme;
+      applyTheme(selected, true);
+      dropdown.classList.add('hidden');
+    };
+  });
+
+  // Tự động đóng dropdown khi click ra ngoài
+  document.addEventListener('click', (e) => {
+    if (wrapper && !wrapper.contains(e.target)) {
+      dropdown.classList.add('hidden');
+    }
+  });
 }
 
 /**

@@ -4,6 +4,25 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-06 15:05] - Xây Dựng Hệ Thống Bảng Màu Giao Diện (Theme System 7 Tone Màu Độc Đáo) 🎨✨
+
+- **🎯 Yêu cầu từ người dùng**:
+  - Tạo 7 tone màu phong phú cho ứng dụng theo đúng phong cách thiết kế hiện tại: **Đen tuyền (AMOLED)**, **Trắng (Clean Milk - đã fix tương phản & chống chói)**, **Tím đen (Midnight Violet - mặc định)**, **Vàng (Amber Gold)**, **Hồng (Neon Sakura)**, **Xanh dương (Deep Ocean Sapphire)**, **Xanh lá (Emerald Forest Mint)**.
+- **✅ Công việc đã hoàn thành**:
+  - [`src/1.Frontend/styles/1.variables.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/1.variables.css):
+    - Định nghĩa chi tiết bộ biến CSS Variables cho 7 Palette màu chuẩn chỉnh (`--bg-primary`, `--bg-secondary`, `--bg-tertiary`, `--bg-card`, `--bg-glass`, `--border-color`, `--border-highlight`, `--text-primary`, `--accent-primary`, `--accent-gradient`, `--accent-subtle`).
+    - Fix lại tone Trắng (`theme-white` / `theme-light`) đạt chuẩn tương phản cao, nền dịu mát chống mỏi mắt.
+    - Đồng bộ màu sắc 3 vệt sáng cực quang huyền ảo (`--glow-1`, `--glow-2`, `--glow-3`) tương thích với từng theme.
+  - [`src/1.Frontend/styles/2.navbar.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/2.navbar.css):
+    - Xây dựng giao diện Theme Palette Dropdown Popover cao cấp chuẩn Glassmorphism.
+  - [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html):
+    - Tích hợp `#theme-palette-wrapper` và `#theme-palette-dropdown` với 7 swatch màu sắc trực quan.
+  - [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    - Nâng cấp hàm `initThemeToggle()`: Hỗ trợ chọn theme 1-chạm, lưu vào `localStorage`, đồng bộ active state và toast thông báo.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v99`.
+
+---
+
 ## 📅 [2026-09-06 15:00] - Tách Biệt Hoàn Toàn Tính Năng Focus (Định Vị Hôm Nay 🎯) Theo Ngữ Cảnh Mục 1 & Mục 2 🧭✨
 
 - **🎯 Yêu cầu từ người dùng**:

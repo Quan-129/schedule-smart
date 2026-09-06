@@ -147,9 +147,52 @@
         </div>
 
         <div class="nav-quick-actions">
-          <!-- Theme Toggle -->
-          <button id="theme-toggle-btn" class="btn-icon" title="Đổi giao diện Sáng / Tối"><i
-              class="fa-solid fa-sun"></i></button>
+          <!-- Theme Palette Selector (7 Tone Màu) -->
+          <div class="theme-palette-wrapper" id="theme-palette-wrapper">
+            <button id="theme-toggle-btn" class="btn-icon btn-theme-toggle" title="Chọn bảng màu giao diện (7 tone màu)" aria-label="Bảng màu">
+              <i class="fa-solid fa-palette"></i>
+            </button>
+            <div id="theme-palette-dropdown" class="theme-palette-dropdown hidden" role="menu">
+              <div class="theme-palette-header">
+                <span><i class="fa-solid fa-swatchbook"></i> Bảng Màu (7 Tone)</span>
+              </div>
+              <button type="button" class="theme-opt-btn" data-theme="violet">
+                <span class="theme-swatch" style="background: linear-gradient(135deg, #6366f1, #ec4899);"></span>
+                <span class="theme-opt-name">Tím Đen (Midnight)</span>
+                <i class="fa-solid fa-check theme-opt-check"></i>
+              </button>
+              <button type="button" class="theme-opt-btn" data-theme="black">
+                <span class="theme-swatch" style="background: linear-gradient(135deg, #000000, #3f3f46); border-color: #71717a;"></span>
+                <span class="theme-opt-name">Đen Tuyền (AMOLED)</span>
+                <i class="fa-solid fa-check theme-opt-check"></i>
+              </button>
+              <button type="button" class="theme-opt-btn" data-theme="white">
+                <span class="theme-swatch" style="background: linear-gradient(135deg, #ffffff, #e2e8f0); border-color: #94a3b8;"></span>
+                <span class="theme-opt-name">Trắng Sáng (Clean Milk)</span>
+                <i class="fa-solid fa-check theme-opt-check"></i>
+              </button>
+              <button type="button" class="theme-opt-btn" data-theme="gold">
+                <span class="theme-swatch" style="background: linear-gradient(135deg, #f59e0b, #ea580c);"></span>
+                <span class="theme-opt-name">Vàng (Amber Gold)</span>
+                <i class="fa-solid fa-check theme-opt-check"></i>
+              </button>
+              <button type="button" class="theme-opt-btn" data-theme="pink">
+                <span class="theme-swatch" style="background: linear-gradient(135deg, #ec4899, #f43f5e);"></span>
+                <span class="theme-opt-name">Hồng (Neon Sakura)</span>
+                <i class="fa-solid fa-check theme-opt-check"></i>
+              </button>
+              <button type="button" class="theme-opt-btn" data-theme="blue">
+                <span class="theme-swatch" style="background: linear-gradient(135deg, #0284c7, #38bdf8);"></span>
+                <span class="theme-opt-name">Xanh Dương (Sapphire)</span>
+                <i class="fa-solid fa-check theme-opt-check"></i>
+              </button>
+              <button type="button" class="theme-opt-btn" data-theme="green">
+                <span class="theme-swatch" style="background: linear-gradient(135deg, #10b981, #059669);"></span>
+                <span class="theme-opt-name">Xanh Lá (Emerald Mint)</span>
+                <i class="fa-solid fa-check theme-opt-check"></i>
+              </button>
+            </div>
+          </div>
 
           <!-- User Auth & Cloud Sync Widget -->
           <div class="user-auth-group">
