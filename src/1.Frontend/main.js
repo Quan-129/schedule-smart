@@ -540,16 +540,69 @@ export function checkIsCurrentWeek(filepath) {
   if (!weekObj || !weekObj.startDate) return false;
 
   const today = new Date();
-  const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+  const todayY = today.getFullYear();
+  const todayM = today.getMonth();
+  const todayD = today.getDate();
+  const todayStr = `${todayY}-${String(todayM + 1).padStart(2, '0')}-${String(todayD).padStart(2, '0')}`;
 
-  const start = new Date(weekObj.startDate);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
+  const parts = weekObj.startDate.split('-').map(Number);
+  if (parts.length !== 3) return false;
+  const start = new Date(parts[0], parts[1] - 1, parts[2]);
+  const end = new Date(parts[0], parts[1] - 1, parts[2] + 6);
 
-  const startStr = start.getFullYear() + '-' + String(start.getMonth() + 1).padStart(2, '0') + '-' + String(start.getDate()).padStart(2, '0');
-  const endStr = end.getFullYear() + '-' + String(end.getMonth() + 1).padStart(2, '0') + '-' + String(end.getDate()).padStart(2, '0');
+  const startStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`;
+  const endStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')}`;
 
   return todayStr >= startStr && todayStr <= endStr;
+}
+
+/**
+ * Tìm file tuần học THỰC TẾ chứa ngày hôm nay (hoặc tuần có startDate gần nhất)
+ * @returns {string}
+ */
+export function getRealCurrentWeekFile() {
+  const today = new Date();
+  const todayY = today.getFullYear();
+  const todayM = today.getMonth();
+  const todayD = today.getDate();
+  const todayTime = new Date(todayY, todayM, todayD).getTime();
+  const todayStr = `${todayY}-${String(todayM + 1).padStart(2, '0')}-${String(todayD).padStart(2, '0')}`;
+
+  // 1. Tìm tuần chứa ngày hôm nay chính xác (startDate <= today <= startDate + 6 days)
+  const exactWeek = availableWeeks.find(w => {
+    if (!w.startDate) return false;
+    const parts = w.startDate.split('-').map(Number);
+    if (parts.length !== 3) return false;
+    const start = new Date(parts[0], parts[1] - 1, parts[2]);
+    const end = new Date(parts[0], parts[1] - 1, parts[2] + 6);
+
+    const startStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`;
+    const endStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')}`;
+
+    return todayStr >= startStr && todayStr <= endStr;
+  });
+
+  if (exactWeek) return exactWeek.filename;
+
+  // 2. Nếu không nằm trúng tuần nào (nghỉ hè/trước kỳ), tìm tuần có ngày bắt đầu gần ngày hôm nay nhất
+  let closestWeek = null;
+  let minDiff = Infinity;
+
+  availableWeeks.forEach(w => {
+    if (w.startDate) {
+      const parts = w.startDate.split('-').map(Number);
+      if (parts.length === 3) {
+        const startTime = new Date(parts[0], parts[1] - 1, parts[2]).getTime();
+        const diff = Math.abs(todayTime - startTime);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestWeek = w;
+        }
+      }
+    }
+  });
+
+  return closestWeek ? closestWeek.filename : (availableWeeks[0] ? availableWeeks[0].filename : 'schedules/tuan-35.md');
 }
 
 /**
@@ -564,22 +617,7 @@ function getInitialWeekFilename() {
   }
 
   // 2. Tìm tuần hiện tại theo ngày thực tế
-  const currentWeekObj = availableWeeks.find(w => {
-    if (!w.startDate) return false;
-    const today = new Date();
-    const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-
-    const start = new Date(w.startDate);
-    const end = new Date(start);
-    end.setDate(start.getDate() + 6);
-
-    const startStr = start.getFullYear() + '-' + String(start.getMonth() + 1).padStart(2, '0') + '-' + String(start.getDate()).padStart(2, '0');
-    const endStr = end.getFullYear() + '-' + String(end.getMonth() + 1).padStart(2, '0') + '-' + String(end.getDate()).padStart(2, '0');
-
-    return todayStr >= startStr && todayStr <= endStr;
-  });
-
-  return currentWeekObj ? currentWeekObj.filename : (availableWeeks[0] ? availableWeeks[0].filename : 'schedules/tuan-35.md');
+  return getRealCurrentWeekFile();
 }
 
 function renderWeekDropdownOptions(selectedFilename) {
@@ -1079,11 +1117,14 @@ function persistCurrentSchedule() {
 
 /**
  * Định vị & Focus vào ngày hôm nay theo ngữ cảnh Tab hiện tại (Mục 1 vs Mục 2)
+ * Tự động chuyển tới tuần chứa ngày hiện tại luôn
  */
 export async function focusTodayTarget() {
-  // 1. Nếu đang ở Mục 2 (Bản Đồ Nhiệt) -> Focus trực tiếp trong Mục 2 mà KHÔNG chuyển tab
+  const todayWeekFile = getRealCurrentWeekFile();
+
+  // 1. Nếu đang ở Mục 2 (Bản Đồ Nhiệt / Calendar) -> Focus trực tiếp trong Mục 2
   if (state.currentTab === 'today') {
-    focusTodayInHeatmap();
+    focusTodayInHeatmap(todayWeekFile);
     return;
   }
 
@@ -1092,14 +1133,12 @@ export async function focusTodayTarget() {
     switchTab('grid');
   }
 
-  // 3. Kiểm tra nếu tuần đang xem không phải tuần hiện tại -> Chuyển về tuần hiện tại
-  const isCurrentWeek = checkIsCurrentWeek(currentWeekFile);
-  if (!isCurrentWeek) {
-    const todayWeekFile = getInitialWeekFilename();
-    if (todayWeekFile && todayWeekFile !== currentWeekFile) {
-      showToast('Đang chuyển về tuần hiện tại...');
-      await loadWeekSchedule(todayWeekFile);
-    }
+  // 3. Tự động chuyển tới tuần chứa ngày hiện tại nếu đang xem tuần khác
+  if (currentWeekFile !== todayWeekFile) {
+    showToast('Đang chuyển tới tuần chứa ngày hôm nay...');
+    const weekSelect = document.getElementById('week-select');
+    if (weekSelect) weekSelect.value = todayWeekFile;
+    await loadWeekSchedule(todayWeekFile);
   }
 
   // 4. Định vị và kích hoạt hiệu ứng Ping Target trên thẻ ngày Hôm Nay của Mục 1
@@ -1116,11 +1155,11 @@ export async function focusTodayTarget() {
         todayCard.classList.remove('ping-target-active');
       }, 2600);
 
-      showToast('Đã định vị ngày Hôm nay! 🎯');
+      showToast('Đã định vị tuần & ngày Hôm nay! 🎯');
     } else {
-      showToast('Hôm nay không nằm trong lịch học đang hiển thị.');
+      showToast('Đã chuyển tới tuần gần nhất chứa ngày hôm nay! 🎯');
     }
-  }, 120);
+  }, 150);
 }
 
 

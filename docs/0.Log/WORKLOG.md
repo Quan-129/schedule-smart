@@ -4,6 +4,24 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-07 08:15] - Tối Ưu Nút Focus Target: Tự Động Nhận Diện & Chuyển Ngay Tới Tuần Chứa Ngày Hiện Tại 🎯⚡📅
+
+- **🎯 Yêu cầu từ người dùng**: Khi đang xem bất kỳ tuần học nào khác (ví dụ Tuần 36, Tuần 35...) mà bấm vào nút **Focus Target** (nút icon tâm ngắm `#btn-focus-today`), ứng dụng phải tự động chuyển ngay về tuần chứa ngày hôm nay thực tế thay vì chỉ định vị trên tuần đang mở.
+- **🔍 Giải pháp & Triển khai**:
+  - Viết hàm chuẩn `getRealCurrentWeekFile()` trong [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    - Tính toán chính xác khoảng thời gian của từng tuần (`startDate` đến `startDate + 6 ngày`) bằng việc tách các số nguyên năm-tháng-ngày nhằm chống lệch múi giờ UTC/GMT.
+    - Tìm tuần chứa ngày hôm nay chính xác (`startDate <= today <= endDate`).
+    - Nếu hôm nay nằm ngoài tất cả các tuần (nghỉ hè/trước kỳ), tự động chọn tuần có ngày bắt đầu gần ngày hôm nay nhất.
+  - Cập nhật hàm [`focusTodayTarget()`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    - Khi bấm Focus ở Tab 1 (Lưới thời khóa biểu): Tự động cập nhật dropdown `weekSelect`, nạp lịch tuần chứa ngày hôm nay (`loadWeekSchedule(todayWeekFile)`), cuộn mượt tới thẻ ngày `.day-card.is-today` và kích hoạt hiệu ứng Radar Ping Target xoay sáng viền.
+    - Khi bấm Focus ở Tab 2 (Bản đồ nhiệt / Google Calendar): Đồng bộ sang hàm [`focusTodayInHeatmap(todayWeekFile)`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js) để render ngay cột ngày hôm nay trên Lịch Tuần.
+- **✅ Chi tiết thay đổi**:
+  - [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js)
+  - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js)
+  - [`docs/0.Log/WORKLOG.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/docs/0.Log/WORKLOG.md)
+
+---
+
 ## 📅 [2026-09-06 19:40] - Khởi Tạo & Đăng Ký Skill Chuyên Môn: `tiktok-overlay-generator` 🖼️🎨📱✨
 
 - **🎯 Yêu cầu từ người dùng**: Đóng gói quy trình tự động vẽ card, chèn chữ (Text Overlay), xử lý đa dòng tiếng Việt và kết xuất 3-4 biến thể kịch bản ảnh TikTok thành một Skill độc lập (`tiktok-overlay-generator`).

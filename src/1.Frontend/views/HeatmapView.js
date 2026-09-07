@@ -1320,14 +1320,35 @@ export function renderHeatmapView(availableWeeks = [], currentWeekFile = '', onS
 /**
  * Định vị & Focus vào ngày hôm nay NGAY TRONG Bản Đồ Nhiệt (Mục 2)
  * Tự động nhận diện chế độ xem hiện tại (Tuần / Tháng / Học kỳ) mà KHÔNG chuyển tab
+ * @param {string} [targetWeekFile]
  */
-export async function focusTodayInHeatmap() {
+export async function focusTodayInHeatmap(targetWeekFile = null) {
   const container = document.getElementById('today-view-container');
   if (!container) return;
 
   // 1. Chế độ TUẦN (Google Calendar Weekly Matrix)
   if (currentHorizonMode === 'week') {
-    const todayWeekFile = storedCurrentWeekFile || state.currentWeekFile || '';
+    let todayWeekFile = targetWeekFile;
+    if (!todayWeekFile) {
+      const today = new Date();
+      const todayY = today.getFullYear();
+      const todayM = today.getMonth();
+      const todayD = today.getDate();
+      const todayStr = `${todayY}-${String(todayM + 1).padStart(2, '0')}-${String(todayD).padStart(2, '0')}`;
+
+      const matchedWeek = (storedAvailableWeeks || []).find(w => {
+        if (!w.startDate) return false;
+        const parts = w.startDate.split('-').map(Number);
+        if (parts.length !== 3) return false;
+        const start = new Date(parts[0], parts[1] - 1, parts[2]);
+        const end = new Date(parts[0], parts[1] - 1, parts[2] + 6);
+        const startStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`;
+        const endStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')}`;
+        return todayStr >= startStr && todayStr <= endStr;
+      });
+      todayWeekFile = matchedWeek ? matchedWeek.filename : (storedCurrentWeekFile || state.currentWeekFile || '');
+    }
+
     if (todayWeekFile && activeWeeklyFile !== todayWeekFile) {
       activeWeeklyFile = todayWeekFile;
       const semesterWeeks = aggregateSemesterData(storedAvailableWeeks, todayWeekFile);
@@ -1374,9 +1395,9 @@ export async function focusTodayInHeatmap() {
           if (todayHeader) todayHeader.classList.remove('heatmap-focus-ping');
         }, 2500);
 
-        showToast('Đã định vị ngày Hôm nay trên Lịch Tuần! 🎯');
+        showToast('Đã định vị tuần & ngày Hôm nay trên Lịch Tuần! 🎯');
       } else {
-        showToast('Hôm nay không nằm trong tuần học đang hiển thị.');
+        showToast('Đã chuyển tới tuần chứa ngày hôm nay! 🎯');
       }
     }, 120);
     return;
