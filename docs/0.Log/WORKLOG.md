@@ -4,6 +4,20 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-07 08:30] - Sửa Lỗi Focus Chế Độ Quý / Học Kỳ: Focus Chính Xác Tuần Hiện Tại Thực Tế 🎯📅✨
+
+- **🎯 Yêu cầu từ người dùng**: Sửa lỗi khi ở chế độ **Học Kỳ / Quý** (Semester Matrix) mà bấm nút **Focus (Tâm ngắm)** thì hệ thống bị focus theo tuần đang chọn trên thanh Navbar (ví dụ Tuần 45) thay vì tuần chứa ngày hôm nay thực tế.
+- **🔍 Giải pháp & Triển khai**:
+  - Trong [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    - Tách biệt rõ ràng 2 khái niệm: `isRealCurrentWeek` (tuần chứa ngày hôm nay thực tế theo `startDate`) và `isSelectedWeek` (tuần đang được chọn trên Navbar).
+    - Cập nhật hàm `renderSemesterMatrixView`: Đánh dấu class `is-in-real-current-week` và `is-today-semester-square` cho ô ngày hôm nay thực tế.
+    - Cập nhật hàm `focusTodayInHeatmap`: Khi ở chế độ Học Kỳ / Quý, tự động tìm `realTodayWeekFile`, đồng bộ thanh Navbar `#week-select` về tuần thực tế nếu đang ở tuần khác, cuộn tới đúng cột tuần hôm nay và kích hoạt hiệu ứng Radar Ping Target xoay sáng rực rỡ.
+- **✅ Chi tiết thay đổi**:
+  - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js)
+  - [`docs/0.Log/WORKLOG.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/docs/0.Log/WORKLOG.md)
+
+---
+
 ## 📅 [2026-09-07 08:25] - Tinh Gọn Giao Diện Tab Heatmap: Dùng Chung Thanh Điều Hướng Tuần Navbar 🧹✨
 
 - **🎯 Yêu cầu từ người dùng**: Loại bỏ dropdown chọn tuần và badge ngày/buổi học trùng lặp bên trong chế độ Tuần của Tab Bản Đồ Nhiệt (Mục 2), thống nhất dùng chung thanh điều hướng tuần trên Navbar.
