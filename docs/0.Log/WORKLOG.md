@@ -4,6 +4,20 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-07 08:25] - Tinh Gọn Giao Diện Tab Heatmap: Dùng Chung Thanh Điều Hướng Tuần Navbar 🧹✨
+
+- **🎯 Yêu cầu từ người dùng**: Loại bỏ dropdown chọn tuần và badge ngày/buổi học trùng lặp bên trong chế độ Tuần của Tab Bản Đồ Nhiệt (Mục 2), thống nhất dùng chung thanh điều hướng tuần trên Navbar.
+- **🔍 Triển khai & Tối ưu**:
+  - Trong [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js):
+    - Loại bỏ thẻ `<select id="select-weekly-matrix-week">` và `<span class="semester-workload-badge">` trong phần header của card Lịch Tuần.
+    - Xóa bỏ khối listener sự kiện `selectWeek.onchange` thừa.
+    - Đồng bộ biến `activeWeeklyFile` luôn luôn theo `currentWeekFile` của thanh Navbar trên cùng, giúp khi chuyển tuần ở bất kỳ đâu trên thanh bar thì Lịch Tuần Google Calendar cũng tự động cập nhật ngay lập tức.
+- **✅ Chi tiết thay đổi**:
+  - [`src/1.Frontend/views/HeatmapView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/HeatmapView.js)
+  - [`docs/0.Log/WORKLOG.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/docs/0.Log/WORKLOG.md)
+
+---
+
 ## 📅 [2026-09-07 08:15] - Tối Ưu Nút Focus Target: Tự Động Nhận Diện & Chuyển Ngay Tới Tuần Chứa Ngày Hiện Tại 🎯⚡📅
 
 - **🎯 Yêu cầu từ người dùng**: Khi đang xem bất kỳ tuần học nào khác (ví dụ Tuần 36, Tuần 35...) mà bấm vào nút **Focus Target** (nút icon tâm ngắm `#btn-focus-today`), ứng dụng phải tự động chuyển ngay về tuần chứa ngày hôm nay thực tế thay vì chỉ định vị trên tuần đang mở.

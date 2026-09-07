@@ -303,10 +303,7 @@ export function bindHorizonModeTabsEvents(container, semesterWeeks, currentWeekF
  * Cố định hiển thị trọn vẹn 7 Ngày (Thứ 2 -> Chủ Nhật) với Unified Single Scroll Container
  */
 function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile = '', onSelectWeek = null) {
-  if (!activeWeeklyFile) {
-    activeWeeklyFile = currentWeekFile || (semesterWeeks[0] ? semesterWeeks[0].filename : '');
-  }
-
+  activeWeeklyFile = currentWeekFile || activeWeeklyFile || (semesterWeeks[0] ? semesterWeeks[0].filename : '');
   const selectedWeek = semesterWeeks.find(w => w.filename === activeWeeklyFile) || semesterWeeks[0];
   if (!selectedWeek) {
     container.innerHTML = `<p style="color: var(--text-muted); padding: 1rem;">Chưa có dữ liệu tuần học.</p>`;
@@ -480,18 +477,6 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
 
         <div class="heatmap-card-actions">
           ${generateHorizonModeTabsHtml('week')}
-
-          <select id="select-weekly-matrix-week" class="heatmap-select-filter" title="Chọn tuần học">
-            ${semesterWeeks.map(w => `
-              <option value="${escapeHtml(w.filename)}" ${w.filename === activeWeeklyFile ? 'selected' : ''}>
-                ${escapeHtml(w.title)}
-              </option>
-            `).join('')}
-          </select>
-
-          <span class="semester-workload-badge" style="background: ${selectedWeek.workload.bg}; color: ${selectedWeek.workload.color};">
-            ${selectedWeek.workload.label} (${selectedWeek.totalClasses} buổi)
-          </span>
         </div>
       </div>
 
@@ -609,17 +594,7 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
     </div>
   `;
 
-  // GẮN SỰ KIỆN: 1. Đổi tuần học trong dropdown
-  const selectWeek = container.querySelector('#select-weekly-matrix-week');
-  if (selectWeek) {
-    selectWeek.onchange = (e) => {
-      activeWeeklyFile = e.target.value;
-      renderWeeklyMatrixView(container, semesterWeeks, currentWeekFile, onSelectWeek);
-      setupHeatmapTooltips();
-    };
-  }
-
-  // GẮN SỰ KIỆN: 2. Mở chi tiết tuần
+  // GẮN SỰ KIỆN: Mở chi tiết tuần
   const navBtn = container.querySelector('.btn-open-week-nav');
   if (navBtn) {
     navBtn.onclick = () => {
