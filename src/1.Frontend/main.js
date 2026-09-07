@@ -1117,28 +1117,28 @@ function persistCurrentSchedule() {
 
 /**
  * Định vị & Focus vào ngày hôm nay theo ngữ cảnh Tab hiện tại (Mục 1 vs Mục 2)
- * Tự động chuyển tới tuần chứa ngày hiện tại luôn
+ * Tự động chuyển tới tuần chứa ngày hiện tại trên thanh điều hướng Navbar
  */
 export async function focusTodayTarget() {
   const todayWeekFile = getRealCurrentWeekFile();
 
-  // 1. Nếu đang ở Mục 2 (Bản Đồ Nhiệt / Calendar) -> Focus trực tiếp trong Mục 2
+  // 1. Tự động chuyển tới tuần chứa ngày hiện tại nếu đang xem tuần khác
+  if (todayWeekFile && currentWeekFile !== todayWeekFile) {
+    showToast('Đang chuyển tới tuần chứa ngày hôm nay...');
+    const weekSelect = document.getElementById('week-select');
+    if (weekSelect) weekSelect.value = todayWeekFile;
+    await loadWeekSchedule(todayWeekFile);
+  }
+
+  // 2. Nếu đang ở Mục 2 (Bản Đồ Nhiệt / Calendar) -> Định vị trực tiếp trong Mục 2
   if (state.currentTab === 'today') {
     focusTodayInHeatmap(todayWeekFile);
     return;
   }
 
-  // 2. Nếu đang ở các tab khác (không phải grid) -> Chuyển sang Tab 1 (Thời khóa biểu)
+  // 3. Nếu đang ở các tab khác (không phải grid) -> Chuyển sang Tab 1 (Thời khóa biểu)
   if (state.currentTab !== 'grid' && state.currentTab !== 'schedule') {
     switchTab('grid');
-  }
-
-  // 3. Tự động chuyển tới tuần chứa ngày hiện tại nếu đang xem tuần khác
-  if (currentWeekFile !== todayWeekFile) {
-    showToast('Đang chuyển tới tuần chứa ngày hôm nay...');
-    const weekSelect = document.getElementById('week-select');
-    if (weekSelect) weekSelect.value = todayWeekFile;
-    await loadWeekSchedule(todayWeekFile);
   }
 
   // 4. Định vị và kích hoạt hiệu ứng Ping Target trên thẻ ngày Hôm Nay của Mục 1

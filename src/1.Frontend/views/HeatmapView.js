@@ -357,6 +357,8 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
     return;
   }
 
+  const realTodayWeekFile = getRealTodayWeekFilename(semesterWeeks);
+  const isRealTodayWeek = (selectedWeek.filename === realTodayWeekFile);
   const currentDayOfWeek = new Date().getDay();
   const dayIndexMap = { 'Thứ 2': 1, 'Thứ 3': 2, 'Thứ 4': 3, 'Thứ 5': 4, 'Thứ 6': 5, 'Thứ 7': 6, 'Chủ Nhật': 0 };
   const standardDays = selectedWeek.days || [];
@@ -539,7 +541,7 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
               </div>
               <div class="cal-days-header-grid">
                 ${visibleDays.map(d => {
-                  const isToday = dayIndexMap[d.dayName] === currentDayOfWeek && selectedWeek.filename === currentWeekFile;
+                  const isToday = isRealTodayWeek && (dayIndexMap[d.dayName] === currentDayOfWeek);
                   const weekStartDate = selectedWeek.startDate || '';
                   const dateInfo = getDateForDayOfWeek(weekStartDate, dayIndexMap[d.dayName]);
                   const dateLabel = dateInfo ? dateInfo.full : '';
@@ -568,7 +570,7 @@ function renderWeeklyMatrixView(container, semesterWeeks = [], currentWeekFile =
               <!-- 7 Cột Ngày dạng Timeline -->
               <div class="cal-days-columns-grid">
                 ${visibleDays.map(d => {
-                  const isToday = dayIndexMap[d.dayName] === currentDayOfWeek && selectedWeek.filename === currentWeekFile;
+                  const isToday = isRealTodayWeek && (dayIndexMap[d.dayName] === currentDayOfWeek);
                   const dayEvents = layoutDayEvents(d.classes);
 
                   // Vạch thời gian hiện tại
@@ -1364,29 +1366,13 @@ export async function focusTodayInHeatmap(targetWeekFile = null) {
 
   // 1. Chế độ TUẦN (Google Calendar Weekly Matrix)
   if (currentHorizonMode === 'week') {
-    let todayWeekFile = targetWeekFile;
-    if (!todayWeekFile) {
-      const today = new Date();
-      const todayY = today.getFullYear();
-      const todayM = today.getMonth();
-      const todayD = today.getDate();
-      const todayStr = `${todayY}-${String(todayM + 1).padStart(2, '0')}-${String(todayD).padStart(2, '0')}`;
+    const todayWeekFile = targetWeekFile || getRealTodayWeekFilename(storedAvailableWeeks);
 
-      const matchedWeek = (storedAvailableWeeks || []).find(w => {
-        if (!w.startDate) return false;
-        const parts = w.startDate.split('-').map(Number);
-        if (parts.length !== 3) return false;
-        const start = new Date(parts[0], parts[1] - 1, parts[2]);
-        const end = new Date(parts[0], parts[1] - 1, parts[2] + 6);
-        const startStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`;
-        const endStr = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')}`;
-        return todayStr >= startStr && todayStr <= endStr;
-      });
-      todayWeekFile = matchedWeek ? matchedWeek.filename : (storedCurrentWeekFile || state.currentWeekFile || '');
-    }
-
-    if (todayWeekFile && activeWeeklyFile !== todayWeekFile) {
+    if (todayWeekFile && (activeWeeklyFile !== todayWeekFile || storedCurrentWeekFile !== todayWeekFile)) {
       activeWeeklyFile = todayWeekFile;
+      storedCurrentWeekFile = todayWeekFile;
+      const weekSelect = document.getElementById('week-select');
+      if (weekSelect) weekSelect.value = todayWeekFile;
       const semesterWeeks = aggregateSemesterData(storedAvailableWeeks, todayWeekFile);
       renderActiveHorizonModeContent(semesterWeeks, todayWeekFile, storedOnSelectWeek);
     }
