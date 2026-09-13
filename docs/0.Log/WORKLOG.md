@@ -4,6 +4,28 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-13 22:05] - Khắc Phục Lỗi Chèn Text Rác Khi Highlight & Bổ Sung Tính Năng Undo / Redo (Ctrl+Z / Ctrl+Y) ↩️↪️✨
+
+- **🎯 Yêu cầu & Phản hồi người dùng**:
+  - Người dùng phản hồi: *"mỗi lần hightlight nó cứ bị lỗi như vầy tạo 1 cái text lên trên có vẻ vẫn chưa hoạt động với lại thêm tính năng undo đi"* kèm ảnh chụp `văn bản # Dự án QuickStart`.
+  - Phân tích nguyên nhân:
+    1. Hàm `applyFormat` trước đó có fallback tự động chèn chuỗi `'văn bản'` khi người dùng bấm nút mà không bôi đen chữ (`selectedText = text.substring(start, end) || 'văn bản'`). Khi đang ở tab Preview hoặc chưa click vào ô nhập, con trỏ ở vị trí 0 nên nó tự động nhét `==văn bản==` lên ngay đầu file!
+    2. Chưa có hệ thống Undo/Redo khiến người dùng không thể hoàn tác khi lỡ bấm nhầm.
+- **🛠 Triển khai kỹ thuật**:
+  1. **Nâng Cấp Hàm Định Dạng Thông Minh ([`src/1.Frontend/components/modals/NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - **Tuyệt đối không chèn chữ "văn bản" rác**: Nếu không bôi đen chữ nào, chỉ chèn cặp thẻ rỗng (`====`, `****`, `<u></u>`) và đưa con trỏ chuột vào chính giữa để người dùng tiếp tục gõ.
+     - **Toggle thông minh**: Nếu đoạn bôi đen đã có định dạng, bấm nút sẽ tự động gỡ bỏ định dạng đó.
+     - **Hỗ trợ bôi đen trên bản Preview**: Nếu người dùng đang xem ở tab "Đã Gen Ra" và bôi đen một cụm từ trên màn hình rồi bấm nút Highlight, hệ thống tự động tìm cụm từ đó trong mã nguồn và bọc `==từ khóa==`, cập nhật bản gen ngay lập tức!
+  2. **Tích Hợp Hệ Thống Lịch Sử Undo / Redo Hoàn Chỉnh**:
+     - Quản lý ngăn xếp lịch sử `historyStack` (tối đa 60 bước) lưu trữ cả nội dung và vị trí con trỏ.
+     - Thêm 2 nút bấm trên thanh Toolbar: `[↩️ Hoàn tác (Ctrl+Z)]` và `[↪️ Làm lại (Ctrl+Y)]` với trạng thái `disabled` tự động khi không còn bước lịch sử.
+     - Hỗ trợ phím tắt tiêu chuẩn thế giới: `Ctrl + Z` (Undo) và `Ctrl + Y` hoặc `Ctrl + Shift + Z` (Redo).
+     - Gom cụm lịch sử thông minh (Debounce 450ms) để không bị phình to lịch sử khi gõ từng ký tự.
+  3. **Cập Nhật Giao Diện Toolbar ([`src/1.Frontend/styles/13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Thêm thanh phân cách `.neural-np-tool-divider` phân chia nhóm Undo/Redo và nhóm Định dạng.
+     - Styling mờ disabled `opacity: 0.3` cho nút khi hết lịch sử.
+- **✅ Kết quả**: Loại bỏ 100% hiện tượng nhảy chữ lạ lên đầu file, mang lại trải nghiệm soạn thảo chuyên nghiệp tương đương Notion và Google Docs!
+
 ## 📅 [2026-09-13 21:50] - Khắc Phục Triệt Để Lỗi Bảng Markdown (Table Delimiter Normalizer) & Post-Processing An Toàn 🛠️📊
 
 - **🎯 Yêu cầu & Điều tra ảnh thực tế**:

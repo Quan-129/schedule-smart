@@ -6,18 +6,76 @@ import { updateNeuralNode } from '../../../3.Database/state.js';
 import { renderMarkdownToHtml } from '../../../2.Backend/utils/markdownRenderer.js';
 
 // ==========================================================================
-// 2. HELPER FUNCTIONS
+// 2. HELPER FUNCTIONS: SMART FORMATTING (KHÔNG CHÈN TEXT RÁC)
 // ==========================================================================
-function applyFormat(textarea, prefix, suffix) {
+
+/**
+ * Áp dụng định dạng Markdown thông minh:
+ * - Nếu có bôi đen trong textarea: Bọc định dạng hoặc tháo gỡ nếu đã bọc (Toggle).
+ * - Nếu có bôi đen trên màn hình (Preview pane): Tự động tìm từ đó trong textarea và bọc định dạng.
+ * - Nếu không bôi đen: Chỉ chèn cặp thẻ rỗng và đưa con trỏ vào giữa để gõ tiếp.
+ * Tuyệt đối không chèn chữ giả mạo "văn bản" làm hỏng nội dung của người dùng.
+ * 
+ * @param {HTMLTextAreaElement} textarea 
+ * @param {string} prefix 
+ * @param {string} suffix 
+ * @param {Function} onModifyCallback 
+ */
+function applyFormat(textarea, prefix, suffix, onModifyCallback) {
   if (!textarea) return;
   const start = textarea.selectionStart;
   const end = textarea.selectionEnd;
   const text = textarea.value;
-  const selectedText = text.substring(start, end) || 'văn bản';
-  const replacement = prefix + selectedText + suffix;
-  textarea.value = text.substring(0, start) + replacement + text.substring(end);
+
+  // 1. Nếu có bôi đen trong textarea
+  if (start !== end) {
+    const selectedText = text.substring(start, end);
+
+    // Kiểm tra nếu đã có định dạng -> Gỡ bỏ (Toggle OFF)
+    if (selectedText.startsWith(prefix) && selectedText.endsWith(suffix) && selectedText.length >= prefix.length + suffix.length) {
+      const unformatted = selectedText.slice(prefix.length, -suffix.length);
+      const newText = text.substring(0, start) + unformatted + text.substring(end);
+      textarea.value = newText;
+      textarea.focus();
+      textarea.setSelectionRange(start, start + unformatted.length);
+      if (onModifyCallback) onModifyCallback(newText, start, start + unformatted.length);
+      return;
+    }
+
+    // Chưa có định dạng -> Bọc thẻ (Toggle ON)
+    const replacement = prefix + selectedText + suffix;
+    const newText = text.substring(0, start) + replacement + text.substring(end);
+    textarea.value = newText;
+    textarea.focus();
+    textarea.setSelectionRange(start, start + replacement.length);
+    if (onModifyCallback) onModifyCallback(newText, start, start + replacement.length);
+    return;
+  }
+
+  // 2. Nếu textarea không có bôi đen, kiểm tra xem có bôi đen trên Preview pane không
+  const sel = (typeof window !== 'undefined' && window.getSelection) ? window.getSelection().toString().trim() : '';
+  if (sel) {
+    const idx = text.indexOf(sel);
+    if (idx !== -1) {
+      const replacement = prefix + sel + suffix;
+      const newText = text.substring(0, idx) + replacement + text.substring(idx + sel.length);
+      textarea.value = newText;
+      textarea.focus();
+      textarea.setSelectionRange(idx, idx + replacement.length);
+      if (onModifyCallback) onModifyCallback(newText, idx, idx + replacement.length);
+      return;
+    }
+  }
+
+  // 3. Nếu KHÔNG bôi đen bất kỳ chữ nào:
+  // Chèn cặp thẻ rỗng và đặt con trỏ chuột vào chính giữa để người dùng gõ
+  const replacement = prefix + suffix;
+  const newText = text.substring(0, start) + replacement + text.substring(end);
+  textarea.value = newText;
   textarea.focus();
-  textarea.setSelectionRange(start + prefix.length, start + prefix.length + selectedText.length);
+  const midPos = start + prefix.length;
+  textarea.setSelectionRange(midPos, midPos);
+  if (onModifyCallback) onModifyCallback(newText, midPos, midPos);
 }
 
 // ==========================================================================
@@ -57,16 +115,27 @@ function renderNotepadTemplate(node) {
       </div>
     </div>
 
-    <!-- Toolbar 4 chức năng định dạng Markdown -->
+    <!-- Toolbar: Undo/Redo & 4 Chức năng định dạng Markdown -->
     <div class="neural-notepad-toolbar">
       <div class="neural-np-tools-group">
+        <!-- Nút Undo / Redo -->
+        <button type="button" class="neural-np-tool-btn" id="btn-hist-undo" title="Hoàn tác (Ctrl+Z)" disabled>
+          <i class="fa-solid fa-rotate-left"></i>
+        </button>
+        <button type="button" class="neural-np-tool-btn" id="btn-hist-redo" title="Làm lại (Ctrl+Y)" disabled>
+          <i class="fa-solid fa-rotate-right"></i>
+        </button>
+
+        <div class="neural-np-tool-divider"></div>
+
+        <!-- Nút Định dạng -->
         <button type="button" class="neural-np-tool-btn" id="btn-fmt-bold" title="In đậm (**văn bản**)">
           <strong>B</strong>
         </button>
         <button type="button" class="neural-np-tool-btn" id="btn-fmt-italic" title="In nghiêng (*văn bản*)">
           <em>I</em>
         </button>
-        <button type="button" class="neural-np-tool-btn" id="btn-fmt-underline" title="Gạch chân (&lt;u&gt;văn bản&lt;/u&gt;)">
+        <button type="button" class="neural-np-tool-btn" id="btn-fmt-underline" title="Gạch chân (<u>văn bản</u>)">
           <span style="text-decoration: underline;">U</span>
         </button>
         <button type="button" class="neural-np-tool-btn highlight" id="btn-fmt-highlight" title="Tô sáng dạ quang (==văn bản==)">
@@ -86,7 +155,7 @@ function renderNotepadTemplate(node) {
         <textarea 
           id="neural-notepad-textarea" 
           class="neural-notepad-textarea" 
-          placeholder="Nhập ghi chú định dạng Markdown tại đây...&#10;• **In đậm**&#10;• *In nghiêng*&#10;• <u>Gạch chân</u> hoặc --Gạch chân--&#10;• ==Tô sáng highlight=="
+          placeholder="Nhập ghi chú định dạng Markdown tại đây...&#10;• **In đậm**&#10;• *In nghiêng*&#10;• <u>Gạch chân</u>&#10;• ==Tô sáng highlight=="
         >${escapeHtml(notes)}</textarea>
       </div>
 
@@ -143,10 +212,94 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   const previewPane = sidebar.querySelector('#neural-np-preview-pane');
   const tabBtns = sidebar.querySelectorAll('.neural-np-tab');
   const saveStatus = sidebar.querySelector('#neural-notepad-save-status');
-
   const bodyContainer = sidebar.querySelector('#neural-notepad-body-container');
+  const undoBtn = sidebar.querySelector('#btn-hist-undo');
+  const redoBtn = sidebar.querySelector('#btn-hist-redo');
 
-  // Hàm chuyển đổi chế độ xem
+  // ========================================================================
+  // UNDO / REDO HISTORY ENGINE
+  // ========================================================================
+  const historyStack = [{
+    text: textarea.value,
+    start: textarea.selectionStart || 0,
+    end: textarea.selectionEnd || 0
+  }];
+  let historyIndex = 0;
+  const MAX_HISTORY = 60;
+
+  const updateHistoryButtons = () => {
+    if (undoBtn) undoBtn.disabled = (historyIndex <= 0);
+    if (redoBtn) redoBtn.disabled = (historyIndex >= historyStack.length - 1);
+  };
+
+  const pushHistory = (newText, start, end) => {
+    if (historyStack[historyIndex] && historyStack[historyIndex].text === newText) {
+      return;
+    }
+    // Cắt bỏ nhánh redo cũ nếu vừa có thao tác mới
+    if (historyIndex < historyStack.length - 1) {
+      historyStack.splice(historyIndex + 1);
+    }
+    historyStack.push({
+      text: newText,
+      start: typeof start === 'number' ? start : textarea.selectionStart,
+      end: typeof end === 'number' ? end : textarea.selectionEnd
+    });
+    if (historyStack.length > MAX_HISTORY) {
+      historyStack.shift();
+    } else {
+      historyIndex++;
+    }
+    updateHistoryButtons();
+  };
+
+  const doUndo = () => {
+    if (historyIndex > 0) {
+      historyIndex--;
+      const state = historyStack[historyIndex];
+      textarea.value = state.text;
+      textarea.focus();
+      textarea.setSelectionRange(state.start, state.end);
+      updateLivePreview();
+      updateHistoryButtons();
+      debouncedSave();
+    }
+  };
+
+  const doRedo = () => {
+    if (historyIndex < historyStack.length - 1) {
+      historyIndex++;
+      const state = historyStack[historyIndex];
+      textarea.value = state.text;
+      textarea.focus();
+      textarea.setSelectionRange(state.start, state.end);
+      updateLivePreview();
+      updateHistoryButtons();
+      debouncedSave();
+    }
+  };
+
+  // Gắn sự kiện nút Undo/Redo
+  if (undoBtn) undoBtn.addEventListener('click', doUndo);
+  if (redoBtn) redoBtn.addEventListener('click', doRedo);
+
+  // Phím tắt Ctrl+Z / Ctrl+Y
+  textarea.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+      e.preventDefault();
+      doUndo();
+      return;
+    }
+    if ((e.ctrlKey && e.key.toLowerCase() === 'y') || (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'z')) {
+      e.preventDefault();
+      doRedo();
+      return;
+    }
+  });
+
+  // ========================================================================
+  // TAB SWITCHING & LIVE PREVIEW
+  // ========================================================================
   const switchViewTab = (tab) => {
     tabBtns.forEach(b => {
       if (b.dataset.tab === tab) b.classList.add('active');
@@ -172,14 +325,12 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     }
   };
 
-  // 1. Tab Switching (Soạn thảo vs Xem trước đã gen vs Chia đôi)
   tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       switchViewTab(btn.dataset.tab);
     });
   });
 
-  // Nút chuyển nhanh từ Preview sang Edit
   const quickEditBtn = sidebar.querySelector('#btn-quick-switch-to-edit');
   if (quickEditBtn) {
     quickEditBtn.addEventListener('click', () => {
@@ -187,35 +338,31 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     });
   }
 
-  // Hàm cập nhật Live Preview khi gõ hoặc bấm định dạng
   const updateLivePreview = () => {
     if (previewContent) {
       previewContent.innerHTML = renderMarkdownToHtml(textarea.value);
     }
   };
 
-  // 2. Toolbar 4 Chức năng Định dạng
-  sidebar.querySelector('#btn-fmt-bold').addEventListener('click', () => {
-    applyFormat(textarea, '**', '**');
-    updateLivePreview();
-  });
+  // ========================================================================
+  // TOOLBAR 4 CHỨC NĂNG ĐỊNH DẠNG (B, I, U, HL)
+  // ========================================================================
+  const handleFormat = (prefix, suffix) => {
+    applyFormat(textarea, prefix, suffix, (newText, s, e) => {
+      pushHistory(newText, s, e);
+      updateLivePreview();
+      debouncedSave();
+    });
+  };
 
-  sidebar.querySelector('#btn-fmt-italic').addEventListener('click', () => {
-    applyFormat(textarea, '*', '*');
-    updateLivePreview();
-  });
+  sidebar.querySelector('#btn-fmt-bold').addEventListener('click', () => handleFormat('**', '**'));
+  sidebar.querySelector('#btn-fmt-italic').addEventListener('click', () => handleFormat('*', '*'));
+  sidebar.querySelector('#btn-fmt-underline').addEventListener('click', () => handleFormat('<u>', '</u>'));
+  sidebar.querySelector('#btn-fmt-highlight').addEventListener('click', () => handleFormat('==', '=='));
 
-  sidebar.querySelector('#btn-fmt-underline').addEventListener('click', () => {
-    applyFormat(textarea, '<u>', '</u>');
-    updateLivePreview();
-  });
-
-  sidebar.querySelector('#btn-fmt-highlight').addEventListener('click', () => {
-    applyFormat(textarea, '==', '==');
-    updateLivePreview();
-  });
-
-  // 3. Lưu ghi chú
+  // ========================================================================
+  // AUTO-SAVE ENGINE & DEBOUNCE
+  // ========================================================================
   const saveNotes = () => {
     const newNotes = textarea.value;
     updateNeuralNode(subjectCode, node.id, { notes: newNotes });
@@ -235,20 +382,30 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     if (onSavedCallback) onSavedCallback(node.id, newNotes);
   };
 
-  sidebar.querySelector('#btn-save-neural-notepad').addEventListener('click', saveNotes);
-
-  // Auto-save debounce khi gõ và Live Preview tức thì
   let debounceTimer = null;
-  textarea.addEventListener('input', () => {
-    updateLivePreview();
+  const debouncedSave = () => {
     if (saveStatus) {
       saveStatus.innerHTML = '<i class="fa-solid fa-pen-nib"></i> Đang chỉnh sửa...';
     }
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(saveNotes, 1200);
+  };
+
+  sidebar.querySelector('#btn-save-neural-notepad').addEventListener('click', saveNotes);
+
+  let historyDebounce = null;
+  textarea.addEventListener('input', () => {
+    updateLivePreview();
+    debouncedSave();
+
+    // Gom cụm lịch sử chỉnh sửa khi gõ phím
+    clearTimeout(historyDebounce);
+    historyDebounce = setTimeout(() => {
+      pushHistory(textarea.value, textarea.selectionStart, textarea.selectionEnd);
+    }, 450);
   });
 
-  // 4. Đóng Notepad
+  // Đóng bảng ghi chú
   sidebar.querySelector('#btn-close-neural-notepad').addEventListener('click', closeNeuralNotepadSidebar);
 }
 
@@ -266,3 +423,4 @@ export function closeNeuralNotepadSidebar() {
     }, 280);
   }
 }
+
