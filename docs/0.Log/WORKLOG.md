@@ -4,6 +4,26 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-14 00:25] - Hover Vào Chữ Có Highlight Hiện Dấu Bỏ Highlight (Floating Badge & Toggle Highlight) 💡✨
+
+- **🎯 Yêu cầu từ người dùng**:
+  - *"hover vào chữ có highlight để hiện dấu bỏ highlight"*
+- **🛠 Triển khai kỹ thuật ([`src/1.Frontend/components/modals/NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`src/1.Frontend/styles/13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Huy hiệu nổi độc lập (Floating Unhighlight Badge)**:
+     - Tạo phần tử DOM nổi `.neural-unhighlight-badge` (`[ ✕ Bỏ highlight ]`) độc lập với `visualEditor.innerHTML` để không làm bẩn dữ liệu lưu trữ trong LocalStorage.
+     - Sử dụng `getBoundingClientRect()` tự động căn giữa badge ngay phía trên chữ highlight; nếu gần mép trên màn hình (< 10px) sẽ tự động đảo xuống phía dưới.
+  2. **Trải nghiệm Hover mượt mà**:
+     - Lắng nghe `mouseover` và `mouseout` trên vùng nội dung note, có bộ đệm trễ 200ms giúp người dùng di chuyển chuột từ dòng chữ lên badge mà không bị chớp tắt.
+     - Hover trực tiếp lên chữ highlight có viền đứt dạ quang sinh động (`outline: 1.5px dashed rgba(250, 204, 21, 0.8)`).
+     - Rê chuột vào badge sẽ đổi màu sang đỏ cảnh báo với hiệu ứng xoay icon `✕` 90 độ.
+  3. **Hỗ trợ gỡ highlight trên cả 2 tab (Visual Rich Editor & Markdown Preview)**:
+     - *Trong tab Visual Editor*: Unwrap chuẩn cây DOM (`replaceWith(...childNodes)`), loại bỏ thẻ `<mark class="neural-highlight">`, giữ nguyên toàn bộ chữ và tự động lưu.
+     - *Trong tab Markdown Preview*: Tự động bóc tách cú pháp `==nội dung==` hoặc `<mark>nội dung</mark>` trong `textarea.value`, render lại preview và đồng bộ ghi chú.
+  4. **Nút HL Toolbar thông minh (Toggle Highlight)**:
+     - Nếu vùng chọn đã nằm trong thẻ highlight, click nút `HL` trên thanh công cụ sẽ tự động toggle gỡ bỏ highlight.
+  5. **Nâng cấp Service Worker Cache v126**:
+     - Nâng `CACHE_NAME` lên `smart-schedule-modular-v126` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js) để trình duyệt tự động cập nhật asset mới nhất.
+
 ## 📅 [2026-09-14 00:10] - Khắc Phục Triệt Để Tính Năng Đổi Màu Chữ & Đổi Cỡ Chữ Trong Visual Note: Selection Tracking & Mousedown Retention 🎨🔤✨
 
 - **🎯 Yêu cầu từ người dùng**:

@@ -855,21 +855,47 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     document.execCommand('undo', false, null);
     saveAllNotes();
   });
+  // Hàm unwrap/gỡ bỏ thẻ highlight
+  const unwrapHighlightNode = (markNode) => {
+    if (!markNode || !markNode.parentNode) return;
+    const parent = markNode.parentNode;
+    while (markNode.firstChild) {
+      parent.insertBefore(markNode.firstChild, markNode);
+    }
+    parent.removeChild(markNode);
+    parent.normalize();
+  };
+
   sidebar.querySelector('#btn-vis-highlight')?.addEventListener('click', () => {
     const range = getOrRestoreVisualRange();
     if (!range || range.collapsed) return;
     try {
-      const mark = document.createElement('mark');
-      mark.className = 'neural-highlight';
-      mark.appendChild(range.extractContents());
-      range.insertNode(mark);
+      // Kiểm tra nếu vùng chọn nằm trong hoặc bọc thẻ neural-highlight
+      let existingMark = null;
+      let curr = range.commonAncestorContainer;
+      while (curr && curr !== visualEditor) {
+        if (curr.nodeType === 1 && curr.classList.contains('neural-highlight')) {
+          existingMark = curr;
+          break;
+        }
+        curr = curr.parentNode;
+      }
 
-      const sel = window.getSelection();
-      const newRange = document.createRange();
-      newRange.selectNodeContents(mark);
-      sel.removeAllRanges();
-      sel.addRange(newRange);
-      lastVisualRange = newRange.cloneRange();
+      if (existingMark) {
+        unwrapHighlightNode(existingMark);
+      } else {
+        const mark = document.createElement('mark');
+        mark.className = 'neural-highlight';
+        mark.appendChild(range.extractContents());
+        range.insertNode(mark);
+
+        const sel = window.getSelection();
+        const newRange = document.createRange();
+        newRange.selectNodeContents(mark);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+        lastVisualRange = newRange.cloneRange();
+      }
     } catch (e) {
       console.warn('Highlight error:', e);
     }
@@ -1013,6 +1039,158 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     historyDebounce = setTimeout(() => {
       pushHistory(textarea.value, textarea.selectionStart, textarea.selectionEnd);
     }, 450);
+  });
+
+  // ========================================================================
+  // FLOATING UNHIGHLIGHT BADGE (HOVER ĐỂ HIỆN DẤU BỎ HIGHLIGHT)
+  // ========================================================================
+  let unhighlightBadge = document.querySelector('.neural-unhighlight-badge');
+  if (!unhighlightBadge) {
+    unhighlightBadge = document.createElement('div');
+    unhighlightBadge.className = 'neural-unhighlight-badge';
+    unhighlightBadge.innerHTML = '<i class="fa-solid fa-xmark"></i> Bỏ highlight';
+    document.body.appendChild(unhighlightBadge);
+  }
+
+  let activeHighlightEl = null;
+  let hideBadgeTimeout = null;
+
+  const positionBadge = (markEl) => {
+    if (!unhighlightBadge || !markEl) return;
+    clearTimeout(hideBadgeTimeout);
+    activeHighlightEl = markEl;
+
+    unhighlightBadge.classList.add('visible');
+    const markRect = markEl.getBoundingClientRect();
+    const badgeRect = unhighlightBadge.getBoundingClientRect();
+
+    // Căn giữa phía trên đoạn text highlight
+    let top = markRect.top - badgeRect.height - 7;
+    let left = markRect.left + (markRect.width - badgeRect.width) / 2;
+
+    // Nếu sát mép trên màn hình (< 10px) thì hiện phía dưới text
+    if (top < 10) {
+      top = markRect.bottom + 7;
+    }
+    // Giữ badge không tràn mép màn hình
+    if (left < 10) left = 10;
+    if (left + badgeRect.width > window.innerWidth - 10) {
+      left = window.innerWidth - badgeRect.width - 10;
+    }
+
+    unhighlightBadge.style.top = `${Math.round(top)}px`;
+    unhighlightBadge.style.left = `${Math.round(left)}px`;
+  };
+
+  const scheduleHideBadge = () => {
+    clearTimeout(hideBadgeTimeout);
+    hideBadgeTimeout = setTimeout(() => {
+      if (unhighlightBadge) {
+        unhighlightBadge.classList.remove('visible');
+      }
+      activeHighlightEl = null;
+    }, 200);
+  };
+
+  const hideBadgeImmediately = () => {
+    clearTimeout(hideBadgeTimeout);
+    if (unhighlightBadge) {
+      unhighlightBadge.classList.remove('visible');
+    }
+    activeHighlightEl = null;
+  };
+
+  const onBodyMouseOver = (e) => {
+    const markEl = e.target.closest('.neural-highlight');
+    if (markEl) {
+      positionBadge(markEl);
+    }
+  };
+
+  const onBodyMouseOut = (e) => {
+    const markEl = e.target.closest('.neural-highlight');
+    if (markEl) {
+      scheduleHideBadge();
+    }
+  };
+
+  if (bodyContainer) {
+    bodyContainer.addEventListener('mouseover', onBodyMouseOver);
+    bodyContainer.addEventListener('mouseout', onBodyMouseOut);
+  }
+
+  const onBadgeMouseEnter = () => {
+    clearTimeout(hideBadgeTimeout);
+  };
+  const onBadgeMouseLeave = () => {
+    scheduleHideBadge();
+  };
+
+  unhighlightBadge.addEventListener('mouseenter', onBadgeMouseEnter);
+  unhighlightBadge.addEventListener('mouseleave', onBadgeMouseLeave);
+
+  const onBadgeClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!activeHighlightEl) return;
+
+    // 1. Nếu thẻ mark nằm trong Visual Editor
+    if (visualEditor && visualEditor.contains(activeHighlightEl)) {
+      unwrapHighlightNode(activeHighlightEl);
+      saveAllNotes();
+    }
+    // 2. Nếu thẻ mark nằm trong Markdown Preview
+    else if (previewContent && previewContent.contains(activeHighlightEl)) {
+      const targetText = activeHighlightEl.textContent;
+      if (targetText && textarea) {
+        const raw = textarea.value;
+        const pattern1 = `==${targetText}==`;
+        const pattern2 = `<mark class="neural-highlight">${targetText}</mark>`;
+        const pattern3 = `<mark>${targetText}</mark>`;
+
+        if (raw.includes(pattern1)) {
+          textarea.value = raw.replace(pattern1, targetText);
+        } else if (raw.includes(pattern2)) {
+          textarea.value = raw.replace(pattern2, targetText);
+        } else if (raw.includes(pattern3)) {
+          textarea.value = raw.replace(pattern3, targetText);
+        } else {
+          const escaped = targetText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const regex = new RegExp(`==(${escaped})==`, 'g');
+          textarea.value = raw.replace(regex, '$1');
+        }
+        updateLivePreview();
+        saveAllNotes();
+      }
+    }
+
+    hideBadgeImmediately();
+  };
+
+  unhighlightBadge.addEventListener('click', onBadgeClick);
+
+  const onScrollHide = () => hideBadgeImmediately();
+  window.addEventListener('scroll', onScrollHide, true);
+  sidebar.addEventListener('scroll', onScrollHide, true);
+  if (visualPane) visualPane.addEventListener('scroll', onScrollHide, true);
+  if (previewPane) previewPane.addEventListener('scroll', onScrollHide, true);
+
+  notepadCleanupFns.push(() => {
+    hideBadgeImmediately();
+    window.removeEventListener('scroll', onScrollHide, true);
+    sidebar.removeEventListener('scroll', onScrollHide, true);
+    if (visualPane) visualPane.removeEventListener('scroll', onScrollHide, true);
+    if (previewPane) previewPane.removeEventListener('scroll', onScrollHide, true);
+    if (bodyContainer) {
+      bodyContainer.removeEventListener('mouseover', onBodyMouseOver);
+      bodyContainer.removeEventListener('mouseout', onBodyMouseOut);
+    }
+    unhighlightBadge.removeEventListener('mouseenter', onBadgeMouseEnter);
+    unhighlightBadge.removeEventListener('mouseleave', onBadgeMouseLeave);
+    unhighlightBadge.removeEventListener('click', onBadgeClick);
+    if (unhighlightBadge.parentNode) {
+      unhighlightBadge.parentNode.removeChild(unhighlightBadge);
+    }
   });
 
   // Đóng bảng ghi chú

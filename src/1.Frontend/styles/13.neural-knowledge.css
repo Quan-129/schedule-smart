@@ -845,6 +845,66 @@
   border-radius: 4px;
   font-weight: 600;
   text-shadow: 0 0 8px rgba(250, 204, 21, 0.4);
+  transition: background 0.15s ease, outline 0.15s ease;
+  position: relative;
+}
+
+.neural-highlight:hover {
+  background: rgba(250, 204, 21, 0.38);
+  outline: 1.5px dashed rgba(250, 204, 21, 0.8);
+  outline-offset: 1px;
+}
+
+/* Nút Bỏ Highlight Nổi Khi Rê Chuột (Unhighlight Floating Badge) */
+.neural-unhighlight-badge {
+  position: fixed;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: rgba(15, 23, 42, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(250, 204, 21, 0.5);
+  border-radius: 20px;
+  color: #fef08a;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6), 0 0 12px rgba(250, 204, 21, 0.35);
+  cursor: pointer;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(4px) scale(0.92);
+  transition: opacity 0.18s ease, transform 0.18s ease, background 0.15s ease, border-color 0.15s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.neural-unhighlight-badge i {
+  color: #ef4444;
+  font-size: 0.75rem;
+  transition: transform 0.15s ease;
+}
+
+.neural-unhighlight-badge.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.neural-unhighlight-badge:hover {
+  background: rgba(220, 38, 38, 0.9);
+  border-color: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.5);
+  transform: translateY(-2px) scale(1.05);
+}
+
+.neural-unhighlight-badge:hover i {
+  color: #ffffff;
+  transform: rotate(90deg);
 }
 
 .neural-underline {
