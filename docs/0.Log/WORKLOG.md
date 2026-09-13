@@ -4,6 +4,23 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-13 18:50] - Tối Ưu Thoát Jiggle Mode 1-Chạm Toàn Màn Hình (Capture Phase Outside Click) 🎯✨
+
+- **🎯 Yêu cầu & Vấn đề xử lý**: Sau khi kéo thả nhập các node hoặc đang ở chế độ rung lắc Jiggle Mode, người dùng bấm vào các vùng khác (khoảng trống giữa các node, nửa dưới màn hình, navbar, viền lề) không thoát được chế độ lắc mà bắt buộc phải bấm nút "Xong".
+- **🔍 Nguyên nhân gốc rễ**:
+  1. **Listener cục bộ**: Sự kiện click trước đó chỉ được gắn trên `#backpack-view-container`. Khi số lượng môn học ít, container chỉ cao khoảng 300px, toàn bộ vùng nửa dưới màn hình thuộc `<main>` và `<body>` nên click không bao giờ kích hoạt được handler.
+  2. **Bị chặn lan truyền (Event Propagation)**: Các thẻ `.bp-app-btn` có padding rộng chiếm gần hết diện tích grid và gọi `stopPropagation()`, khiến click gần node bị chặn trước khi tới container.
+  3. **Xung đột sau khi thả tay**: Cần phân biệt giữa cú click do vừa thả chuột (drop) và cú click chủ động bấm ra ngoài của người dùng.
+- **🛠 Giải pháp & Triển khai**:
+  - Trong [`src/1.Frontend/views/BackpackView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/BackpackView.js):
+    - Chuyển `handleOutsideClick` sang lắng nghe toàn cục trên `document` với cơ chế **Capture Phase (`useCapture: true`)**, bắt sự kiện click ngay lập tức ở mọi vị trí trên màn hình trước khi bị bất kỳ thẻ con nào `stopPropagation()`.
+    - Thêm bộ đệm thời gian `Date.now() - lastDropTimestamp < 400ms` để không bị thoát nhầm ngay khi vừa thả tay hợp nhất 2 node.
+    - Cho phép click vào bất kỳ đâu ngoài vòng tròn icon (`bp-circle-wrapper`) hoặc các nút chức năng để thoát ngay Jiggle Mode.
+  - Trong [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js):
+    - Tự động gọi `exitJiggleMode()` khi người dùng chuyển sang các Tab khác trên Navbar (`switchTab`).
+  - Trong [`src/1.Frontend/styles/5.backpack-drive.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/5.backpack-drive.css):
+    - Bổ sung `min-height: calc(100vh - 120px)` cho `#backpack-view-container` phủ kín toàn bộ màn hình.
+
 ## 📅 [2026-09-13 18:30] - Ra Mắt Tính Năng Kéo - Thả Gom Môn Học Thành Thư Mục (iOS Folder Merging) Trên Tab 4 Chiếc Cặp 🎒📱📁✨
 
 - **🎯 Yêu cầu & Vấn đề xử lý**:

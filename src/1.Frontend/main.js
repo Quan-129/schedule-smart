@@ -277,6 +277,11 @@ export function handleSelectWeekFromHeatmap(targetFilename) {
 }
 
 export function switchTab(tabName) {
+  // Nếu đang ở chế độ chỉnh sửa Jiggle của Chiếc Cặp mà chuyển tab khác -> tự động thoát
+  if (state.isJiggleMode && tabName !== 'backpack') {
+    exitJiggleMode();
+  }
+
   state.currentTab = tabName;
   persistLastActiveTab(tabName);
 

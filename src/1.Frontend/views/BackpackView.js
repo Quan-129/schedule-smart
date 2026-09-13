@@ -18,7 +18,7 @@ import { openAddSubjectModal } from '../components/modals/AddSubjectModal.js';
 import { openSubjectDetailModal } from '../components/modals/SubjectDetailModal.js';
 import { showToast } from '../components/Toast.js';
 import { syncDriveSubjectsToCloud } from '../../3.Database/auth/FirebaseAuthService.js';
-import { attachBackpackDragDrop } from './backpack/BackpackDragDrop.js';
+import { attachBackpackDragDrop, lastDropTimestamp } from './backpack/BackpackDragDrop.js';
 
 // 2. CONSTANTS & VARIABLES
 let longPressTimer = null;
@@ -340,31 +340,48 @@ function attachGlobalJiggleEvents() {
   if (globalEventsAttached) return;
   globalEventsAttached = true;
 
+  // 1. Phím ESC để thoát Jiggle Mode
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && state.isJiggleMode) {
       exitJiggleMode();
     }
   });
 
-  const backpackSection = document.getElementById('backpack-view-container');
-  if (backpackSection) {
-    backpackSection.addEventListener('click', (e) => {
-      if (!state.isJiggleMode) return;
+  // 2. Click hoặc chạm vào bất kỳ vùng trống nào trên toàn trang để thoát Jiggle Mode (Capture Phase)
+  const handleOutsideClick = (e) => {
+    if (!state.isJiggleMode) return;
 
-      if (
-        e.target.closest('.bp-app-btn') ||
-        e.target.closest('#bp-done-jiggle-btn') ||
-        e.target.closest('#bp-add-subject-btn') ||
-        e.target.closest('.backpack-filter-box') ||
-        e.target.closest('.modal-backdrop') ||
-        e.target.closest('.modal-folder-box')
-      ) {
-        return;
-      }
+    // Bỏ qua nếu vừa thả node (merge) trong vòng 400ms để không bị xung đột
+    if (Date.now() - lastDropTimestamp < 400) return;
 
-      exitJiggleMode();
-    });
-  }
+    // Không thoát nếu bấm vào các thành phần tương tác:
+    // - Nút Xong
+    // - Nút Thêm môn học
+    // - Nút xóa (-), nút sửa (✏️)
+    // - Vòng tròn icon của môn (circle-wrapper) để người dùng có thể nhấp giữ hoặc kéo tiếp
+    // - Ô tìm kiếm
+    // - Modal đang mở
+    if (
+      e.target.closest('#bp-done-jiggle-btn') ||
+      e.target.closest('#bp-add-subject-btn') ||
+      e.target.closest('.btn-delete-node-badge') ||
+      e.target.closest('.btn-edit-node-pencil') ||
+      e.target.closest('.bp-circle-wrapper') ||
+      e.target.closest('.backpack-filter-box') ||
+      e.target.closest('.modal-backdrop') ||
+      e.target.closest('.modal-folder-box') ||
+      e.target.closest('.modal-card')
+    ) {
+      return;
+    }
+
+    // Bấm vào BẤT KỲ VÙNG NÀO KHÁC (khoảng trống giữa các node, nhãn tên, nền trang, navbar, footer, v.v.)
+    // -> TỰ ĐỘNG THOÁT CHẾ ĐỘ JIGGLE MODE NGAY LẬP TỨC
+    exitJiggleMode();
+  };
+
+  // Dùng useCapture: true để bắt sự kiện click trước khi bất kỳ stopPropagation nào chặn lại
+  document.addEventListener('click', handleOutsideClick, true);
 }
 
 // 5. EXPORTS & WINDOW ALIASES

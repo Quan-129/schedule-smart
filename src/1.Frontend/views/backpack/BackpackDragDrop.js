@@ -10,6 +10,7 @@ import { state, createDriveFolder, addSubjectToFolder } from '../../../3.Databas
 import { showToast } from '../../components/Toast.js';
 
 // 2. CONSTANTS & VARIABLES
+export let lastDropTimestamp = 0;
 let activeDragNode = null;
 let ghostEl = null;
 let currentDropTarget = null;
@@ -142,6 +143,7 @@ function executeDropMerge(sourceNode, targetNode) {
 
   // 1. Môn học thả lên Môn học -> Tạo Thư mục mới gom cả 2
   if (sourceCode && targetCode && sourceCode !== targetCode) {
+    lastDropTimestamp = Date.now();
     const s1 = state.driveSubjects.find(s => s.code === sourceCode);
     const s2 = state.driveSubjects.find(s => s.code === targetCode);
     const defaultName = s1 && s2 ? `Nhóm ${s1.code} & ${s2.code}` : 'Thư mục mới';
@@ -157,6 +159,7 @@ function executeDropMerge(sourceNode, targetNode) {
 
   // 2. Môn học thả lên Thư mục có sẵn -> Thêm môn vào Thư mục
   if (sourceCode && targetFolderId) {
+    lastDropTimestamp = Date.now();
     const s1 = state.driveSubjects.find(s => s.code === sourceCode);
     const folder = (state.driveFolders || []).find(f => f.id === targetFolderId);
 
@@ -171,6 +174,7 @@ function executeDropMerge(sourceNode, targetNode) {
 
   // 3. Thư mục thả lên Môn học -> Thêm môn đích vào Thư mục
   if (sourceFolderId && targetCode) {
+    lastDropTimestamp = Date.now();
     const s2 = state.driveSubjects.find(s => s.code === targetCode);
     const folder = (state.driveFolders || []).find(f => f.id === sourceFolderId);
 
@@ -185,6 +189,7 @@ function executeDropMerge(sourceNode, targetNode) {
 
   // 4. Thư mục thả lên Thư mục khác -> Hợp nhất 2 Thư mục
   if (sourceFolderId && targetFolderId && sourceFolderId !== targetFolderId) {
+    lastDropTimestamp = Date.now();
     const f1 = (state.driveFolders || []).find(f => f.id === sourceFolderId);
     const f2 = (state.driveFolders || []).find(f => f.id === targetFolderId);
 

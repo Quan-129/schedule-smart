@@ -2,6 +2,10 @@
    SMART BACKPACK (CHIẾC CẶP GOOGLE DRIVE) & CIRCULAR LAUNCHER NODES
    ========================================================================== */
 
+#backpack-view-container {
+  min-height: calc(100vh - 120px);
+}
+
 .backpack-header-card {
   background: var(--bg-card);
   backdrop-filter: blur(16px);
