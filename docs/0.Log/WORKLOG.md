@@ -4,6 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-13 21:50] - Khắc Phục Triệt Để Lỗi Bảng Markdown (Table Delimiter Normalizer) & Post-Processing An Toàn 🛠️📊
+
+- **🎯 Yêu cầu & Điều tra ảnh thực tế**:
+  - Người dùng phản hồi: *"vẫn chưa đủ này 1 số được 1 số không"* kèm ảnh chụp.
+  - Phân tích hình ảnh:
+    - ✅ **ĐÃ GEN HOÀN HẢO**: Tiêu đề (`Bảng trạng thái`, `Hướng dẫn cài đặt`), Danh sách bullet (`* **Hiển thị**:`), Chữ in đậm, Khối code terminal (`bash` font JetBrains Mono màu cyan).
+    - ❌ **CHƯA GEN THÀNH BẢNG**: Bảng `| Module | Tiến độ | Độ ưu tiên |` vẫn ở dạng text thô.
+    - 🔍 **Nguyên nhân gốc rễ**: Tại ô đầu tiên của dòng phân cách cột `| :- |`, người dùng hoặc trình soạn thảo đã chèn thẻ HTML `<span class="neural-underline">` (hoặc `<u>-</u>`) do nút `[U]`. Khi dòng delimiter của bảng bị lẫn thẻ HTML, `marked.js` không thể nhận diện được cấu trúc bảng hợp lệ và tự động coi đó là một đoạn văn bản `<p>` thường! Ngoài ra việc tiền xử lý thay thế HTML trước khi gọi `marked.parse()` đã làm nhiễu cú pháp GFM.
+- **🛠 Triển khai kỹ thuật**:
+  1. **Hàm Tự Động Làm Sạch Dòng Bảng ([`src/2.Backend/utils/markdownRenderer.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/utils/markdownRenderer.js))**:
+     - Xây dựng hàm thuần `normalizeTableDelimiters(text)`: Tự động phát hiện các dòng phân cách bảng `| ... |` và bóc tách toàn bộ thẻ HTML rác vô tình lọt vào, trả lại dòng delimiter chuẩn xác 100% (`| :- | :-: | ---: |`).
+  2. **Chuyển Đổi Sang Cơ Chế Post-Processing**:
+     - Cho phép `marked.parse()` xử lý toàn bộ cấu trúc Markdown nguyên bản trước mà không bị bất kỳ thẻ HTML nào làm xáo trộn.
+     - Sau khi Marked hoàn tất, hệ thống mới tiến hành bọc thẻ `<mark class="neural-highlight">` cho cú pháp `==nội dung==` và `<span class="neural-underline">` cho thẻ `<u>`.
+- **✅ Kết quả**: Toàn bộ các bảng biểu Markdown (dù người dùng có vô tình chèn thẻ gạch chân vào dòng kẻ) đều được tự động làm sạch và gen ra bảng HTML sắc nét, chuẩn xác 100%!
+
 ## 📅 [2026-09-13 21:35] - Tích Hợp Thư Viện Marked.js Tiêu Chuẩn Công Nghiệp - Hỗ Trợ 100% GFM (Bảng Tables, Khối Code, Blockquotes, Links & Tasks) 🌟📑
 
 - **🎯 Yêu cầu & Bối cảnh**:

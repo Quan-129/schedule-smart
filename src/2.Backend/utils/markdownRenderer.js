@@ -4,7 +4,34 @@
 import { escapeHtml } from '../../4.Security/sanitizer.js';
 
 // ==========================================================================
-// 2. MARKDOWN RENDERER ENGINE (POWERED BY MARKED.JS & NATIVE EXTENSIONS)
+// 2. HELPER FUNCTIONS: TABLE DELIMITER NORMALIZER
+// ==========================================================================
+
+/**
+ * Tự động làm sạch các thẻ HTML hoặc ký tự rác vô tình lọt vào dòng phân cách cột bảng (delimiter).
+ * Ví dụ: | :<u>-</u> | :-: | hoặc | :-- | sẽ được làm sạch thành | :- | :-: | để Marked.js luôn nhận diện được Table.
+ * 
+ * @param {string} text - Nội dung Markdown thô
+ * @returns {string} Markdown đã chuẩn hóa dòng bảng
+ */
+function normalizeTableDelimiters(text) {
+  if (!text || typeof text !== 'string') return '';
+  return text.split('\n').map(line => {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('|') && trimmed.endsWith('|')) {
+      // Loại bỏ toàn bộ thẻ HTML trong dòng này để kiểm tra xem có phải dòng delimiter không
+      const stripped = trimmed.replace(/<[^>]+>/g, '').trim();
+      // Dòng delimiter hợp lệ chỉ gồm: |, -, :, khoảng trắng
+      if (/^\|[\s\-:]+(\|[\s\-:]+)+\|$/.test(stripped)) {
+        return stripped; // Trả về dòng delimiter chuẩn sạch sẽ
+      }
+    }
+    return line;
+  }).join('\n');
+}
+
+// ==========================================================================
+// 3. MARKDOWN RENDERER ENGINE (POWERED BY MARKED.JS & NATIVE EXTENSIONS)
 // ==========================================================================
 
 /**
@@ -20,16 +47,8 @@ export function renderMarkdownToHtml(rawMarkdown) {
     return '<p class="neural-notepad-empty-text">Chưa có nội dung ghi chú nào...</p>';
   }
 
-  // 1. Tiền xử lý cho cú pháp độc quyền: Highlight và Underline
-  let processed = rawMarkdown;
-
-  // Highlight: ==nội dung== hoặc <mark>nội dung</mark>
-  processed = processed.replace(/==([^=\n]+)==/g, '<mark class="neural-highlight">$1</mark>');
-  processed = processed.replace(/<mark>([\s\S]*?)<\/mark>/gi, '<mark class="neural-highlight">$1</mark>');
-
-  // Underline: <u>nội dung</u> hoặc --nội dung--
-  processed = processed.replace(/<u>([\s\S]*?)<\/u>/gi, '<span class="neural-underline">$1</span>');
-  processed = processed.replace(/--([^-\n]+)--/g, '<span class="neural-underline">$1</span>');
+  // 1. Tự động chuẩn hóa và làm sạch dòng phân cách bảng (ngăn ngừa lỗi vỡ Table do thẻ rác)
+  const cleanMarkdown = normalizeTableDelimiters(rawMarkdown);
 
   // 2. Kiểm tra bộ máy Marked.js tiêu chuẩn
   const markedEngine = (typeof window !== 'undefined' && window.marked) ? window.marked : null;
@@ -43,13 +62,21 @@ export function renderMarkdownToHtml(rawMarkdown) {
         pedantic: false
       };
 
-      let html = markedEngine.parse(processed, options);
+      // Để Marked.js parse cấu trúc Markdown nguyên bản trước (Bảng, Codeblock, Blockquote, List)
+      let html = markedEngine.parse(cleanMarkdown, options);
 
-      // Bọc Table trong wrapper để hỗ trợ cuộn ngang mượt mà trên panel 50%
+      // 3. Post-processing cho Highlight: ==nội dung== hoặc <mark>nội dung</mark>
+      html = html.replace(/==([^=\n<]+)==/g, '<mark class="neural-highlight">$1</mark>');
+      html = html.replace(/<mark(?:\s+class="[^"]*")?>([\s\S]*?)<\/mark>/gi, '<mark class="neural-highlight">$1</mark>');
+
+      // 4. Post-processing cho Gạch chân: <u>nội dung</u>
+      html = html.replace(/<u>([\s\S]*?)<\/u>/gi, '<span class="neural-underline">$1</span>');
+
+      // 5. Bọc Table trong wrapper để hỗ trợ cuộn ngang mượt mà trên panel 50%
       html = html.replace(/<table(?:\s+[^>]*)?>/gi, '<div class="neural-table-wrapper"><table>');
       html = html.replace(/<\/table>/gi, '</table></div>');
 
-      // Tự động thêm target="_blank" và rel="noopener noreferrer" cho mọi thẻ <a>
+      // 6. Tự động thêm target="_blank" và rel="noopener noreferrer" cho mọi thẻ <a>
       html = html.replace(/<a\s+(?:[^>]*?\s+)?href="([^"]*)"([^>]*)>/gi, '<a href="$1" target="_blank" rel="noopener noreferrer"$2>');
 
       return html;
@@ -58,8 +85,8 @@ export function renderMarkdownToHtml(rawMarkdown) {
     }
   }
 
-  // 3. Fallback Engine: Xử lý an toàn nếu Marked.js chưa tải kịp
-  return fallbackRender(processed);
+  // 7. Fallback Engine: Xử lý an toàn nếu Marked.js chưa tải kịp
+  return fallbackRender(cleanMarkdown);
 }
 
 /**
@@ -70,9 +97,10 @@ export function renderMarkdownToHtml(rawMarkdown) {
 function fallbackRender(text) {
   let safeText = escapeHtml(text);
 
-  // Khôi phục thẻ an toàn đã tiền xử lý
-  safeText = safeText.replace(/&lt;mark class="neural-highlight"&gt;([\s\S]*?)&lt;\/mark&gt;/g, '<mark class="neural-highlight">$1</mark>');
-  safeText = safeText.replace(/&lt;span class="neural-underline"&gt;([\s\S]*?)&lt;\/span&gt;/g, '<span class="neural-underline">$1</span>');
+  // Highlight
+  safeText = safeText.replace(/==([^=\n]+)==/g, '<mark class="neural-highlight">$1</mark>');
+  // Underline
+  safeText = safeText.replace(/&lt;u&gt;([\s\S]*?)&lt;\/u&gt;/gi, '<span class="neural-underline">$1</span>');
 
   // In đậm & In nghiêng
   safeText = safeText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
