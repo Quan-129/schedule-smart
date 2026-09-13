@@ -198,6 +198,9 @@ function setupWindowHelpers() {
   window.focusTodayTarget = focusTodayTarget;
   window.openEditWeeklyNotes = handleOpenWeeklyNotesModal;
   window.renderHeatmapView = () => renderHeatmapView(availableWeeks, currentWeekFile, handleSelectWeekFromHeatmap);
+  window.renderSpaceSelectorUi = renderSpaceSelectorUi;
+  window.renderBackpackView = renderBackpackView;
+  window.renderGradesView = renderGradesView;
 
   // Visual Schedule Builder Handlers
   window.openAddClassModal = (dayName = 'Thứ 2') => {

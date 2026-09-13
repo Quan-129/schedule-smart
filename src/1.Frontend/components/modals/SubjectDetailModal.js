@@ -301,3 +301,20 @@ export function closeSubjectDetailModal() {
   }
   currentSubjectCode = null;
 }
+
+/**
+ * Tự động re-render nội dung Modal chi tiết môn học nếu đang mở (khi có snapshot mới từ Cloud)
+ */
+export function refreshSubjectDetailModalIfOpen() {
+  const modal = document.getElementById(MODAL_ID);
+  if (modal && !modal.classList.contains('hidden') && currentSubjectCode) {
+    const subject = (state.driveSubjects || []).find(s => s.code === currentSubjectCode);
+    if (subject) {
+      renderSubjectDetail(subject);
+    }
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.refreshSubjectDetailModalIfOpen = refreshSubjectDetailModalIfOpen;
+}

@@ -5,7 +5,7 @@
  * ==========================================================================
  */
 
-import { state, persistDriveSubjects, persistGrades, initApplicationState, exportFullBackupData, importFullBackupData, setApplyingRemoteUpdateFlag, getApplyingRemoteUpdateFlag } from '../state.js';
+import { state, persistDriveSubjects, persistGrades, initApplicationState, exportFullBackupData, importFullBackupData, mergeGuestDataIntoUser, setApplyingRemoteUpdateFlag, getApplyingRemoteUpdateFlag } from '../state.js';
 import { showToast } from '../../1.Frontend/components/Toast.js';
 
 export const firebaseConfig = {
@@ -98,6 +98,8 @@ export function initFirebaseAuth(onAuthChangedCallback) {
       const localUser = JSON.parse(localAuthRaw);
       if (localUser && localUser.email) {
         currentUser = localUser;
+        mergeGuestDataIntoUser(localUser);
+        initApplicationState(localUser);
         updateAuthUI(localUser);
         attachFirestoreListener(localUser, onAuthChangedCallback);
         if (typeof onAuthChangedCallback === 'function') {
@@ -117,6 +119,8 @@ export function initFirebaseAuth(onAuthChangedCallback) {
         currentUser = result.user;
         localStorage.removeItem('smart_schedule_guest_mode');
         localStorage.removeItem('smart_schedule_local_auth');
+        mergeGuestDataIntoUser(result.user);
+        initApplicationState(result.user);
         updateAuthUI(result.user);
         attachFirestoreListener(result.user, onAuthChangedCallback);
         showToast(`Đăng nhập thành công! Xin chào ${result.user.displayName || 'bạn'}.`);
@@ -141,6 +145,8 @@ export function initFirebaseAuth(onAuthChangedCallback) {
         currentUser = user;
         localStorage.removeItem('smart_schedule_guest_mode');
         localStorage.removeItem('smart_schedule_local_auth');
+        mergeGuestDataIntoUser(user);
+        initApplicationState(user);
         updateAuthUI(user);
 
         // Hủy listener cũ và gắn listener mới
@@ -170,6 +176,8 @@ export function initFirebaseAuth(onAuthChangedCallback) {
             const localUser = JSON.parse(localAuth);
             if (localUser && localUser.email) {
               currentUser = localUser;
+              mergeGuestDataIntoUser(localUser);
+              initApplicationState(localUser);
               updateAuthUI(localUser);
               attachFirestoreListener(localUser, onAuthChangedCallback);
               return;
@@ -234,6 +242,8 @@ export function handleOwnerFastLogin() {
   };
   localStorage.setItem('smart_schedule_local_auth', JSON.stringify(currentUser));
   localStorage.removeItem('smart_schedule_guest_mode');
+  mergeGuestDataIntoUser(currentUser);
+  initApplicationState(currentUser);
   updateAuthUI(currentUser);
 
   // Gắn Firestore Listener đồng bộ Cloud
@@ -242,15 +252,6 @@ export function handleOwnerFastLogin() {
     firestoreUnsubscribe = null;
   }
   attachFirestoreListener(currentUser, globalAuthCallback);
-
-  // Nạp lại dữ liệu State
-  initApplicationState(currentUser);
-
-  // Nếu máy hiện tại đang có dữ liệu, đồng bộ ngay lên Cloud để các thiết bị khác nhận được
-  const backupData = exportFullBackupData(currentUser);
-  if (backupData.spaces.length > 1 || (state.driveSubjects && state.driveSubjects.length > 0)) {
-    syncAllStateToCloud(currentUser);
-  }
 
   showToast('Đã kết nối tài khoản Chủ Sở Hữu (Minh Quân)! Dữ liệu Cloud đồng bộ tức thì. ✨');
   if (typeof globalAuthCallback === 'function') {
@@ -477,7 +478,21 @@ function attachFirestoreListener(userOrUid, onSyncCallback) {
 
           // 2. Phục hồi toàn bộ Đa Không Gian & Dữ liệu Spaces từ Cloud (Chỉ nạp Data Domain)
           const cloudSpaces = Array.isArray(data.spaces) && data.spaces.length > 0 ? data.spaces : [];
-          const cloudData = data.spacesData || data.data || {};
+          let cloudData = data.spacesData || data.data || {};
+
+          // Khôi phục nếu Cloud lưu ở định dạng phẳng cấp cao nhất (driveSubjects / studentGrades / driveFolders)
+          if (!cloudData['default'] && (Array.isArray(data.driveSubjects) || data.studentGrades || Array.isArray(data.driveFolders))) {
+            cloudData = {
+              ...cloudData,
+              default: {
+                driveSubjects: data.driveSubjects || [],
+                driveFolders: data.driveFolders || [],
+                studentGrades: data.studentGrades || {},
+                customWeeks: [],
+                customMds: {}
+              }
+            };
+          }
 
           if (cloudSpaces.length > 0 || Object.keys(cloudData).length > 0) {
             const importPayload = {
@@ -486,14 +501,19 @@ function attachFirestoreListener(userOrUid, onSyncCallback) {
               spaces: cloudSpaces,
               data: cloudData
             };
-            importFullBackupData(importPayload, currentUser, { isSilent: true });
+            importFullBackupData(importPayload, targetUser, { isSilent: true });
           }
 
           // 3. Khởi tạo lại Application State (Giữ nguyên không gian, tab, tuần của thiết bị hiện tại)
-          initApplicationState(currentUser);
+          initApplicationState(targetUser);
 
-          // 4. Thông báo re-render cho UI (chỉ cập nhật dữ liệu môn học / điểm số / spaces mới)
-          if (typeof onSyncCallback === 'function') onSyncCallback(currentUser);
+          // 4. Thông báo re-render cho UI (cập nhật ngay giao diện môn học / link Drive / spaces mới)
+          if (typeof window.renderBackpackView === 'function') window.renderBackpackView();
+          if (typeof window.renderGradesView === 'function') window.renderGradesView();
+          if (typeof window.renderSpaceSelectorUi === 'function') window.renderSpaceSelectorUi();
+          if (typeof window.refreshSubjectDetailModalIfOpen === 'function') window.refreshSubjectDetailModalIfOpen();
+
+          if (typeof onSyncCallback === 'function') onSyncCallback(targetUser);
         } catch (err) {
           console.error('[Firestore] Lỗi áp dụng Snapshot từ Cloud:', err);
         } finally {
@@ -501,10 +521,11 @@ function attachFirestoreListener(userOrUid, onSyncCallback) {
         }
       }
     } else {
-      // Tài khoản mới chưa có trên Cloud: Chỉ đồng bộ nếu máy hiện tại thực sự có dữ liệu
+      // Tài khoản mới chưa có trên Cloud: Chỉ đồng bộ nếu máy hiện tại thực sự có dữ liệu tùy biến (Link Drive hoặc Spaces)
       const currentBackup = exportFullBackupData(targetUser);
-      const hasData = (currentBackup.spaces && currentBackup.spaces.length > 1) || (state.driveSubjects && state.driveSubjects.length > 0);
-      if (hasData) {
+      const hasRealDriveLinks = Array.isArray(state.driveSubjects) && state.driveSubjects.some(s => s.driveUrl && s.driveUrl.trim());
+      const hasCustomSpaces = currentBackup.spaces && currentBackup.spaces.length > 1;
+      if (hasRealDriveLinks || hasCustomSpaces) {
         syncAllStateToCloud(targetUser);
       }
     }
@@ -542,13 +563,16 @@ export function syncAllStateToCloud(user = null) {
       spacesData: backupData.data || {},
       // Tương thích ngược với các client cũ
       driveSubjects: state.driveSubjects || [],
+      driveFolders: state.driveFolders || [],
       studentGrades: state.studentGrades || {},
       lastUpdatedBySession: CLIENT_SESSION_ID,
       clientTimestamp: Date.now(),
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
-    docRef.set(cloudPayload, { merge: true }).catch(err => {
+    docRef.set(cloudPayload, { merge: true }).then(() => {
+      console.log('[Firestore] Đã đồng bộ State lên Cloud Firestore thành công.');
+    }).catch(err => {
       console.warn('[Firestore] Lỗi đồng bộ State lên Cloud:', err);
     });
   } catch (err) {

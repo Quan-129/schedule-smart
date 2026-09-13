@@ -4,7 +4,59 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
-## 📅 [2026-09-07 08:35] - Đồng Bộ Toàn Diện Nút Focus: Tự Động Nhảy Tuần Đúng Trên Cả Lịch Tuần & Navbar 🎯⚡📅
+## 📅 [2026-09-13 18:30] - Ra Mắt Tính Năng Kéo - Thả Gom Môn Học Thành Thư Mục (iOS Folder Merging) Trên Tab 4 Chiếc Cặp 🎒📱📁✨
+
+- **🎯 Yêu cầu & Vấn đề xử lý**:
+  - Khi người dùng nhấn giữ kích hoạt chế độ rung lắc (**Jiggle Mode**) ở Tab 4 (Chiếc Cặp Google Drive), cho phép cầm (drag) một node môn học kéo thả đè lên node khác để tự động gom thành một **Thư mục (Folder)** phong cách Apple iOS Home Screen.
+  - Hỗ trợ xem danh sách môn con, mở link Drive, đổi tên thư mục trực tiếp, tách môn ra khỏi nhóm (Un-group), và giải tán thư mục an toàn không làm mất môn học.
+- **🛠 Giải pháp & Triển khai**:
+  - **1. Kiến trúc Dữ liệu & State (`src/3.Database/`)**:
+    - Trong [`src/3.Database/state.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/state.js):
+      - Thêm `STORAGE_KEYS.DRIVE_FOLDERS` và `state.driveFolders` độc lập với `state.driveSubjects`.
+      - Môn học được gom vào nhóm bằng trường liên kết `folderId: string | null`.
+      - Bổ sung các helper: `createDriveFolder`, `addSubjectToFolder`, `removeSubjectFromFolder`, `removeDriveFolder`, `renameDriveFolder`.
+      - Mở rộng `exportFullBackupData()` và `importFullBackupData()` để bảo toàn cấu trúc thư mục trong sao lưu JSON và Cloud Firestore.
+    - Trong [`src/3.Database/auth/FirebaseAuthService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js):
+      - Đồng bộ tự động `driveFolders` lên Cloud Firestore trong `syncAllStateToCloud()`.
+  - **2. Engine Kéo - Thả Pointer Events (`src/1.Frontend/views/backpack/`)**:
+    - Tạo [`src/1.Frontend/views/backpack/BackpackDragDrop.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/backpack/BackpackDragDrop.js):
+      - Sử dụng Pointer Events (`pointerdown`, `pointermove`, `pointerup`) kết hợp `document.elementFromPoint()` để hoạt động mượt mà cả Desktop (chuột) lẫn Mobile (cảm ứng vuốt chạm).
+      - Hiệu ứng Ghost Element nổi lên theo con trỏ chuột (`.bp-drag-ghost`), viền hào quang tỏa sáng (`.bp-drop-target`) khi hover trúng đích, kèm rung phản hồi xúc giác `navigator.vibrate()`.
+      - Hỗ trợ toàn diện 4 kịch bản hợp nhất: Môn vào Môn (tạo folder mới), Môn vào Folder, Folder vào Môn, và Folder vào Folder.
+  - **3. Giao diện & Components (`src/1.Frontend/`)**:
+    - Tạo [`src/1.Frontend/components/FolderNode.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/FolderNode.js): Render icon thư mục tròn với lưới 2x2 các icon thu nhỏ của môn con bên trong.
+    - Tạo [`src/1.Frontend/components/modals/FolderDetailModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/FolderDetailModal.js): Popover thư mục Apple iOS Glassmorphism hiển thị các môn con, cho phép sửa tên, tách môn ra ngoài hoặc giải tán thư mục.
+    - Cập nhật [`src/1.Frontend/views/BackpackView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/BackpackView.js) tích hợp hiển thị song song Folder Nodes và Subject Nodes.
+    - Tạo [`src/1.Frontend/styles/12.backpack-folder.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/12.backpack-folder.css) và nhúng vào [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html).
+
+## 📅 [2026-09-07 23:45] - Khắc Phục Triệt Để Đồng Bộ Link Drive & Dữ Liệu Học Tập Đa Thiết Bị Qua Cloud Firestore ☁️🔄✨
+
+- **🎯 Yêu cầu & Vấn đề xử lý**: Sửa lỗi khi đính kèm link Google Drive vào môn học trên một thiết bị và đăng nhập tài khoản trên thiết bị khác, link Drive không hiển thị hoặc bị đè mất dữ liệu.
+- **🔍 Nguyên nhân gốc rễ (Root Cause)**:
+  1. **Race Condition khi Đăng Nhập**: Thiết bị thứ 2 khi vừa đăng nhập đã tự động nạp `INITIAL_SUBJECT_DRIVE` (trắng link) và đẩy ngược lên Cloud đè mất dữ liệu của thiết bị 1 trước khi snapshot Firestore kịp nạp về.
+  2. **Dữ liệu Khách chưa được chuyển giao (Guest $\rightarrow$ User Migration)**: Người dùng nhập link Drive ở chế độ Khách, khi đăng nhập Google thì scoped storage key chuyển sang key người dùng nhưng không copy dữ liệu từ profile khách sang, khiến danh sách môn bị trống.
+  3. **Tương thích cấu trúc Snapshot**: Cấu trúc dữ liệu Firestore giữa bản lưu cũ (phẳng) và bản mới (`spacesData`) chưa tự động fallback `default space`.
+- **🛠 Giải pháp & Triển khai**:
+  - Trong [`src/3.Database/state.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/state.js):
+    - Thêm hàm `mergeGuestDataIntoUser(user)`: Tự động phát hiện và chuyển giao toàn bộ môn học, link Drive, điểm số, spaces từ profile khách sang tài khoản khi đăng nhập.
+    - Cập nhật `initApplicationState()`: Khởi tạo dữ liệu môn học mặc định cho tất cả các loại tài khoản nếu chưa có data.
+    - Nâng cấp `exportFullBackupData()` & `importFullBackupData()`: Ưu tiên dữ liệu bộ nhớ đang hoạt động và thực hiện Smart Merge bảo toàn toàn bộ link Drive và ghi chú.
+  - Trong [`src/3.Database/auth/FirebaseAuthService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js):
+    - Loại bỏ lệnh đẩy Cloud đồng bộ tức thời khi vừa đăng nhập trong `handleOwnerFastLogin` để snapshot Cloud luôn được ưu tiên tải về trước.
+    - Cập nhật `attachFirestoreListener()`: Tự động nhận diện cả cấu trúc `spacesData` và `driveSubjects` phẳng, nạp vào state và kích hoạt re-render ngay lập tức toàn bộ UI (`renderBackpackView`, `renderGradesView`, `renderSpaceSelectorUi`, `refreshSubjectDetailModalIfOpen`).
+    - Thêm điều kiện kiểm tra dữ liệu thực tế `hasRealDriveLinks` trước khi đẩy lên Cloud cho tài khoản mới.
+  - Trong [`src/1.Frontend/components/modals/EditSubjectModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/EditSubjectModal.js) & [`src/1.Frontend/components/modals/SubjectDetailModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/SubjectDetailModal.js):
+    - Đẩy trực tiếp `syncAllStateToCloud()` khi bấm lưu môn học.
+    - Thêm hàm `refreshSubjectDetailModalIfOpen()` tự động làm mới Modal chi tiết môn học theo thời gian thực khi nhận link Drive mới từ thiết bị khác.
+- **✅ Chi tiết file sửa đổi**:
+  - [`src/3.Database/state.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/state.js)
+  - [`src/3.Database/auth/FirebaseAuthService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/auth/FirebaseAuthService.js)
+  - [`src/1.Frontend/components/modals/EditSubjectModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/EditSubjectModal.js)
+  - [`src/1.Frontend/components/modals/SubjectDetailModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/SubjectDetailModal.js)
+  - [`src/1.Frontend/main.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/main.js)
+  - [`docs/0.Log/WORKLOG.md`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/docs/0.Log/WORKLOG.md)
+
+---
 
 - **🎯 Yêu cầu từ người dùng**: Khi đang ở chế độ **1. Lịch Tuần (Google Calendar Style)** trong Tab Bản Đồ Nhiệt mà bấm nút **Focus (Tâm ngắm)**, hệ thống phải tự động nhảy tuần trên Navbar và hiển thị tuần chứa ngày hôm nay thực tế thay vì giữ tuần cũ.
 - **🔍 Triển khai & Tối ưu**:

@@ -4,6 +4,7 @@ import { isOwnerUser, getCurrentUser } from './auth/FirebaseAuthService.js';
 
 export const STORAGE_KEYS = {
   DRIVE_SUBJECTS: 'smart_schedule_drive_v2',
+  DRIVE_FOLDERS: 'smart_schedule_drive_folders_v2',
   GRADES: 'smart_schedule_grades_v1',
   THEME: 'smart_schedule_theme',
   DAYS_DISPLAY_MODE: 'smart_schedule_days_mode',
@@ -52,6 +53,7 @@ export const state = {
   
   // Backpack & Drive
   driveSubjects: [],
+  driveFolders: [],
   selectedSubject: null,
   isJiggleMode: false,
   
@@ -304,6 +306,70 @@ export function deleteSpace(spaceId, user = null) {
 }
 
 /**
+ * Tự động di chuyển (merge) dữ liệu từ chế độ Khách sang tài khoản người dùng khi đăng nhập
+ * @param {Object|null} user 
+ */
+export function mergeGuestDataIntoUser(user = null) {
+  const activeUser = user || getCurrentUser();
+  if (!activeUser) return;
+
+  const isOwner = isOwnerUser(activeUser);
+
+  // 1. Merge Drive Subjects
+  const guestDriveKey = 'smart_schedule_guest_smart_schedule_drive_v2';
+  const guestSubjects = getStorageItem(guestDriveKey, null);
+  const targetDriveKey = getScopedStorageKey(STORAGE_KEYS.DRIVE_SUBJECTS, activeUser, 'default');
+  const targetSubjects = getStorageItem(targetDriveKey, null);
+
+  const hasGuestDriveLinks = Array.isArray(guestSubjects) && guestSubjects.some(s => s.driveUrl && s.driveUrl.trim());
+  const hasTargetDriveLinks = Array.isArray(targetSubjects) && targetSubjects.some(s => s.driveUrl && s.driveUrl.trim());
+
+  if (Array.isArray(guestSubjects) && guestSubjects.length > 0 && (!hasTargetDriveLinks || !targetSubjects || targetSubjects.length === 0)) {
+    setStorageItem(targetDriveKey, guestSubjects);
+    if (state.activeSpaceId === 'default') {
+      state.driveSubjects = guestSubjects;
+    }
+  }
+
+  // 2. Merge Spaces
+  const guestSpacesKey = 'smart_schedule_guest_spaces_list';
+  const guestSpaces = getStorageItem(guestSpacesKey, null);
+  const targetSpacesKey = isOwner ? STORAGE_KEYS.SPACES_LIST : `smart_schedule_${activeUser.uid}_spaces_list`;
+  const targetSpaces = getStorageItem(targetSpacesKey, null);
+
+  if (Array.isArray(guestSpaces) && guestSpaces.length > 1 && (!targetSpaces || targetSpaces.length <= 1)) {
+    setStorageItem(targetSpacesKey, guestSpaces);
+    guestSpaces.forEach(sp => {
+      if (sp.id !== 'default') {
+        const gDKey = `smart_schedule_guest_smart_schedule_drive_v2_${sp.id}`;
+        const gVal = getStorageItem(gDKey, null);
+        if (gVal) {
+          const tDKey = getScopedStorageKey(STORAGE_KEYS.DRIVE_SUBJECTS, activeUser, sp.id);
+          setStorageItem(tDKey, gVal);
+        }
+        const gGKey = `smart_schedule_guest_smart_schedule_grades_v1_${sp.id}`;
+        const gGVal = getStorageItem(gGKey, null);
+        if (gGVal) {
+          const tGKey = getScopedStorageKey(STORAGE_KEYS.GRADES, activeUser, sp.id);
+          setStorageItem(tGKey, gGVal);
+        }
+      }
+    });
+  }
+
+  // 3. Merge Custom Weeks & Markdown
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('smart_schedule_guest_smart_schedule_custom_md_')) {
+      const targetMdKey = k.replace('smart_schedule_guest_', isOwner ? '' : `smart_schedule_${activeUser.uid}_`);
+      if (!localStorage.getItem(targetMdKey)) {
+        localStorage.setItem(targetMdKey, localStorage.getItem(k));
+      }
+    }
+  }
+}
+
+/**
  * Nạp dữ liệu ban đầu từ LocalStorage theo phạm vi người dùng & Không Gian Lịch (User & Space Scope)
  * @param {Object|null} user 
  */
@@ -317,19 +383,21 @@ export function initApplicationState(user = null) {
   const savedActiveSpaceId = getStorageItem(activeSpaceKey, 'default');
   state.activeSpaceId = state.spaces.some(s => s.id === savedActiveSpaceId) ? savedActiveSpaceId : 'default';
 
-  // 2. Nạp danh sách môn học Drive theo Space hiện tại
+  // 2. Nạp danh sách môn học Drive & Thư mục theo Space hiện tại
   const driveKey = getScopedStorageKey(STORAGE_KEYS.DRIVE_SUBJECTS, activeUser, state.activeSpaceId);
   const savedSubjects = getStorageItem(driveKey, null);
+
+  const foldersKey = getScopedStorageKey(STORAGE_KEYS.DRIVE_FOLDERS, activeUser, state.activeSpaceId);
+  const savedFolders = getStorageItem(foldersKey, []);
+  state.driveFolders = Array.isArray(savedFolders) ? savedFolders : [];
 
   if (state.activeSpaceId === 'default') {
     // SPACE GỐC: Nạp dữ liệu lịch học thực tế hoặc seed data
     if (savedSubjects && Array.isArray(savedSubjects) && savedSubjects.length > 0) {
       state.driveSubjects = savedSubjects;
-    } else if (isOwner) {
+    } else {
       state.driveSubjects = JSON.parse(JSON.stringify(INITIAL_SUBJECT_DRIVE));
       setStorageItem(driveKey, state.driveSubjects);
-    } else {
-      state.driveSubjects = Array.isArray(savedSubjects) ? savedSubjects : [];
     }
   } else {
     // CÁC SPACES KHÁC: Dữ liệu độc lập
@@ -349,7 +417,7 @@ export function initApplicationState(user = null) {
 
   // 6. Nạp Tab và Tuần đã lưu gần nhất (Cấp độ 1 & Tips Auto-Restore)
   const lastTabKey = getScopedStorageKey(STORAGE_KEYS.LAST_ACTIVE_TAB, activeUser);
-  state.lastActiveTab = getStorageItem(lastTabKey, 'grid');
+  state.lastActiveTab = getStorageItem(lastTabKey, 'backpack');
 
   const lastWeekKey = getScopedStorageKey(STORAGE_KEYS.LAST_SELECTED_WEEK, activeUser, state.activeSpaceId);
   state.lastSelectedWeek = getStorageItem(lastWeekKey, '');
@@ -364,6 +432,122 @@ export function persistDriveSubjects(user = null) {
   const driveKey = getScopedStorageKey(STORAGE_KEYS.DRIVE_SUBJECTS, activeUser, state.activeSpaceId);
   setStorageItem(driveKey, state.driveSubjects);
   triggerCloudSync(activeUser);
+}
+
+/**
+ * Lưu danh sách thư mục vào Storage theo Space
+ * @param {Object|null} user 
+ */
+export function persistDriveFolders(user = null) {
+  const activeUser = user || getCurrentUser();
+  const foldersKey = getScopedStorageKey(STORAGE_KEYS.DRIVE_FOLDERS, activeUser, state.activeSpaceId);
+  setStorageItem(foldersKey, state.driveFolders);
+  triggerCloudSync(activeUser);
+}
+
+/**
+ * Tạo một thư mục mới và gom các môn học vào thư mục đó
+ * @param {string} name - Tên thư mục
+ * @param {Array<string>} subjectCodes - Danh sách mã môn
+ * @returns {Object} Folder object vừa tạo
+ */
+export function createDriveFolder(name = 'Thư mục mới', subjectCodes = []) {
+  const folderId = 'fld_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+  const newFolder = {
+    id: folderId,
+    name: name.trim() || 'Thư mục mới',
+    color: '#6366f1',
+    createdAt: Date.now()
+  };
+
+  if (!Array.isArray(state.driveFolders)) {
+    state.driveFolders = [];
+  }
+  state.driveFolders.push(newFolder);
+
+  // Gán folderId cho các môn con
+  if (Array.isArray(subjectCodes) && subjectCodes.length > 0) {
+    state.driveSubjects.forEach(s => {
+      if (subjectCodes.includes(s.code)) {
+        s.folderId = folderId;
+      }
+    });
+  }
+
+  persistDriveFolders();
+  persistDriveSubjects();
+  return newFolder;
+}
+
+/**
+ * Thêm một môn học vào thư mục
+ * @param {string} folderId 
+ * @param {string} subjectCode 
+ */
+export function addSubjectToFolder(folderId, subjectCode) {
+  const subj = state.driveSubjects.find(s => s.code === subjectCode);
+  if (subj) {
+    subj.folderId = folderId;
+    persistDriveSubjects();
+  }
+}
+
+/**
+ * Tách một môn học ra khỏi thư mục (Un-group)
+ * @param {string} subjectCode 
+ */
+export function removeSubjectFromFolder(subjectCode) {
+  const subj = state.driveSubjects.find(s => s.code === subjectCode);
+  if (!subj) return;
+  const prevFolderId = subj.folderId;
+  subj.folderId = null;
+  persistDriveSubjects();
+
+  // Kiểm tra nếu thư mục chỉ còn 0 hoặc 1 môn thì tự động giải tán thư mục
+  if (prevFolderId) {
+    const remaining = state.driveSubjects.filter(s => s.folderId === prevFolderId);
+    if (remaining.length <= 1) {
+      // Đưa môn còn lại ra ngoài luôn và xóa thư mục
+      remaining.forEach(r => { r.folderId = null; });
+      removeDriveFolder(prevFolderId, true);
+      persistDriveSubjects();
+    }
+  }
+}
+
+/**
+ * Xóa hoặc giải tán thư mục
+ * @param {string} folderId 
+ * @param {boolean} keepSubjects - Giữ lại các môn học (trả về ngoài màn hình)
+ */
+export function removeDriveFolder(folderId, keepSubjects = true) {
+  if (keepSubjects) {
+    state.driveSubjects.forEach(s => {
+      if (s.folderId === folderId) {
+        s.folderId = null;
+      }
+    });
+    persistDriveSubjects();
+  } else {
+    state.driveSubjects = state.driveSubjects.filter(s => s.folderId !== folderId);
+    persistDriveSubjects();
+  }
+
+  state.driveFolders = (state.driveFolders || []).filter(f => f.id !== folderId);
+  persistDriveFolders();
+}
+
+/**
+ * Đổi tên thư mục
+ * @param {string} folderId 
+ * @param {string} newName 
+ */
+export function renameDriveFolder(folderId, newName) {
+  const folder = (state.driveFolders || []).find(f => f.id === folderId);
+  if (folder && newName && newName.trim()) {
+    folder.name = newName.trim();
+    persistDriveFolders();
+  }
 }
 
 /**
@@ -421,8 +605,20 @@ export function exportFullBackupData(user = null) {
   const spacesData = {};
   spaces.forEach(sp => {
     const driveKey = getScopedStorageKey(STORAGE_KEYS.DRIVE_SUBJECTS, activeUser, sp.id);
+    const foldersKey = getScopedStorageKey(STORAGE_KEYS.DRIVE_FOLDERS, activeUser, sp.id);
     const gradesKey = getScopedStorageKey(STORAGE_KEYS.GRADES, activeUser, sp.id);
     const customWeeksKey = getScopedStorageKey(STORAGE_KEYS.CUSTOM_WEEKS, activeUser, sp.id);
+
+    let driveSubjectsForSpace = getStorageItem(driveKey, []);
+    // Nếu đang là space hiện tại và state.driveSubjects có dữ liệu, ưu tiên lấy từ state
+    if (sp.id === (state.activeSpaceId || 'default') && Array.isArray(state.driveSubjects) && state.driveSubjects.length > 0) {
+      driveSubjectsForSpace = state.driveSubjects;
+    }
+
+    let driveFoldersForSpace = getStorageItem(foldersKey, []);
+    if (sp.id === (state.activeSpaceId || 'default') && Array.isArray(state.driveFolders)) {
+      driveFoldersForSpace = state.driveFolders;
+    }
 
     const customMds = {};
     for (let i = 0; i < localStorage.length; i++) {
@@ -433,7 +629,8 @@ export function exportFullBackupData(user = null) {
     }
 
     spacesData[sp.id] = {
-      driveSubjects: getStorageItem(driveKey, []),
+      driveSubjects: driveSubjectsForSpace,
+      driveFolders: driveFoldersForSpace,
       studentGrades: getStorageItem(gradesKey, {}),
       customWeeks: getStorageItem(customWeeksKey, []),
       customMds: customMds
@@ -452,7 +649,7 @@ export function exportFullBackupData(user = null) {
     settings: {
       theme: localStorage.getItem(STORAGE_KEYS.THEME) || 'violet',
       daysDisplayMode: state.daysDisplayMode || '7',
-      lastActiveTab: state.lastActiveTab || state.currentTab || 'grid',
+      lastActiveTab: state.lastActiveTab || state.currentTab || 'backpack',
       activeSpaceId: state.activeSpaceId || 'default',
       heatmapMode: localStorage.getItem('smart_schedule_heatmap_mode') || 'week',
       heatmapBannerCollapsed: localStorage.getItem('smart_schedule_heatmap_banner_collapsed') || 'true'
@@ -522,11 +719,40 @@ export function importFullBackupData(backupData, user = null, options = {}) {
       if (spData) {
         if (Array.isArray(spData.driveSubjects)) {
           const driveKey = getScopedStorageKey(STORAGE_KEYS.DRIVE_SUBJECTS, activeUser, spaceId);
-          setStorageItem(driveKey, spData.driveSubjects);
+          const localSubjects = getStorageItem(driveKey, []);
+          
+          // Smart merge: Đảm bảo không làm mất thuộc tính nếu cloud hoặc local có
+          const mergedSubjects = spData.driveSubjects.map(cloudSubj => {
+            const localSubj = Array.isArray(localSubjects) ? localSubjects.find(l => l.code === cloudSubj.code) : null;
+            if (!localSubj) return cloudSubj;
+            return {
+              ...localSubj,
+              ...cloudSubj,
+              folderId: cloudSubj.folderId !== undefined ? cloudSubj.folderId : (localSubj.folderId || null),
+              driveUrl: (cloudSubj.driveUrl !== undefined && cloudSubj.driveUrl !== null) ? cloudSubj.driveUrl : (localSubj.driveUrl || ''),
+              notes: cloudSubj.notes || localSubj.notes || '',
+              gradeItems: (Array.isArray(cloudSubj.gradeItems) && cloudSubj.gradeItems.length > 0) ? cloudSubj.gradeItems : (localSubj.gradeItems || [])
+            };
+          });
+
+          setStorageItem(driveKey, mergedSubjects);
+          if (spaceId === (state.activeSpaceId || 'default')) {
+            state.driveSubjects = mergedSubjects;
+          }
+        }
+        if (Array.isArray(spData.driveFolders)) {
+          const foldersKey = getScopedStorageKey(STORAGE_KEYS.DRIVE_FOLDERS, activeUser, spaceId);
+          setStorageItem(foldersKey, spData.driveFolders);
+          if (spaceId === (state.activeSpaceId || 'default')) {
+            state.driveFolders = spData.driveFolders;
+          }
         }
         if (spData.studentGrades && typeof spData.studentGrades === 'object') {
           const gradesKey = getScopedStorageKey(STORAGE_KEYS.GRADES, activeUser, spaceId);
           setStorageItem(gradesKey, spData.studentGrades);
+          if (spaceId === (state.activeSpaceId || 'default')) {
+            state.studentGrades = spData.studentGrades;
+          }
         }
         if (Array.isArray(spData.customWeeks)) {
           const customWeeksKey = getScopedStorageKey(STORAGE_KEYS.CUSTOM_WEEKS, activeUser, spaceId);

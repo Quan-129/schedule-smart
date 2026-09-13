@@ -12,7 +12,7 @@ import { escapeHtml } from '../../../4.Security/sanitizer.js';
 import { formatSafeUrl } from '../../../4.Security/urlValidator.js';
 import { state, persistDriveSubjects } from '../../../3.Database/state.js';
 import { showToast } from '../Toast.js';
-import { syncDriveSubjectsToCloud } from '../../../3.Database/auth/FirebaseAuthService.js';
+import { syncDriveSubjectsToCloud, syncAllStateToCloud } from '../../../3.Database/auth/FirebaseAuthService.js';
 import { openSubjectIconPicker } from './AddClassModal.js';
 
 let currentEditingSubject = null;
@@ -535,11 +535,12 @@ export function saveSubjectDriveChanges() {
   }
 
   persistDriveSubjects();
-  syncDriveSubjectsToCloud();
+  syncAllStateToCloud();
   closeEditDriveModal();
 
   if (window.renderBackpackView) window.renderBackpackView();
   if (window.renderGradesView) window.renderGradesView();
+  if (typeof window.refreshSubjectDetailModalIfOpen === 'function') window.refreshSubjectDetailModalIfOpen();
 
-  showToast(`Đã lưu thay đổi cho môn "${state.driveSubjects[subjectIndex].name}"!`);
+  showToast(`Đã lưu thay đổi cho môn "${state.driveSubjects[subjectIndex].name}"! ✨`);
 }

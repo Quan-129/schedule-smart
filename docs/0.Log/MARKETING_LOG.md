@@ -5,6 +5,26 @@
 
 ---
 
+## 💎 ENTRY 7: [2026-09-13] - "Chiếc Cặp Google Drive Chuẩn Apple iOS": Kéo - Thả Gom Môn Học Thành Thư Mục Thỏa Mãn Thị Giác (Satisfying UI) 🎒📱✨
+
+### 📌 Phân Loại & Tags:
+`#AppleAesthetic` `#iOSJiggleMode` `#FolderMerging` `#UIUXDesign` `#StudentLifeHacks` `#ChiếcCặpDrive`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Trải Nghiệm Đỉnh Cao Tương Tác (Tactile & Satisfying UX)**: Nhấn giữ 750ms để kích hoạt chế độ rung lắc (**Jiggle Mode**), cầm một node môn học kéo thả đè lên môn khác để tự động tạo Thư mục (Folder) với hiệu ứng bóng mờ nổi 3D, hào quang tỏa sáng (Aura Glow) và rung xúc giác (Haptic Feedback) y hệt iOS Home Screen.
+- **Folder Node Thông Minh**: Hiển thị lưới xem trước 2x2 các icon thu nhỏ của các môn bên trong. Chạm vào mở bung Popover Glassmorphism mờ hậu cảnh sang trọng.
+- **Giải Pháp Chống Rối Cho Sinh Viên**: Gom gọn các môn đôi (Lý thuyết + Thực hành, Đồ án chuyên ngành, Khối đại cương) vào 1 thư mục chung. Cho phép đổi tên trực tiếp, gỡ môn (Un-group) hoặc giải tán an toàn 100% không làm mất dữ liệu.
+
+### 2. 🎣 Bộ Viral Hooks TikTok Đời Thường & Đánh Trúng Thị Giác:
+1. **Visual Satisfaction Hook (Đề xuất)**:
+   > *"Lần đầu tiên thấy một trang web thời khóa biểu cho sinh viên mà làm hiệu ứng kéo thả gom thư mục mượt như iPhone thế này luôn á!..."*
+2. **Relatable Problem Hook**:
+   > *"Học nhiều môn quá nhìn màn hình hoa cả mắt? Xem cách tui gom môn Lý thuyết với Thực hành vào chung một thư mục kiểu iOS này nè!..."*
+3. **Tech Flex Hook**:
+   > *"Khi sinh viên nghiện hệ sinh thái Apple tự code web Lịch học và Chiếc cặp Drive cho chính mình..."*
+
+---
+
 ## 💎 ENTRY 6: [2026-09-06] - Kịch Bản TikTok Photo Carousel / Video Ngắn: "Khi Dân IT Tự Làm Thời Khóa Biểu"
 
 ### 📌 Phân Loại & Tags:

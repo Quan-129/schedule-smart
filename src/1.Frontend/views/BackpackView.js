@@ -1,27 +1,33 @@
 /**
  * ==========================================================================
  * FRONTEND VIEW - BACKPACK VIEW (CHIẾC CẶP GOOGLE DRIVE & CIRCULAR NODES)
- * Hỗ trợ chế độ rung lắc Jiggle Mode (Apple Style) & Đầy đủ cách thoát:
+ * Hỗ trợ chế độ rung lắc Jiggle Mode (Apple Style), Kéo-Thả gom Thư mục & Đầy đủ cách thoát:
  * - Nút "✓ Xong" trên thanh điều khiển
  * - Bấm vào khoảng trống nền
  * - Phím ESC
  * ==========================================================================
  */
 
-import { state, persistDriveSubjects } from '../../3.Database/state.js';
+// 1. IMPORTS
+import { state, persistDriveSubjects, removeDriveFolder } from '../../3.Database/state.js';
 import { renderCircularNodeHtml } from '../components/CircularNode.js';
+import { renderFolderNodeHtml } from '../components/FolderNode.js';
+import { openFolderDetailModal } from '../components/modals/FolderDetailModal.js';
 import { openEditDriveModal } from '../components/EditModal.js';
 import { openAddSubjectModal } from '../components/modals/AddSubjectModal.js';
 import { openSubjectDetailModal } from '../components/modals/SubjectDetailModal.js';
 import { showToast } from '../components/Toast.js';
 import { syncDriveSubjectsToCloud } from '../../3.Database/auth/FirebaseAuthService.js';
+import { attachBackpackDragDrop } from './backpack/BackpackDragDrop.js';
 
+// 2. CONSTANTS & VARIABLES
 let longPressTimer = null;
 let isLongPressTriggered = false;
 let globalEventsAttached = false;
 
+// 3. MAIN RENDER FUNCTION
 /**
- * Render toàn bộ giao diện Chiếc Cặp dạng lưới vòng tròn
+ * Render toàn bộ giao diện Chiếc Cặp dạng lưới vòng tròn (Folders & Subjects)
  */
 export function renderBackpackView() {
   const container = document.getElementById('backpack-launcher-grid');
@@ -38,22 +44,36 @@ export function renderBackpackView() {
     }
   }
 
-  // 1. Render từng Node môn học
-  state.driveSubjects.forEach((subject) => {
+  // 1. Render các Node Thư Mục (Folders)
+  const folders = Array.isArray(state.driveFolders) ? state.driveFolders : [];
+  folders.forEach((folder) => {
+    const subSubjects = (state.driveSubjects || []).filter(s => s.folderId === folder.id);
+    // Chỉ hiển thị thư mục nếu còn môn học bên trong
+    if (subSubjects.length === 0) return;
+
+    const folderBtn = document.createElement('div');
+    folderBtn.className = `bp-app-btn bp-folder-btn ${state.isJiggleMode ? 'jiggle-active' : ''}`;
+    folderBtn.dataset.folderId = folder.id;
+
+    folderBtn.innerHTML = renderFolderNodeHtml(folder, subSubjects, state.isJiggleMode);
+    attachFolderEvents(folderBtn, folder);
+    container.appendChild(folderBtn);
+  });
+
+  // 2. Render từng Node môn học độc lập (chưa thuộc thư mục nào)
+  const standaloneSubjects = (state.driveSubjects || []).filter(s => !s.folderId);
+  standaloneSubjects.forEach((subject) => {
     const btn = document.createElement('div');
     btn.className = `bp-app-btn ${state.isJiggleMode ? 'jiggle-active' : ''}`;
     btn.style.setProperty('--app-color', subject.color || '#6366f1');
     btn.dataset.code = subject.code;
 
     btn.innerHTML = renderCircularNodeHtml(subject, state.isJiggleMode);
-
-    // Gắn sự kiện tương tác
     attachNodeEvents(btn, subject);
-
     container.appendChild(btn);
   });
 
-  // 2. Render nút Thêm Môn Học
+  // 3. Render nút Thêm Môn Học
   const addBtn = document.createElement('div');
   addBtn.className = 'bp-app-btn btn-add-app';
   addBtn.innerHTML = `
@@ -72,17 +92,21 @@ export function renderBackpackView() {
   };
   container.appendChild(addBtn);
 
-  // 3. Cập nhật thanh công cụ Jiggle Mode (Nút Xong & Hướng dẫn)
+  // 4. Gắn cơ chế Kéo Thả (Pointer Drag & Drop) khi ở Jiggle Mode
+  if (state.isJiggleMode) {
+    attachBackpackDragDrop(container);
+  }
+
+  // 5. Cập nhật thanh công cụ Jiggle Mode (Nút Xong & Hướng dẫn)
   updateJiggleToolbar();
 
-  // 4. Gắn các sự kiện toàn cục để thoát Jiggle (Click ngoài, ESC)
+  // 6. Gắn các sự kiện toàn cục để thoát Jiggle (Click ngoài, ESC)
   attachGlobalJiggleEvents();
 }
 
+// 4. EVENT HANDLERS
 /**
- * Gắn các sự kiện click, long-press, xóa, sửa cho từng Node
- * @param {HTMLElement} btn 
- * @param {Object} subject 
+ * Gắn các sự kiện click, long-press cho từng Node môn học
  */
 function attachNodeEvents(btn, subject) {
   const circleWrapper = btn.querySelector('.bp-circle-wrapper');
@@ -101,7 +125,7 @@ function attachNodeEvents(btn, subject) {
       isLongPressTriggered = true;
       enterJiggleMode();
       if (navigator.vibrate) navigator.vibrate(60);
-    }, 750); // Giữ lâu hơn (750ms) mới hiện chế độ xóa & bút chì
+    }, 750);
   };
 
   const cancelLongPress = () => {
@@ -115,13 +139,11 @@ function attachNodeEvents(btn, subject) {
     if (!longPressTimer || !e.touches || !e.touches[0]) return;
     const moveX = Math.abs(e.touches[0].clientX - touchStartX);
     const moveY = Math.abs(e.touches[0].clientY - touchStartY);
-    // Nếu di chuyển ngón tay quá 8px (đang cuộn màn hình), hủy ngay nhấn giữ
     if (moveX > 8 || moveY > 8) {
       cancelLongPress();
     }
   };
 
-  // CHỈ GẮN SỰ KIỆN NHẤN GIỮ VÀO HÌNH TRÒN NODE (KHÍT ĐÚNG KÍCH THƯỚC VÒNG TRÒN)
   circleWrapper.addEventListener('mousedown', startLongPress);
   circleWrapper.addEventListener('touchstart', startLongPress, { passive: true });
   circleWrapper.addEventListener('touchmove', checkTouchMove, { passive: true });
@@ -135,7 +157,6 @@ function attachNodeEvents(btn, subject) {
     enterJiggleMode();
   });
 
-  // Xử lý Click vào các nút con hoặc vào ô môn
   btn.addEventListener('click', (e) => {
     // 1. Nút Xóa (-)
     const deleteBtn = e.target.closest('[data-action="delete"]');
@@ -153,20 +174,92 @@ function attachNodeEvents(btn, subject) {
       return;
     }
 
-    // 3. Nếu đang ở chế độ Jiggle, bấm vào node sẽ không mở link Drive
+    // 3. Nếu đang ở chế độ Jiggle, không mở chi tiết
     if (state.isJiggleMode) {
       e.stopPropagation();
       return;
     }
 
-    // 4. Nếu vừa kích hoạt long press thì bỏ qua click thông thường
+    // 4. Nếu vừa kích hoạt long press thì bỏ qua click
     if (isLongPressTriggered) {
       isLongPressTriggered = false;
       return;
     }
 
-    // 5. Mở trang Chi Tiết Môn Học (Tỉ lệ điểm, Ghi chú, Nút vào Drive)
+    // 5. Mở trang Chi Tiết Môn Học
     openSubjectDetailModal(subject.code);
+  });
+}
+
+/**
+ * Gắn các sự kiện cho Node Thư Mục (Folder Node)
+ */
+function attachFolderEvents(btn, folder) {
+  const circleWrapper = btn.querySelector('.bp-circle-wrapper');
+  if (!circleWrapper) return;
+
+  const startLongPress = () => {
+    isLongPressTriggered = false;
+    longPressTimer = setTimeout(() => {
+      isLongPressTriggered = true;
+      enterJiggleMode();
+      if (navigator.vibrate) navigator.vibrate(60);
+    }, 750);
+  };
+
+  const cancelLongPress = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+  };
+
+  circleWrapper.addEventListener('mousedown', startLongPress);
+  circleWrapper.addEventListener('touchstart', startLongPress, { passive: true });
+  circleWrapper.addEventListener('mouseup', cancelLongPress);
+  circleWrapper.addEventListener('mouseleave', cancelLongPress);
+  circleWrapper.addEventListener('touchend', cancelLongPress);
+  circleWrapper.addEventListener('touchcancel', cancelLongPress);
+
+  circleWrapper.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    enterJiggleMode();
+  });
+
+  btn.addEventListener('click', (e) => {
+    // 1. Nút Giải tán thư mục (-)
+    const deleteBtn = e.target.closest('[data-action="delete-folder"]');
+    if (deleteBtn) {
+      e.stopPropagation();
+      if (confirm(`Bạn có chắc chắn muốn giải tán thư mục "${folder.name}"?\nToàn bộ các môn học bên trong sẽ trở lại màn hình chính của Chiếc Cặp.`)) {
+        removeDriveFolder(folder.id, true);
+        renderBackpackView();
+        showToast(`Đã giải tán thư mục "${folder.name}" ✓`);
+      }
+      return;
+    }
+
+    // 2. Nút Bút Chì (✏️) Đổi tên thư mục
+    const editBtn = e.target.closest('[data-action="edit-folder"]');
+    if (editBtn) {
+      e.stopPropagation();
+      openFolderDetailModal(folder.id);
+      return;
+    }
+
+    // 3. Nếu đang ở Jiggle mode, không mở modal
+    if (state.isJiggleMode) {
+      e.stopPropagation();
+      return;
+    }
+
+    if (isLongPressTriggered) {
+      isLongPressTriggered = false;
+      return;
+    }
+
+    // 4. Chạm vào Folder mở Modal Chi tiết Thư mục
+    openFolderDetailModal(folder.id);
   });
 }
 
@@ -177,7 +270,7 @@ export function enterJiggleMode() {
   if (state.isJiggleMode) return;
   state.isJiggleMode = true;
   renderBackpackView();
-  showToast('Chế độ chỉnh sửa: Bấm ✏️ để sửa, (-) để xóa, hoặc bấm "Xong" để thoát.');
+  showToast('Chế độ chỉnh sửa: Kéo thả 2 môn vào nhau để gom thành Thư mục 📁, hoặc bấm ✏️/(-)');
 }
 
 /**
@@ -192,7 +285,6 @@ export function exitJiggleMode() {
 
 /**
  * Xóa một môn học khỏi Chiếc Cặp
- * @param {string} subjectCode 
  */
 function deleteSubject(subjectCode) {
   const subj = state.driveSubjects.find(s => s.code === subjectCode);
@@ -225,7 +317,7 @@ function updateJiggleToolbar() {
     if (hintText) {
       hintText.innerHTML = `
         <i class="fa-solid fa-arrows-spin fa-spin" style="color: #3b82f6;"></i>
-        <span><strong>Chế độ chỉnh sửa đang bật:</strong> Bấm <strong style="color: #f59e0b;">✏️</strong> để sửa link/tỉ lệ điểm, <strong style="color: #ef4444;">-</strong> để xóa môn. Bấm nút <strong style="color: #3b82f6;">"Xong"</strong> hoặc bấm vào khoảng trống để hoàn tất.</span>
+        <span><strong>Chế độ chỉnh sửa đang bật:</strong> Cầm kéo thả 2 môn vào nhau để <strong>tạo Thư mục gom nhóm 📁</strong>. Bấm <strong style="color: #f59e0b;">✏️</strong> để sửa, <strong style="color: #ef4444;">-</strong> để xóa. Bấm <strong style="color: #3b82f6;">"Xong"</strong> để hoàn tất.</span>
       `;
     }
   } else {
@@ -235,7 +327,7 @@ function updateJiggleToolbar() {
     if (hintText) {
       hintText.innerHTML = `
         <i class="fa-solid fa-hand-pointer"></i>
-        <span><em>Mẹo: <strong>Nhấn giữ ô tròn</strong> để bật chế độ chỉnh sửa (hiện nút cây bút ✏️ và nút xóa -).</em></span>
+        <span><em>Mẹo: <strong>Nhấn giữ ô tròn</strong> để kích hoạt chế độ chỉnh sửa (kéo thả gom nhóm thư mục, đổi link ✏️, xóa -).</em></span>
       `;
     }
   }
@@ -248,26 +340,24 @@ function attachGlobalJiggleEvents() {
   if (globalEventsAttached) return;
   globalEventsAttached = true;
 
-  // 1. Phím ESC để thoát Jiggle Mode
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && state.isJiggleMode) {
       exitJiggleMode();
     }
   });
 
-  // 2. Click vào khoảng trống của Backpack View để thoát Jiggle Mode
   const backpackSection = document.getElementById('backpack-view-container');
   if (backpackSection) {
     backpackSection.addEventListener('click', (e) => {
       if (!state.isJiggleMode) return;
 
-      // Không thoát nếu bấm vào nút môn học, nút xong, hoặc modal
       if (
         e.target.closest('.bp-app-btn') ||
         e.target.closest('#bp-done-jiggle-btn') ||
         e.target.closest('#bp-add-subject-btn') ||
         e.target.closest('.backpack-filter-box') ||
-        e.target.closest('.modal-backdrop')
+        e.target.closest('.modal-backdrop') ||
+        e.target.closest('.modal-folder-box')
       ) {
         return;
       }
@@ -277,7 +367,7 @@ function attachGlobalJiggleEvents() {
   }
 }
 
-// Window aliases for backward compatibility
+// 5. EXPORTS & WINDOW ALIASES
 window.enterJiggleMode = enterJiggleMode;
 window.exitJiggleMode = exitJiggleMode;
 window.renderBackpackView = renderBackpackView;
