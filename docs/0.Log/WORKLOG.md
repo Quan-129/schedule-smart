@@ -4,6 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-13 19:45] - Bổ Sung Bảng 7 Màu Cơ Bản Tùy Chọn Cho Node Nơ-Ron 🎨🧠
+
+- **🎯 Yêu cầu & Mục tiêu**:
+  - Ngoài 3 màu trạng thái học tập cơ bản (Đã hiểu - Xanh lục, Đang học - Vàng cam, Cần học - Xám), bổ sung thêm **7 màu sắc cơ bản** (Đỏ Ruby, Cam Rực, Vàng Chanh, Xanh Lục, Lam Ngọc, Tím Thạch Anh, Hồng Neon) để người dùng tự do tùy biến màu sắc từng node nơ-ron theo ý muốn.
+- **🛠 Triển khai kỹ thuật**:
+  - Trong [`src/1.Frontend/components/modals/EditNeuralNodeModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/EditNeuralNodeModal.js):
+    - Khai báo mảng `BASIC_NEURAL_COLORS` gồm 7 mã màu chuẩn (#ef4444, #f97316, #eab308, #10b981, #06b6d4, #8b5cf6, #ec4899).
+    - Render dãy bảng màu tròn bóng bẩy (`.neural-color-palette`), có dấu checkmark `✓` đánh dấu màu đang chọn và preview icon atom real-time.
+    - Gắn sự kiện chọn màu và lưu trường `color` vào node khi bấm Lưu.
+  - Trong [`src/1.Frontend/styles/13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css):
+    - Bổ sung style cho `.neural-color-palette` và `.neural-color-swatch` với hiệu ứng scale 1.18, aura glow sáng rực màu tương ứng.
+  - Trong [`src/1.Frontend/views/neural/NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js):
+    - Cập nhật hàm `drawNode` để quả cầu nơ-ron, viền, hào quang phát sáng và sợi truyền axon hiển thị chính xác theo `node.color`.
+    - Tách biệt trạng thái học tập thành mini badge ở góc trên bên trái: `✓` màu xanh lá (Đã hiểu) và `⚡` màu vàng cam (Đang học), tránh xung đột với màu sắc chủ đạo của node.
+- **✨ Kết quả**: Người dùng có thể tùy ý chọn màu cho các nhánh nơ-ron theo từng chuyên đề/chương mục, giao diện trực quan và rực rỡ.
+
 ## 📅 [2026-09-13 19:32] - Khắc Phục Lỗi 404 Broken Import & Phục Hồi Nút Đăng Nhập 🛠⚡
 
 - **🎯 Vấn đề phát sinh**: Người dùng bấm nút Đăng nhập không phản hồi, console báo lỗi: `Failed to load resource: the server responded with a status of 404 ()` tại `.../src/1...Database/state.js:1`.

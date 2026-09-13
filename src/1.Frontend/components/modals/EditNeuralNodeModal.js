@@ -5,17 +5,37 @@ import { escapeHtml } from '../../../4.Security/sanitizer.js';
 import { updateNeuralNode, deleteNeuralNode } from '../../../3.Database/state.js';
 
 // ==========================================================================
-// 2. TEMPLATES
+// 2. CONSTANTS
+// ==========================================================================
+export const BASIC_NEURAL_COLORS = [
+  { hex: '#ef4444', name: 'Đỏ Ruby' },
+  { hex: '#f97316', name: 'Cam Rực' },
+  { hex: '#eab308', name: 'Vàng Chanh' },
+  { hex: '#10b981', name: 'Xanh Lục' },
+  { hex: '#06b6d4', name: 'Lam Ngọc' },
+  { hex: '#8b5cf6', name: 'Tím Thạch Anh' },
+  { hex: '#ec4899', name: 'Hồng Neon' }
+];
+
+// ==========================================================================
+// 3. TEMPLATES
 // ==========================================================================
 function renderEditModalTemplate(node) {
   const isRoot = node.parentId === null;
   const status = node.status || 'todo';
+  const activeColor = node.color || '#8b5cf6';
+
+  const colorSwatchesHtml = BASIC_NEURAL_COLORS.map(c => `
+    <button type="button" class="neural-color-swatch ${activeColor.toLowerCase() === c.hex.toLowerCase() ? 'selected' : ''}" data-color="${c.hex}" title="${c.name}" style="--swatch-color: ${c.hex};">
+      ${activeColor.toLowerCase() === c.hex.toLowerCase() ? '<i class="fa-solid fa-check"></i>' : ''}
+    </button>
+  `).join('');
 
   return `
     <div class="neural-editor-card">
       <div class="neural-editor-header">
         <h3>
-          <i class="fa-solid fa-atom" style="color: ${escapeHtml(node.color || '#818cf8')};"></i>
+          <i class="fa-solid fa-atom" id="neural-editor-icon-atom" style="color: ${escapeHtml(activeColor)};"></i>
           <span>${isRoot ? 'Chỉnh Sửa Node Gốc' : 'Chỉnh Sửa Khái Niệm'}</span>
         </h3>
         <button class="neural-close-btn" id="btn-close-neural-editor" title="Đóng">
@@ -34,6 +54,13 @@ function renderEditModalTemplate(node) {
           <span>Link Tài Liệu / Google Drive / Web</span>
         </label>
         <input type="url" id="neural-input-url" class="neural-input" value="${escapeHtml(node.url || '')}" placeholder="https://drive.google.com/... hoặc https://youtube.com/...">
+      </div>
+
+      <div class="neural-form-group">
+        <label>Màu sắc node nơ-ron (7 màu cơ bản)</label>
+        <div class="neural-color-palette" id="neural-color-palette-container">
+          ${colorSwatchesHtml}
+        </div>
       </div>
 
       <div class="neural-form-group">
@@ -97,6 +124,25 @@ export function openEditNeuralNodeModal(subjectCode, node, onSavedCallback, onDe
   });
 
   let currentStatus = node.status || 'todo';
+  let currentColor = node.color || '#8b5cf6';
+  const atomIcon = overlay.querySelector('#neural-editor-icon-atom');
+
+  // Color Swatches Selector (7 Basic Colors)
+  const colorSwatches = overlay.querySelectorAll('.neural-color-swatch');
+  colorSwatches.forEach(swatch => {
+    swatch.addEventListener('click', () => {
+      colorSwatches.forEach(s => {
+        s.classList.remove('selected');
+        s.innerHTML = '';
+      });
+      swatch.classList.add('selected');
+      swatch.innerHTML = '<i class="fa-solid fa-check"></i>';
+      currentColor = swatch.dataset.color;
+      if (atomIcon) {
+        atomIcon.style.color = currentColor;
+      }
+    });
+  });
 
   // Status Selector
   const statusBtns = overlay.querySelectorAll('.neural-status-btn');
@@ -134,6 +180,7 @@ export function openEditNeuralNodeModal(subjectCode, node, onSavedCallback, onDe
     const updates = {
       label: newLabel,
       url: urlInput.value.trim(),
+      color: currentColor,
       status: currentStatus,
       notes: notesInput.value.trim()
     };

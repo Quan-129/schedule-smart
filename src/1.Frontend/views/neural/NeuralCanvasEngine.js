@@ -205,10 +205,10 @@ export class NeuralCanvasEngine {
     ctx.save();
 
     // 1. Aura Glow
-    const glowColor = node.status === 'completed' ? '#10b981' : (node.status === 'learning' ? '#f59e0b' : (node.color || '#6366f1'));
+    const nodeColor = node.color || (node.status === 'completed' ? '#10b981' : (node.status === 'learning' ? '#f59e0b' : '#6366f1'));
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, radius + (isSelected ? 10 * this.zoom : 5 * this.zoom), 0, Math.PI * 2);
-    ctx.fillStyle = isSelected ? `${glowColor}40` : (isHovered ? `${glowColor}25` : `${glowColor}15`);
+    ctx.fillStyle = isSelected ? `${nodeColor}45` : (isHovered ? `${nodeColor}30` : `${nodeColor}18`);
     ctx.fill();
 
     // 2. Node Core Sphere
@@ -216,14 +216,14 @@ export class NeuralCanvasEngine {
     ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
     const gradient = ctx.createRadialGradient(pos.x - radius * 0.3, pos.y - radius * 0.3, radius * 0.1, pos.x, pos.y, radius);
     gradient.addColorStop(0, '#ffffff');
-    gradient.addColorStop(0.4, glowColor);
-    gradient.addColorStop(1, '#0f172a');
+    gradient.addColorStop(0.35, nodeColor);
+    gradient.addColorStop(1, '#0b0f19');
     ctx.fillStyle = gradient;
     ctx.fill();
 
     // 3. Border Stroke
     ctx.lineWidth = Math.max(1.5, (isSelected ? 3 : 2) * this.zoom);
-    ctx.strokeStyle = isSelected ? '#ffffff' : glowColor;
+    ctx.strokeStyle = isSelected ? '#ffffff' : nodeColor;
     ctx.stroke();
 
     // 4. Node Label Text
@@ -235,7 +235,29 @@ export class NeuralCanvasEngine {
     ctx.shadowBlur = 6;
     ctx.fillText(node.label || 'Node', pos.x, pos.y + radius + 6);
 
-    // 5. Direct Link Icon Badge (🔗)
+    // 5. Status Badge on Top-Left (✓ hoặc ⚡)
+    if (node.status === 'completed' || node.status === 'learning') {
+      const isCompleted = node.status === 'completed';
+      const statusX = pos.x - radius * 0.7;
+      const statusY = pos.y - radius * 0.7;
+      const statusR = Math.max(7, 9.5 * this.zoom);
+
+      ctx.beginPath();
+      ctx.arc(statusX, statusY, statusR, 0, Math.PI * 2);
+      ctx.fillStyle = isCompleted ? '#10b981' : '#f59e0b';
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.font = `${Math.max(7, 8.5 * this.zoom)}px sans-serif`;
+      ctx.fillStyle = isCompleted ? '#ffffff' : '#0f172a';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(isCompleted ? '✓' : '⚡', statusX, statusY);
+    }
+
+    // 6. Direct Link Icon Badge (🔗) on Top-Right
     if (node.url && node.url.trim()) {
       const badgeX = pos.x + radius * 0.7;
       const badgeY = pos.y - radius * 0.7;
