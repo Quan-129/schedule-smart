@@ -4,6 +4,19 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-13 19:32] - Khắc Phục Lỗi 404 Broken Import & Phục Hồi Nút Đăng Nhập 🛠⚡
+
+- **🎯 Vấn đề phát sinh**: Người dùng bấm nút Đăng nhập không phản hồi, console báo lỗi: `Failed to load resource: the server responded with a status of 404 ()` tại `.../src/1...Database/state.js:1`.
+- **🔍 Nguyên nhân gốc rễ**:
+  - File [`src/1.Frontend/views/neural/NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js) nằm trong thư mục con 3 cấp (`src/1.Frontend/views/neural/`).
+  - Khi import `state.js`, đường dẫn bị viết nhầm thành `../../3.Database/state.js` (chỉ lùi 2 cấp, dẫn đến `src/1.Frontend/3.Database/state.js`). Trình duyệt hiển thị rút gọn thành `src/1...Database/state.js` và trả về mã lỗi 404 Not Found.
+  - Do Native ES Modules hoạt động theo cơ chế Module Dependency Tree: khi một module con bị lỗi 404, toàn bộ cây nạp module (`NeuralCanvasEngine` $\rightarrow$ `NeuralKnowledgeModal` $\rightarrow$ `SubjectDetailModal` & `BackpackView` $\rightarrow$ `main.js`) bị ngắt quãng, khiến các sự kiện trên Navbar (bao gồm nút Đăng Nhập và Google Auth) không được khởi tạo.
+- **🛠 Giải pháp & Triển khai**:
+  - Trong [`src/1.Frontend/views/neural/NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js):
+    - Đã sửa thành `import { saveSubjectKnowledgeNodes } from '../../../3.Database/state.js';`.
+  - Đã chạy script quét kiểm tra đệ quy 100% các câu lệnh import trong toàn bộ thư mục `src/`, xác nhận tất cả đường dẫn import đều hợp lệ (`ALL IMPORTS ARE VALID! 100% OK`).
+- **✨ Kết quả**: Toàn bộ chuỗi nạp module hoạt động trơn tru, nút Đăng nhập và các tính năng tương tác đã hoạt động trở lại bình thường.
+
 ## 📅 [2026-09-13 19:25] - Triển Khai Cây Kiến Thức Dạng Node Nơ-Ron & Đính Kèm Link Từng Node (Neural Knowledge Cosmos) 🧠⚡
 
 - **🎯 Yêu cầu & Mục tiêu**:
