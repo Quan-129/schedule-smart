@@ -4,6 +4,28 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-13 21:35] - Tích Hợp Thư Viện Marked.js Tiêu Chuẩn Công Nghiệp - Hỗ Trợ 100% GFM (Bảng Tables, Khối Code, Blockquotes, Links & Tasks) 🌟📑
+
+- **🎯 Yêu cầu & Bối cảnh**:
+  - Người dùng gửi ảnh thực tế chứa cú pháp Markdown nâng cao: Bảng biểu `| Module | Tiến độ |`, Khối lệnh ````bash ...````, Trích dẫn `> Lưu ý: ...`.
+  - Bộ regex tự viết trước đó không thể parse cấu trúc bảng hoặc code block đa dòng.
+  - Người dùng yêu cầu: *"bạn có đề xuất giải pháp nào không như 1 công cụ mạnh mẽ nào đó đã chuyện việc gen này ta chỉ cần tích hợp thôi"* -> Người dùng chốt: *"ok múa đi"*.
+- **🛠 Triển khai kỹ thuật**:
+  1. **Vendor Thư Viện Marked.js ([`src/2.Backend/vendor/marked.min.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/vendor/marked.min.js))**:
+     - Lưu trữ trực tiếp file `marked.min.js` (~39.9KB) vào thư mục `vendor/`, đảm bảo 100% nguyên tắc Zero-Dependency Native Architecture, hoạt động mượt mà cả khi offline / PWA trên GitHub Pages.
+     - Nạp script đồng bộ trong [`index.html`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/index.html).
+  2. **Bộ Chuyển Đổi Lai Thông Minh ([`src/2.Backend/utils/markdownRenderer.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/utils/markdownRenderer.js))**:
+     - Tiền xử lý các thẻ độc quyền: Tô sáng dạ quang `==nội dung==` $\rightarrow$ `<mark class="neural-highlight">`, Gạch chân `<u>nội dung</u>` hoặc `--nội dung--` $\rightarrow$ `<span class="neural-underline">`.
+     - Chuyển tiếp toàn bộ nội dung qua `marked.parse(processed, { gfm: true, breaks: true })`.
+     - Hậu xử lý: Tự động bọc `<table>` vào `<div class="neural-table-wrapper">` giúp cuộn ngang mượt mà trên panel 50% và thiết bị di động; tự động gắn `target="_blank" rel="noopener noreferrer"` cho toàn bộ liên kết `<a>`.
+     - Tích hợp Fallback Engine đảm bảo an toàn tuyệt đối ngay cả khi thư viện chưa nạp kịp.
+  3. **Bộ CSS Dark Mode Chuyên Nghiệp ([`src/1.Frontend/styles/13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - **Bảng (Tables)**: Viền bo góc 10px, gradient header tím `rgba(99, 102, 241, 0.2)`, kẻ sọc xen kẽ và hover highlight hàng.
+     - **Khối Code (`pre code`)**: Nền Deep Space `#090d16`, font JetBrains Mono, border mờ, thanh cuộn ngang tùy chỉnh.
+     - **Trích dẫn (`blockquote`)**: Viền trái 4px gradient tím cyan, nền kính mờ sang trọng.
+     - **Links & Task list**: Màu xanh cyan `#38bdf8`, checkbox accent tím.
+- **✅ Kết quả**: Toàn bộ nội dung Markdown phong phú như trong ảnh chụp màn hình của người dùng (Bảng, Code bash, Blockquote) lập tức được gen ra trực quan, hoàn hảo 100%!
+
 ## 📅 [2026-09-13 21:15] - Khắc Phục Lỗi Hiển Thị Markdown: Tự Động Gen Live Preview & Mặc Định Mở Bản Đã Gen Trong Sidebar 50% 🚀⚡
 
 - **🎯 Yêu cầu & Phản hồi người dùng**:
