@@ -4,6 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-14 00:10] - Khắc Phục Triệt Để Tính Năng Đổi Màu Chữ & Đổi Cỡ Chữ Trong Visual Note: Selection Tracking & Mousedown Retention 🎨🔤✨
+
+- **🎯 Yêu cầu từ người dùng**:
+  - *"tính năng đổi màu vẫn chưa hoạt động"*
+- **🛠 Triển khai kỹ thuật ([`src/1.Frontend/components/modals/NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js) & [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Nguyên nhân cốt lõi**:
+     - Các nút chấm màu (`.visual-color-dot`) trước đây không được chặn `mousedown`, dẫn tới khi người dùng bôi đen chữ rồi bấm chuột vào nút màu, trình duyệt lập tức làm mất focus khỏi `visualEditor` và xóa vùng chọn (`Selection is collapsed`). Lệnh `document.execCommand('foreColor')` bị gọi trên phần tử body không có focus nên thất bại hoàn toàn trong im lặng.
+  2. **Giải pháp khắc phục toàn diện**:
+     - **Chặn mất focus (`e.preventDefault()` trên `mousedown`)**: Thêm `mousedown` handler trên tất cả `.visual-color-dot` và công cụ toolbar để giữ nguyên vẹn vùng bôi đen chữ khi người dùng bấm chọn màu.
+     - **Bộ nhớ vùng chọn (Selection Tracking Engine)**: Tự động lưu `lastVisualRange` qua các sự kiện `selectionchange`, `mouseup`, `keyup`. Nếu người dùng click vào dropdown cỡ chữ `#vis-font-size`, vùng bôi đen được tự động khôi phục (`getOrRestoreVisualRange()`).
+     - **Hỗ trợ cả 2 chế độ**:
+       - *Khi có bôi đen chữ*: Đổi màu ngay lập tức cho đoạn văn bản được chọn với cơ chế kép (`execCommand('foreColor')` + fallback bọc `<span>` trực tiếp).
+       - *Khi không bôi đen chữ*: Thiết lập màu sắc để các ký tự người dùng chuẩn bị gõ tiếp theo sẽ mang màu đã chọn.
+  3. **Nâng cấp Service Worker Cache v125**:
+     - Nâng `CACHE_NAME` lên `smart-schedule-modular-v125` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js) để các trình duyệt tự động xóa cache cũ và nhận ngay bản vá.
+
 ## 📅 [2026-09-13 23:30] - Hoàn Thiện Tương Tác Visual Image Card: Kéo Thả Ra Tự Động Ẩn Khung, Chỉ Click Vào Mới Hiện & Click Ra Ngoài Cũng Ẩn 🎯🖼️✨
 
 - **🎯 Yêu cầu từ người dùng**:

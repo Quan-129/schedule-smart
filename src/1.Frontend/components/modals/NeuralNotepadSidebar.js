@@ -782,39 +782,97 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     });
   }
 
-  // Toolbar Formatting cho Visual Note
+  // ========================================================================
+  // SELECTION TRACKING & VISUAL FORMATTING ENGINE
+  // ========================================================================
+  let lastVisualRange = null;
+
+  const trackVisualSelection = () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+      const r = sel.getRangeAt(0);
+      if (visualEditor && visualEditor.contains(r.commonAncestorContainer)) {
+        lastVisualRange = r.cloneRange();
+      }
+    }
+  };
+
+  if (visualEditor) {
+    visualEditor.addEventListener('mouseup', trackVisualSelection);
+    visualEditor.addEventListener('keyup', trackVisualSelection);
+    visualEditor.addEventListener('touchend', trackVisualSelection);
+    document.addEventListener('selectionchange', trackVisualSelection);
+  }
+
+  // Hàm khôi phục hoặc lấy vùng chọn hiện thời trong visualEditor
+  const getOrRestoreVisualRange = () => {
+    if (!visualEditor) return null;
+    visualEditor.focus();
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+      const r = sel.getRangeAt(0);
+      if (visualEditor.contains(r.commonAncestorContainer)) {
+        return r;
+      }
+    }
+    if (lastVisualRange && !lastVisualRange.collapsed) {
+      if (visualEditor.contains(lastVisualRange.commonAncestorContainer)) {
+        if (sel) {
+          sel.removeAllRanges();
+          sel.addRange(lastVisualRange);
+        }
+        return lastVisualRange;
+      }
+    }
+    return null;
+  };
+
+  // Toolbar Formatting cho Visual Note: Chặn mousedown trên toàn bộ tool/dots để không mất vùng chọn text
   const visToolbar = sidebar.querySelector('#neural-visual-toolbar');
   if (visToolbar) {
-    visToolbar.querySelectorAll('.neural-np-tool-btn, .visual-paste-btn').forEach(btn => {
+    visToolbar.querySelectorAll('.neural-np-tool-btn, .visual-paste-btn, .visual-color-dot').forEach(btn => {
       btn.addEventListener('mousedown', (e) => e.preventDefault());
     });
   }
 
   sidebar.querySelector('#btn-vis-bold')?.addEventListener('click', () => {
+    visualEditor?.focus();
     document.execCommand('bold', false, null);
     saveAllNotes();
   });
   sidebar.querySelector('#btn-vis-italic')?.addEventListener('click', () => {
+    visualEditor?.focus();
     document.execCommand('italic', false, null);
     saveAllNotes();
   });
   sidebar.querySelector('#btn-vis-underline')?.addEventListener('click', () => {
+    visualEditor?.focus();
     document.execCommand('underline', false, null);
     saveAllNotes();
   });
   sidebar.querySelector('#btn-vis-undo')?.addEventListener('click', () => {
+    visualEditor?.focus();
     document.execCommand('undo', false, null);
     saveAllNotes();
   });
   sidebar.querySelector('#btn-vis-highlight')?.addEventListener('click', () => {
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return;
-    const range = selection.getRangeAt(0);
-    const mark = document.createElement('mark');
-    mark.className = 'neural-highlight';
-    mark.appendChild(range.extractContents());
-    range.insertNode(mark);
-    selection.removeAllRanges();
+    const range = getOrRestoreVisualRange();
+    if (!range || range.collapsed) return;
+    try {
+      const mark = document.createElement('mark');
+      mark.className = 'neural-highlight';
+      mark.appendChild(range.extractContents());
+      range.insertNode(mark);
+
+      const sel = window.getSelection();
+      const newRange = document.createRange();
+      newRange.selectNodeContents(mark);
+      sel.removeAllRanges();
+      sel.addRange(newRange);
+      lastVisualRange = newRange.cloneRange();
+    } catch (e) {
+      console.warn('Highlight error:', e);
+    }
     saveAllNotes();
   });
 
@@ -823,37 +881,78 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   if (fontSizeSelect) {
     fontSizeSelect.addEventListener('change', (e) => {
       const size = e.target.value;
-      const selection = window.getSelection();
-      if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return;
-      const range = selection.getRangeAt(0);
-      const span = document.createElement('span');
-      span.style.fontSize = size;
-      span.appendChild(range.extractContents());
-      range.insertNode(span);
-      selection.removeAllRanges();
-      saveAllNotes();
+      const range = getOrRestoreVisualRange();
+      if (range && !range.collapsed) {
+        try {
+          const span = document.createElement('span');
+          span.style.fontSize = size;
+          span.appendChild(range.extractContents());
+          range.insertNode(span);
+
+          const sel = window.getSelection();
+          const newRange = document.createRange();
+          newRange.selectNodeContents(span);
+          sel.removeAllRanges();
+          sel.addRange(newRange);
+          lastVisualRange = newRange.cloneRange();
+        } catch (err) {
+          console.warn('Font size error:', err);
+        }
+        saveAllNotes();
+      }
     });
   }
 
-  // Đổi màu chữ
+  // Đổi màu chữ (Áp dụng cho văn bản đang bôi đen HOẶC thiết lập màu gõ tiếp theo)
+  const applyTextColor = (color) => {
+    if (!visualEditor) return;
+    const range = getOrRestoreVisualRange();
+
+    try {
+      document.execCommand('styleWithCSS', false, true);
+    } catch (e) {}
+
+    if (range && !range.collapsed) {
+      // 1. Trường hợp có văn bản đang được bôi đen
+      const success = document.execCommand('foreColor', false, color);
+      if (!success) {
+        try {
+          const span = document.createElement('span');
+          span.style.color = color;
+          span.appendChild(range.extractContents());
+          range.insertNode(span);
+
+          const sel = window.getSelection();
+          const newRange = document.createRange();
+          newRange.selectNodeContents(span);
+          sel.removeAllRanges();
+          sel.addRange(newRange);
+          lastVisualRange = newRange.cloneRange();
+        } catch (domErr) {
+          console.warn('Fallback span color error:', domErr);
+        }
+      }
+    } else {
+      // 2. Trường hợp con trỏ đang nhấp nháy (không bôi đen): Đặt màu để gõ chữ tiếp theo
+      visualEditor.focus();
+      document.execCommand('foreColor', false, color);
+    }
+
+    saveAllNotes();
+  };
+
   const colorDots = sidebar.querySelectorAll('.visual-color-dot');
   colorDots.forEach(dot => {
-    dot.addEventListener('click', () => {
+    dot.addEventListener('mousedown', (e) => {
+      e.preventDefault(); // Giữ nguyên vùng chọn bôi đen text
+    });
+
+    dot.addEventListener('click', (e) => {
+      e.preventDefault();
       colorDots.forEach(d => d.classList.remove('active'));
       dot.classList.add('active');
       const color = dot.dataset.color;
-      const selection = window.getSelection();
-      if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
-        document.execCommand('foreColor', false, color);
-        return;
-      }
-      const range = selection.getRangeAt(0);
-      const span = document.createElement('span');
-      span.style.color = color;
-      span.appendChild(range.extractContents());
-      range.insertNode(span);
-      selection.removeAllRanges();
-      saveAllNotes();
+      applyTextColor(color);
     });
   });
 
