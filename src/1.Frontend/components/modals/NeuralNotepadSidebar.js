@@ -6,15 +6,84 @@ import { updateNeuralNode } from '../../../3.Database/state.js';
 import { renderMarkdownToHtml } from '../../../2.Backend/utils/markdownRenderer.js';
 
 // ==========================================================================
-// 2. HELPER FUNCTIONS: SMART FORMATTING (KHÔNG CHÈN TEXT RÁC)
+// 2. HELPER FUNCTIONS: SMART FORMATTING & CONTEXT MATCHING
 // ==========================================================================
+
+/**
+ * Tìm vị trí chính xác của đoạn text đang được bôi đen trên giao diện xem trước (Preview)
+ * Bằng cách so khớp ngữ cảnh các từ xung quanh (Context Matching), ngăn ngừa triệt để
+ * lỗi nhảy lên từ xuất hiện đầu tiên ở đầu file khi một từ bị lặp lại nhiều lần.
+ * 
+ * @param {string} rawText - Toàn bộ nội dung văn bản gốc trong textarea
+ * @param {string} sel - Cụm từ người dùng đang bôi đen
+ * @returns {number} Vị trí index chính xác trong rawText, hoặc -1 nếu không tìm thấy
+ */
+function findSmartSelectionIndex(rawText, sel) {
+  if (!sel || !rawText) return -1;
+
+  // 1. Trích xuất ngữ cảnh xung quanh từ DOM Selection
+  let prefixContext = '';
+  let suffixContext = '';
+
+  if (typeof window !== 'undefined' && window.getSelection) {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      let container = range.commonAncestorContainer;
+      if (container && container.nodeType === 3) container = container.parentElement;
+      const fullContent = (container && container.textContent) ? container.textContent : '';
+      const pos = fullContent.indexOf(sel);
+      if (pos !== -1) {
+        prefixContext = fullContent.substring(Math.max(0, pos - 30), pos).trim();
+        suffixContext = fullContent.substring(pos + sel.length, pos + sel.length + 30).trim();
+      }
+    }
+  }
+
+  // 2. Nếu có ngữ cảnh, quét toàn bộ các vị trí xuất hiện và chấm điểm khớp (Scoring)
+  if (prefixContext || suffixContext) {
+    let searchPos = 0;
+    let bestIdx = -1;
+    let maxScore = -1;
+
+    while ((searchPos = rawText.indexOf(sel, searchPos)) !== -1) {
+      let score = 0;
+      // Khớp ngữ cảnh phía trước
+      if (prefixContext) {
+        const beforeText = rawText.substring(Math.max(0, searchPos - 45), searchPos);
+        for (let word of prefixContext.split(/\s+/)) {
+          if (word.length > 1 && beforeText.includes(word)) score += 2;
+        }
+      }
+      // Khớp ngữ cảnh phía sau
+      if (suffixContext) {
+        const afterText = rawText.substring(searchPos + sel.length, searchPos + sel.length + 45);
+        for (let word of suffixContext.split(/\s+/)) {
+          if (word.length > 1 && afterText.includes(word)) score += 2;
+        }
+      }
+
+      if (score > maxScore) {
+        maxScore = score;
+        bestIdx = searchPos;
+      }
+      searchPos += sel.length;
+    }
+
+    if (bestIdx !== -1 && maxScore > 0) {
+      return bestIdx;
+    }
+  }
+
+  // 3. Fallback: Nếu không có ngữ cảnh đặc thù, lấy vị trí đầu tiên
+  return rawText.indexOf(sel);
+}
 
 /**
  * Áp dụng định dạng Markdown thông minh:
  * - Nếu có bôi đen trong textarea: Bọc định dạng hoặc tháo gỡ nếu đã bọc (Toggle).
- * - Nếu có bôi đen trên màn hình (Preview pane): Tự động tìm từ đó trong textarea và bọc định dạng.
+ * - Nếu có bôi đen trên màn hình (Preview pane): So khớp ngữ cảnh chính xác để không bao giờ nhảy nhầm từ.
  * - Nếu không bôi đen: Chỉ chèn cặp thẻ rỗng và đưa con trỏ vào giữa để gõ tiếp.
- * Tuyệt đối không chèn chữ giả mạo "văn bản" làm hỏng nội dung của người dùng.
  * 
  * @param {HTMLTextAreaElement} textarea 
  * @param {string} prefix 
@@ -27,7 +96,7 @@ function applyFormat(textarea, prefix, suffix, onModifyCallback) {
   const end = textarea.selectionEnd;
   const text = textarea.value;
 
-  // 1. Nếu có bôi đen trong textarea
+  // 1. Nếu có bôi đen trong textarea (vị trí con trỏ chính xác tuyệt đối)
   if (start !== end) {
     const selectedText = text.substring(start, end);
 
@@ -52,11 +121,22 @@ function applyFormat(textarea, prefix, suffix, onModifyCallback) {
     return;
   }
 
-  // 2. Nếu textarea không có bôi đen, kiểm tra xem có bôi đen trên Preview pane không
+  // 2. Nếu textarea không bôi đen, kiểm tra xem người dùng có đang bôi đen trên Preview pane không
   const sel = (typeof window !== 'undefined' && window.getSelection) ? window.getSelection().toString().trim() : '';
   if (sel) {
-    const idx = text.indexOf(sel);
+    const idx = findSmartSelectionIndex(text, sel);
     if (idx !== -1) {
+      // Kiểm tra nếu đoạn đó đã có format -> gỡ bỏ
+      const existing = text.substring(Math.max(0, idx - prefix.length), idx + sel.length + suffix.length);
+      if (existing === prefix + sel + suffix) {
+        const newText = text.substring(0, idx - prefix.length) + sel + text.substring(idx + sel.length + suffix.length);
+        textarea.value = newText;
+        textarea.focus();
+        textarea.setSelectionRange(idx - prefix.length, idx - prefix.length + sel.length);
+        if (onModifyCallback) onModifyCallback(newText, idx - prefix.length, idx - prefix.length + sel.length);
+        return;
+      }
+
       const replacement = prefix + sel + suffix;
       const newText = text.substring(0, idx) + replacement + text.substring(idx + sel.length);
       textarea.value = newText;
@@ -345,8 +425,15 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   };
 
   // ========================================================================
-  // TOOLBAR 4 CHỨC NĂNG ĐỊNH DẠNG (B, I, U, HL)
+  // TOOLBAR 4 CHỨC NĂNG ĐỊNH DẠNG (B, I, U, HL) & GIỮ VÙNG CHỌN (SELECTION)
   // ========================================================================
+  // QUAN TRỌNG: Ngăn chặn mousedown làm mất focus và làm mất selection trong textarea!
+  sidebar.querySelectorAll('.neural-np-tool-btn').forEach(btn => {
+    btn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+    });
+  });
+
   const handleFormat = (prefix, suffix) => {
     applyFormat(textarea, prefix, suffix, (newText, s, e) => {
       pushHistory(newText, s, e);

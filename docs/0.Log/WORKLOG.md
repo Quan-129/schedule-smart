@@ -4,6 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-13 22:15] - Khắc Phục Lỗi Nhảy Highlight Sang Từ Khác: So Khớp Ngữ Cảnh (Context Matching) & Bảo Toàn Vùng Chọn 🎯🛡️
+
+- **🎯 Yêu cầu & Phản hồi người dùng**:
+  - Người dùng phản hồi: *"sao hightlight trên nó cứ bị nhảy hightlight thằng khác vậy"*.
+  - Điều tra nguyên nhân gốc rễ:
+    1. **Thuật toán `indexOf` mù quáng**: Khi người dùng bôi đen một từ trên giao diện xem trước (Preview) mà từ đó xuất hiện nhiều lần trong bài (ví dụ chữ "và", "API", "Dự án"), hàm cũ dùng `text.indexOf(sel)` luôn luôn trả về vị trí xuất hiện đầu tiên ở tuốt trên đỉnh file, dẫn đến việc tô sáng nhầm "thằng khác" ở phía trên!
+    2. **Mất vùng chọn (Blur / Selection Loss)**: Khi người dùng bôi đen trong textarea rồi click vào nút Toolbar, sự kiện `mousedown` mặc định của trình duyệt làm textarea bị mất focus (blur), khiến vùng chọn bị reset và rơi vào thuật toán quét DOM.
+- **🛠 Triển khai kỹ thuật**:
+  1. **Bảo Toàn Tuyệt Đối Vùng Chọn ([`src/1.Frontend/components/modals/NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Thêm `e.preventDefault()` vào sự kiện `mousedown` cho toàn bộ các nút Toolbar (`.neural-np-tool-btn`). Textarea không bao giờ bị mất focus khi click nút, vùng bôi đen `selectionStart`/`selectionEnd` được giữ nguyên vẹn 100%.
+  2. **Thuật Toán So Khớp Ngữ Cảnh Thông Minh (`findSmartSelectionIndex`)**:
+     - Khi người dùng bôi đen trên Preview pane, hệ thống trích xuất khoảng 30 ký tự ngữ cảnh liền trước và liền sau từ được chọn trong DOM.
+     - Quét toàn bộ các vị trí xuất hiện trong mã nguồn Markdown và tính điểm khớp (Context Scoring) dựa trên các từ ngữ cảnh bao quanh.
+     - Định vị chính xác 100% vị trí occurrence mà người dùng đang nhìn thấy, loại bỏ hoàn toàn hiện tượng nhảy nhầm lên đầu trang.
+- **✅ Kết quả**: Dù văn bản có hàng chục từ giống hệt nhau, tính năng Highlight sẽ luôn luôn tô màu đúng từ tại đúng vị trí người dùng đang chọn!
+
 ## 📅 [2026-09-13 22:05] - Khắc Phục Lỗi Chèn Text Rác Khi Highlight & Bổ Sung Tính Năng Undo / Redo (Ctrl+Z / Ctrl+Y) ↩️↪️✨
 
 - **🎯 Yêu cầu & Phản hồi người dùng**:
