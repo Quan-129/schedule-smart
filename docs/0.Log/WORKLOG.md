@@ -8,15 +8,17 @@
 
 - **🎯 Yêu cầu từ người dùng**:
   - *"ý tôi là kéo rồi thả ra nó phải ẩn khung chỉnh chứ click vào mới hiện click ra ngoài chỗ khác cũng phải ẩn chứ"*
-- **🛠 Triển khai kỹ thuật ([`src/1.Frontend/components/modals/NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js) & [`src/1.Frontend/styles/13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+  - *"tôi thấy vẫn vậy mà đã được đâu"*
+- **🛠 Triển khai kỹ thuật ([`src/1.Frontend/components/modals/NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js) & [`src/1.Frontend/styles/13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
   1. **Phân biệt rành mạch thao tác Click vs Kéo Thả (Click vs Drag Detection)**:
      - Tính toán khoảng cách di chuyển delta `Math.hypot(dx, dy) > 3` giữa `pointerdown` và `pointerup`.
      - **Nếu người dùng KÉO (Drag để di chuyển hoặc Resize núm góc) rồi THẢ RA (`pointerup`)**: Hệ thống tự động xóa class `.active`, ngay lập tức ẩn khung viền tím và 4 núm co giãn góc. Ảnh nằm yên vị trí mới một cách phẳng phiu, sạch sẽ.
      - **Nếu người dùng chỉ CLICK VÀO ẢNH (không kéo)**: Hệ thống kích hoạt class `.active`, hiển thị khung điều chỉnh và nút xóa để người dùng thao tác.
-  2. **Tự động ẩn khung khi Click ra vùng ngoài (Click-Outside Deselection)**:
-     - Giữ vững bộ lắng nghe `pointerdown` toàn cục trên `document`: Bất cứ khi nào click ra ngoài card ảnh (vào khung soạn thảo chữ, nền notepad, toolbar, chuyển tab hay phím Escape), khung viền sẽ lập tức biến mất.
-  3. **Hiệu ứng trực quan khi đang kéo (.dragging)**:
-     - Class `.dragging` sở hữu viền `#6366f1` và shadow 3D nổi bật trong suốt quá trình kéo để người dùng dễ căn vị trí; ngay khi thả chuột ra, cả `.dragging` và `.active` đều được gỡ bỏ hoàn toàn.
+  2. **Tự động ẩn khung khi Click ra vùng ngoài (Click-Outside Deselection với Capture Phase)**:
+     - Sử dụng capture phase `{ capture: true }` cho cả `pointerdown` và `click` trên `document`, đảm bảo sự kiện luôn được xử lý trước mọi hàm chặn `stopPropagation`.
+     - Lắng nghe trực tiếp trên `visualEditor` để hủy chọn ngay khi bấm vào vùng soạn văn bản.
+  3. **Cập nhật Service Worker Cache & PWA Fresh Engine**:
+     - Nâng `CACHE_NAME` lên `smart-schedule-modular-v124` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js) và bổ sung các module Neural Knowledge vào `STATIC_ASSETS`, giúp toàn bộ trình duyệt tự động xóa cache cũ và nạp phiên bản mới nhất ngay khi tải lại trang.
 
 ## 📅 [2026-09-13 23:10] - Tích Hợp Tab "🎨 Ghi Chú" Tự Do: Rich-Text Editor, Dán Ảnh Nhanh Ctrl+V, Sticker Nổi Đè Lên Văn Bản, Drag & 4-Corner Resize 🎨🖼️✨
 

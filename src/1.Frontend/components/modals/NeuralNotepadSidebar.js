@@ -695,17 +695,21 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     }
   };
 
-  document.addEventListener('pointerdown', onOutsidePointerDown);
+  document.addEventListener('pointerdown', onOutsidePointerDown, true);
+  document.addEventListener('click', onOutsidePointerDown, true);
   document.addEventListener('keydown', onGlobalKeyDown);
 
   notepadCleanupFns.push(() => {
-    document.removeEventListener('pointerdown', onOutsidePointerDown);
+    document.removeEventListener('pointerdown', onOutsidePointerDown, true);
+    document.removeEventListener('click', onOutsidePointerDown, true);
     document.removeEventListener('keydown', onGlobalKeyDown);
   });
 
-  // Tự động ẩn khung chỉnh khi người dùng click vào soạn thảo văn bản
+  // Tự động ẩn khung chỉnh khi người dùng click hoặc focus vào soạn thảo văn bản
   if (visualEditor) {
     visualEditor.addEventListener('focus', deselectAllVisualCards);
+    visualEditor.addEventListener('pointerdown', deselectAllVisualCards);
+    visualEditor.addEventListener('click', deselectAllVisualCards);
   }
 
   // Hàm nạp file ảnh vào Canvas
