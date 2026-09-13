@@ -4,6 +4,21 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-13 22:45] - Tinh Gọn Giao Diện Bảng Notepad: Loại Bỏ Tab Chia Đôi & Xóa Dòng Chữ Subtitle Thừa Thãi 🧹✨
+
+- **🎯 Yêu cầu từ người dùng**:
+  - Người dùng gửi 2 ảnh chụp và yêu cầu: *"bỏ chia đôi và bỏ dòng chữ này đi"*.
+  - Nội dung cần lược bỏ:
+    1. Nút tab **`[Chia đôi]`** trên thanh chuyển đổi tab.
+    2. Dòng chữ subtitle **`Bảng Notepad Markdown • Chiếm 50% bên phải`** dưới tiêu đề node.
+- **🛠 Triển khai kỹ thuật ([`src/1.Frontend/components/modals/NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+  1. **Lược Bỏ Nút Tab Chia Đôi**:
+     - Xóa thẻ `<button data-tab="split">` khỏi `renderNotepadTemplate`.
+     - Tinh giản hàm `switchViewTab` chỉ còn 2 trạng thái rõ ràng, mượt mà: **`[👁️ Đã Gen Ra]`** và **`[📝 Soạn thảo]`**.
+  2. **Lược Bỏ Subtitle Thừa Thãi**:
+     - Xóa bỏ thẻ `<p class="neural-notepad-subtitle">` giúp phần Header của bảng Notepad trở nên cực kỳ tinh tế, gọn gàng, tôn vinh trọn vẹn tiêu đề Node kiến thức.
+- **✅ Kết quả**: Giao diện Header thanh thoát, tối giản, chuyên nghiệp và đúng 100% ý muốn của người dùng!
+
 ## 📅 [2026-09-13 22:30] - Khắc Phục Triệt Để Lỗi Highlight Vòng Lặp (Lần 1 Được, Lần 2 Mất, Lần 3 Hiện Lại) Do Rò Rỉ Selection 🔄🎯
 
 - **🎯 Yêu cầu & Phân tích hiện tượng**:

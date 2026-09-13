@@ -187,7 +187,6 @@ function renderNotepadTemplate(node) {
         <span class="neural-notepad-badge"><i class="fa-solid fa-file-pen"></i></span>
         <div>
           <h3 class="neural-notepad-title">${escapeHtml(node.label || 'Ghi Chú Khái Niệm')}</h3>
-          <p class="neural-notepad-subtitle">Bảng Notepad Markdown • Chiếm 50% bên phải</p>
         </div>
       </div>
       <div class="neural-notepad-header-actions">
@@ -197,9 +196,6 @@ function renderNotepadTemplate(node) {
           </button>
           <button type="button" class="neural-np-tab ${defaultTab === 'edit' ? 'active' : ''}" data-tab="edit" title="Soạn thảo Markdown">
             <i class="fa-solid fa-pen-to-square"></i> Soạn thảo
-          </button>
-          <button type="button" class="neural-np-tab" data-tab="split" title="Chia đôi: Vừa gõ vừa gen trực tiếp">
-            <i class="fa-solid fa-table-columns"></i> Chia đôi
           </button>
         </div>
         <button type="button" class="neural-close-btn" id="btn-close-neural-notepad" title="Đóng bảng ghi chú">
@@ -404,12 +400,6 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       bodyContainer.classList.remove('split-active');
       editPane.classList.add('hidden');
       previewPane.classList.remove('hidden');
-    } else if (tab === 'split') {
-      previewContent.innerHTML = renderMarkdownToHtml(textarea.value);
-      bodyContainer.classList.add('split-active');
-      editPane.classList.remove('hidden');
-      previewPane.classList.remove('hidden');
-      textarea.focus();
     } else {
       bodyContainer.classList.remove('split-active');
       editPane.classList.remove('hidden');
