@@ -27,17 +27,18 @@ export function renderMarkdownToHtml(rawMarkdown) {
   text = text.replace(/==([^=\n]+)==/g, '<mark class="neural-highlight">$1</mark>');
   text = text.replace(/&lt;mark&gt;([\s\S]*?)&lt;\/mark&gt;/gi, '<mark class="neural-highlight">$1</mark>');
 
-  // 3. Chuyển đổi Gạch chân: &lt;u&gt;nội dung&lt;/u&gt; hoặc --nội dung--
+  // 3. Chuyển đổi Gạch chân: &lt;u&gt;nội dung&lt;/u&gt; hoặc --nội dung-- hoặc ~~nội dung~~
   text = text.replace(/&lt;u&gt;([\s\S]*?)&lt;\/u&gt;/gi, '<span class="neural-underline">$1</span>');
   text = text.replace(/--([^-\n]+)--/g, '<span class="neural-underline">$1</span>');
+  text = text.replace(/~~([^~\n]+)~~/g, '<span class="neural-underline">$1</span>');
 
   // 4. Chuyển đổi In đậm: **nội dung** hoặc __nội dung__
-  text = text.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
-  text = text.replace(/__([^_\n]+)__/g, '<strong>$1</strong>');
+  text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  text = text.replace(/__(.*?)__/g, '<strong>$1</strong>');
 
   // 5. Chuyển đổi In nghiêng: *nội dung* hoặc _nội dung_
-  text = text.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
-  text = text.replace(/_([^_\n]+)_/g, '<em>$1</em>');
+  text = text.replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '<em>$1</em>');
+  text = text.replace(/(?<!_)_([^_\n]+)_(?!_)/g, '<em>$1</em>');
 
   // 6. Chuyển đổi Code Inline: `code`
   text = text.replace(/`([^`\n]+)`/g, '<code class="neural-inline-code">$1</code>');

@@ -4,6 +4,7 @@
 import { escapeHtml } from '../../../4.Security/sanitizer.js';
 import { updateNeuralNode, deleteNeuralNode } from '../../../3.Database/state.js';
 import { openNeuralNotepadSidebar } from './NeuralNotepadSidebar.js';
+import { renderMarkdownToHtml } from '../../../2.Backend/utils/markdownRenderer.js';
 
 // ==========================================================================
 // 2. CONSTANTS
@@ -87,6 +88,16 @@ function renderEditModalTemplate(node) {
           </button>
         </div>
         <textarea id="neural-input-notes" class="neural-input" style="min-height: 75px; resize: vertical; font-family: 'JetBrains Mono', monospace;" placeholder="Nhập ghi chú hoặc Markdown:&#10;• **In đậm**  • *In nghiêng*&#10;• <u>Gạch chân</u>  • ==Highlight==">${escapeHtml(node.notes || '')}</textarea>
+        
+        <!-- Bản xem trước đã gen ra (Live Preview) -->
+        <div class="neural-modal-inline-preview" id="neural-inline-preview-box">
+          <div style="font-size: 0.7rem; color: #94a3b8; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+            <i class="fa-solid fa-wand-magic-sparkles" style="color: #c084fc;"></i> Bản xem trước đã gen ra:
+          </div>
+          <div id="neural-inline-preview-content">
+            ${renderMarkdownToHtml(node.notes || '')}
+          </div>
+        </div>
       </div>
 
       <div class="neural-editor-footer">
@@ -175,6 +186,12 @@ export function openEditNeuralNodeModal(subjectCode, node, onSavedCallback, onDe
   const labelInput = overlay.querySelector('#neural-input-label');
   const urlInput = overlay.querySelector('#neural-input-url');
   const notesInput = overlay.querySelector('#neural-input-notes');
+  const previewEl = overlay.querySelector('#neural-inline-preview-content');
+  if (notesInput && previewEl) {
+    notesInput.addEventListener('input', () => {
+      previewEl.innerHTML = renderMarkdownToHtml(notesInput.value);
+    });
+  }
 
   saveBtn.addEventListener('click', () => {
     const newLabel = labelInput.value.trim();

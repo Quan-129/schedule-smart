@@ -12,6 +12,7 @@ import { state } from '../../../3.Database/state.js';
 import { showToast } from '../Toast.js';
 import { openEditDriveModal } from './EditSubjectModal.js';
 import { openNeuralKnowledgeModal } from './NeuralKnowledgeModal.js';
+import { renderMarkdownToHtml } from '../../../2.Backend/utils/markdownRenderer.js';
 
 // ============================================================================
 // 2. CONSTANTS & DOM SELECTORS
@@ -176,7 +177,7 @@ function renderSubjectDetail(subject) {
         </div>
         <div class="compact-notes-content">
           ${subject.notes && subject.notes.trim() ? `
-            <p>${escapeHtml(subject.notes)}</p>
+            <div class="compact-notes-markdown">${renderMarkdownToHtml(subject.notes)}</div>
           ` : `
             <span class="compact-empty-text">Chưa có ghi chú nào.</span>
           `}

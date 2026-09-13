@@ -4,6 +4,30 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-13 21:15] - Khắc Phục Lỗi Hiển Thị Markdown: Tự Động Gen Live Preview & Mặc Định Mở Bản Đã Gen Trong Sidebar 50% 🚀⚡
+
+- **🎯 Yêu cầu & Phản hồi người dùng**:
+  - Người dùng thắc mắc: *"tại sao hiện tại nhập .md rồi xem nó vẫn không gen"*.
+  - Điều tra nguyên nhân cốt lõi:
+    1. Khi mở Bảng Notepad 50%, mặc định trước đó luôn mở tab **"Soạn thảo" (`edit`)** hiển thị thẻ `<textarea>` chứa ký tự thô `**in đậm**` thay vì tab **"Bản Đã Gen Ra" (`preview`)**. Người dùng tưởng rằng hệ thống không phân tích cú pháp Markdown.
+    2. Trong Modal Chỉnh Sửa Node (`EditNeuralNodeModal.js`), trước đó chỉ có một ô textarea đơn thuần, không có khung xem trước trực tiếp khi người dùng gõ Markdown.
+    3. Bộ phân tích Markdown (`markdownRenderer.js`) chưa hỗ trợ mượt mà các trường hợp định dạng lồng nhau (ví dụ: vừa bôi vàng vừa in đậm `**==chữ==**`) và các biến thể gạch chân phổ biến (`~~chữ~~`, `<u>chữ</u>`, `--chữ--`).
+    4. Chi tiết môn học (`SubjectDetailModal.js`) chưa gọi parser chuyển đổi ghi chú sang HTML.
+- **🛠 Triển khai kỹ thuật**:
+  1. **Nâng Cấp Bộ Phân Tích Cú Pháp Markdown ([`src/2.Backend/utils/markdownRenderer.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/utils/markdownRenderer.js))**:
+     - Xử lý regex đa tầng hỗ trợ định dạng lồng nhau: Tô sáng `==văn bản==` hoặc `<mark>...</mark>`, Gạch chân `<u>...</u>`, `~~...~~`, `--...--`, In đậm `**...**` và In nghiêng `*...*`.
+  2. **Tự Động Mở Bản Đã Gen & Chế Độ Split View ([`src/1.Frontend/components/modals/NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Khi mở Sidebar: Nếu node đã có nội dung $\rightarrow$ **Mặc định hiển thị ngay tab "👁️ Bản Đã Gen Ra" (Preview)** với phong cách Rich-Text đẹp mắt, kèm nút tiện ích `[✏️ Sửa nội dung]`.
+     - Bổ sung tab thứ 3: **`[⚡ Chia đôi]` (Split View)**: Nửa trên soạn thảo, nửa dưới gen live tức thì theo từng phím gõ.
+     - Lắng nghe sự kiện `input` trên textarea và sau khi bấm 4 nút (B, I, U, HL) tự động cập nhật Live Preview tức thì không cần reload.
+  3. **Tích Hợp Live Preview Trực Tiếp Trong Modal Sửa Node ([`src/1.Frontend/components/modals/EditNeuralNodeModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/EditNeuralNodeModal.js))**:
+     - Bổ sung khung `.neural-modal-inline-preview` ngay dưới ô textarea ghi chú. Người dùng vừa gõ cú pháp Markdown là khung bên dưới lập tức hiển thị bản đã gen ra trực tiếp.
+  4. **Hỗ Trợ Markdown Trong Chi Tiết Môn Học ([`src/1.Frontend/components/modals/SubjectDetailModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/SubjectDetailModal.js))**:
+     - Sử dụng `renderMarkdownToHtml(subject.notes)` để hiển thị định dạng ghi chú môn học chuẩn HTML rich-text.
+  5. **Tự Động Đồng Bộ Khi Đổi Node Trên Canvas ([`src/1.Frontend/views/neural/NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js))**:
+     - Khi người dùng click chọn bất kỳ node nào trên Canvas, nếu Sidebar Notepad đang mở thì tự động cập nhật ngay sang ghi chú đã gen của node đó.
+- **✅ Kết quả**: Đã kiểm tra cú pháp `node --check` toàn bộ 100% hợp lệ, loại bỏ hoàn toàn sự khó hiểu, cho phép người dùng nhìn thấy bản gen ra ngay lập tức ở mọi vị trí.
+
 ## 📅 [2026-09-13 20:15] - Triển Khai Bảng Notepad Markdown Chiếm 50% Bên Phải Kèm 4 Chức Năng Định Dạng Văn Bản 📝⚡
 
 - **🎯 Yêu cầu & Mục tiêu**:

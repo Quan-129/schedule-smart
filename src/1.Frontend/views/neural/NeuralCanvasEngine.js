@@ -381,6 +381,12 @@ export class NeuralCanvasEngine {
       this.selectedNodeId = clickedNode.id;
       const worldPos = this.screenToWorld(sx, sy);
       this.dragOffset = { x: worldPos.x - clickedNode.x, y: worldPos.y - clickedNode.y };
+
+      // Nếu Notepad Sidebar 50% đang mở, tự động cập nhật nội dung sang node vừa chọn
+      const activeSidebar = document.getElementById('neural-notepad-sidebar-panel');
+      if (activeSidebar && this.onOpenNotepad) {
+        this.onOpenNotepad(clickedNode);
+      }
     } else {
       this.isDraggingCanvas = true;
       this.selectedNodeId = null;
