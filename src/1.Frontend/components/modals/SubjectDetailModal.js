@@ -11,6 +11,7 @@ import { escapeHtml } from '../../../4.Security/sanitizer.js';
 import { state } from '../../../3.Database/state.js';
 import { showToast } from '../Toast.js';
 import { openEditDriveModal } from './EditSubjectModal.js';
+import { openNeuralKnowledgeModal } from './NeuralKnowledgeModal.js';
 
 // ============================================================================
 // 2. CONSTANTS & DOM SELECTORS
@@ -142,6 +143,10 @@ function renderSubjectDetail(subject) {
           <i class="fa-solid fa-pen-to-square"></i>
           <span>Sửa</span>
         </button>
+        <button type="button" class="btn-compact-neural" data-action="open-neural" data-code="${escapeHtml(subject.code)}" title="Mở Cây Kiến Thức Nơ-ron">
+          <i class="fa-solid fa-brain"></i>
+          <span>Cây Kiến Thức</span>
+        </button>
       </div>
 
       <!-- 3. PHẦN TỶ LỆ THÀNH PHẦN ĐIỂM -->
@@ -222,6 +227,15 @@ function bindSubjectDetailEvents() {
       const code = editSubjBtn.dataset.code;
       closeSubjectDetailModal();
       openEditDriveModal(code, 'tab-drive');
+      return;
+    }
+
+    // Nút mở Cây Kiến Thức Nơ-ron
+    const neuralBtn = e.target.closest('[data-action="open-neural"]');
+    if (neuralBtn) {
+      const code = neuralBtn.dataset.code;
+      closeSubjectDetailModal();
+      openNeuralKnowledgeModal(code);
       return;
     }
 

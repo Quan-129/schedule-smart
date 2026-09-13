@@ -16,6 +16,7 @@ import { openFolderDetailModal } from '../components/modals/FolderDetailModal.js
 import { openEditDriveModal } from '../components/EditModal.js';
 import { openAddSubjectModal } from '../components/modals/AddSubjectModal.js';
 import { openSubjectDetailModal } from '../components/modals/SubjectDetailModal.js';
+import { openNeuralKnowledgeModal } from '../components/modals/NeuralKnowledgeModal.js';
 import { showToast } from '../components/Toast.js';
 import { syncDriveSubjectsToCloud } from '../../3.Database/auth/FirebaseAuthService.js';
 import { attachBackpackDragDrop, lastDropTimestamp } from './backpack/BackpackDragDrop.js';
@@ -171,6 +172,14 @@ function attachNodeEvents(btn, subject) {
     if (editBtn) {
       e.stopPropagation();
       openEditDriveModal(subject.code);
+      return;
+    }
+
+    // 2.5 Nút Cây Kiến Thức Nơ-ron Nhanh (🧠)
+    const quickNeuralBtn = e.target.closest('[data-action="quick-neural"]');
+    if (quickNeuralBtn) {
+      e.stopPropagation();
+      openNeuralKnowledgeModal(subject.code);
       return;
     }
 

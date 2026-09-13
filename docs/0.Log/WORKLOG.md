@@ -4,6 +4,34 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-13 19:25] - Triển Khai Cây Kiến Thức Dạng Node Nơ-Ron & Đính Kèm Link Từng Node (Neural Knowledge Cosmos) 🧠⚡
+
+- **🎯 Yêu cầu & Mục tiêu**:
+  - Xây dựng tính năng Cây Kiến Thức Nơ-ron (Mindmap Graph / Neural Cosmos) cho từng môn học trong Chiếc Cặp Google Drive (Tab 4).
+  - Mỗi node nơ-ron có thể đính kèm và mở trực tiếp link tài liệu (Google Drive, slide PDF, bài giảng YouTube, trang web ôn thi...).
+  - Cho phép người dùng tự do phân nhánh vô tận, kéo rê định vị các node, zoom/pan không gian vô cực với đồ họa Canvas 2D 60FPS mượt mà, thuần JS (Zero-dependency ES Modules).
+- **🏛 Kiến trúc & Triển khai**:
+  1. **Tầng Dữ liệu ([`src/3.Database/state.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/state.js))**:
+     - Bổ sung các hàm helper: `getSubjectKnowledgeNodes(subjectCode)` (tự động khởi tạo nhánh mẫu nếu môn chưa có cây kiến thức), `saveSubjectKnowledgeNodes`, `addNeuralNode`, `updateNeuralNode`, `deleteNeuralNode` (xóa đệ quy node con cháu, bảo vệ Root node).
+     - Bảo toàn trường `knowledgeNodes` trong cơ chế Smart Merge Import & Cloud Sync.
+  2. **Engine Đồ Họa 60FPS ([`src/1.Frontend/views/neural/NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js))**:
+     - Vẽ đường dẫn truyền nơ-ron bằng đường cong Bezier mềm mại.
+     - Hiệu ứng hạt xung điện sinh học chuyển động dọc theo sợi trục axon (`getBezierPoint`).
+     - Hỗ trợ Pan không gian (chuột trái/giữa), Zoom mượt mà theo con trỏ chuột, Drag & Drop node có độ trễ quán tính.
+     - Vẽ badge link `↗` phát sáng trên node khi có URL; click trực tiếp vào badge sẽ mở tab mới ngay lập tức.
+  3. **Hộp Thoại Chỉnh Sửa Node ([`src/1.Frontend/components/modals/EditNeuralNodeModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/EditNeuralNodeModal.js))**:
+     - Cho phép chỉnh sửa Tên khái niệm, dán URL tài liệu, chọn trạng thái học tập (Cần học / Đang học / Đã hiểu) và ghi chú.
+     - Nút xóa nhánh nơ-ron hỗ trợ Two-Step Inline Confirmation an toàn.
+  4. **Modal Toàn Cảnh Vũ Trụ ([`src/1.Frontend/components/modals/NeuralKnowledgeModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralKnowledgeModal.js))**:
+     - Giao diện Fullscreen Deep Space Glassmorphism với HUD Toolbar điều khiển: `+ Thêm Nhánh Con`, `🎯 Căn Giữa (Root)`, `Phóng To`, `Thu Nhỏ`, `100%`.
+     - Bảng chú giải màu sắc trạng thái ở góc trên bên phải.
+  5. **Tích Hợp Giao Diện ([`src/1.Frontend/components/modals/SubjectDetailModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/SubjectDetailModal.js), [`src/1.Frontend/components/CircularNode.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/CircularNode.js), [`src/1.Frontend/views/BackpackView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/BackpackView.js))**:
+     - Nút `[🧠 Cây Kiến Thức]` đặt nổi bật trong hàng CTA của modal chi tiết môn học.
+     - Nút quick badge não bộ `🧠` đặt trực tiếp dưới thẻ môn học hình tròn ngoài màn hình Backpack để mở nhanh 1-chạm.
+  6. **Modular CSS ([`src/1.Frontend/styles/13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Toàn bộ phong cách Deep Space Glassmorphism, Aura glow, button micro-animations đóng gói độc lập.
+- **✨ Kết quả**: Cây kiến thức nơ-ron hoạt động hoàn hảo, mượt mà 60 FPS, liên kết tài liệu trực quan, đáp ứng trọn vẹn ý tưởng của người dùng.
+
 ## 📅 [2026-09-13 19:05] - Khắc Phục Nút Giải Tán Thư Mục & Loại Bỏ Lặp HTML Trong Modal Thư Mục 🛠✨
 
 - **🎯 Yêu cầu & Vấn đề xử lý**:

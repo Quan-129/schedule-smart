@@ -5,6 +5,27 @@
 
 ---
 
+## 💎 ENTRY 8: [2026-09-13] - "Cây Kiến Thức Nơ-Ron Vũ Trụ": Bản Đồ Não Bộ Đính Kèm Link Tài Liệu Không Giới Hạn 🧠🌌🔗
+
+### 📌 Phân Loại & Tags:
+`#NeuralCosmos` `#MindmapKnowledge` `#SecondBrain` `#StudyHacks` `#ObsidianAlternative` `#ZeroDependencyCanvas`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Bản Đồ Tư Duy Dạng Nơ-ron Thần Kinh Siêu Mượt (60 FPS Deep Space Canvas)**: Không đơn thuần là danh sách tài liệu phẳng lì, mỗi môn học biến thành một "Vũ trụ nơ-ron thu nhỏ" với các sợi trục axon uốn lượn Bezier và hạt xung điện sinh học chuyển động phát sáng.
+- **Mỗi Node Nơ-ron Là Một Kho Tài Liệu (Hyperlink Direct Access)**: Người dùng có thể dán link trực tiếp vào bất kỳ node nào (Google Drive, slide PDF, bài giảng YouTube, tài liệu GitHub, link web ôn thi...). Trên node có huy hiệu `↗` phát sáng, bấm vào là mở tài liệu tức thì không cần tìm kiếm.
+- **Theo Dõi Tiến Trình Ôn Thi Trực Quan Bằng Màu Sắc**: Phân cấp trạng thái học tập 3 màu neon nổi bật: Xanh ngọc (Đã hiểu / Xong), Vàng cam (Đang ôn / Đọc), Xám tím (Cần học), giúp sinh viên nhìn lướt qua cả kỳ thi là biết mình đang hổng kiến thức ở chương nào.
+- **Tương Tác Không Giới Hạn**: Tự do phân nhánh con vô cực, kéo rê sắp xếp lại theo trực giác, Pan/Zoom không gian vô cực như đang thám hiểm vũ trụ tri thức của chính mình.
+
+### 2. 🎣 Bộ Viral Hooks TikTok / Threads Đánh Trúng Thị Giác:
+1. **Mind-Blown Visual Hook (Đề xuất số 1)**:
+   > *"Tưởng chỉ là web xem thời khóa biểu, ai ngờ bấm vào môn học nó bung ra cả một bản đồ nơ-ron vũ trụ đính kèm link Drive từng chương đỉnh như Obsidian luôn trời ơi!..."*
+2. **Productivity / Study Hack Hook**:
+   > *"Bỏ ngay cái thói quen lưu tài liệu môn học lộn xộn trong máy đi! Đây là cách tui biến từng môn đại học thành cây nơ-ron kiến thức: chương nào học rồi xanh lè, chương nào chưa học đỏ cam, bấm một cái là bay thẳng vào slide bài giảng!..."*
+3. **Gen Z Tech Flex Hook**:
+   > *"Khi sinh viên ngành phần mềm tự build 'Second Brain' nơ-ron não bộ 60 FPS tích hợp luôn vào chiếc cặp Drive của trường..."*
+
+---
+
 ## 💎 ENTRY 7: [2026-09-13] - "Chiếc Cặp Google Drive Chuẩn Apple iOS": Kéo - Thả Gom Môn Học Thành Thư Mục Thỏa Mãn Thị Giác (Satisfying UI) 🎒📱✨
 
 ### 📌 Phân Loại & Tags:

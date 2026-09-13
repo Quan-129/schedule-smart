@@ -101,9 +101,14 @@ export function renderCircularNodeHtml(subject, isJiggleMode = false) {
 
     <div class="bp-app-details">
       <span class="bp-app-title" title="${escapeHtml(subject.name)}">${escapeHtml(subject.name)}</span>
-      <span class="bp-app-drive-status ${hasDrive ? '' : 'not-set'}">
-        ${hasDrive ? '<i class="fa-brands fa-google-drive"></i> Drive ↗' : '<i class="fa-solid fa-link-slash"></i> Chưa gắn'}
-      </span>
+      <div class="bp-app-sub-row">
+        <span class="bp-app-drive-status ${hasDrive ? '' : 'not-set'}">
+          ${hasDrive ? '<i class="fa-brands fa-google-drive"></i> Drive' : '<i class="fa-solid fa-link-slash"></i> Trống'}
+        </span>
+        <button type="button" class="btn-quick-neural-badge" data-action="quick-neural" data-code="${escapeHtml(subject.code)}" title="Mở Cây Kiến Thức Nơ-ron">
+          <i class="fa-solid fa-brain"></i>
+        </button>
+      </div>
     </div>
   `;
 }

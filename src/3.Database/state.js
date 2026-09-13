@@ -550,6 +550,173 @@ export function renameDriveFolder(folderId, newName) {
   }
 }
 
+// ==========================================
+// 🧠 NEURAL KNOWLEDGE NODES (CÂY KIẾN THỨC NƠ-RON)
+// ==========================================
+
+/**
+ * Lấy danh sách node nơ-ron của môn học, tự khởi tạo nhánh mẫu nếu chưa có
+ * @param {string} subjectCode 
+ * @returns {Array<Object>}
+ */
+export function getSubjectKnowledgeNodes(subjectCode) {
+  const subject = (state.driveSubjects || []).find(s => s.code === subjectCode);
+  if (!subject) return [];
+
+  if (!Array.isArray(subject.knowledgeNodes) || subject.knowledgeNodes.length === 0) {
+    const rootId = 'node_root_' + Date.now();
+    const defaultColor = subject.color || '#6366f1';
+
+    subject.knowledgeNodes = [
+      {
+        id: rootId,
+        label: subject.name || subject.code,
+        parentId: null,
+        url: subject.link || '',
+        color: defaultColor,
+        status: 'completed',
+        x: 0,
+        y: 0,
+        notes: 'Node gốc môn học'
+      },
+      {
+        id: 'node_' + (Date.now() + 1),
+        label: 'Giáo trình & Slide',
+        parentId: rootId,
+        url: subject.link || '',
+        color: '#38bdf8',
+        status: 'completed',
+        x: 200,
+        y: -90,
+        notes: ''
+      },
+      {
+        id: 'node_' + (Date.now() + 2),
+        label: 'Kiến thức trọng tâm',
+        parentId: rootId,
+        url: '',
+        color: '#10b981',
+        status: 'learning',
+        x: 230,
+        y: 20,
+        notes: ''
+      },
+      {
+        id: 'node_' + (Date.now() + 3),
+        label: 'Bài tập & Ôn thi',
+        parentId: rootId,
+        url: '',
+        color: '#f59e0b',
+        status: 'todo',
+        x: 190,
+        y: 120,
+        notes: ''
+      }
+    ];
+    persistDriveSubjects();
+  }
+
+  return subject.knowledgeNodes;
+}
+
+/**
+ * Lưu toàn bộ danh sách node kiến thức của môn học
+ * @param {string} subjectCode 
+ * @param {Array<Object>} nodes 
+ */
+export function saveSubjectKnowledgeNodes(subjectCode, nodes) {
+  const subject = (state.driveSubjects || []).find(s => s.code === subjectCode);
+  if (!subject) return;
+  subject.knowledgeNodes = Array.isArray(nodes) ? nodes : [];
+  persistDriveSubjects();
+}
+
+/**
+ * Thêm một node nơ-ron mới vào môn học
+ * @param {string} subjectCode 
+ * @param {string|null} parentId 
+ * @param {Object} nodeData 
+ * @returns {Object|null}
+ */
+export function addNeuralNode(subjectCode, parentId, nodeData = {}) {
+  const subject = (state.driveSubjects || []).find(s => s.code === subjectCode);
+  if (!subject) return null;
+
+  if (!Array.isArray(subject.knowledgeNodes)) {
+    subject.knowledgeNodes = [];
+  }
+
+  const newNodeId = 'node_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+  const newNode = {
+    id: newNodeId,
+    parentId: parentId || null,
+    label: (nodeData.label || 'Nhánh mới').trim(),
+    url: (nodeData.url || '').trim(),
+    color: nodeData.color || subject.color || '#6366f1',
+    status: nodeData.status || 'todo', // 'todo' | 'learning' | 'completed'
+    x: typeof nodeData.x === 'number' ? nodeData.x : 0,
+    y: typeof nodeData.y === 'number' ? nodeData.y : 0,
+    notes: (nodeData.notes || '').trim()
+  };
+
+  subject.knowledgeNodes.push(newNode);
+  persistDriveSubjects();
+  return newNode;
+}
+
+/**
+ * Cập nhật thông tin node nơ-ron
+ * @param {string} subjectCode 
+ * @param {string} nodeId 
+ * @param {Object} updates 
+ * @returns {boolean}
+ */
+export function updateNeuralNode(subjectCode, nodeId, updates = {}) {
+  const subject = (state.driveSubjects || []).find(s => s.code === subjectCode);
+  if (!subject || !Array.isArray(subject.knowledgeNodes)) return false;
+
+  const node = subject.knowledgeNodes.find(n => n.id === nodeId);
+  if (!node) return false;
+
+  Object.assign(node, updates);
+  persistDriveSubjects();
+  return true;
+}
+
+/**
+ * Xóa một node nơ-ron và toàn bộ các node con cháu đệ quy
+ * @param {string} subjectCode 
+ * @param {string} nodeId 
+ * @returns {boolean}
+ */
+export function deleteNeuralNode(subjectCode, nodeId) {
+  const subject = (state.driveSubjects || []).find(s => s.code === subjectCode);
+  if (!subject || !Array.isArray(subject.knowledgeNodes)) return false;
+
+  const targetNode = subject.knowledgeNodes.find(n => n.id === nodeId);
+  if (!targetNode || targetNode.parentId === null) {
+    // Không thể xóa Node Gốc (Root)
+    return false;
+  }
+
+  // Thu thập toàn bộ ID cần xóa đệ quy
+  const idsToDelete = new Set([nodeId]);
+  let addedNew = true;
+  while (addedNew) {
+    addedNew = false;
+    subject.knowledgeNodes.forEach(n => {
+      if (n.parentId && idsToDelete.has(n.parentId) && !idsToDelete.has(n.id)) {
+        idsToDelete.add(n.id);
+        addedNew = true;
+      }
+    });
+  }
+
+  subject.knowledgeNodes = subject.knowledgeNodes.filter(n => !idsToDelete.has(n.id));
+  persistDriveSubjects();
+  return true;
+}
+
 /**
  * Lưu điểm số vào Storage theo Space
  * @param {Object|null} user 
@@ -731,7 +898,8 @@ export function importFullBackupData(backupData, user = null, options = {}) {
               folderId: cloudSubj.folderId !== undefined ? cloudSubj.folderId : (localSubj.folderId || null),
               driveUrl: (cloudSubj.driveUrl !== undefined && cloudSubj.driveUrl !== null) ? cloudSubj.driveUrl : (localSubj.driveUrl || ''),
               notes: cloudSubj.notes || localSubj.notes || '',
-              gradeItems: (Array.isArray(cloudSubj.gradeItems) && cloudSubj.gradeItems.length > 0) ? cloudSubj.gradeItems : (localSubj.gradeItems || [])
+              gradeItems: (Array.isArray(cloudSubj.gradeItems) && cloudSubj.gradeItems.length > 0) ? cloudSubj.gradeItems : (localSubj.gradeItems || []),
+              knowledgeNodes: (Array.isArray(cloudSubj.knowledgeNodes) && cloudSubj.knowledgeNodes.length > 0) ? cloudSubj.knowledgeNodes : (localSubj.knowledgeNodes || [])
             };
           });
 
