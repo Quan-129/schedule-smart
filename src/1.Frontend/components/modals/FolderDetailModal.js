@@ -78,12 +78,6 @@ export function openFolderDetailModal(folderId) {
         <div class="folder-sub-item-card" data-code="${escapeHtml(subject.code)}">
           <div class="bp-app-btn" style="--app-color: ${subject.color || '#6366f1'}; cursor: pointer;">
             ${renderCircularNodeHtml(subject, false)}
-            <div class="bp-app-details">
-              <span class="bp-app-title">${escapeHtml(subject.name)}</span>
-              <span class="bp-app-drive-status ${subject.driveUrl ? 'has-url' : 'not-set'}">
-                ${subject.driveUrl ? 'Đã có Drive' : 'Chưa có Drive'}
-              </span>
-            </div>
           </div>
           <button class="btn-ungroup-sub-node" data-action="ungroup" data-code="${escapeHtml(subject.code)}" title="Đưa môn này ra khỏi thư mục">
             <i class="fa-solid fa-arrow-up-right-from-square"></i> Tách ra
@@ -93,8 +87,8 @@ export function openFolderDetailModal(folderId) {
     </div>
 
     <div class="modal-folder-footer">
-      <button type="button" class="btn-dissolve-folder" id="btn-dissolve-folder-action">
-        <i class="fa-solid fa-folder-minus"></i> Giải tán thư mục
+      <button type="button" class="btn-dissolve-folder" id="btn-dissolve-folder-action" title="Giải tán thư mục và trả toàn bộ môn về màn hình chính">
+        <i class="fa-solid fa-folder-minus"></i> <span>Giải tán thư mục</span>
       </button>
       <button type="button" class="btn-close-folder-modal" id="btn-done-folder-action">
         Xong
@@ -140,24 +134,54 @@ function bindModalEvents(folderId) {
     });
   }
 
-  // 2. Nút Đóng
+  // 2. Nút Đóng & Xong
   const closeBtn = document.getElementById('close-folder-detail-btn');
   const doneBtn = document.getElementById('btn-done-folder-action');
-  if (closeBtn) closeBtn.onclick = closeFolderDetailModal;
-  if (doneBtn) doneBtn.onclick = closeFolderDetailModal;
+  if (closeBtn) {
+    closeBtn.onclick = (e) => {
+      e.stopPropagation();
+      closeFolderDetailModal();
+    };
+  }
+  if (doneBtn) {
+    doneBtn.onclick = (e) => {
+      e.stopPropagation();
+      closeFolderDetailModal();
+    };
+  }
 
-  // 3. Giải tán thư mục (Un-group tất cả)
+  // 3. Giải tán thư mục (Cơ chế Two-Step Confirmation an toàn 100%, không bị browser chặn)
   const dissolveBtn = document.getElementById('btn-dissolve-folder-action');
+  let isConfirmingDissolve = false;
+  let dissolveTimeout = null;
+
   if (dissolveBtn) {
-    dissolveBtn.onclick = () => {
-      const folder = (state.driveFolders || []).find(f => f.id === folderId);
-      const name = folder ? folder.name : 'thư mục';
-      if (confirm(`Bạn có chắc chắn muốn giải tán "${name}"?\nToàn bộ các môn học sẽ quay trở lại màn hình chính của Chiếc Cặp.`)) {
+    dissolveBtn.onclick = (e) => {
+      e.stopPropagation();
+
+      // Bước 2: Bấm lần 2 để thực hiện giải tán
+      if (isConfirmingDissolve) {
+        if (dissolveTimeout) clearTimeout(dissolveTimeout);
+        const folder = (state.driveFolders || []).find(f => f.id === folderId);
+        const name = folder ? folder.name : 'thư mục';
+
         removeDriveFolder(folderId, true);
         closeFolderDetailModal();
         if (window.renderBackpackView) window.renderBackpackView();
-        showToast(`Đã giải tán thư mục "${name}" ✓`);
+        showToast(`Đã giải tán "${name}", các môn đã trở về màn hình chính! ✓`);
+        return;
       }
+
+      // Bước 1: Yêu cầu xác nhận inline trên nút
+      isConfirmingDissolve = true;
+      dissolveBtn.classList.add('btn-dissolve-confirming');
+      dissolveBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> <span>Chắc chắn giải tán?</span>';
+
+      dissolveTimeout = setTimeout(() => {
+        isConfirmingDissolve = false;
+        dissolveBtn.classList.remove('btn-dissolve-confirming');
+        dissolveBtn.innerHTML = '<i class="fa-solid fa-folder-minus"></i> <span>Giải tán thư mục</span>';
+      }, 3500);
     };
   }
 

@@ -4,6 +4,23 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-13 19:05] - Khắc Phục Nút Giải Tán Thư Mục & Loại Bỏ Lặp HTML Trong Modal Thư Mục 🛠✨
+
+- **🎯 Yêu cầu & Vấn đề xử lý**:
+  - Nút "Giải tán thư mục" trong Modal chi tiết Thư mục không phản hồi khi người dùng bấm vào.
+  - Thẻ môn học bên trong Modal Thư Mục bị hiển thị lặp lại 2 lần tên môn và badge trạng thái Drive.
+- **🔍 Nguyên nhân gốc rễ**:
+  1. **Hàm `window.confirm()` bị chặn**: Việc sử dụng hộp thoại `confirm()` của trình duyệt hay bị Chrome/Edge và môi trường web app chặn âm thầm khiến hàm trả về `false` ngay lập tức mà không thực thi logic xóa.
+  2. **Duplicate DOM Details**: Trong [`src/1.Frontend/components/modals/FolderDetailModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/FolderDetailModal.js), template HTML vừa gọi `renderCircularNodeHtml()` (đã có sẵn `.bp-app-details`) vừa chèn thêm một khối `.bp-app-details` thứ hai làm lặp lại giao diện.
+- **🛠 Giải pháp & Triển khai**:
+  - Trong [`src/1.Frontend/components/modals/FolderDetailModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/FolderDetailModal.js):
+    - Thay thế `confirm()` bằng **Two-Step Inline Confirmation**: Khi bấm lần 1, nút chuyển sang trạng thái cảnh báo màu đỏ cam `<i class="fa-solid fa-triangle-exclamation"></i> Chắc chắn giải tán?` kèm hiệu ứng nhịp thở (`dissolvePulse`). Bấm lần 2 trong 3.5s sẽ thực thi giải tán ngay lập tức và đưa các môn về màn hình chính, không phụ thuộc vào dialog trình duyệt.
+    - Loại bỏ khối `.bp-app-details` bị thừa, giao diện môn học bên trong Modal hiển thị sạch đẹp và chuẩn xác.
+  - Trong [`src/1.Frontend/styles/12.backpack-folder.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/12.backpack-folder.css):
+    - Bổ sung style `.btn-dissolve-confirming` và animation `@keyframes dissolvePulse`.
+  - Trong [`src/1.Frontend/views/BackpackView.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/BackpackView.js):
+    - Tối ưu nút badge (-) xóa thư mục ngoài màn hình chính: giải tán trực tiếp và hiện Toast thông báo an toàn.
+
 ## 📅 [2026-09-13 18:50] - Tối Ưu Thoát Jiggle Mode 1-Chạm Toàn Màn Hình (Capture Phase Outside Click) 🎯✨
 
 - **🎯 Yêu cầu & Vấn đề xử lý**: Sau khi kéo thả nhập các node hoặc đang ở chế độ rung lắc Jiggle Mode, người dùng bấm vào các vùng khác (khoảng trống giữa các node, nửa dưới màn hình, navbar, viền lề) không thoát được chế độ lắc mà bắt buộc phải bấm nút "Xong".

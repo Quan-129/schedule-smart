@@ -247,6 +247,19 @@
   color: #ffffff;
 }
 
+.btn-dissolve-folder.btn-dissolve-confirming {
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
+  color: #ffffff !important;
+  border-color: #f87171 !important;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.6) !important;
+  animation: dissolvePulse 0.4s infinite alternate ease-in-out;
+}
+
+@keyframes dissolvePulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.04); }
+}
+
 .btn-close-folder-modal {
   background: rgba(255, 255, 255, 0.08);
   color: #f8fafc;

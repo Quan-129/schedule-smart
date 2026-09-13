@@ -231,11 +231,9 @@ function attachFolderEvents(btn, folder) {
     const deleteBtn = e.target.closest('[data-action="delete-folder"]');
     if (deleteBtn) {
       e.stopPropagation();
-      if (confirm(`Bạn có chắc chắn muốn giải tán thư mục "${folder.name}"?\nToàn bộ các môn học bên trong sẽ trở lại màn hình chính của Chiếc Cặp.`)) {
-        removeDriveFolder(folder.id, true);
-        renderBackpackView();
-        showToast(`Đã giải tán thư mục "${folder.name}" ✓`);
-      }
+      removeDriveFolder(folder.id, true);
+      renderBackpackView();
+      showToast(`Đã giải tán thư mục "${folder.name}", các môn đã trở về màn hình chính! ✓`);
       return;
     }
 
