@@ -322,6 +322,7 @@ function renderNotepadTemplate(node) {
 // 4. CONTROLLER & INSTANCE MANAGEMENT
 // ==========================================================================
 let currentNotepadEl = null;
+let notepadCleanupFns = [];
 
 /**
  * Mở bảng Notepad Sidepanel 50% bên phải cho một node nơ-ron
@@ -358,6 +359,13 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   const bodyContainer = sidebar.querySelector('#neural-notepad-body-container');
   const undoBtn = sidebar.querySelector('#btn-hist-undo');
   const redoBtn = sidebar.querySelector('#btn-hist-redo');
+
+  // Hàm hủy chọn tất cả các ảnh nổi (ẩn khung viền điều chỉnh, 4 núm co giãn và nút xóa)
+  const deselectAllVisualCards = () => {
+    sidebar.querySelectorAll('.visual-floating-img-card.active').forEach(c => {
+      c.classList.remove('active');
+    });
+  };
 
   // ========================================================================
   // UNDO / REDO HISTORY ENGINE CHO MARKDOWN
@@ -441,6 +449,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   // TAB SWITCHING (ĐÃ GEN RA vs SOẠN THẢO vs GHI CHÚ)
   // ========================================================================
   const switchViewTab = (tab) => {
+    deselectAllVisualCards();
     tabBtns.forEach(b => {
       if (b.dataset.tab === tab) b.classList.add('active');
       else b.classList.remove('active');
@@ -552,17 +561,21 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
         }
 
         e.preventDefault();
-        sidebar.querySelectorAll('.visual-floating-img-card').forEach(c => c.classList.remove('active'));
-        card.classList.add('active', 'dragging');
 
         const startX = e.clientX;
         const startY = e.clientY;
         const initLeft = card.offsetLeft;
         const initTop = card.offsetTop;
+        let isDragged = false;
+
+        card.classList.add('dragging');
 
         const onPointerMove = (moveEvt) => {
           const dx = moveEvt.clientX - startX;
           const dy = moveEvt.clientY - startY;
+          if (Math.hypot(dx, dy) > 3) {
+            isDragged = true;
+          }
           const newX = Math.max(0, initLeft + dx);
           const newY = Math.max(0, initTop + dy);
           card.style.left = `${newX}px`;
@@ -575,6 +588,16 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
           card.classList.remove('dragging');
           window.removeEventListener('pointermove', onPointerMove);
           window.removeEventListener('pointerup', onPointerUp);
+
+          if (isDragged) {
+            // Đã kéo di chuyển rồi thả ra -> tự động ẩn khung chỉnh!
+            card.classList.remove('active');
+          } else {
+            // Chỉ click vào ảnh mà không kéo -> hiện khung chỉnh!
+            deselectAllVisualCards();
+            card.classList.add('active');
+          }
+
           saveAllNotes();
         };
 
@@ -589,9 +612,6 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
           e.preventDefault();
           e.stopPropagation();
 
-          sidebar.querySelectorAll('.visual-floating-img-card').forEach(c => c.classList.remove('active'));
-          card.classList.add('active');
-
           const handleType = handle.dataset.handle;
           const startX = e.clientX;
           const startWidth = card.offsetWidth;
@@ -599,9 +619,13 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
           const startLeft = card.offsetLeft;
           const startTop = card.offsetTop;
           const aspectRatio = startWidth / (startHeight || 1);
+          let isResized = false;
 
           const onResizeMove = (moveEvt) => {
             const dx = moveEvt.clientX - startX;
+            if (Math.abs(dx) > 2) {
+              isResized = true;
+            }
             let newWidth = startWidth;
 
             if (handleType === 'se') {
@@ -636,6 +660,12 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
           const onResizeUp = () => {
             window.removeEventListener('pointermove', onResizeMove);
             window.removeEventListener('pointerup', onResizeUp);
+
+            // Kéo co giãn xong rồi thả chuột ra -> tự động ẩn khung chỉnh!
+            if (isResized) {
+              card.classList.remove('active');
+            }
+
             saveAllNotes();
           };
 
@@ -649,6 +679,34 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   };
 
   renderVisualImages();
+
+  // 4. Lắng nghe click/pointerdown ra vùng ngoài card để tự động hủy chọn (ẩn khung viền & núm chỉnh)
+  const onOutsidePointerDown = (e) => {
+    if (e.target && e.target.closest && e.target.closest('.visual-floating-img-card')) {
+      return;
+    }
+    deselectAllVisualCards();
+  };
+
+  // 5. Lắng nghe phím Escape để hủy chọn card
+  const onGlobalKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      deselectAllVisualCards();
+    }
+  };
+
+  document.addEventListener('pointerdown', onOutsidePointerDown);
+  document.addEventListener('keydown', onGlobalKeyDown);
+
+  notepadCleanupFns.push(() => {
+    document.removeEventListener('pointerdown', onOutsidePointerDown);
+    document.removeEventListener('keydown', onGlobalKeyDown);
+  });
+
+  // Tự động ẩn khung chỉnh khi người dùng click vào soạn thảo văn bản
+  if (visualEditor) {
+    visualEditor.addEventListener('focus', deselectAllVisualCards);
+  }
 
   // Hàm nạp file ảnh vào Canvas
   const handleImageFile = (file) => {
@@ -677,6 +735,14 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
         currentImages.push(newImg);
         renderVisualImages();
+
+        // Tự động chọn ảnh mới thêm để hiển thị khung căn chỉnh ngay lập tức
+        const newCard = visualImagesLayer.querySelector(`[data-id="${newImg.id}"]`);
+        if (newCard) {
+          deselectAllVisualCards();
+          newCard.classList.add('active');
+        }
+
         saveAllNotes();
       };
       tempImg.src = dataUrl;
@@ -854,6 +920,13 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
  * Đóng bảng Notepad Sidepanel
  */
 export function closeNeuralNotepadSidebar() {
+  if (notepadCleanupFns && notepadCleanupFns.length > 0) {
+    notepadCleanupFns.forEach(fn => {
+      try { fn(); } catch (err) { console.error('Cleanup error:', err); }
+    });
+    notepadCleanupFns = [];
+  }
+
   if (currentNotepadEl) {
     currentNotepadEl.classList.remove('active');
     setTimeout(() => {

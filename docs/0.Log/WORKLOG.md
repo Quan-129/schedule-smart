@@ -4,6 +4,20 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-13 23:30] - Hoàn Thiện Tương Tác Visual Image Card: Kéo Thả Ra Tự Động Ẩn Khung, Chỉ Click Vào Mới Hiện & Click Ra Ngoài Cũng Ẩn 🎯🖼️✨
+
+- **🎯 Yêu cầu từ người dùng**:
+  - *"ý tôi là kéo rồi thả ra nó phải ẩn khung chỉnh chứ click vào mới hiện click ra ngoài chỗ khác cũng phải ẩn chứ"*
+- **🛠 Triển khai kỹ thuật ([`src/1.Frontend/components/modals/NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js) & [`src/1.Frontend/styles/13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+  1. **Phân biệt rành mạch thao tác Click vs Kéo Thả (Click vs Drag Detection)**:
+     - Tính toán khoảng cách di chuyển delta `Math.hypot(dx, dy) > 3` giữa `pointerdown` và `pointerup`.
+     - **Nếu người dùng KÉO (Drag để di chuyển hoặc Resize núm góc) rồi THẢ RA (`pointerup`)**: Hệ thống tự động xóa class `.active`, ngay lập tức ẩn khung viền tím và 4 núm co giãn góc. Ảnh nằm yên vị trí mới một cách phẳng phiu, sạch sẽ.
+     - **Nếu người dùng chỉ CLICK VÀO ẢNH (không kéo)**: Hệ thống kích hoạt class `.active`, hiển thị khung điều chỉnh và nút xóa để người dùng thao tác.
+  2. **Tự động ẩn khung khi Click ra vùng ngoài (Click-Outside Deselection)**:
+     - Giữ vững bộ lắng nghe `pointerdown` toàn cục trên `document`: Bất cứ khi nào click ra ngoài card ảnh (vào khung soạn thảo chữ, nền notepad, toolbar, chuyển tab hay phím Escape), khung viền sẽ lập tức biến mất.
+  3. **Hiệu ứng trực quan khi đang kéo (.dragging)**:
+     - Class `.dragging` sở hữu viền `#6366f1` và shadow 3D nổi bật trong suốt quá trình kéo để người dùng dễ căn vị trí; ngay khi thả chuột ra, cả `.dragging` và `.active` đều được gỡ bỏ hoàn toàn.
+
 ## 📅 [2026-09-13 23:10] - Tích Hợp Tab "🎨 Ghi Chú" Tự Do: Rich-Text Editor, Dán Ảnh Nhanh Ctrl+V, Sticker Nổi Đè Lên Văn Bản, Drag & 4-Corner Resize 🎨🖼️✨
 
 - **🎯 Yêu cầu từ người dùng**:
