@@ -81,22 +81,62 @@ function findSmartSelectionIndex(rawText, sel) {
 
 /**
  * Áp dụng định dạng Markdown thông minh:
- * - Nếu có bôi đen trong textarea: Bọc định dạng hoặc tháo gỡ nếu đã bọc (Toggle).
- * - Nếu có bôi đen trên màn hình (Preview pane): So khớp ngữ cảnh chính xác để không bao giờ nhảy nhầm từ.
+ * - Nếu đang thao tác trên Preview: Định vị chính xác qua ngữ cảnh, bọc định dạng và XÓA SẠCH selection
+ *   để không bị lưu vết selection cũ sang các lần bấm tiếp theo.
+ * - Nếu đang thao tác trong Textarea: Bọc/gỡ định dạng trực tiếp tại con trỏ.
  * - Nếu không bôi đen: Chỉ chèn cặp thẻ rỗng và đưa con trỏ vào giữa để gõ tiếp.
  * 
+ * @param {HTMLElement} sidebar
  * @param {HTMLTextAreaElement} textarea 
+ * @param {HTMLElement} previewContent
  * @param {string} prefix 
  * @param {string} suffix 
  * @param {Function} onModifyCallback 
  */
-function applyFormat(textarea, prefix, suffix, onModifyCallback) {
+function applyFormat(sidebar, textarea, previewContent, prefix, suffix, onModifyCallback) {
   if (!textarea) return;
   const start = textarea.selectionStart;
   const end = textarea.selectionEnd;
   const text = textarea.value;
 
-  // 1. Nếu có bôi đen trong textarea (vị trí con trỏ chính xác tuyệt đối)
+  const isEditPaneHidden = sidebar.querySelector('#neural-np-edit-pane')?.classList.contains('hidden');
+  const domSelection = (typeof window !== 'undefined' && window.getSelection) ? window.getSelection() : null;
+  const domSelText = (domSelection && domSelection.rangeCount > 0) ? domSelection.toString().trim() : '';
+
+  // ƯU TIÊN 1: Người dùng đang bôi đen trên bản Preview (hoặc tab Preview đang mở độc chiếm)
+  const isDomSelInPreview = domSelText && previewContent && domSelection.anchorNode && previewContent.contains(domSelection.anchorNode);
+
+  if (isEditPaneHidden || isDomSelInPreview) {
+    if (!domSelText) return;
+
+    const idx = findSmartSelectionIndex(text, domSelText);
+    if (idx !== -1) {
+      const existing = text.substring(Math.max(0, idx - prefix.length), idx + domSelText.length + suffix.length);
+      let newText = '';
+      if (existing === prefix + domSelText + suffix) {
+        // Toggle OFF: Gỡ bỏ highlight
+        newText = text.substring(0, idx - prefix.length) + domSelText + text.substring(idx + domSelText.length + suffix.length);
+      } else {
+        // Toggle ON: Bọc highlight
+        const replacement = prefix + domSelText + suffix;
+        newText = text.substring(0, idx) + replacement + text.substring(idx + domSelText.length);
+      }
+
+      textarea.value = newText;
+      // CỰC KỲ QUAN TRỌNG: Reset selection của textarea về (0, 0) để lần bấm sau không bị dính vết selection cũ!
+      textarea.setSelectionRange(0, 0);
+
+      // Giải phóng selection trên DOM để chuẩn bị cho lần bôi đen tiếp theo
+      if (domSelection) {
+        domSelection.removeAllRanges();
+      }
+
+      if (onModifyCallback) onModifyCallback(newText, 0, 0);
+      return;
+    }
+  }
+
+  // ƯU TIÊN 2: Người dùng đang bôi đen trực tiếp trong Textarea
   if (start !== end) {
     const selectedText = text.substring(start, end);
 
@@ -121,34 +161,7 @@ function applyFormat(textarea, prefix, suffix, onModifyCallback) {
     return;
   }
 
-  // 2. Nếu textarea không bôi đen, kiểm tra xem người dùng có đang bôi đen trên Preview pane không
-  const sel = (typeof window !== 'undefined' && window.getSelection) ? window.getSelection().toString().trim() : '';
-  if (sel) {
-    const idx = findSmartSelectionIndex(text, sel);
-    if (idx !== -1) {
-      // Kiểm tra nếu đoạn đó đã có format -> gỡ bỏ
-      const existing = text.substring(Math.max(0, idx - prefix.length), idx + sel.length + suffix.length);
-      if (existing === prefix + sel + suffix) {
-        const newText = text.substring(0, idx - prefix.length) + sel + text.substring(idx + sel.length + suffix.length);
-        textarea.value = newText;
-        textarea.focus();
-        textarea.setSelectionRange(idx - prefix.length, idx - prefix.length + sel.length);
-        if (onModifyCallback) onModifyCallback(newText, idx - prefix.length, idx - prefix.length + sel.length);
-        return;
-      }
-
-      const replacement = prefix + sel + suffix;
-      const newText = text.substring(0, idx) + replacement + text.substring(idx + sel.length);
-      textarea.value = newText;
-      textarea.focus();
-      textarea.setSelectionRange(idx, idx + replacement.length);
-      if (onModifyCallback) onModifyCallback(newText, idx, idx + replacement.length);
-      return;
-    }
-  }
-
-  // 3. Nếu KHÔNG bôi đen bất kỳ chữ nào:
-  // Chèn cặp thẻ rỗng và đặt con trỏ chuột vào chính giữa để người dùng gõ
+  // ƯU TIÊN 3: Nếu KHÔNG bôi đen bất kỳ chữ nào
   const replacement = prefix + suffix;
   const newText = text.substring(0, start) + replacement + text.substring(end);
   textarea.value = newText;
@@ -435,7 +448,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   });
 
   const handleFormat = (prefix, suffix) => {
-    applyFormat(textarea, prefix, suffix, (newText, s, e) => {
+    applyFormat(sidebar, textarea, previewContent, prefix, suffix, (newText, s, e) => {
       pushHistory(newText, s, e);
       updateLivePreview();
       debouncedSave();

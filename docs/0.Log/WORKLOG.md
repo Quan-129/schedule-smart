@@ -4,6 +4,24 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-13 22:30] - Khắc Phục Triệt Để Lỗi Highlight Vòng Lặp (Lần 1 Được, Lần 2 Mất, Lần 3 Hiện Lại) Do Rò Rỉ Selection 🔄🎯
+
+- **🎯 Yêu cầu & Phân tích hiện tượng**:
+  - Người dùng phản ánh rất chuẩn xác: *"nó đang bị chỉ highlight được lần đầu, lần bấm tiếp theo chỗ khác không được kèm theo chỗ highlight đầu bị mất, rồi nếu highlight tiếp chỗ khác thì không được mà lại hiện lại highlight chỗ đầu, bạn hiểu ra vấn đề không"*.
+  - **Bản chất nguyên nhân**:
+    1. Khi highlight lần 1 trên Preview: Hàm xử lý xong đã gọi lệnh `textarea.setSelectionRange(...)` bôi đen chính cụm từ vừa highlight trong textarea.
+    2. Khi người dùng chuyển sang bôi đen cụm từ thứ 2 trên Preview: Nhưng trong textarea vẫn đang lưu vùng chọn cũ của cụm từ thứ 1! Khi click nút Highlight, code kiểm tra thấy `textarea.selectionStart !== textarea.selectionEnd` (chính là cụm từ 1) $\rightarrow$ code hiểu lầm người dùng đang muốn gỡ highlight của cụm từ 1 (Toggle OFF), nên đã **xóa highlight của từ 1 và bỏ qua từ 2**!
+    3. Đến lần thứ 3 bôi đen tiếp: Textarea vẫn đang chọn từ 1 (lúc này đã mất `==`), code lại hiểu lầm muốn bật lại highlight cho từ 1 (Toggle ON) $\rightarrow$ cụm từ 1 lại hiện lại highlight!
+    4. Tạo thành vòng luẩn quẩn: Bật từ 1 $\rightarrow$ Tắt từ 1 $\rightarrow$ Bật từ 1!
+- **🛠 Triển khai kỹ thuật ([`src/1.Frontend/components/modals/NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+  1. **Phân Định Rạch Ròi Nguồn Selection**:
+     - Kiểm tra nếu đang ở tab Preview (Edit pane bị ẩn) HOẶC người dùng vừa bôi đen text trong `previewContent`, hệ thống xác định 100% người dùng đang thao tác trên Preview.
+  2. **Giải Phóng Toàn Bộ Selection Cũ (Cleanup)**:
+     - Sau khi bọc Highlight cho cụm từ trên Preview, hệ thống lập tức gọi `textarea.setSelectionRange(0, 0)` để reset vùng chọn trong textarea về rỗng.
+     - Đồng thời gọi `window.getSelection().removeAllRanges()` giải phóng vùng chọn trên DOM.
+     - Loại bỏ hoàn toàn việc rò rỉ vùng chọn cũ sang các thao tác sau.
+- **✅ Kết quả**: Người dùng có thể bôi đen và Highlight liên tục hàng chục chỗ khác nhau (A, B, C, D...) độc lập, không bao giờ bị mất các chỗ đã Highlight trước đó!
+
 ## 📅 [2026-09-13 22:15] - Khắc Phục Lỗi Nhảy Highlight Sang Từ Khác: So Khớp Ngữ Cảnh (Context Matching) & Bảo Toàn Vùng Chọn 🎯🛡️
 
 - **🎯 Yêu cầu & Phản hồi người dùng**:
