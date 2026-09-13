@@ -4,6 +4,32 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-13 23:10] - Tích Hợp Tab "🎨 Ghi Chú" Tự Do: Rich-Text Editor, Dán Ảnh Nhanh Ctrl+V, Sticker Nổi Đè Lên Văn Bản, Drag & 4-Corner Resize 🎨🖼️✨
+
+- **🎯 Yêu cầu từ người dùng**:
+  - *"thêm 1 cái gọi là ghi chú ở đây có thể gõ văn bản gồm các tính năng cơ bản như in đâm, nghiêng, gạch chân, highlight undo, thay đổi cỡ chữ, thay đổi màu chữ , có thể chèn hình nhanh bằng crtl V chèn theo kiểu đè lên văn bản được có thể thay đổi kịch thước ở góc kéo thả ở tâm để di chuyển, thao tác thông minh mượt mà nhé"*.
+- **🛠 Triển khai kỹ thuật ([`src/1.Frontend/components/modals/NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js) & [`src/1.Frontend/styles/13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+  1. **Hệ Thống 3 Tab Chuyên Nghiệp**:
+     - Bổ sung tab **`[🎨 Ghi chú]`** bên cạnh `[👁️ Đã Gen Ra]` và `[📝 Soạn thảo]`.
+     - Tự động chuyển đổi mượt mà với toolbar riêng biệt cho Visual Note, giấu/hiện theo ngữ cảnh tab.
+  2. **Trình Soạn Thảo Rich-Text Đa Tính Năng**:
+     - Hỗ trợ toàn diện: **Bold (B)**, *Italic (I)*, <u>Underline (U)</u>, Highlight vàng tươi (`<mark class="neural-highlight">`), Undo (`document.execCommand('undo')`).
+     - Bộ chọn cỡ chữ linh hoạt: 13px (Nhỏ), 15px (Chuẩn), 18px (Vừa), 22px (Lớn), 26px (Tiêu đề).
+     - Bảng màu chữ 8 màu tương phản cao (Trắng ngà, Vàng amber, Xanh lục ngọc, Lam neon, Tím tím pastel, Đỏ cam, Xanh da trời, Xám ghi).
+     - Giữ vững con trỏ/vùng chọn text (Selection Lock) bằng cách `e.preventDefault()` trên `mousedown` ở toolbar.
+  3. **Cơ Chế Chèn Ảnh Nổi Đè Lên Văn Bản (Overlay Floating Sticker)**:
+     - Lớp ảnh nổi độc lập (`.visual-images-layer`) nằm đè lên trên lớp văn bản (`.visual-rich-editor`).
+     - **Bắt phím `Ctrl + V`** thông minh qua sự kiện `paste`: tự động lấy ảnh từ Clipboard, chuyển sang Base64 Data URL và chèn ảnh sticker nổi ngay tức thì.
+     - Hỗ trợ cả nút **`[📷 Dán ảnh / Tải ảnh]`** trên thanh công cụ cho người dùng tải ảnh từ máy tính hoặc dán clipboard bằng nút bấm.
+  4. **Bộ Điều Khiển Di Chuyển Tâm & Co Giãn 4 Góc Mượt Mà (Smart Drag & 4-Corner Resize Engine)**:
+     - **Di chuyển ở tâm/thân ảnh**: Bắt sự kiện `pointerdown` / `pointermove` / `pointerup` (hỗ trợ cả chuột và cảm ứng touch), tính toán delta `(x, y)` theo toạ độ container, ngăn kéo văng khỏi khung biên.
+     - **Co giãn ở 4 góc**: 4 núm điều khiển `NW`, `NE`, `SE`, `SW` trực quan với con trỏ `nwse-resize` và `nesw-resize`. Khi kéo núm góc, kích thước ảnh tự động co giãn theo tỉ lệ gốc (aspect ratio) mượt mà không bị méo ảnh.
+     - Tích hợp nút xóa nhanh **`[✕]`** trên góc mỗi card ảnh.
+  5. **Tự Động Lưu Đồng Bộ & An Toàn**:
+     - Cấu trúc lưu trữ linh hoạt `node.visualNotes = { html, images }` song song với `notes` markdown.
+     - Lưu real-time vào `state.driveSubjects` trong LocalStorage thông qua `updateNeuralNode()`.
+- **✅ Kết quả**: Biến bảng Notepad của mỗi node tri thức thành một bảng ghi chú trực quan (Visual Canvas) mạnh mẽ như Miro/Notion, hỗ trợ học tập và ghi nhớ đỉnh cao!
+
 ## 📅 [2026-09-13 22:45] - Tinh Gọn Giao Diện Bảng Notepad: Loại Bỏ Tab Chia Đôi & Xóa Dòng Chữ Subtitle Thừa Thãi 🧹✨
 
 - **🎯 Yêu cầu từ người dùng**:

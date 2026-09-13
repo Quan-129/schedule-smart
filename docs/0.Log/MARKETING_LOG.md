@@ -5,6 +5,25 @@
 
 ---
 
+## 💎 ENTRY 9: [2026-09-13] - "Visual Canvas Note": Dán Ảnh Bài Giảng Đè Lên Chữ Bằng Ctrl+V, Co Giãn 4 Góc & Kéo Thả Tự Do Như Sticker Notion/GoodNotes 🎨🖼️✨
+
+### 📌 Phân Loại & Tags:
+`#VisualNoteTaking` `#FreeformCanvas` `#GoodNotesDupe` `#CtrlVPasteImage` `#StudyWithMe` `#NotionAlternative`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Bảng Ghi Chú Đồ Họa Tự Do Đa Tầng (Multi-layer Visual Note)**: Không bị bó buộc bởi trình soạn thảo văn bản cứng nhắc, sinh viên có thể vừa soạn thảo chữ định dạng đẹp (Bold, Italic, Highlight neon, đổi màu chữ, đổi cỡ chữ), vừa chèn ảnh nổi dạng sticker đè lên chữ.
+- **Dán Ảnh Siêu Tốc 0.1 Giây Bằng `Ctrl + V`**: Chụp màn hình công thức, slide bài giảng hoặc bài tập trên mạng, bấm `Ctrl + V` là ảnh lập tức bay lên mặt bảng ghi chú. Không cần tải về máy rồi upload thủ công lằng nhằn!
+- **Kéo Thả Ở Tâm & Co Giãn 4 Góc Cực Mượt (Smart Drag & 4-Corner Scale)**: Kéo rê ảnh tự do đến bất kỳ vị trí nào để minh họa bài viết, kéo 4 góc để phóng to/thu nhỏ giữ nguyên tỉ lệ khung hình cực kỳ thỏa mãn thị giác (satisfying interaction).
+- **Lưu Tự Động Trọn Đời Không Cần Database Ngoài**: Toàn bộ cấu trúc text và danh sách ảnh dán nổi được mã hóa lưu trữ bền bỉ ngay trên trình duyệt, mở lại lúc nào cũng nguyên vẹn.
+
+### 2. 🎣 Bộ Viral Hooks TikTok / Reels / Threads:
+1. **Satisfying UI / Study Hacks Hook**:
+   > *"Đố app ghi chú nào vừa gõ chữ vừa dán ảnh đè lên như sticker mượt như này! Chụp màn hình bài giải bấm Ctrl+V cái là ảnh hiện ra, kéo tâm để di chuyển, kéo 4 góc để phóng to thu nhỏ đỉnh nóc kịch trần luôn!..."*
+2. **Student Pain Point Hook**:
+   > *"Ghi chú mấy môn nhiều hình vẽ với đồ thị mà dùng Word hay Docs cứ bị nhảy format ức chế dã man? Thử tính năng Ghi chú sticker tự do trong Cây Nơ-ron này xem, dán ảnh đè lên chữ muốn đặt đâu thì đặt!..."*
+
+---
+
 ## 💎 ENTRY 8: [2026-09-13] - "Cây Kiến Thức Nơ-Ron Vũ Trụ": Bản Đồ Não Bộ Đính Kèm Link Tài Liệu Không Giới Hạn 🧠🌌🔗
 
 ### 📌 Phân Loại & Tags:

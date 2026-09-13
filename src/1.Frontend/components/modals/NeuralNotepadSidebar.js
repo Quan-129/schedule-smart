@@ -21,7 +21,6 @@ import { renderMarkdownToHtml } from '../../../2.Backend/utils/markdownRenderer.
 function findSmartSelectionIndex(rawText, sel) {
   if (!sel || !rawText) return -1;
 
-  // 1. Trích xuất ngữ cảnh xung quanh từ DOM Selection
   let prefixContext = '';
   let suffixContext = '';
 
@@ -40,7 +39,6 @@ function findSmartSelectionIndex(rawText, sel) {
     }
   }
 
-  // 2. Nếu có ngữ cảnh, quét toàn bộ các vị trí xuất hiện và chấm điểm khớp (Scoring)
   if (prefixContext || suffixContext) {
     let searchPos = 0;
     let bestIdx = -1;
@@ -48,14 +46,12 @@ function findSmartSelectionIndex(rawText, sel) {
 
     while ((searchPos = rawText.indexOf(sel, searchPos)) !== -1) {
       let score = 0;
-      // Khớp ngữ cảnh phía trước
       if (prefixContext) {
         const beforeText = rawText.substring(Math.max(0, searchPos - 45), searchPos);
         for (let word of prefixContext.split(/\s+/)) {
           if (word.length > 1 && beforeText.includes(word)) score += 2;
         }
       }
-      // Khớp ngữ cảnh phía sau
       if (suffixContext) {
         const afterText = rawText.substring(searchPos + sel.length, searchPos + sel.length + 45);
         for (let word of suffixContext.split(/\s+/)) {
@@ -75,7 +71,6 @@ function findSmartSelectionIndex(rawText, sel) {
     }
   }
 
-  // 3. Fallback: Nếu không có ngữ cảnh đặc thù, lấy vị trí đầu tiên
   return rawText.indexOf(sel);
 }
 
@@ -114,19 +109,15 @@ function applyFormat(sidebar, textarea, previewContent, prefix, suffix, onModify
       const existing = text.substring(Math.max(0, idx - prefix.length), idx + domSelText.length + suffix.length);
       let newText = '';
       if (existing === prefix + domSelText + suffix) {
-        // Toggle OFF: Gỡ bỏ highlight
         newText = text.substring(0, idx - prefix.length) + domSelText + text.substring(idx + domSelText.length + suffix.length);
       } else {
-        // Toggle ON: Bọc highlight
         const replacement = prefix + domSelText + suffix;
         newText = text.substring(0, idx) + replacement + text.substring(idx + domSelText.length);
       }
 
       textarea.value = newText;
-      // CỰC KỲ QUAN TRỌNG: Reset selection của textarea về (0, 0) để lần bấm sau không bị dính vết selection cũ!
       textarea.setSelectionRange(0, 0);
 
-      // Giải phóng selection trên DOM để chuẩn bị cho lần bôi đen tiếp theo
       if (domSelection) {
         domSelection.removeAllRanges();
       }
@@ -140,7 +131,6 @@ function applyFormat(sidebar, textarea, previewContent, prefix, suffix, onModify
   if (start !== end) {
     const selectedText = text.substring(start, end);
 
-    // Kiểm tra nếu đã có định dạng -> Gỡ bỏ (Toggle OFF)
     if (selectedText.startsWith(prefix) && selectedText.endsWith(suffix) && selectedText.length >= prefix.length + suffix.length) {
       const unformatted = selectedText.slice(prefix.length, -suffix.length);
       const newText = text.substring(0, start) + unformatted + text.substring(end);
@@ -151,7 +141,6 @@ function applyFormat(sidebar, textarea, previewContent, prefix, suffix, onModify
       return;
     }
 
-    // Chưa có định dạng -> Bọc thẻ (Toggle ON)
     const replacement = prefix + selectedText + suffix;
     const newText = text.substring(0, start) + replacement + text.substring(end);
     textarea.value = newText;
@@ -178,8 +167,9 @@ function renderNotepadTemplate(node) {
   const notes = node.notes || '';
   const hasNotes = Boolean(notes && notes.trim());
   const renderedHtml = renderMarkdownToHtml(notes);
-  // Mặc định: Nếu đã có ghi chú thì mở ngay Bảng Notepad Đã Gen Ra (preview), nếu trống thì mở soạn thảo (edit)
   const defaultTab = hasNotes ? 'preview' : 'edit';
+  const visualNotes = node.visualNotes || { html: '', images: [] };
+  const initialVisualHtml = visualNotes.html || '';
 
   return `
     <div class="neural-notepad-header">
@@ -197,6 +187,9 @@ function renderNotepadTemplate(node) {
           <button type="button" class="neural-np-tab ${defaultTab === 'edit' ? 'active' : ''}" data-tab="edit" title="Soạn thảo Markdown">
             <i class="fa-solid fa-pen-to-square"></i> Soạn thảo
           </button>
+          <button type="button" class="neural-np-tab" data-tab="visual" title="Ghi chú tự do & chèn ảnh nổi đè lên">
+            <i class="fa-solid fa-paintbrush"></i> Ghi chú
+          </button>
         </div>
         <button type="button" class="neural-close-btn" id="btn-close-neural-notepad" title="Đóng bảng ghi chú">
           <i class="fa-solid fa-xmark"></i>
@@ -204,10 +197,9 @@ function renderNotepadTemplate(node) {
       </div>
     </div>
 
-    <!-- Toolbar: Undo/Redo & 4 Chức năng định dạng Markdown -->
-    <div class="neural-notepad-toolbar">
+    <!-- Toolbar 1: Dành cho Markdown (Preview & Soạn thảo) -->
+    <div class="neural-notepad-toolbar" id="neural-notepad-toolbar">
       <div class="neural-np-tools-group">
-        <!-- Nút Undo / Redo -->
         <button type="button" class="neural-np-tool-btn" id="btn-hist-undo" title="Hoàn tác (Ctrl+Z)" disabled>
           <i class="fa-solid fa-rotate-left"></i>
         </button>
@@ -217,7 +209,6 @@ function renderNotepadTemplate(node) {
 
         <div class="neural-np-tool-divider"></div>
 
-        <!-- Nút Định dạng -->
         <button type="button" class="neural-np-tool-btn" id="btn-fmt-bold" title="In đậm (**văn bản**)">
           <strong>B</strong>
         </button>
@@ -237,9 +228,9 @@ function renderNotepadTemplate(node) {
       </div>
     </div>
 
-    <!-- Body Container: Edit Textarea & Preview Notepad -->
+    <!-- Body Container: 3 Panes (Edit, Preview, Visual) -->
     <div class="neural-notepad-body" id="neural-notepad-body-container" data-view-mode="${defaultTab}">
-      <!-- 1. Textarea Soạn thảo -->
+      <!-- 1. Textarea Soạn thảo Markdown -->
       <div class="neural-np-pane ${defaultTab === 'preview' ? 'hidden' : ''}" id="neural-np-edit-pane">
         <textarea 
           id="neural-notepad-textarea" 
@@ -256,6 +247,64 @@ function renderNotepadTemplate(node) {
         <button type="button" class="btn-quick-switch-to-edit" id="btn-quick-switch-to-edit" title="Chuyển sang soạn thảo">
           <i class="fa-solid fa-pen-to-square"></i> Sửa nội dung
         </button>
+      </div>
+
+      <!-- 3. Pane Ghi Chú Tự Do Đa Tầng (Visual Canvas Note & Overlay Floating Images) -->
+      <div class="neural-np-pane hidden" id="neural-np-visual-pane">
+        <!-- Toolbar riêng cho tab Ghi Chú -->
+        <div class="neural-visual-toolbar" id="neural-visual-toolbar">
+          <button type="button" class="neural-np-tool-btn" id="btn-vis-undo" title="Hoàn tác (Ctrl+Z)">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+          <div class="neural-np-tool-divider"></div>
+          <button type="button" class="neural-np-tool-btn" id="btn-vis-bold" title="In đậm">
+            <strong>B</strong>
+          </button>
+          <button type="button" class="neural-np-tool-btn" id="btn-vis-italic" title="In nghiêng">
+            <em>I</em>
+          </button>
+          <button type="button" class="neural-np-tool-btn" id="btn-vis-underline" title="Gạch chân">
+            <span style="text-decoration: underline;">U</span>
+          </button>
+          <button type="button" class="neural-np-tool-btn highlight" id="btn-vis-highlight" title="Tô sáng dạ quang">
+            <i class="fa-solid fa-highlighter"></i> HL
+          </button>
+          <div class="neural-np-tool-divider"></div>
+          <select class="visual-font-size-select" id="vis-font-size" title="Thay đổi cỡ chữ">
+            <option value="15px">Chuẩn (15px)</option>
+            <option value="13px">Nhỏ (13px)</option>
+            <option value="18px">Vừa (18px)</option>
+            <option value="22px">Tiêu đề (22px)</option>
+            <option value="26px">Lớn (26px)</option>
+          </select>
+          <div class="neural-np-tool-divider"></div>
+          <div class="visual-color-swatches" id="vis-color-swatches" title="Chọn màu chữ">
+            <span class="visual-color-dot active" data-color="#f8fafc" style="background: #f8fafc;" title="Trắng sáng"></span>
+            <span class="visual-color-dot" data-color="#38bdf8" style="background: #38bdf8;" title="Xanh Cyan"></span>
+            <span class="visual-color-dot" data-color="#facc15" style="background: #facc15;" title="Vàng Neon"></span>
+            <span class="visual-color-dot" data-color="#c084fc" style="background: #c084fc;" title="Tím Pastel"></span>
+            <span class="visual-color-dot" data-color="#4ade80" style="background: #4ade80;" title="Xanh Mint"></span>
+            <span class="visual-color-dot" data-color="#f472b6" style="background: #f472b6;" title="Hồng Pastel"></span>
+          </div>
+          <div class="neural-np-tool-divider"></div>
+          <label class="visual-paste-btn" title="Chèn ảnh từ máy (hoặc bấm Ctrl+V để dán trực tiếp)">
+            <i class="fa-regular fa-image"></i> Dán ảnh (Ctrl+V)
+            <input type="file" id="vis-file-input" accept="image/*" style="display: none;">
+          </label>
+        </div>
+
+        <!-- Canvas Wrapper chứa Text Editor nền & Lớp ảnh nổi đè lên -->
+        <div class="visual-note-canvas-wrapper" id="visual-note-canvas-wrapper">
+          <div 
+            class="visual-rich-editor" 
+            id="visual-rich-editor" 
+            contenteditable="true" 
+            spellcheck="false"
+            data-placeholder="Gõ văn bản ghi chú tại đây...&#10;• Dùng các nút trên để đổi cỡ chữ, màu sắc, in đậm/nghiêng/highlight&#10;• Bấm Ctrl+V để dán ảnh đè lên văn bản, kéo thả ở tâm và co giãn 4 góc mượt mà!"
+          >${initialVisualHtml}</div>
+
+          <div class="visual-images-layer" id="visual-images-layer"></div>
+        </div>
       </div>
     </div>
 
@@ -299,6 +348,11 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   const previewContent = sidebar.querySelector('#neural-notepad-preview-content');
   const editPane = sidebar.querySelector('#neural-np-edit-pane');
   const previewPane = sidebar.querySelector('#neural-np-preview-pane');
+  const visualPane = sidebar.querySelector('#neural-np-visual-pane');
+  const visualEditor = sidebar.querySelector('#visual-rich-editor');
+  const visualImagesLayer = sidebar.querySelector('#visual-images-layer');
+  const canvasWrapper = sidebar.querySelector('#visual-note-canvas-wrapper');
+  const mdToolbar = sidebar.querySelector('#neural-notepad-toolbar');
   const tabBtns = sidebar.querySelectorAll('.neural-np-tab');
   const saveStatus = sidebar.querySelector('#neural-notepad-save-status');
   const bodyContainer = sidebar.querySelector('#neural-notepad-body-container');
@@ -306,7 +360,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   const redoBtn = sidebar.querySelector('#btn-hist-redo');
 
   // ========================================================================
-  // UNDO / REDO HISTORY ENGINE
+  // UNDO / REDO HISTORY ENGINE CHO MARKDOWN
   // ========================================================================
   const historyStack = [{
     text: textarea.value,
@@ -325,7 +379,6 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     if (historyStack[historyIndex] && historyStack[historyIndex].text === newText) {
       return;
     }
-    // Cắt bỏ nhánh redo cũ nếu vừa có thao tác mới
     if (historyIndex < historyStack.length - 1) {
       historyStack.splice(historyIndex + 1);
     }
@@ -368,11 +421,9 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     }
   };
 
-  // Gắn sự kiện nút Undo/Redo
   if (undoBtn) undoBtn.addEventListener('click', doUndo);
   if (redoBtn) redoBtn.addEventListener('click', doRedo);
 
-  // Phím tắt Ctrl+Z / Ctrl+Y
   textarea.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.key.toLowerCase() === 'z' && !e.shiftKey) {
       e.preventDefault();
@@ -387,7 +438,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   });
 
   // ========================================================================
-  // TAB SWITCHING & LIVE PREVIEW
+  // TAB SWITCHING (ĐÃ GEN RA vs SOẠN THẢO vs GHI CHÚ)
   // ========================================================================
   const switchViewTab = (tab) => {
     tabBtns.forEach(b => {
@@ -397,13 +448,21 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
     if (tab === 'preview') {
       previewContent.innerHTML = renderMarkdownToHtml(textarea.value);
-      bodyContainer.classList.remove('split-active');
+      if (mdToolbar) mdToolbar.style.display = 'flex';
       editPane.classList.add('hidden');
+      if (visualPane) visualPane.classList.add('hidden');
       previewPane.classList.remove('hidden');
-    } else {
-      bodyContainer.classList.remove('split-active');
-      editPane.classList.remove('hidden');
+    } else if (tab === 'visual') {
+      if (mdToolbar) mdToolbar.style.display = 'none';
+      editPane.classList.add('hidden');
       previewPane.classList.add('hidden');
+      if (visualPane) visualPane.classList.remove('hidden');
+      if (visualEditor) visualEditor.focus();
+    } else {
+      if (mdToolbar) mdToolbar.style.display = 'flex';
+      previewPane.classList.add('hidden');
+      if (visualPane) visualPane.classList.add('hidden');
+      editPane.classList.remove('hidden');
       textarea.focus();
     }
   };
@@ -428,9 +487,8 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   };
 
   // ========================================================================
-  // TOOLBAR 4 CHỨC NĂNG ĐỊNH DẠNG (B, I, U, HL) & GIỮ VÙNG CHỌN (SELECTION)
+  // TOOLBAR 4 CHỨC NĂNG ĐỊNH DẠNG (B, I, U, HL) CHO MARKDOWN
   // ========================================================================
-  // QUAN TRỌNG: Ngăn chặn mousedown làm mất focus và làm mất selection trong textarea!
   sidebar.querySelectorAll('.neural-np-tool-btn').forEach(btn => {
     btn.addEventListener('mousedown', (e) => {
       e.preventDefault();
@@ -445,18 +503,312 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     });
   };
 
-  sidebar.querySelector('#btn-fmt-bold').addEventListener('click', () => handleFormat('**', '**'));
-  sidebar.querySelector('#btn-fmt-italic').addEventListener('click', () => handleFormat('*', '*'));
-  sidebar.querySelector('#btn-fmt-underline').addEventListener('click', () => handleFormat('<u>', '</u>'));
-  sidebar.querySelector('#btn-fmt-highlight').addEventListener('click', () => handleFormat('==', '=='));
+  sidebar.querySelector('#btn-fmt-bold')?.addEventListener('click', () => handleFormat('**', '**'));
+  sidebar.querySelector('#btn-fmt-italic')?.addEventListener('click', () => handleFormat('*', '*'));
+  sidebar.querySelector('#btn-fmt-underline')?.addEventListener('click', () => handleFormat('<u>', '</u>'));
+  sidebar.querySelector('#btn-fmt-highlight')?.addEventListener('click', () => handleFormat('==', '=='));
+
+  // ========================================================================
+  // VISUAL CANVAS NOTE: RICH-TEXT & FLOATING OVERLAY IMAGES CONTROLLER
+  // ========================================================================
+  const visualNotes = node.visualNotes || { html: '', images: [] };
+  let currentImages = Array.isArray(visualNotes.images) ? [...visualNotes.images] : [];
+
+  // Render các ảnh nổi đè lên văn bản
+  const renderVisualImages = () => {
+    if (!visualImagesLayer) return;
+    visualImagesLayer.innerHTML = '';
+
+    currentImages.forEach(imgItem => {
+      const card = document.createElement('div');
+      card.className = 'visual-floating-img-card';
+      card.dataset.id = imgItem.id;
+      card.style.left = `${imgItem.x}px`;
+      card.style.top = `${imgItem.y}px`;
+      card.style.width = `${imgItem.width}px`;
+
+      card.innerHTML = `
+        <img src="${imgItem.src}" alt="Note sticker" draggable="false" />
+        <button type="button" class="visual-img-btn-delete" title="Xóa ảnh"><i class="fa-solid fa-xmark"></i></button>
+        <div class="visual-resize-handle handle-nw" data-handle="nw"></div>
+        <div class="visual-resize-handle handle-ne" data-handle="ne"></div>
+        <div class="visual-resize-handle handle-se" data-handle="se"></div>
+        <div class="visual-resize-handle handle-sw" data-handle="sw"></div>
+      `;
+
+      // 1. Nút xóa ảnh
+      const delBtn = card.querySelector('.visual-img-btn-delete');
+      delBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        currentImages = currentImages.filter(i => i.id !== imgItem.id);
+        card.remove();
+        saveAllNotes();
+      });
+
+      // 2. Kéo thả di chuyển ở tâm / thân ảnh
+      card.addEventListener('pointerdown', (e) => {
+        if (e.target.classList.contains('visual-resize-handle') || e.target.closest('.visual-img-btn-delete')) {
+          return;
+        }
+
+        e.preventDefault();
+        sidebar.querySelectorAll('.visual-floating-img-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active', 'dragging');
+
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const initLeft = card.offsetLeft;
+        const initTop = card.offsetTop;
+
+        const onPointerMove = (moveEvt) => {
+          const dx = moveEvt.clientX - startX;
+          const dy = moveEvt.clientY - startY;
+          const newX = Math.max(0, initLeft + dx);
+          const newY = Math.max(0, initTop + dy);
+          card.style.left = `${newX}px`;
+          card.style.top = `${newY}px`;
+          imgItem.x = newX;
+          imgItem.y = newY;
+        };
+
+        const onPointerUp = () => {
+          card.classList.remove('dragging');
+          window.removeEventListener('pointermove', onPointerMove);
+          window.removeEventListener('pointerup', onPointerUp);
+          saveAllNotes();
+        };
+
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+      });
+
+      // 3. Co giãn kích thước ở 4 góc
+      const handles = card.querySelectorAll('.visual-resize-handle');
+      handles.forEach(handle => {
+        handle.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          sidebar.querySelectorAll('.visual-floating-img-card').forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+
+          const handleType = handle.dataset.handle;
+          const startX = e.clientX;
+          const startWidth = card.offsetWidth;
+          const startHeight = card.offsetHeight;
+          const startLeft = card.offsetLeft;
+          const startTop = card.offsetTop;
+          const aspectRatio = startWidth / (startHeight || 1);
+
+          const onResizeMove = (moveEvt) => {
+            const dx = moveEvt.clientX - startX;
+            let newWidth = startWidth;
+
+            if (handleType === 'se') {
+              newWidth = Math.max(60, startWidth + dx);
+            } else if (handleType === 'sw') {
+              newWidth = Math.max(60, startWidth - dx);
+              const newLeft = startLeft + (startWidth - newWidth);
+              card.style.left = `${newLeft}px`;
+              imgItem.x = newLeft;
+            } else if (handleType === 'ne') {
+              newWidth = Math.max(60, startWidth + dx);
+              const deltaH = (newWidth - startWidth) / aspectRatio;
+              const newTop = startTop - deltaH;
+              card.style.top = `${newTop}px`;
+              imgItem.y = newTop;
+            } else if (handleType === 'nw') {
+              newWidth = Math.max(60, startWidth - dx);
+              const newLeft = startLeft + (startWidth - newWidth);
+              const deltaH = (newWidth - startWidth) / aspectRatio;
+              const newTop = startTop - deltaH;
+              card.style.left = `${newLeft}px`;
+              card.style.top = `${newTop}px`;
+              imgItem.x = newLeft;
+              imgItem.y = newTop;
+            }
+
+            card.style.width = `${newWidth}px`;
+            imgItem.width = newWidth;
+            imgItem.height = Math.round(newWidth / aspectRatio);
+          };
+
+          const onResizeUp = () => {
+            window.removeEventListener('pointermove', onResizeMove);
+            window.removeEventListener('pointerup', onResizeUp);
+            saveAllNotes();
+          };
+
+          window.addEventListener('pointermove', onResizeMove);
+          window.addEventListener('pointerup', onResizeUp);
+        });
+      });
+
+      visualImagesLayer.appendChild(card);
+    });
+  };
+
+  renderVisualImages();
+
+  // Hàm nạp file ảnh vào Canvas
+  const handleImageFile = (file) => {
+    if (!file || !file.type || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const dataUrl = evt.target.result;
+      const tempImg = new Image();
+      tempImg.onload = () => {
+        const naturalW = tempImg.naturalWidth || 300;
+        const naturalH = tempImg.naturalHeight || 200;
+        const width = Math.min(280, naturalW);
+        const height = Math.round(width * (naturalH / naturalW));
+        const wrapperW = canvasWrapper ? canvasWrapper.clientWidth : 400;
+        const x = Math.max(20, Math.round((wrapperW - width) / 2));
+        const y = Math.max(20, (visualPane ? visualPane.scrollTop : 0) + 40);
+
+        const newImg = {
+          id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+          src: dataUrl,
+          x,
+          y,
+          width,
+          height
+        };
+
+        currentImages.push(newImg);
+        renderVisualImages();
+        saveAllNotes();
+      };
+      tempImg.src = dataUrl;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Lắng nghe Ctrl + V dán ảnh từ Clipboard
+  sidebar.addEventListener('paste', (e) => {
+    if (visualPane && !visualPane.classList.contains('hidden')) {
+      const items = (e.clipboardData || window.clipboardData)?.items;
+      if (items) {
+        for (let item of items) {
+          if (item.type && item.type.startsWith('image/')) {
+            e.preventDefault();
+            const blob = item.getAsFile();
+            handleImageFile(blob);
+            return;
+          }
+        }
+      }
+    }
+  });
+
+  // Chọn ảnh từ máy tính
+  const fileInput = sidebar.querySelector('#vis-file-input');
+  if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleImageFile(e.target.files[0]);
+        e.target.value = '';
+      }
+    });
+  }
+
+  // Toolbar Formatting cho Visual Note
+  const visToolbar = sidebar.querySelector('#neural-visual-toolbar');
+  if (visToolbar) {
+    visToolbar.querySelectorAll('.neural-np-tool-btn, .visual-paste-btn').forEach(btn => {
+      btn.addEventListener('mousedown', (e) => e.preventDefault());
+    });
+  }
+
+  sidebar.querySelector('#btn-vis-bold')?.addEventListener('click', () => {
+    document.execCommand('bold', false, null);
+    saveAllNotes();
+  });
+  sidebar.querySelector('#btn-vis-italic')?.addEventListener('click', () => {
+    document.execCommand('italic', false, null);
+    saveAllNotes();
+  });
+  sidebar.querySelector('#btn-vis-underline')?.addEventListener('click', () => {
+    document.execCommand('underline', false, null);
+    saveAllNotes();
+  });
+  sidebar.querySelector('#btn-vis-undo')?.addEventListener('click', () => {
+    document.execCommand('undo', false, null);
+    saveAllNotes();
+  });
+  sidebar.querySelector('#btn-vis-highlight')?.addEventListener('click', () => {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return;
+    const range = selection.getRangeAt(0);
+    const mark = document.createElement('mark');
+    mark.className = 'neural-highlight';
+    mark.appendChild(range.extractContents());
+    range.insertNode(mark);
+    selection.removeAllRanges();
+    saveAllNotes();
+  });
+
+  // Đổi cỡ chữ
+  const fontSizeSelect = sidebar.querySelector('#vis-font-size');
+  if (fontSizeSelect) {
+    fontSizeSelect.addEventListener('change', (e) => {
+      const size = e.target.value;
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return;
+      const range = selection.getRangeAt(0);
+      const span = document.createElement('span');
+      span.style.fontSize = size;
+      span.appendChild(range.extractContents());
+      range.insertNode(span);
+      selection.removeAllRanges();
+      saveAllNotes();
+    });
+  }
+
+  // Đổi màu chữ
+  const colorDots = sidebar.querySelectorAll('.visual-color-dot');
+  colorDots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      colorDots.forEach(d => d.classList.remove('active'));
+      dot.classList.add('active');
+      const color = dot.dataset.color;
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+        document.execCommand('foreColor', false, color);
+        return;
+      }
+      const range = selection.getRangeAt(0);
+      const span = document.createElement('span');
+      span.style.color = color;
+      span.appendChild(range.extractContents());
+      range.insertNode(span);
+      selection.removeAllRanges();
+      saveAllNotes();
+    });
+  });
+
+  if (visualEditor) {
+    visualEditor.addEventListener('input', () => {
+      debouncedSave();
+    });
+  }
 
   // ========================================================================
   // AUTO-SAVE ENGINE & DEBOUNCE
   // ========================================================================
-  const saveNotes = () => {
+  const saveAllNotes = () => {
     const newNotes = textarea.value;
-    updateNeuralNode(subjectCode, node.id, { notes: newNotes });
+    const newVisualNotes = {
+      html: visualEditor ? visualEditor.innerHTML : (node.visualNotes?.html || ''),
+      images: currentImages
+    };
+
+    updateNeuralNode(subjectCode, node.id, { 
+      notes: newNotes,
+      visualNotes: newVisualNotes
+    });
     node.notes = newNotes;
+    node.visualNotes = newVisualNotes;
 
     if (saveStatus) {
       saveStatus.innerHTML = '<i class="fa-solid fa-check"></i> Đã lưu thành công!';
@@ -478,17 +830,16 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       saveStatus.innerHTML = '<i class="fa-solid fa-pen-nib"></i> Đang chỉnh sửa...';
     }
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(saveNotes, 1200);
+    debounceTimer = setTimeout(saveAllNotes, 1200);
   };
 
-  sidebar.querySelector('#btn-save-neural-notepad').addEventListener('click', saveNotes);
+  sidebar.querySelector('#btn-save-neural-notepad').addEventListener('click', saveAllNotes);
 
   let historyDebounce = null;
   textarea.addEventListener('input', () => {
     updateLivePreview();
     debouncedSave();
 
-    // Gom cụm lịch sử chỉnh sửa khi gõ phím
     clearTimeout(historyDebounce);
     historyDebounce = setTimeout(() => {
       pushHistory(textarea.value, textarea.selectionStart, textarea.selectionEnd);

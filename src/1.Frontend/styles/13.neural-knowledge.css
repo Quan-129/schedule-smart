@@ -1014,6 +1014,271 @@
   margin-top: 40px !important;
 }
 
+/* ==========================================================================
+   VISUAL CANVAS NOTE & OVERLAY IMAGES LAYER (TAB GHI CHÚ TỰ DO)
+   ========================================================================== */
+
+/* Container Pane cho Visual Note */
+.neural-np-visual-pane {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: auto;
+  background: radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.02) 0%, transparent 70%);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Toolbar cho Tab Ghi Chú */
+.neural-visual-toolbar {
+  padding: 8px 16px;
+  background: rgba(13, 17, 28, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(10px);
+}
+
+.neural-visual-toolbar select.visual-font-size-select {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f1f5f9;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.neural-visual-toolbar select.visual-font-size-select:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: #6366f1;
+}
+
+.neural-visual-toolbar select.visual-font-size-select option {
+  background: #0f172a;
+  color: #f1f5f9;
+}
+
+/* Color Picker Swatches */
+.visual-color-swatches {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.visual-color-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.visual-color-dot:hover {
+  transform: scale(1.25);
+  border-color: #ffffff;
+}
+
+.visual-color-dot.active {
+  transform: scale(1.2);
+  border-color: #ffffff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+}
+
+.visual-paste-btn {
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px dashed rgba(99, 102, 241, 0.4);
+  color: #a5b4fc;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.76rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.visual-paste-btn:hover {
+  background: rgba(99, 102, 241, 0.3);
+  color: #ffffff;
+  border-color: #6366f1;
+}
+
+/* Content Area: Vùng soạn thảo Rich-Text nền */
+.visual-note-canvas-wrapper {
+  position: relative;
+  flex: 1;
+  min-height: 500px;
+  padding: 20px 24px 80px 24px;
+}
+
+.visual-rich-editor {
+  width: 100%;
+  min-height: 400px;
+  color: #e2e8f0;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.75;
+  outline: none;
+  position: relative;
+  z-index: 1;
+  word-break: break-word;
+}
+
+.visual-rich-editor[contenteditable="true"]:empty:before {
+  content: attr(data-placeholder);
+  color: #64748b;
+  font-style: italic;
+  pointer-events: none;
+  display: block;
+}
+
+/* Lớp Ảnh Nổi Đè Lên Văn Bản (Overlay Floating Images Layer) */
+.visual-images-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.visual-floating-img-card {
+  position: absolute;
+  pointer-events: auto;
+  user-select: none;
+  touch-action: none;
+  cursor: grab;
+  border-radius: 10px;
+  overflow: visible;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  border: 2px solid transparent;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.visual-floating-img-card:hover {
+  border-color: rgba(99, 102, 241, 0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 12px rgba(99, 102, 241, 0.3);
+}
+
+.visual-floating-img-card.active {
+  border-color: #6366f1;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7), 0 0 18px rgba(99, 102, 241, 0.5);
+}
+
+.visual-floating-img-card.dragging {
+  cursor: grabbing !important;
+  opacity: 0.92;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(99, 102, 241, 0.6);
+  transform: scale(1.01);
+}
+
+.visual-floating-img-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+/* Nút xóa ảnh [✕] */
+.visual-img-btn-delete {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #ffffff;
+  border: 2px solid #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 30;
+}
+
+.visual-floating-img-card:hover .visual-img-btn-delete,
+.visual-floating-img-card.active .visual-img-btn-delete {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.visual-img-btn-delete:hover {
+  background: #dc2626;
+  transform: scale(1.15) !important;
+}
+
+/* 4 Núm Co Giãn Kích Thước (Resize Handles) ở 4 góc */
+.visual-resize-handle {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #6366f1;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 25;
+}
+
+.visual-floating-img-card:hover .visual-resize-handle,
+.visual-floating-img-card.active .visual-resize-handle {
+  opacity: 1;
+}
+
+.visual-resize-handle:hover {
+  transform: scale(1.3);
+  background: #38bdf8;
+}
+
+.visual-resize-handle.handle-nw {
+  top: -6px;
+  left: -6px;
+  cursor: nwse-resize;
+}
+
+.visual-resize-handle.handle-ne {
+  top: -6px;
+  right: -6px;
+  cursor: nesw-resize;
+}
+
+.visual-resize-handle.handle-se {
+  bottom: -6px;
+  right: -6px;
+  cursor: nwse-resize;
+}
+
+.visual-resize-handle.handle-sw {
+  bottom: -6px;
+  left: -6px;
+  cursor: nesw-resize;
+}
+
 /* Footer Action */
 .neural-notepad-footer {
   padding: 12px 20px;
@@ -1035,5 +1300,6 @@
     max-width: 100%;
   }
 }
+
 
 
