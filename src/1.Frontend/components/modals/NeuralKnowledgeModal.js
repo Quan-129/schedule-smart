@@ -5,6 +5,7 @@ import { state, getSubjectKnowledgeNodes, addNeuralNode } from '../../../3.Datab
 import { escapeHtml } from '../../../4.Security/sanitizer.js';
 import { NeuralCanvasEngine } from '../../views/neural/NeuralCanvasEngine.js';
 import { openEditNeuralNodeModal } from './EditNeuralNodeModal.js';
+import { openNeuralNotepadSidebar, closeNeuralNotepadSidebar } from './NeuralNotepadSidebar.js';
 
 // ==========================================================================
 // 2. TEMPLATES
@@ -82,6 +83,13 @@ function renderNeuralModalShell(subject) {
       <button type="button" class="neural-tool-btn" id="btn-neural-reset-zoom" title="Reset Zoom">
         <span>100%</span>
       </button>
+
+      <div class="neural-toolbar-separator"></div>
+
+      <button type="button" class="neural-tool-btn" id="btn-neural-open-notepad" title="Mở Bảng Notepad Markdown (50% bên phải)">
+        <i class="fa-solid fa-file-pen"></i>
+        <span>Ghi Chú (.md)</span>
+      </button>
     </div>
   `;
 }
@@ -137,6 +145,14 @@ export function openNeuralKnowledgeModal(subjectCode) {
           activeCanvasEngine.updateNodes(refreshed);
         }
       );
+    },
+    // Callback thêm con
+    null,
+    // Callback khi click icon ghi chú hoặc mở Notepad Sidepanel
+    (nodeWithNotes) => {
+      openNeuralNotepadSidebar(overlay, subjectCode, nodeWithNotes, () => {
+        activeCanvasEngine.updateNodes(getSubjectKnowledgeNodes(subjectCode));
+      });
     }
   );
 
@@ -155,6 +171,21 @@ export function openNeuralKnowledgeModal(subjectCode) {
 
   const resetZoomBtn = overlay.querySelector('#btn-neural-reset-zoom');
   resetZoomBtn.addEventListener('click', () => activeCanvasEngine.resetZoom());
+
+  // Nút mở Bảng Notepad Markdown (50% bên phải)
+  const openNotepadBtn = overlay.querySelector('#btn-neural-open-notepad');
+  if (openNotepadBtn) {
+    openNotepadBtn.addEventListener('click', () => {
+      const currentNodes = getSubjectKnowledgeNodes(subjectCode);
+      const targetId = activeCanvasEngine.selectedNodeId || currentNodes.find(n => n.parentId === null)?.id || currentNodes[0]?.id;
+      const targetNode = currentNodes.find(n => n.id === targetId);
+      if (targetNode) {
+        openNeuralNotepadSidebar(overlay, subjectCode, targetNode, () => {
+          activeCanvasEngine.updateNodes(getSubjectKnowledgeNodes(subjectCode));
+        });
+      }
+    });
+  }
 
   // Thêm nhánh con mới
   const addNodeBtn = overlay.querySelector('#btn-neural-add-node');
@@ -209,6 +240,7 @@ export function openNeuralKnowledgeModal(subjectCode) {
  * Đóng Modal Toàn Cảnh
  */
 export function closeNeuralKnowledgeModal() {
+  closeNeuralNotepadSidebar();
   if (activeCanvasEngine) {
     activeCanvasEngine.stop();
     activeCanvasEngine = null;

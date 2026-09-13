@@ -4,6 +4,37 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-13 20:15] - Triển Khai Bảng Notepad Markdown Chiếm 50% Bên Phải Kèm 4 Chức Năng Định Dạng Văn Bản 📝⚡
+
+- **🎯 Yêu cầu & Mục tiêu**:
+  - Chuyển trường ghi chú của node nơ-ron thành dạng văn bản Markdown (.md) phong phú.
+  - Khi mở ghi chú, hiển thị một **Bảng Notepad Markdown chiếm 50% bên phải màn hình** (giữ nguyên 50% bên trái là canvas nơ-ron).
+  - Tích hợp thanh công cụ 4 chức năng định dạng cốt lõi: **In đậm (Bold)**, **In nghiêng (Italic)**, **Gạch chân (Underline)**, và **Tô sáng (Highlight)**.
+  - Hỗ trợ 2 chế độ: **Soạn thảo Markdown** (kèm auto-wrap selection thông minh) và **Xem trước rich-text (Bảng notepad đã gen ra)** với kiểu dáng trang note học tập hiện đại.
+- **🛠 Triển khai kỹ thuật**:
+  1. **Bộ Phân Tích & Chuyển Đổi Markdown ([`src/2.Backend/utils/markdownRenderer.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/utils/markdownRenderer.js))**:
+     - Viết hàm thuần `renderMarkdownToHtml(rawMarkdown)`: Làm sạch qua `escapeHtml()` chống XSS, chuyển đổi:
+       - `==văn bản==` $\rightarrow$ `<mark class="neural-highlight">` (vàng dạ quang neon phát sáng).
+       - `<u>văn bản</u>` hoặc `--văn bản--` $\rightarrow$ `<span class="neural-underline">` (gạch chân xanh cyan thanh lịch).
+       - `**văn bản**` $\rightarrow$ `<strong>` (in đậm).
+       - `*văn bản*` $\rightarrow$ `<em>` (in nghiêng).
+       - Hỗ trợ thêm tiêu đề `#`, `##`, danh sách `- `, `* ` và code inline `` `code` ``.
+  2. **Component Notepad Sidepanel 50% ([`src/1.Frontend/components/modals/NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Thiết kế trượt ngang 50% bên phải màn hình, Deep Space Glassmorphism.
+     - 4 nút định dạng: **B**, *I*, <u>U</u>, 🖍 **HL**; hàm `applyFormat` tự động bọc vùng con trỏ / bôi đen trong textarea.
+     - 2 tab chuyển đổi: `[📝 Soạn thảo]` và `[👁 Xem trước đã gen]`.
+     - Tự động lưu (Auto-save debounce 1.2s) kèm nút Lưu thủ công đồng bộ tức thì vào `node.notes` và LocalStorage.
+  3. **Tích Hợp Vào Cây Kiến Thức ([`src/1.Frontend/components/modals/NeuralKnowledgeModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralKnowledgeModal.js))**:
+     - Thêm nút `[📝 Ghi Chú (.md)]` trên Floating Toolbar.
+     - Mở Notepad Sidebar trơn tru khi bấm nút toolbar hoặc click icon ghi chú trên node.
+  4. **Mini Notes Badge Trên Canvas ([`src/1.Frontend/views/neural/NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js))**:
+     - Vẽ thêm huy hiệu tròn tím `✎` ở góc dưới bên trái của node khi node có ghi chú. Bấm trực tiếp vào huy hiệu sẽ mở ngay bảng Notepad 50% bên phải.
+  5. **Nâng Cấp Modal Chỉnh Sửa Node ([`src/1.Frontend/components/modals/EditNeuralNodeModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/EditNeuralNodeModal.js))**:
+     - Chuyển input một dòng thành Textarea Markdown đa dòng kèm nút bấm nhanh `[📝 Mở Bảng Notepad (50% Phải) ↗]`.
+  6. **Modular CSS ([`src/1.Frontend/styles/13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Bổ sung toàn bộ style của sidebar 50%, font monospace cho editor và rich text cho preview.
+- **✨ Kết quả**: Người dùng vừa quan sát được cây kiến thức nơ-ron bên trái, vừa ghi chép và xem bảng notepad rich Markdown đã gen ra ở 50% bên phải cực kỳ chuyên nghiệp.
+
 ## 📅 [2026-09-13 19:45] - Bổ Sung Bảng 7 Màu Cơ Bản Tùy Chọn Cho Node Nơ-Ron 🎨🧠
 
 - **🎯 Yêu cầu & Mục tiêu**:

@@ -3,6 +3,7 @@
 // ==========================================================================
 import { escapeHtml } from '../../../4.Security/sanitizer.js';
 import { updateNeuralNode, deleteNeuralNode } from '../../../3.Database/state.js';
+import { openNeuralNotepadSidebar } from './NeuralNotepadSidebar.js';
 
 // ==========================================================================
 // 2. CONSTANTS
@@ -79,8 +80,13 @@ function renderEditModalTemplate(node) {
       </div>
 
       <div class="neural-form-group">
-        <label for="neural-input-notes">Ghi chú vắn tắt</label>
-        <input type="text" id="neural-input-notes" class="neural-input" value="${escapeHtml(node.notes || '')}" placeholder="Mẹo nhớ, trang tài liệu cần đọc kỹ...">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px;">
+          <label for="neural-input-notes">Ghi chú Markdown (.md)</label>
+          <button type="button" class="btn-open-full-notepad-link" id="btn-open-notepad-from-edit" style="background: none; border: none; color: #818cf8; font-size: 0.76rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+            <i class="fa-solid fa-file-pen"></i> Mở Bảng Notepad (50% Phải) ↗
+          </button>
+        </div>
+        <textarea id="neural-input-notes" class="neural-input" style="min-height: 75px; resize: vertical; font-family: 'JetBrains Mono', monospace;" placeholder="Nhập ghi chú hoặc Markdown:&#10;• **In đậm**  • *In nghiêng*&#10;• <u>Gạch chân</u>  • ==Highlight==">${escapeHtml(node.notes || '')}</textarea>
       </div>
 
       <div class="neural-editor-footer">
@@ -189,6 +195,30 @@ export function openEditNeuralNodeModal(subjectCode, node, onSavedCallback, onDe
     closeEditNeuralNodeModal();
     if (onSavedCallback) onSavedCallback(node.id, updates);
   });
+
+  // Mở trực tiếp Bảng Notepad (50% bên phải)
+  const openNotepadLink = overlay.querySelector('#btn-open-notepad-from-edit');
+  if (openNotepadLink) {
+    openNotepadLink.addEventListener('click', () => {
+      const newLabel = labelInput.value.trim() || node.label;
+      const updates = {
+        label: newLabel,
+        url: urlInput.value.trim(),
+        color: currentColor,
+        status: currentStatus,
+        notes: notesInput.value
+      };
+      updateNeuralNode(subjectCode, node.id, updates);
+      Object.assign(node, updates);
+
+      closeEditNeuralNodeModal();
+
+      const modalOverlay = document.querySelector('.neural-modal-overlay') || document.body;
+      openNeuralNotepadSidebar(modalOverlay, subjectCode, node, () => {
+        if (onSavedCallback) onSavedCallback(node.id, updates);
+      });
+    });
+  }
 
   // Delete Event (Two-Step Inline Confirmation)
   const deleteBtn = overlay.querySelector('#btn-delete-neural-node');

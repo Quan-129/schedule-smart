@@ -14,13 +14,14 @@ const PULSE_SPEED = 0.008;
 // 3. NEURAL CANVAS ENGINE CLASS
 // ==========================================================================
 export class NeuralCanvasEngine {
-  constructor(canvasElement, subjectCode, nodes, onNodeEditRequest, onNodeAddChild) {
+  constructor(canvasElement, subjectCode, nodes, onNodeEditRequest, onNodeAddChild, onOpenNotepad) {
     this.canvas = canvasElement;
     this.ctx = canvasElement.getContext('2d');
     this.subjectCode = subjectCode;
     this.nodes = Array.isArray(nodes) ? nodes : [];
     this.onNodeEditRequest = onNodeEditRequest;
     this.onNodeAddChild = onNodeAddChild;
+    this.onOpenNotepad = onOpenNotepad;
 
     // Viewport transform
     this.panX = 0;
@@ -278,6 +279,27 @@ export class NeuralCanvasEngine {
       ctx.fillText('↗', badgeX, badgeY);
     }
 
+    // 7. Mini Notes Badge (📝) on Bottom-Left if node has notes
+    if (node.notes && node.notes.trim()) {
+      const noteX = pos.x - radius * 0.7;
+      const noteY = pos.y + radius * 0.7;
+      const noteR = Math.max(7, 9.5 * this.zoom);
+
+      ctx.beginPath();
+      ctx.arc(noteX, noteY, noteR, 0, Math.PI * 2);
+      ctx.fillStyle = '#8b5cf6';
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.font = `${Math.max(7, 8.5 * this.zoom)}px sans-serif`;
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('✎', noteX, noteY);
+    }
+
     ctx.restore();
   }
 
@@ -333,14 +355,25 @@ export class NeuralCanvasEngine {
 
     const clickedNode = this.findNodeAt(sx, sy);
     if (clickedNode) {
-      // Check if clicked the URL badge on top-right of node
       const pos = this.worldToScreen(clickedNode.x, clickedNode.y);
       const radius = (clickedNode.parentId === null ? ROOT_RADIUS : NODE_RADIUS) * this.zoom;
+
+      // 1. Check if clicked the URL badge on top-right of node
       const badgeX = pos.x + radius * 0.7;
       const badgeY = pos.y - radius * 0.7;
       if (clickedNode.url && Math.hypot(sx - badgeX, sy - badgeY) <= 14 * this.zoom) {
         window.open(clickedNode.url, '_blank');
         return;
+      }
+
+      // 2. Check if clicked the Notes badge on bottom-left
+      const noteX = pos.x - radius * 0.7;
+      const noteY = pos.y + radius * 0.7;
+      if (clickedNode.notes && Math.hypot(sx - noteX, sy - noteY) <= 14 * this.zoom) {
+        if (this.onOpenNotepad) {
+          this.onOpenNotepad(clickedNode);
+          return;
+        }
       }
 
       this.isDraggingNode = true;
