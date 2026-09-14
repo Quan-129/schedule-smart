@@ -10,6 +10,43 @@ const NODE_RADIUS = 26;
 const ROOT_RADIUS = 34;
 const PULSE_SPEED = 0.008;
 
+/**
+ * Kiểm tra xem node có chứa nội dung (ở phần Soạn thảo hoặc phần Ghi chú) hay không
+ * @param {Object} node 
+ * @returns {boolean}
+ */
+export function nodeHasAnyNotes(node) {
+  if (!node) return false;
+
+  // 1. Kiểm tra phần Soạn thảo (Markdown notes)
+  if (typeof node.notes === 'string' && node.notes.trim().length > 0) {
+    return true;
+  }
+
+  // 2. Kiểm tra phần Ghi chú (Visual notes: html & ảnh nổi)
+  if (node.visualNotes) {
+    if (typeof node.visualNotes === 'string' && node.visualNotes.trim().length > 0) {
+      return true;
+    }
+    if (typeof node.visualNotes === 'object') {
+      if (Array.isArray(node.visualNotes.images) && node.visualNotes.images.length > 0) {
+        return true;
+      }
+      if (typeof node.visualNotes.html === 'string' && node.visualNotes.html.trim().length > 0) {
+        const textOnly = node.visualNotes.html
+          .replace(/<[^>]*>/g, '')
+          .replace(/&nbsp;/g, ' ')
+          .trim();
+        if (textOnly.length > 0) return true;
+        if (/<img\b/i.test(node.visualNotes.html)) return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+
 // ==========================================================================
 // 3. NEURAL CANVAS ENGINE CLASS
 // ==========================================================================
@@ -279,8 +316,8 @@ export class NeuralCanvasEngine {
       ctx.fillText('↗', badgeX, badgeY);
     }
 
-    // 7. Mini Notes Badge (📝) on Bottom-Left if node has notes
-    if (node.notes && node.notes.trim()) {
+    // 7. Mini Notes Badge (📝) on Bottom-Left if node has notes (cả Soạn thảo và Ghi chú)
+    if (nodeHasAnyNotes(node)) {
       const noteX = pos.x - radius * 0.7;
       const noteY = pos.y + radius * 0.7;
       const noteR = Math.max(7, 9.5 * this.zoom);
@@ -369,7 +406,7 @@ export class NeuralCanvasEngine {
       // 2. Check if clicked the Notes badge on bottom-left
       const noteX = pos.x - radius * 0.7;
       const noteY = pos.y + radius * 0.7;
-      if (clickedNode.notes && Math.hypot(sx - noteX, sy - noteY) <= 14 * this.zoom) {
+      if (nodeHasAnyNotes(clickedNode) && Math.hypot(sx - noteX, sy - noteY) <= 14 * this.zoom) {
         if (this.onOpenNotepad) {
           this.onOpenNotepad(clickedNode);
           return;

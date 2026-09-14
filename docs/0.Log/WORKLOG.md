@@ -4,6 +4,26 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-14 20:35] - Đồng Bộ Hiển Thị Biểu Tượng Cây Bút (✎) Ngoài Node Cây Kiến Thức Khi Phần Ghi Chú Có Nội Dung 🧠✏️
+
+- **🎯 Yêu cầu từ người dùng**: *"hiện tại ở cây kiến thức tại 1 node chỉ khi sửa phần soạn thảo nó mới hiện cây bút, giờ t muốn khi phần ghi chú thay đổi cũng hiên cây bút ngoài node luôn bạn hiểu không"*.
+  - Trước đây, chỉ khi node có nội dung trong tab **"Soạn thảo"** (Markdown text `node.notes`), trên canvas Cây Kiến Thức mới vẽ badge cây bút màu tím `✎` ở góc dưới bên trái của node.
+  - Nếu người dùng nhập nội dung hoặc chèn ảnh nổi ở tab **"Ghi chú"** (`node.visualNotes`), node ngoài canvas vẫn không xuất hiện cây bút, khiến người dùng không biết node đó đã có ghi chú.
+- **🛠 Triển khai kỹ thuật ([`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js), [`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Định Nghĩa Helper [`nodeHasAnyNotes`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js)**:
+     - Kiểm tra toàn diện cả 2 nguồn ghi chú của một node:
+       * **Phần Soạn thảo**: `node.notes` (Markdown text).
+       * **Phần Ghi chú tự do (Visual Notes)**: Kiểm tra `node.visualNotes`, bao gồm cả văn bản HTML đã loại bỏ thẻ/khoảng trắng (`node.visualNotes.html`), thẻ hình ảnh inline (`<img`), và mảng sticker ảnh nổi kéo thả (`node.visualNotes.images.length > 0`).
+  2. **Đồng Bộ Vẽ & Tương Tác Canvas ([`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js))**:
+     - Cập nhật hàm vẽ `drawNode`: Badge cây bút `✎` viền tím `#8b5cf6` sẽ xuất hiện ngay lập tức nếu node có bất kỳ nội dung nào ở phần Soạn thảo hoặc phần Ghi chú (`nodeHasAnyNotes(node)`).
+     - Cập nhật hàm xử lý click `handleMouseDown`: Cho phép người dùng chạm/click thẳng vào badge cây bút `✎` ngoài canvas để mở ngay bảng Notepad của node đó.
+  3. **Thông Minh Hóa Tab Mặc Định Khi Mở Notepad ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Nếu node chỉ có nội dung ở phần Ghi chú (`visualNotes`) mà chưa có nội dung Soạn thảo (`notes`), hệ thống tự động mở sẵn tab **"Ghi chú"** (kèm hiển thị đúng toolbar và nội dung visual) thay vì mở vào tab Soạn thảo trống.
+  4. **Nâng Cấp Service Worker Cache v128 ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Cập nhật `CACHE_NAME = 'smart-schedule-modular-v128'` để tự động làm mới tài nguyên tĩnh.
+- **✅ Kết quả**: Node trên Cây Kiến Thức nơ-ron luôn phản ánh chính xác trạng thái có ghi chú, dù người dùng ghi chép bằng Markdown ở tab Soạn thảo hay ghi chép/chèn ảnh ở tab Ghi chú tự do!
+
+
 ## 📅 [2026-09-14 08:35] - Nâng Cấp Toàn Diện Nút Tắt Modal Thư Mục (Apple iOS Circular Glassmorphism & Red Glow Hover) 🎨✨
 
 - **🎯 Yêu cầu từ người dùng**: *"nút tắt đang hơi xấu chỉnh lại"*.

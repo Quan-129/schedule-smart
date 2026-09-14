@@ -167,9 +167,20 @@ function renderNotepadTemplate(node) {
   const notes = node.notes || '';
   const hasNotes = Boolean(notes && notes.trim());
   const renderedHtml = renderMarkdownToHtml(notes);
-  const defaultTab = hasNotes ? 'preview' : 'edit';
   const visualNotes = node.visualNotes || { html: '', images: [] };
   const initialVisualHtml = visualNotes.html || '';
+  const hasVisualNotes = Boolean(
+    (Array.isArray(visualNotes.images) && visualNotes.images.length > 0) ||
+    (typeof visualNotes.html === 'string' && visualNotes.html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim().length > 0) ||
+    (typeof visualNotes === 'string' && visualNotes.trim().length > 0)
+  );
+
+  let defaultTab = 'edit';
+  if (hasNotes) {
+    defaultTab = 'preview';
+  } else if (hasVisualNotes) {
+    defaultTab = 'visual';
+  }
 
   return `
     <div class="neural-notepad-header">
@@ -187,7 +198,7 @@ function renderNotepadTemplate(node) {
           <button type="button" class="neural-np-tab ${defaultTab === 'edit' ? 'active' : ''}" data-tab="edit" title="Soạn thảo Markdown">
             <i class="fa-solid fa-pen-to-square"></i> Soạn thảo
           </button>
-          <button type="button" class="neural-np-tab" data-tab="visual" title="Ghi chú tự do & chèn ảnh nổi đè lên">
+          <button type="button" class="neural-np-tab ${defaultTab === 'visual' ? 'active' : ''}" data-tab="visual" title="Ghi chú tự do & chèn ảnh nổi đè lên">
             <i class="fa-solid fa-paintbrush"></i> Ghi chú
           </button>
         </div>
@@ -198,7 +209,7 @@ function renderNotepadTemplate(node) {
     </div>
 
     <!-- Toolbar 1: Dành cho Markdown (Preview & Soạn thảo) -->
-    <div class="neural-notepad-toolbar" id="neural-notepad-toolbar">
+    <div class="neural-notepad-toolbar" id="neural-notepad-toolbar" style="${defaultTab === 'visual' ? 'display: none;' : ''}">
       <div class="neural-np-tools-group">
         <button type="button" class="neural-np-tool-btn" id="btn-hist-undo" title="Hoàn tác (Ctrl+Z)" disabled>
           <i class="fa-solid fa-rotate-left"></i>
@@ -231,7 +242,7 @@ function renderNotepadTemplate(node) {
     <!-- Body Container: 3 Panes (Edit, Preview, Visual) -->
     <div class="neural-notepad-body" id="neural-notepad-body-container" data-view-mode="${defaultTab}">
       <!-- 1. Textarea Soạn thảo Markdown -->
-      <div class="neural-np-pane ${defaultTab === 'preview' ? 'hidden' : ''}" id="neural-np-edit-pane">
+      <div class="neural-np-pane ${defaultTab === 'edit' ? '' : 'hidden'}" id="neural-np-edit-pane">
         <textarea 
           id="neural-notepad-textarea" 
           class="neural-notepad-textarea" 
@@ -240,7 +251,7 @@ function renderNotepadTemplate(node) {
       </div>
 
       <!-- 2. Bảng Notepad Đã Gen Ra (Rich Preview) -->
-      <div class="neural-np-pane ${defaultTab === 'edit' ? 'hidden' : ''}" id="neural-np-preview-pane">
+      <div class="neural-np-pane ${defaultTab === 'preview' ? '' : 'hidden'}" id="neural-np-preview-pane">
         <div class="neural-notepad-rendered-content" id="neural-notepad-preview-content">
           ${renderedHtml}
         </div>
@@ -250,7 +261,7 @@ function renderNotepadTemplate(node) {
       </div>
 
       <!-- 3. Pane Ghi Chú Tự Do Đa Tầng (Visual Canvas Note & Overlay Floating Images) -->
-      <div class="neural-np-pane hidden" id="neural-np-visual-pane">
+      <div class="neural-np-pane ${defaultTab === 'visual' ? '' : 'hidden'}" id="neural-np-visual-pane">
         <!-- Toolbar riêng cho tab Ghi Chú -->
         <div class="neural-visual-toolbar" id="neural-visual-toolbar">
           <button type="button" class="neural-np-tool-btn" id="btn-vis-undo" title="Hoàn tác (Ctrl+Z)">
