@@ -2,7 +2,7 @@
 // 1. IMPORTS
 // ==========================================================================
 import { escapeHtml } from '../../../4.Security/sanitizer.js';
-import { generateQuizFromNodeKnowledge, getGeminiApiKey, setGeminiApiKey } from '../../../2.Backend/services/GeminiAIService.js';
+import { generateQuizFromNodeKnowledge, getGeminiApiKey, setGeminiApiKey, validateGeminiApiKey } from '../../../2.Backend/services/GeminiAIService.js';
 import { saveNeuralNodeQuiz } from '../../../3.Database/state.js';
 
 // ==========================================================================
@@ -94,12 +94,19 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
               <i class="fa-regular fa-eye"></i>
             </button>
           </div>
+
+          <!-- Thông báo phản hồi trạng thái kiểm tra Key -->
+          <div class="neural-quiz-key-status-box" id="neural-quiz-key-status" style="display: none;"></div>
+
           <div class="neural-quiz-key-dialog-actions">
             <button type="button" class="btn-neural-key-save" id="btn-save-key-submit">
-              <i class="fa-solid fa-check"></i> Lưu & Sinh Câu Hỏi
+              <i class="fa-solid fa-check"></i> Lưu & Kích Hoạt
             </button>
-            <button type="button" class="btn-neural-key-clear" id="btn-clear-key-submit">
-              <i class="fa-solid fa-trash-can"></i> Xóa Key (Dùng Demo)
+            <button type="button" class="btn-neural-key-test" id="btn-test-key-submit" title="Kiểm tra kết nối tới Google trước khi lưu">
+              <i class="fa-solid fa-vial-circle-check"></i> Kiểm Tra
+            </button>
+            <button type="button" class="btn-neural-key-clear" id="btn-clear-key-submit" title="Xóa Key để dùng câu hỏi mẫu mô phỏng">
+              <i class="fa-solid fa-trash-can"></i> Xóa
             </button>
           </div>
         </div>
@@ -192,10 +199,37 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
       `;
     }).join('');
 
+    // Cảnh báo nếu API Key bị từ chối
+    const apiWarningHtml = quiz.apiError ? `
+      <div class="neural-quiz-api-alert">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <div class="neural-quiz-api-alert-text">
+          <div class="neural-quiz-api-alert-title">API Key không hợp lệ hoặc lỗi kết nối:</div>
+          <div class="neural-quiz-api-alert-desc">${escapeHtml(quiz.apiError)}</div>
+          <div class="neural-quiz-api-alert-sub">Hệ thống đã tự động chuyển sang chế độ <strong>Mô phỏng Demo</strong>. Bấm nút "Nhập API Key" bên dưới để kiểm tra lại Key của bạn.</div>
+        </div>
+      </div>
+    ` : '';
+
+    const engineBadgeHtml = quiz.isAiGenerated ? `
+      <span class="neural-quiz-engine-badge live" title="Được sinh trực tiếp bởi Google Gemini 1.5 Flash">
+        <i class="fa-solid fa-sparkles"></i> Gemini AI (Trực tiếp)
+      </span>
+    ` : `
+      <span class="neural-quiz-engine-badge demo" title="Đang chạy bằng bộ tạo câu hỏi mô phỏng Fallback">
+        <i class="fa-solid fa-microchip"></i> Mô Phỏng Demo
+      </span>
+    `;
+
     bodyEl.innerHTML = `
+      ${apiWarningHtml}
+
       <div class="neural-quiz-question-box">
-        <div class="neural-quiz-q-tag">
-          <i class="fa-solid fa-circle-question"></i> Câu Hỏi Trắc Nghiệm Tình Huống
+        <div class="neural-quiz-q-meta">
+          <div class="neural-quiz-q-tag">
+            <i class="fa-solid fa-circle-question"></i> Câu Hỏi Trắc Nghiệm Tình Huống
+          </div>
+          ${engineBadgeHtml}
         </div>
         <p class="neural-quiz-q-text">${escapeHtml(quiz.question)}</p>
       </div>
@@ -297,16 +331,34 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
   const keyInput = overlay.querySelector('#input-gemini-api-key');
   const toggleVisibilityBtn = overlay.querySelector('#btn-toggle-key-visibility');
   const saveKeyBtn = overlay.querySelector('#btn-save-key-submit');
+  const testKeyBtn = overlay.querySelector('#btn-test-key-submit');
   const clearKeyBtn = overlay.querySelector('#btn-clear-key-submit');
   const keyLabel = overlay.querySelector('#quiz-key-status-label');
+  const statusBox = overlay.querySelector('#neural-quiz-key-status');
+
+  const showKeyStatus = (type, message) => {
+    if (!statusBox) return;
+    statusBox.style.display = 'block';
+    statusBox.className = `neural-quiz-key-status-box ${type}`;
+    statusBox.innerHTML = message;
+  };
+
+  const hideKeyStatus = () => {
+    if (statusBox) {
+      statusBox.style.display = 'none';
+      statusBox.innerHTML = '';
+    }
+  };
 
   const openKeyDialog = () => {
     keyInput.value = getGeminiApiKey() || '';
+    hideKeyStatus();
     keyDialog.style.display = 'flex';
     requestAnimationFrame(() => keyInput.focus());
   };
 
   const closeKeyDialog = () => {
+    hideKeyStatus();
     keyDialog.style.display = 'none';
   };
 
@@ -328,13 +380,68 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
     }
   });
 
-  saveKeyBtn.addEventListener('click', () => {
+  // Nút Kiểm tra Key
+  if (testKeyBtn) {
+    testKeyBtn.addEventListener('click', async () => {
+      const val = keyInput.value.trim();
+      if (!val) {
+        showKeyStatus('warning', '<i class="fa-solid fa-triangle-exclamation"></i> Vui lòng dán API Key vào ô bên trên để kiểm tra.');
+        return;
+      }
+      testKeyBtn.disabled = true;
+      testKeyBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang test...';
+      showKeyStatus('info', '<i class="fa-solid fa-spinner fa-spin"></i> Đang kết nối tới Google AI Studio...');
+
+      const result = await validateGeminiApiKey(val);
+      testKeyBtn.disabled = false;
+      testKeyBtn.innerHTML = '<i class="fa-solid fa-vial-circle-check"></i> Kiểm Tra';
+
+      if (result.valid) {
+        showKeyStatus('success', `<i class="fa-solid fa-circle-check"></i> <strong>Chính xác!</strong> ${escapeHtml(result.message)}`);
+      } else {
+        showKeyStatus('error', `<i class="fa-solid fa-circle-xmark"></i> <strong>Key không hoạt động:</strong> ${escapeHtml(result.message)}`);
+      }
+    });
+  }
+
+  // Nút Lưu & Kích hoạt Key
+  saveKeyBtn.addEventListener('click', async () => {
     const val = keyInput.value.trim();
+
+    // Nếu để trống -> xóa key và dùng Demo
+    if (!val) {
+      setGeminiApiKey('');
+      if (keyLabel) keyLabel.textContent = 'Nhập API Key';
+      closeKeyDialog();
+      attemptIndex = 0;
+      loadQuiz();
+      return;
+    }
+
+    // Kiểm tra tính hợp lệ của Key với Google trước khi lưu
+    saveKeyBtn.disabled = true;
+    saveKeyBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xác thực...';
+    showKeyStatus('info', '<i class="fa-solid fa-spinner fa-spin"></i> Đang xác thực với Google AI Studio...');
+
+    const result = await validateGeminiApiKey(val);
+    saveKeyBtn.disabled = false;
+    saveKeyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Lưu & Kích Hoạt';
+
+    if (!result.valid) {
+      showKeyStatus('error', `<i class="fa-solid fa-circle-xmark"></i> <strong>Không thể kích hoạt:</strong> ${escapeHtml(result.message)}<br><small style="opacity: 0.85;">Vui lòng kiểm tra lại Key đã copy từ Google AI Studio, hoặc bấm "Xóa" để dùng chế độ Demo.</small>`);
+      return;
+    }
+
+    // Key hợp lệ -> Lưu và kích hoạt
     setGeminiApiKey(val);
-    if (keyLabel) keyLabel.textContent = val ? 'Đã có Key' : 'Nhập API Key';
-    closeKeyDialog();
-    attemptIndex = 0;
-    loadQuiz();
+    if (keyLabel) keyLabel.textContent = 'Gemini AI: Đã kết nối';
+    showKeyStatus('success', '<i class="fa-solid fa-circle-check"></i> <strong>Thành công!</strong> Đang nạp câu hỏi từ Gemini 1.5 Flash...');
+
+    setTimeout(() => {
+      closeKeyDialog();
+      attemptIndex = 0;
+      loadQuiz();
+    }, 600);
   });
 
   clearKeyBtn.addEventListener('click', () => {

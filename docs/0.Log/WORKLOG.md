@@ -4,6 +4,29 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-14 22:20] - Thêm Xác Thực Google Gemini API Key Trực Tiếp, Phân Biệt Nguồn Câu Hỏi & Cảnh Báo Key Lỗi 🛡️🔍✨
+
+- **🎯 Yêu cầu từ người dùng**: *"làm sao để biết api key dã đúng và hoạt động tôi nhập bừa thấy nó vẫn nhận kìa"*.
+  - **Nguyên nhân**: Khi người dùng nhập bừa key, request gọi tới Gemini API trả về lỗi HTTP 400 (`API_KEY_INVALID`). Trước đó hệ thống tự động bắt lỗi và âm thầm fallback về bộ sinh câu hỏi mô phỏng của app mà không hiển thị cảnh báo, khiến người dùng hiểu lầm rằng key nhập bừa cũng được chấp nhận.
+- **🛠 Triển khai kỹ thuật ([`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js), [`NeuralQuizModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralQuizModal.js), [`14.neural-quiz.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/14.neural-quiz.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Hàm Xác Thực Trực Tiếp Với Google ([`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js))**:
+     - Viết hàm `validateGeminiApiKey(key)` gọi GET nhẹ tới endpoint chính thức `models/gemini-1.5-flash?key=...` để kiểm tra tức thì xem key có hợp lệ không (không tốn token gen).
+     - Phân tích và chuyển đổi mã lỗi Google thành thông điệp Tiếng Việt dễ hiểu (ví dụ: Key không hợp lệ, Vượt quá hạn mức quota).
+     - Gắn trường `fallback.apiError` khi Gemini API bị từ chối.
+  2. **Nút "Kiểm Tra" & Chặn Lưu Key Sai ([`NeuralQuizModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralQuizModal.js))**:
+     - Bổ sung nút **"Kiểm Tra"** ngay trong Dialog để người dùng test kết nối tới Google trước khi lưu.
+     - Khi bấm **"Lưu & Kích Hoạt"**: Hệ thống tự động xác thực với Google. Nếu key sai, hiển thị thông báo lỗi màu đỏ rõ ràng và KHÔNG đóng dialog để người dùng sửa lại. Nếu key chuẩn, hiển thị tích xanh và kích hoạt AI ngay lập tức.
+  3. **Huy Hiệu Nguồn Câu Hỏi & Banner Cảnh Báo Trực Quan ([`NeuralQuizModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralQuizModal.js), [`14.neural-quiz.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/14.neural-quiz.css))**:
+     - Phân biệt rõ nguồn gốc câu hỏi trên từng bài kiểm tra:
+       * Huy hiệu tím phát sáng: `✨ Gemini AI (Trực tiếp)` khi sinh từ Google Gemini thật.
+       * Huy hiệu xám: `⚙️ Mô Phỏng Demo` khi đang dùng câu hỏi mô phỏng.
+     - Banner cảnh báo màu đỏ xuất hiện ngay đầu câu hỏi nếu API Key bị Google từ chối, giải thích rõ nguyên nhân để người dùng nhận biết ngay lập tức.
+  4. **Nâng Cấp Service Worker Cache v133 ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Nâng lên `smart-schedule-modular-v133`.
+- **✅ Kết quả**: Người dùng nhập bừa key sẽ bị hệ thống báo lỗi đỏ ngay lập tức và không thể lưu nhầm. Khi nhập key chuẩn, hệ thống xác thực thành công và hiển thị rõ huy hiệu `Gemini AI (Trực tiếp)`!
+
+
+
 ## 📅 [2026-09-14 21:55] - Nâng Cấp Custom Dialog Nhập Gemini API Key & Nút Liên Kết 1-Click Đến Google AI Studio 🔑⚡🌐
 
 - **🎯 Yêu cầu từ người dùng**: *"hiện tại bấm vào nhập key API không chuyện gì xảy ra, để tiện khi bấm nhập aip chuyển ngay tới link chứa api được không"*.

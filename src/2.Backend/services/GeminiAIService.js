@@ -29,6 +29,35 @@ export function setGeminiApiKey(key) {
   }
 }
 
+/**
+ * Kiểm tra tính hợp lệ và trạng thái kết nối của Google Gemini API Key
+ * @param {string} key - API Key cần kiểm tra
+ * @returns {Promise<{ valid: boolean, message: string }>}
+ */
+export async function validateGeminiApiKey(key) {
+  if (!key || !key.trim()) {
+    return { valid: false, message: 'Vui lòng nhập API Key trước khi kiểm tra.' };
+  }
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${DEFAULT_MODEL}?key=${encodeURIComponent(key.trim())}`;
+    const res = await fetch(url);
+    if (res.ok) {
+      return { valid: true, message: 'Kết nối thành công! Gemini 1.5 Flash đã sẵn sàng hoạt động.' };
+    }
+    const errData = await res.json().catch(() => ({}));
+    const rawMsg = errData.error?.message || `Lỗi HTTP ${res.status}`;
+    let friendlyMsg = rawMsg;
+    if (rawMsg.includes('API key not valid')) {
+      friendlyMsg = 'API Key không hợp lệ! Vui lòng kiểm tra lại ký tự copy từ Google AI Studio.';
+    } else if (rawMsg.includes('Quota exceeded') || rawMsg.includes('RESOURCE_EXHAUSTED')) {
+      friendlyMsg = 'API Key đã vượt quá hạn mức truy vấn miễn phí của Google trong phút này.';
+    }
+    return { valid: false, message: friendlyMsg };
+  } catch (err) {
+    return { valid: false, message: `Không thể kết nối tới Google: ${err.message}` };
+  }
+}
+
 // ==========================================================================
 // 3. AI GENERATION ENGINE
 // ==========================================================================
@@ -107,7 +136,9 @@ Cấu trúc JSON bắt buộc:
       const errData = await response.json().catch(() => ({}));
       const errMsg = errData.error?.message || `HTTP ${response.status}`;
       console.warn('Gemini API Error:', errMsg);
-      return generateFallbackQuiz(nodeLabel, notesContent, `error_${errMsg}`, attemptIndex);
+      const fallback = generateFallbackQuiz(nodeLabel, notesContent, `error_${errMsg}`, attemptIndex);
+      fallback.apiError = errMsg;
+      return fallback;
     }
 
     const data = await response.json();
@@ -127,7 +158,9 @@ Cấu trúc JSON bắt buộc:
     return parsed;
   } catch (error) {
     console.error('Lỗi khi gọi Gemini API:', error);
-    return generateFallbackQuiz(nodeLabel, notesContent, `catch_${error.message}`, attemptIndex);
+    const fallback = generateFallbackQuiz(nodeLabel, notesContent, `catch_${error.message}`, attemptIndex);
+    fallback.apiError = error.message;
+    return fallback;
   }
 }
 
