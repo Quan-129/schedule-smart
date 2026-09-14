@@ -823,3 +823,97 @@
   color: #cbd5e1;
   font-size: 0.78rem;
 }
+
+/* 11. Ancestry Breadcrumb Bar */
+.neural-quiz-breadcrumb-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px;
+  background: rgba(15, 23, 42, 0.65);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 12px;
+  font-size: 0.8rem;
+}
+
+.neural-quiz-breadcrumb-track {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  flex: 1;
+}
+
+.neural-quiz-breadcrumb-track::-webkit-scrollbar {
+  display: none;
+}
+
+.neural-quiz-breadcrumb-icon {
+  color: #8b5cf6;
+  font-size: 0.82rem;
+  margin-right: 2px;
+}
+
+.neural-quiz-crumb {
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.neural-quiz-crumb.target {
+  color: #f59e0b;
+  font-weight: 700;
+  background: rgba(245, 158, 11, 0.12);
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  max-width: 200px;
+}
+
+.neural-quiz-crumb-sep {
+  color: #475569;
+  font-size: 0.65rem;
+}
+
+.neural-quiz-breadcrumb-badge {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #c084fc;
+  background: rgba(192, 132, 252, 0.12);
+  border: 1px solid rgba(192, 132, 252, 0.25);
+  padding: 2px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.neural-quiz-meta-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.neural-quiz-ancestry-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}

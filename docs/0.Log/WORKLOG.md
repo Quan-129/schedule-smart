@@ -4,6 +4,30 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-15 00:10] - Ra Mắt Tính Năng Backtracking Phả Hệ Tri Thức Nơ-ron & Kích Hoạt Khảo Hạch AI Tại Mọi Node 🌿🧠🎯
+
+- **🎯 Yêu cầu từ người dùng**: *"đó là những node có tài liệu thì tự động hiện như vậy nhưng tôi muốn có thêm tùy chọn để tạo gen câu hỏi ai đấy tại node bất kỳ nữa, tra cứu theo câu ví vụ tại node con thứ tư thì tra ngược lên node 3 , 2, 1, node gốc để hiểu ngữ cảnh để gen cho đúng, với lại các node hiện tại đang có chức năng gen đó cũng theo tư duy đó backtracking 4, 3,2,1, gốc kèm ghi chú để hiêu ngữ cảnh chính xác nhất để gen..."*
+- **🛠 Triển khai kỹ thuật ([`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js), [`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js), [`NeuralQuizModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralQuizModal.js), [`14.neural-quiz.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/14.neural-quiz.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Thuật toán Backtracking Phả Hệ Tri Thức ([`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js))**:
+     - Xây dựng hàm `traceNodeAncestryPath(allNodes, targetNode)`: Truy ngược từ Target Node lên qua `parentId` (Target ➔ Node Cha ➔ Node Ông ➔ ... ➔ Node Gốc).
+     - Trích xuất 2 luồng dữ liệu ngữ cảnh:
+       * Chuỗi định danh Breadcrumb phả hệ: `Root ➔ Cấp 1 ➔ Cấp 2 ➔ Target Node`.
+       * Ngữ cảnh tri thức tích lũy (Cumulative Context): Gom toàn bộ ghi chú của mọi node tổ tiên trên nhánh, phân tầng rõ ràng theo vai trò.
+     - Cập nhật Prompt Gemini 2.5 Flash: Nạp toàn bộ vị trí phân cấp và bối cảnh lý thuyết cấp trên, chỉ dẫn AI bám sát khái niệm mục tiêu và liên hệ mật thiết với bức tranh tổng thể cấp trên. Kể cả node mục tiêu chưa có ghi chú riêng, AI vẫn sinh câu hỏi cực kỳ chính xác và thực chiến dựa trên ngữ cảnh tổ tiên!
+  2. **Kích Hoạt Huy Hiệu Khảo Hạch AI Tại MỌI NODE BẤT KỲ ([`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js))**:
+     - Badge `✨` được vẽ trên **toàn bộ các node**:
+       * Node có ghi chú: Badge `✨` vàng cam rực rỡ (`#f59e0b`).
+       * Node chưa có ghi chú riêng: Badge `✨` tím nơ-ron (`#8b5cf6`), đại diện cho khảo hạch tích hợp theo ngữ cảnh phả hệ.
+     - Bấm vào góc Bottom-Right của bất kỳ node nào đều mở ngay popup Khảo Hạch AI.
+  3. **Thanh Điều Hướng Breadcrumb Phả Hệ Trên Modal ([`NeuralQuizModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralQuizModal.js), [`14.neural-quiz.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/14.neural-quiz.css))**:
+     - Hiển thị thanh dẫn đường phả hệ `Quản trị dự án ❯ EVM ❯ 🎯 CPI` kèm huy hiệu cấp độ sâu (`Cấp 4`).
+     - Gắn thẻ huy hiệu `Phả hệ N tầng` cạnh tên model AI trên từng bài trắc nghiệm.
+  4. **Nâng Cấp Service Worker Cache v135 ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Cập nhật lên `smart-schedule-modular-v135`.
+- **✅ Kết quả**: Mọi node đều có thể tạo câu hỏi trắc nghiệm thông minh, tận dụng toàn bộ ngữ cảnh tri thức từ ngọn đến gốc!
+
+
+
 ## 📅 [2026-09-14 22:35] - Khắc Phục Lỗi "Model Not Found", Nâng Cấp Lên Gemini 2.5 Flash & Tự Động Xoay Vòng Model 🚀⚡💡
 
 - **🎯 Yêu cầu từ người dùng**: *"AQ.Ab8RN6... (Google AI Studio Key) sao key này bị lỗi này"* (Kèm ảnh chụp lỗi: `Model is not found: models/gemini-1.5-flash for api version v1beta`).

@@ -2,8 +2,8 @@
 // 1. IMPORTS
 // ==========================================================================
 import { escapeHtml } from '../../../4.Security/sanitizer.js';
-import { generateQuizFromNodeKnowledge, getGeminiApiKey, setGeminiApiKey, validateGeminiApiKey } from '../../../2.Backend/services/GeminiAIService.js';
-import { saveNeuralNodeQuiz } from '../../../3.Database/state.js';
+import { generateQuizFromNodeKnowledge, getGeminiApiKey, setGeminiApiKey, validateGeminiApiKey, traceNodeAncestryPath } from '../../../2.Backend/services/GeminiAIService.js';
+import { saveNeuralNodeQuiz, getSubjectKnowledgeNodes } from '../../../3.Database/state.js';
 
 // ==========================================================================
 // 2. STATE & CONTROLLER
@@ -17,8 +17,14 @@ let currentQuizModalEl = null;
  * @param {Object} node - Node nơ-ron đang kiểm tra kiến thức
  * @param {Function} onSavedCallback - Callback khi câu hỏi được lưu
  */
-export async function openNeuralQuizModal(parentContainer, subjectCode, node, onSavedCallback) {
+export async function openNeuralQuizModal(parentContainer, subjectCode, node, onSavedCallback, allNodesOverride = null) {
   closeNeuralQuizModal();
+
+  const allNodes = Array.isArray(allNodesOverride) && allNodesOverride.length > 0
+    ? allNodesOverride
+    : (getSubjectKnowledgeNodes(subjectCode) || []);
+
+  const ancestry = traceNodeAncestryPath(allNodes, node);
 
   const overlay = document.createElement('div');
   overlay.className = 'neural-quiz-overlay';
@@ -35,7 +41,7 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
             <h3 class="neural-quiz-title">
               <span>Khảo Hạch AI: ${escapeHtml(node.label || 'Khái Niệm')}</span>
             </h3>
-            <p class="neural-quiz-subtitle">Trắc nghiệm Active Recall • Chẩn đoán bẫy tư duy • Đúc kết quy tắc</p>
+            <p class="neural-quiz-subtitle">Trắc nghiệm Active Recall • Truy vết phả hệ nơ-ron • Bóc tách bẫy tư duy</p>
           </div>
         </div>
         <button type="button" class="neural-quiz-close-btn" id="btn-close-neural-quiz" title="Đóng">
@@ -43,11 +49,30 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
         </button>
       </div>
 
+      <!-- Thanh Breadcrumb Phả Hệ Tri Thức Nơ-ron -->
+      <div class="neural-quiz-breadcrumb-bar">
+        <div class="neural-quiz-breadcrumb-track">
+          <span class="neural-quiz-breadcrumb-icon" title="Cây phả hệ tri thức"><i class="fa-solid fa-sitemap"></i></span>
+          ${ancestry.breadcrumbList.map((item, idx) => {
+            const isTarget = idx === ancestry.breadcrumbList.length - 1;
+            return `
+              <span class="neural-quiz-crumb ${isTarget ? 'target' : ''}" title="${escapeHtml(item)}">
+                ${isTarget ? '<i class="fa-solid fa-bullseye"></i> ' : ''}${escapeHtml(item)}
+              </span>
+              ${!isTarget ? '<span class="neural-quiz-crumb-sep">❯</span>' : ''}
+            `;
+          }).join('')}
+        </div>
+        <div class="neural-quiz-breadcrumb-badge" title="Độ sâu tầng nơ-ron liên kết">
+          <i class="fa-solid fa-layer-group"></i> Cấp ${ancestry.ancestryPath.length}
+        </div>
+      </div>
+
       <div class="neural-quiz-body" id="neural-quiz-body">
         <div class="neural-quiz-loading-state">
           <div class="neural-quiz-spinner"></div>
-          <div class="neural-quiz-loading-text">AI đang phân tích tri thức ghi chú...</div>
-          <div class="neural-quiz-loading-hint">Hệ thống đang bóc tách bản chất, tạo lập các phương án nhiễu và thiết lập cảnh báo bẫy tư duy.</div>
+          <div class="neural-quiz-loading-text">AI đang truy vết phả hệ ${ancestry.ancestryPath.length} tầng và phân tích tri thức...</div>
+          <div class="neural-quiz-loading-hint">Tự động tổng hợp ngữ cảnh từ Node Gốc đến Node Cha để thiết lập câu hỏi bám sát bản chất.</div>
         </div>
       </div>
 
@@ -165,7 +190,7 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
     try {
       // Đảm bảo có hiệu ứng loading tối thiểu 450ms để người dùng thấy rõ AI đang suy nghĩ đổi câu
       const [quiz] = await Promise.all([
-        generateQuizFromNodeKnowledge(node.label, getCombinedNotes(), attemptIndex),
+        generateQuizFromNodeKnowledge(node, allNodes, attemptIndex),
         new Promise(resolve => setTimeout(resolve, 450))
       ]);
       currentQuiz = quiz;
@@ -211,8 +236,14 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
       </div>
     ` : '';
 
+    const ancestryTagHtml = (quiz.ancestryDepth && quiz.ancestryDepth > 1) ? `
+      <span class="neural-quiz-ancestry-tag" title="Đã nạp ngữ cảnh xuyên suốt ${quiz.ancestryDepth} tầng nơ-ron: ${escapeHtml(quiz.ancestryBreadcrumb || '')}">
+        <i class="fa-solid fa-code-branch"></i> Phả hệ ${quiz.ancestryDepth} tầng
+      </span>
+    ` : '';
+
     const engineBadgeHtml = quiz.isAiGenerated ? `
-      <span class="neural-quiz-engine-badge live" title="Được sinh trực tiếp bởi Google Gemini 1.5 Flash">
+      <span class="neural-quiz-engine-badge live" title="Được sinh trực tiếp bởi Google Gemini 2.5 Flash">
         <i class="fa-solid fa-sparkles"></i> Gemini AI (Trực tiếp)
       </span>
     ` : `
@@ -229,7 +260,10 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
           <div class="neural-quiz-q-tag">
             <i class="fa-solid fa-circle-question"></i> Câu Hỏi Trắc Nghiệm Tình Huống
           </div>
-          ${engineBadgeHtml}
+          <div class="neural-quiz-meta-badges">
+            ${ancestryTagHtml}
+            ${engineBadgeHtml}
+          </div>
         </div>
         <p class="neural-quiz-q-text">${escapeHtml(quiz.question)}</p>
       </div>

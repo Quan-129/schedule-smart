@@ -60,40 +60,162 @@ export async function validateGeminiApiKey(key) {
   }
 }
 
+/**
+ * Trích xuất toàn bộ văn bản sạch từ một node (Markdown + Visual Notes HTML)
+ * @param {Object} node
+ * @returns {string}
+ */
+export function extractNodeText(node) {
+  if (!node) return '';
+  let text = node.notes || '';
+  if (node.visualNotes) {
+    if (typeof node.visualNotes === 'string') {
+      text += '\n' + node.visualNotes;
+    } else if (typeof node.visualNotes === 'object' && node.visualNotes.html) {
+      const visualClean = node.visualNotes.html
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/&nbsp;/g, ' ')
+        .trim();
+      if (visualClean) text += '\n' + visualClean;
+    }
+  }
+  return text.trim();
+}
+
+/**
+ * Thuật toán Backtracking phả hệ tri thức nơ-ron (Truy ngược từ Node Hiện Tại ➔ Cha ➔ Ông ➔ ... ➔ Gốc)
+ * @param {Array<Object>} allNodes - Danh sách toàn bộ node trong cây tri thức môn học
+ * @param {string|Object} targetNodeOrId - Node mục tiêu hoặc ID của node mục tiêu
+ * @returns {{
+ *   targetNode: Object,
+ *   ancestryPath: Array<Object>,
+ *   breadcrumbList: Array<string>,
+ *   breadcrumbStr: string,
+ *   cumulativeNotes: string,
+ *   hasTargetNotes: boolean,
+ *   hasAnyAncestralNotes: boolean
+ * }}
+ */
+export function traceNodeAncestryPath(allNodes, targetNodeOrId) {
+  const nodes = Array.isArray(allNodes) ? allNodes : [];
+  const targetId = (typeof targetNodeOrId === 'object' && targetNodeOrId !== null) ? targetNodeOrId.id : targetNodeOrId;
+  const target = nodes.find(n => n.id === targetId) || (typeof targetNodeOrId === 'object' ? targetNodeOrId : { id: 'target', label: String(targetNodeOrId || 'Khái niệm') });
+
+  // Backtracking ngược từ Target Node lên Root theo parentId
+  const reverseChain = [target];
+  let current = target;
+  const visited = new Set([target.id]);
+
+  while (current && current.parentId) {
+    const parent = nodes.find(n => n.id === current.parentId);
+    if (!parent || visited.has(parent.id)) break;
+    visited.add(parent.id);
+    reverseChain.push(parent);
+    current = parent;
+  }
+
+  // Đảo lại thứ tự từ Gốc ➔ Tầng 1 ➔ Tầng 2 ➔ ... ➔ Target Node
+  const ancestryPath = reverseChain.reverse();
+  const breadcrumbList = ancestryPath.map(n => n.label || 'Khái niệm');
+  const breadcrumbStr = breadcrumbList.join(' ➔ ');
+
+  const noteBlocks = [];
+  let hasTargetNotes = false;
+  let hasAnyAncestralNotes = false;
+
+  ancestryPath.forEach((n, idx) => {
+    const text = extractNodeText(n);
+    const isTarget = (n.id === target.id);
+    const depthLevel = (idx === 0) ? 'Node Gốc (Môn học/Gốc tri thức)' : (isTarget ? `Node Mục Tiêu (Cấp ${idx} - Trọng tâm khảo hạch)` : `Node Tổ Tiên (Cấp ${idx})`);
+
+    if (isTarget && text) hasTargetNotes = true;
+    if (!isTarget && text) hasAnyAncestralNotes = true;
+
+    if (text) {
+      noteBlocks.push(`### [${depthLevel}: "${n.label}"]\n${text}`);
+    } else {
+      noteBlocks.push(`### [${depthLevel}: "${n.label}"]\n*(Chưa có ghi chú văn bản riêng)*`);
+    }
+  });
+
+  return {
+    targetNode: target,
+    ancestryPath,
+    breadcrumbList,
+    breadcrumbStr,
+    cumulativeNotes: noteBlocks.join('\n\n'),
+    hasTargetNotes,
+    hasAnyAncestralNotes
+  };
+}
+
 // ==========================================================================
-// 3. AI GENERATION ENGINE
+// 3. AI GENERATION ENGINE (VỚI HIERARCHICAL CONTEXT BACKTRACKING)
 // ==========================================================================
 
 /**
- * Sinh câu hỏi trắc nghiệm Active Recall từ tri thức ghi chú của node
- * @param {string} nodeLabel - Tên chủ đề / khái niệm của node
- * @param {string} notesContent - Toàn bộ nội dung ghi chú (Markdown hoặc text)
- * @param {number} attemptIndex - Số thứ tự lần sinh câu hỏi (dùng để đổi góc độ câu hỏi)
+ * Sinh câu hỏi trắc nghiệm Active Recall có truy ngược phả hệ ngữ cảnh nơ-ron
+ * @param {string|Object} nodeOrLabel - Node mục tiêu hoặc tên node
+ * @param {string|Array<Object>} notesOrAllNodes - Toàn bộ nodes của môn hoặc chuỗi ghi chú
+ * @param {number} attemptIndex - Số thứ tự lần sinh câu hỏi (xoay vòng góc độ)
+ * @param {Array<Object>} [maybeAllNodes] - Danh sách toàn bộ node nếu truyền theo signature cũ
  * @returns {Promise<Object>}
  */
-export async function generateQuizFromNodeKnowledge(nodeLabel, notesContent, attemptIndex = 0) {
+export async function generateQuizFromNodeKnowledge(nodeOrLabel, notesOrAllNodes, attemptIndex = 0, maybeAllNodes = null) {
   const apiKey = getGeminiApiKey();
 
-  // Nếu chưa có API Key -> Dùng Fallback generator thông minh
+  // Chuẩn hóa tham số đầu vào
+  let targetNode = null;
+  let allNodes = [];
+  let fallbackNotes = '';
+
+  if (typeof nodeOrLabel === 'object' && nodeOrLabel !== null) {
+    targetNode = nodeOrLabel;
+    allNodes = Array.isArray(notesOrAllNodes) ? notesOrAllNodes : (Array.isArray(maybeAllNodes) ? maybeAllNodes : [targetNode]);
+  } else {
+    const label = String(nodeOrLabel || 'Khái niệm');
+    fallbackNotes = typeof notesOrAllNodes === 'string' ? notesOrAllNodes : '';
+    allNodes = Array.isArray(maybeAllNodes) ? maybeAllNodes : [];
+    targetNode = allNodes.find(n => n.label === label) || { id: 'temp', label, notes: fallbackNotes };
+  }
+
+  // Thực hiện truy ngược phả hệ tri thức (Backtracking 4 ➔ 3 ➔ 2 ➔ 1 ➔ Gốc)
+  const ancestry = traceNodeAncestryPath(allNodes, targetNode);
+  const targetLabel = ancestry.targetNode?.label || 'Khái niệm';
+  const combinedContext = ancestry.cumulativeNotes || fallbackNotes || `Khái niệm: ${targetLabel}`;
+
+  // Nếu chưa có API Key -> Dùng Fallback generator thông minh dựa trên ngữ cảnh phả hệ
   if (!apiKey) {
-    return generateFallbackQuiz(nodeLabel, notesContent, 'demo_no_key', attemptIndex);
+    const fallback = generateFallbackQuiz(targetLabel, combinedContext, 'demo_no_key', attemptIndex);
+    fallback.ancestryBreadcrumb = ancestry.breadcrumbStr;
+    fallback.ancestryDepth = ancestry.ancestryPath.length;
+    fallback.ancestryList = ancestry.breadcrumbList;
+    return fallback;
   }
 
   const prompt = `
-Bạn là chuyên gia sư phạm đại học và cố vấn học tập hàng đầu theo phương pháp Active Recall & Phân tích chẩn đoán sai lầm tư duy (Diagnostic Testing).
-Dưới đây là tri thức học tập của sinh viên trong chủ đề: "${nodeLabel}"
+Bạn là chuyên gia sư phạm đại học và cố vấn học tập hàng đầu theo phương pháp Active Recall & Phân tích chẩn đoán bẫy tư duy (Diagnostic Testing).
 
-Nội dung ghi chú của sinh viên:
+🎯 KHÁI NIỆM MỤC TIÊU CẦN KHẢO HẠCH: "${targetLabel}"
+
+🌳 VỊ TRÍ PHÂN CẤP TRI THỨC TRONG CÂY NƠ-RON (BREADCRUMB PHẢ HỆ TỪ GỐC ĐẾN NGỌN):
+${ancestry.breadcrumbStr || targetLabel}
+
+📚 TỔNG HỢP NGỮ CẢNH TRI THỨC THEO DÒNG PHẢ HỆ (TỪ NODE GỐC ➔ CÁC NODE TỔ TIÊN CẤP TRÊN ➔ NODE MỤC TIÊU):
 """
-${(notesContent || '').slice(0, 3500)}
+${combinedContext.slice(0, 4200)}
 """
 
-Hãy tạo ĐÚNG 1 câu hỏi trắc nghiệm chất lượng cao bám sát nội dung trên để sinh viên tự kiểm tra kiến thức.
-Yêu cầu bắt buộc:
-1. ĐÂY LÀ LẦN KHẢO HẠCH THỨ ${attemptIndex + 1}. Hãy tạo một câu hỏi MỚI HOÀN TOÀN, khai thác một GÓC ĐỘ / KHÍA CẠNH KHÁC BIỆT so với các câu cơ bản (ví dụ: góc độ tình huống ứng dụng thực tế, góc độ chẩn đoán ngộ nhận tư duy, góc độ so sánh điều kiện biên, hoặc góc độ bản chất lý thuyết).
-2. Có đúng 4 lựa chọn A, B, C, D (trong đó có 1 đáp án đúng và 3 đáp án nhiễu có bẫy tinh vi). Hãy xáo trộn ngẫu nhiên vị trí đáp án đúng (không cố định ở A).
-3. Bóc tách sâu sắc: Khái niệm cốt lõi, Lời giải thích, Bẫy/Sai lầm thường gặp mà sinh viên hay mắc phải, và Quy tắc/Bản chất cần nhớ (công thức hoặc chuỗi mũi tên ngắn gọn).
-4. Trả về ĐÚNG 1 CHUỖI JSON thuần túy (KHÔNG dùng markdown codeblock \`\`\`json, KHÔNG có bất kỳ lời chào nào ngoài JSON).
+Hãy tạo ĐÚNG 1 câu hỏi trắc nghiệm chất lượng cao bám sát khái niệm "${targetLabel}".
+Yêu cầu sư phạm bắt buộc:
+1. ĐÂY LÀ LẦN KHẢO HẠCH THỨ ${attemptIndex + 1}. Khai thác một GÓC ĐỘ MỚI LẠ xoay quanh khái niệm "${targetLabel}".
+2. TƯ DUY NGỮ CẢNH PHẢ HỆ (BACKTRACKING CONTEXT):
+   - Đặt khái niệm "${targetLabel}" trong mối quan hệ hữu cơ với chuỗi phân cấp cấp trên (${ancestry.breadcrumbStr}).
+   - Dù khái niệm mục tiêu có ít ghi chú hoặc chưa có ghi chú riêng, HÃY DỰA VÀO BỐI CẢNH LÝ THUYẾT VÀ NGUYÊN LÝ CỦA CÁC NODE CẤP TRÊN ĐỂ RA ĐỀ CHÍNH XÁC VỀ BẢN CHẤT CỦA "${targetLabel}".
+   - Tạo câu hỏi tình huống thực tế hoặc nhận định đa chiều, kiểm tra khả năng vận dụng của sinh viên.
+3. Có đúng 4 lựa chọn A, B, C, D (trong đó có 1 đáp án đúng và 3 đáp án nhiễu có bẫy tinh vi). Hãy xáo trộn ngẫu nhiên vị trí đáp án đúng (không cố định ở A).
+4. Bóc tách sâu sắc: Khái niệm cốt lõi, Lời giải thích, Bẫy/Sai lầm thường gặp mà sinh viên hay mắc phải, và Quy tắc/Bản chất cần nhớ (công thức hoặc chuỗi mũi tên ngắn gọn).
+5. Trả về ĐÚNG 1 CHUỖI JSON thuần túy (KHÔNG dùng markdown codeblock, KHÔNG có bất kỳ lời chào nào ngoài JSON).
 
 Cấu trúc JSON bắt buộc:
 {
@@ -105,11 +227,11 @@ Cấu trúc JSON bắt buộc:
     "D. Nội dung lựa chọn D"
   ],
   "correctIndex": 0,
-  "coreConcept": "Tên khái niệm / lý thuyết / mô hình cốt lõi",
+  "coreConcept": "Tên khái niệm cốt lõi (liên hệ với chuỗi phả hệ)",
   "explanation": "Giải thích chi tiết tại sao đáp án này đúng theo lập luận logic...",
   "trap": "Bẫy đề thi & Sai lầm tư duy thường gặp (tại sao sinh viên dễ chọn nhầm phương án khác)...",
   "rule": "Quy tắc / Bản chất cốt lõi cần nhớ (dạng chuỗi: Bước 1 ➔ Bước 2 ➔ Bước 3 hoặc công thức)",
-  "source": "Trích dẫn ngắn chứng minh từ bài học hoặc tài liệu"
+  "source": "Trích dẫn chuỗi phả hệ hoặc tài liệu bài học"
 }
 `;
 
@@ -162,6 +284,11 @@ Cấu trúc JSON bắt buộc:
       parsed.createdAt = new Date().toISOString();
       parsed.isAiGenerated = true;
       parsed.modelUsed = model;
+      parsed.ancestryBreadcrumb = ancestry.breadcrumbStr;
+      parsed.ancestryDepth = ancestry.ancestryPath.length;
+      parsed.ancestryList = ancestry.breadcrumbList;
+      parsed.hasTargetNotes = ancestry.hasTargetNotes;
+      parsed.hasAnyAncestralNotes = ancestry.hasAnyAncestralNotes;
       return parsed;
     } catch (error) {
       lastErrMsg = error.message;
@@ -170,8 +297,13 @@ Cấu trúc JSON bắt buộc:
   }
 
   // Nếu tất cả model đều thất bại hoặc lỗi Key -> Chuyển Fallback và hiển thị rõ thông báo lỗi
-  const fallback = generateFallbackQuiz(nodeLabel, notesContent, `error_${lastErrMsg}`, attemptIndex);
+  const fallback = generateFallbackQuiz(targetLabel, combinedContext, `error_${lastErrMsg}`, attemptIndex);
   fallback.apiError = lastErrMsg;
+  fallback.ancestryBreadcrumb = ancestry.breadcrumbStr;
+  fallback.ancestryDepth = ancestry.ancestryPath.length;
+  fallback.ancestryList = ancestry.breadcrumbList;
+  fallback.hasTargetNotes = ancestry.hasTargetNotes;
+  fallback.hasAnyAncestralNotes = ancestry.hasAnyAncestralNotes;
   return fallback;
 }
 

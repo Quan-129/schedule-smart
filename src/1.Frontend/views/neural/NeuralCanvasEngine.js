@@ -338,26 +338,25 @@ export class NeuralCanvasEngine {
       ctx.fillText('✎', noteX, noteY);
     }
 
-    // 8. Mini Quiz AI Badge (✨) on Bottom-Right if node has notes
-    if (nodeHasAnyNotes(node)) {
-      const quizX = pos.x + radius * 0.7;
-      const quizY = pos.y + radius * 0.7;
-      const quizR = Math.max(7, 9.5 * this.zoom);
+    // 8. Mini Quiz AI Badge (✨) on Bottom-Right (Hiển thị trên MỌI node - kích hoạt khảo hạch phả hệ)
+    const hasNotes = nodeHasAnyNotes(node);
+    const quizX = pos.x + radius * 0.7;
+    const quizY = pos.y + radius * 0.7;
+    const quizR = Math.max(7, 9.5 * this.zoom);
 
-      ctx.beginPath();
-      ctx.arc(quizX, quizY, quizR, 0, Math.PI * 2);
-      ctx.fillStyle = '#f59e0b';
-      ctx.fill();
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(quizX, quizY, quizR, 0, Math.PI * 2);
+    ctx.fillStyle = hasNotes ? '#f59e0b' : '#8b5cf6';
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
 
-      ctx.font = `${Math.max(7, 8.5 * this.zoom)}px sans-serif`;
-      ctx.fillStyle = '#0f172a';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('✨', quizX, quizY);
-    }
+    ctx.font = `${Math.max(7, 8.5 * this.zoom)}px sans-serif`;
+    ctx.fillStyle = hasNotes ? '#0f172a' : '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('✨', quizX, quizY);
 
     ctx.restore();
   }
@@ -441,12 +440,12 @@ export class NeuralCanvasEngine {
         }
       }
 
-      // 3. Check if clicked the Quiz AI badge on bottom-right (Chỉ mở khi click chính xác trúng badge ✨)
+      // 3. Check if clicked the Quiz AI badge on bottom-right (Kích hoạt khảo hạch AI cho MỌI node)
       const quizX = pos.x + radius * 0.7;
       const quizY = pos.y + radius * 0.7;
       const quizR = Math.max(7, 9.5 * this.zoom);
       const distToQuizBadge = Math.hypot(sx - quizX, sy - quizY);
-      if (nodeHasAnyNotes(clickedNode) && distToQuizBadge <= (quizR + 1) && distToQuizBadge < distToCenter) {
+      if (distToQuizBadge <= (quizR + 2) && distToQuizBadge < distToCenter) {
         if (this.onOpenQuiz) {
           this.onOpenQuiz(clickedNode);
           return;
