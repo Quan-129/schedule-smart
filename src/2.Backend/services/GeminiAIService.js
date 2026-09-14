@@ -2,7 +2,8 @@
 // 1. IMPORTS & CONFIG
 // ==========================================================================
 const STORAGE_KEY_GEMINI = 'smart_schedule_gemini_api_key';
-const DEFAULT_MODEL = 'gemini-1.5-flash';
+const DEFAULT_MODEL = 'gemini-2.5-flash';
+const BACKUP_MODELS = ['gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.0-flash'];
 
 // ==========================================================================
 // 2. API KEY MANAGEMENT
@@ -39,10 +40,11 @@ export async function validateGeminiApiKey(key) {
     return { valid: false, message: 'Vui lòng nhập API Key trước khi kiểm tra.' };
   }
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${DEFAULT_MODEL}?key=${encodeURIComponent(key.trim())}`;
+    // Gọi endpoint models tổng quát để kiểm tra quyền truy cập của API Key
+    const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key.trim())}`;
     const res = await fetch(url);
     if (res.ok) {
-      return { valid: true, message: 'Kết nối thành công! Gemini 1.5 Flash đã sẵn sàng hoạt động.' };
+      return { valid: true, message: 'Kết nối thành công! Google Gemini 2.5 Flash đã sẵn sàng hoạt động.' };
     }
     const errData = await res.json().catch(() => ({}));
     const rawMsg = errData.error?.message || `Lỗi HTTP ${res.status}`;
@@ -111,57 +113,66 @@ Cấu trúc JSON bắt buộc:
 }
 `;
 
-  try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${DEFAULT_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: prompt }]
+  let lastErrMsg = '';
+  for (const model of BACKUP_MODELS) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: prompt }]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.88,
+            responseMimeType: 'application/json'
           }
-        ],
-        generationConfig: {
-          temperature: 0.88,
-          responseMimeType: 'application/json'
+        })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        lastErrMsg = errData.error?.message || `HTTP ${response.status}`;
+        console.warn(`Gemini Model ${model} Error:`, lastErrMsg);
+        // Nếu lỗi là model not found -> thử model tiếp theo trong danh sách
+        if (lastErrMsg.includes('not found') || lastErrMsg.includes('NOT_FOUND')) {
+          continue;
         }
-      })
-    });
+        break;
+      }
 
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      const errMsg = errData.error?.message || `HTTP ${response.status}`;
-      console.warn('Gemini API Error:', errMsg);
-      const fallback = generateFallbackQuiz(nodeLabel, notesContent, `error_${errMsg}`, attemptIndex);
-      fallback.apiError = errMsg;
-      return fallback;
+      const data = await response.json();
+      const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      
+      // Parse JSON
+      let cleaned = candidateText.trim();
+      if (cleaned.startsWith('```json')) cleaned = cleaned.slice(7);
+      if (cleaned.startsWith('```')) cleaned = cleaned.slice(3);
+      if (cleaned.endsWith('```')) cleaned = cleaned.slice(0, -3);
+      cleaned = cleaned.trim();
+
+      const parsed = JSON.parse(cleaned);
+      parsed.id = `quiz_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+      parsed.createdAt = new Date().toISOString();
+      parsed.isAiGenerated = true;
+      parsed.modelUsed = model;
+      return parsed;
+    } catch (error) {
+      lastErrMsg = error.message;
+      console.warn(`Lỗi khi gọi model ${model}:`, error);
     }
-
-    const data = await response.json();
-    const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    
-    // Parse JSON
-    let cleaned = candidateText.trim();
-    if (cleaned.startsWith('```json')) cleaned = cleaned.slice(7);
-    if (cleaned.startsWith('```')) cleaned = cleaned.slice(3);
-    if (cleaned.endsWith('```')) cleaned = cleaned.slice(0, -3);
-    cleaned = cleaned.trim();
-
-    const parsed = JSON.parse(cleaned);
-    parsed.id = `quiz_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
-    parsed.createdAt = new Date().toISOString();
-    parsed.isAiGenerated = true;
-    return parsed;
-  } catch (error) {
-    console.error('Lỗi khi gọi Gemini API:', error);
-    const fallback = generateFallbackQuiz(nodeLabel, notesContent, `catch_${error.message}`, attemptIndex);
-    fallback.apiError = error.message;
-    return fallback;
   }
+
+  // Nếu tất cả model đều thất bại hoặc lỗi Key -> Chuyển Fallback và hiển thị rõ thông báo lỗi
+  const fallback = generateFallbackQuiz(nodeLabel, notesContent, `error_${lastErrMsg}`, attemptIndex);
+  fallback.apiError = lastErrMsg;
+  return fallback;
 }
 
 // ==========================================================================

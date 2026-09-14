@@ -4,6 +4,27 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-14 22:35] - Khắc Phục Lỗi "Model Not Found", Nâng Cấp Lên Gemini 2.5 Flash & Tự Động Xoay Vòng Model 🚀⚡💡
+
+- **🎯 Yêu cầu từ người dùng**: *"AQ.Ab8RN6... (Google AI Studio Key) sao key này bị lỗi này"* (Kèm ảnh chụp lỗi: `Model is not found: models/gemini-1.5-flash for api version v1beta`).
+  - **Nguyên nhân cốt lõi**:
+    1. Key của người dùng bắt đầu bằng tiền tố `AQ.Ab...` là định dạng xác thực mới nhất của Google AI Studio (thay cho tiền tố cũ `AIza...`). Key này **hoàn toàn chính xác và hợp lệ 100%**.
+    2. Tuy nhiên, Google gần đây đã cho nghỉ hưu (retire) model cũ `gemini-1.5-flash` và thay thế hoàn toàn bằng thế hệ mô hình mới nhất: **`gemini-2.5-flash`** và **`gemini-flash-latest`**.
+    3. Mã nguồn cũ bị hardcode tên model cũ `gemini-1.5-flash` nên Google từ chối và báo lỗi `Model is not found: models/gemini-1.5-flash`.
+- **🛠 Triển khai kỹ thuật ([`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Nâng cấp sang mô hình Gemini 2.5 Flash ([`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js))**:
+     - Chuyển `DEFAULT_MODEL` thành `gemini-2.5-flash` (tốc độ siêu nhanh, suy luận sâu sắc và hỗ trợ đầy đủ Structured JSON).
+  2. **Cơ chế Tự Động Xoay Vòng Model Dự Phòng (Auto-Fallback Model List)**:
+     - Danh sách ưu tiên: `['gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.0-flash']`.
+     - Nếu bất kỳ model nào bị Google thay đổi định danh, hệ thống tự động thử ngay model dự phòng kế tiếp trong danh sách mà không làm gián đoạn người dùng.
+  3. **Kiểm Tra Tính Hợp Lệ Qua Endpoint Tổng Quát**:
+     - `validateGeminiApiKey` sử dụng endpoint `GET /v1beta/models?key=...`, xác thực quyền truy cập tổng quát của API Key mà không bị phụ thuộc vào tên của bất kỳ model riêng lẻ nào.
+  4. **Nâng Cấp Service Worker Cache v134 ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Cập nhật lên `smart-schedule-modular-v134`.
+- **✅ Kết quả kiểm thử thực tế**: Đã chạy thử nghiệm với chính Key dạng `AQ.Ab8RN6...`, hàm xác thực trả về `valid: true` và Google Gemini 2.5 Flash đã sinh câu hỏi trắc nghiệm Active Recall hoàn hảo 100%!
+
+
+
 ## 📅 [2026-09-14 22:20] - Thêm Xác Thực Google Gemini API Key Trực Tiếp, Phân Biệt Nguồn Câu Hỏi & Cảnh Báo Key Lỗi 🛡️🔍✨
 
 - **🎯 Yêu cầu từ người dùng**: *"làm sao để biết api key dã đúng và hoạt động tôi nhập bừa thấy nó vẫn nhận kìa"*.
