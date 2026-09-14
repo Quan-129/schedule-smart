@@ -4,6 +4,25 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-14 21:55] - Nâng Cấp Custom Dialog Nhập Gemini API Key & Nút Liên Kết 1-Click Đến Google AI Studio 🔑⚡🌐
+
+- **🎯 Yêu cầu từ người dùng**: *"hiện tại bấm vào nhập key API không chuyện gì xảy ra, để tiện khi bấm nhập aip chuyển ngay tới link chứa api được không"*.
+  - **Nguyên nhân**: Mã nguồn cũ sử dụng `window.prompt()`, vốn thường bị trình duyệt hiện đại hoặc môi trường PWA/chế độ bảo mật chặn âm thầm khiến người dùng bấm không thấy phản hồi.
+- **🛠 Triển khai kỹ thuật ([`NeuralQuizModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralQuizModal.js), [`14.neural-quiz.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/14.neural-quiz.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Nút Liên Kết Nhanh Trực Tiếp Đến Google AI Studio ([`NeuralQuizModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralQuizModal.js))**:
+     - Bổ sung nút liên kết `Lấy Key ↗` trực tiếp ngay tại thanh footer của popup trắc nghiệm: `<a href="https://aistudio.google.com/app/apikey" target="_blank">...</a>`, bấm vào là mở ngay tab Google AI Studio để người dùng lấy API key miễn phí 1-click.
+  2. **Custom Dialog Nhập API Key Chuẩn Dark Glassmorphism ([`NeuralQuizModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralQuizModal.js), [`14.neural-quiz.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/14.neural-quiz.css))**:
+     - Thay thế hoàn toàn `prompt()` bằng một popup dialog thanh lịch hiển thị ngay bên trong modal:
+       * Nút tắt mở xem key mật khẩu (`fa-eye` / `fa-eye-slash`).
+       * Nút link hướng dẫn và truy cập nhanh `https://aistudio.google.com/app/apikey`.
+       * Hỗ trợ phím tắt `Enter` để "Lưu & Sinh Câu Hỏi" ngay lập tức, `Escape` để đóng dialog.
+       * Nút "Xóa Key (Dùng Demo)" cho phép người dùng dễ dàng chuyển về chế độ mô phỏng bất kỳ lúc nào.
+  3. **Nâng Cấp Service Worker Cache v132 ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Cập nhật lên `smart-schedule-modular-v132` đảm bảo client nhận bản cập nhật mới nhất tức thì.
+- **✅ Kết quả**: Bấm vào cài đặt key mở dialog siêu mượt mà, có link chuyển thẳng tới trang cấp key của Google, dán key và kích hoạt mô hình Gemini tức thì!
+
+
+
 ## 📅 [2026-09-14 21:40] - Sửa Lỗi Nút "Đổi Câu Khác" & Nâng Cấp Hệ Thống Đa Góc Độ Câu Hỏi (Dynamic Quiz Archetypes) 🎲🔄
 
 - **🎯 Yêu cầu từ người dùng**: *"sao hiện tại đổi câu khác không được"*.

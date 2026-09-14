@@ -430,6 +430,19 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
+.btn-neural-quiz-action.link {
+  background: rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+  text-decoration: none;
+}
+
+.btn-neural-quiz-action.link:hover {
+  background: rgba(59, 130, 246, 0.25);
+  color: #93c5fd;
+  transform: translateY(-1px);
+}
+
 /* 8. Quiz Vault trong Notepad Sidebar */
 .quiz-vault-empty {
   text-align: center;
@@ -481,4 +494,197 @@
 .quiz-vault-btn-del:hover {
   color: #ef4444;
   background: rgba(239, 68, 68, 0.12);
+}
+
+/* 9. API Key Settings Dialog */
+.neural-quiz-key-dialog {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 15, 28, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 20px;
+  animation: keyDialogFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes keyDialogFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.neural-quiz-key-dialog-inner {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(19, 26, 42, 0.98);
+  border: 1.5px solid rgba(245, 158, 11, 0.3);
+  border-radius: 18px;
+  padding: 22px 24px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), 0 0 30px rgba(245, 158, 11, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.neural-quiz-key-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.neural-quiz-key-dialog-header h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.neural-quiz-key-dialog-close {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.neural-quiz-key-dialog-close:hover {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.neural-quiz-key-dialog-desc {
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.neural-quiz-key-quick-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px dashed rgba(245, 158, 11, 0.3);
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+}
+
+.neural-quiz-get-key-link {
+  color: #f59e0b;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+
+.neural-quiz-get-key-link:hover {
+  color: #fbbf24;
+  text-decoration: underline;
+}
+
+.neural-quiz-key-input-group {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 2px 8px;
+  transition: border-color 0.2s ease;
+}
+
+.neural-quiz-key-input-group:focus-within {
+  border-color: #f59e0b;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+}
+
+.neural-quiz-key-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 10px 8px;
+  color: #f8fafc;
+  font-size: 0.88rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.btn-toggle-key-visibility {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+
+.btn-toggle-key-visibility:hover {
+  color: #f8fafc;
+}
+
+.neural-quiz-key-dialog-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.btn-neural-key-save {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border: none;
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 0.86rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.btn-neural-key-save:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(245, 158, 11, 0.45);
+}
+
+.btn-neural-key-clear {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #f87171;
+  font-weight: 600;
+  font-size: 0.84rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-neural-key-clear:hover {
+  background: rgba(239, 68, 68, 0.22);
+  color: #fca5a5;
 }

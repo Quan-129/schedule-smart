@@ -56,6 +56,9 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
           <button type="button" class="btn-neural-quiz-action key" id="btn-quiz-config-key" title="Cài đặt Gemini API Key cá nhân">
             <i class="fa-solid fa-key"></i> <span id="quiz-key-status-label">${getGeminiApiKey() ? 'Đã có Key' : 'Nhập API Key'}</span>
           </button>
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="btn-neural-quiz-action link" title="Mở trang lấy Google Gemini API Key miễn phí">
+            <i class="fa-brands fa-google"></i> Lấy Key ↗
+          </a>
         </div>
         <div class="neural-quiz-footer-right">
           <button type="button" class="btn-neural-quiz-action save" id="btn-quiz-save" disabled>
@@ -64,6 +67,41 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
           <button type="button" class="btn-neural-quiz-action next" id="btn-quiz-next">
             <i class="fa-solid fa-dice"></i> Đổi câu khác
           </button>
+        </div>
+      </div>
+
+      <!-- Custom Dialog Cài đặt Key bên trong Modal -->
+      <div class="neural-quiz-key-dialog" id="neural-quiz-key-dialog" style="display: none;">
+        <div class="neural-quiz-key-dialog-inner">
+          <div class="neural-quiz-key-dialog-header">
+            <h4><i class="fa-solid fa-key" style="color: #f59e0b;"></i> Cài Đặt Gemini API Key</h4>
+            <button type="button" class="neural-quiz-key-dialog-close" id="btn-close-key-dialog" title="Đóng">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <p class="neural-quiz-key-dialog-desc">
+            Nhập Google Gemini API Key để AI trích xuất và sinh câu hỏi trắc nghiệm chuyên sâu trực tiếp từ ghi chú của bạn.
+          </p>
+          <div class="neural-quiz-key-quick-link">
+            <span>Chưa có key?</span>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="neural-quiz-get-key-link">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Mở Google AI Studio lấy Key miễn phí ↗
+            </a>
+          </div>
+          <div class="neural-quiz-key-input-group">
+            <input type="password" id="input-gemini-api-key" class="neural-quiz-key-input" placeholder="Dán API Key tại đây (AIzaSy...)" autocomplete="off">
+            <button type="button" class="btn-toggle-key-visibility" id="btn-toggle-key-visibility" title="Hiện/Ẩn Key">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+          <div class="neural-quiz-key-dialog-actions">
+            <button type="button" class="btn-neural-key-save" id="btn-save-key-submit">
+              <i class="fa-solid fa-check"></i> Lưu & Sinh Câu Hỏi
+            </button>
+            <button type="button" class="btn-neural-key-clear" id="btn-clear-key-submit">
+              <i class="fa-solid fa-trash-can"></i> Xóa Key (Dùng Demo)
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -252,22 +290,60 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
     loadQuiz();
   });
 
-  // Nút Cài đặt API Key
+  // Quản lý Dialog Cài đặt API Key
+  const keyDialog = overlay.querySelector('#neural-quiz-key-dialog');
   const configKeyBtn = overlay.querySelector('#btn-quiz-config-key');
-  configKeyBtn.addEventListener('click', () => {
-    const currentKey = getGeminiApiKey();
-    const inputKey = prompt(
-      'Nhập Google Gemini API Key để sinh câu hỏi chuyên sâu không giới hạn:\n(Lấy miễn phí 1-click tại: https://aistudio.google.com/app/apikey)\n\nĐể trống nếu muốn dùng bộ tạo mô phỏng Fallback:',
-      currentKey
-    );
+  const closeKeyDialogBtn = overlay.querySelector('#btn-close-key-dialog');
+  const keyInput = overlay.querySelector('#input-gemini-api-key');
+  const toggleVisibilityBtn = overlay.querySelector('#btn-toggle-key-visibility');
+  const saveKeyBtn = overlay.querySelector('#btn-save-key-submit');
+  const clearKeyBtn = overlay.querySelector('#btn-clear-key-submit');
+  const keyLabel = overlay.querySelector('#quiz-key-status-label');
 
-    if (inputKey !== null) {
-      setGeminiApiKey(inputKey.trim());
-      const label = overlay.querySelector('#quiz-key-status-label');
-      if (label) label.textContent = inputKey.trim() ? 'Đã có Key' : 'Nhập API Key';
-      alert(inputKey.trim() ? 'Đã lưu Google Gemini API Key thành công!' : 'Đã chuyển về chế độ Demo Fallback.');
-      loadQuiz();
+  const openKeyDialog = () => {
+    keyInput.value = getGeminiApiKey() || '';
+    keyDialog.style.display = 'flex';
+    requestAnimationFrame(() => keyInput.focus());
+  };
+
+  const closeKeyDialog = () => {
+    keyDialog.style.display = 'none';
+  };
+
+  configKeyBtn.addEventListener('click', openKeyDialog);
+  closeKeyDialogBtn.addEventListener('click', closeKeyDialog);
+
+  toggleVisibilityBtn.addEventListener('click', () => {
+    const isPass = keyInput.type === 'password';
+    keyInput.type = isPass ? 'text' : 'password';
+    toggleVisibilityBtn.innerHTML = isPass ? '<i class="fa-regular fa-eye-slash"></i>' : '<i class="fa-regular fa-eye"></i>';
+  });
+
+  keyInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveKeyBtn.click();
+    } else if (e.key === 'Escape') {
+      closeKeyDialog();
     }
+  });
+
+  saveKeyBtn.addEventListener('click', () => {
+    const val = keyInput.value.trim();
+    setGeminiApiKey(val);
+    if (keyLabel) keyLabel.textContent = val ? 'Đã có Key' : 'Nhập API Key';
+    closeKeyDialog();
+    attemptIndex = 0;
+    loadQuiz();
+  });
+
+  clearKeyBtn.addEventListener('click', () => {
+    keyInput.value = '';
+    setGeminiApiKey('');
+    if (keyLabel) keyLabel.textContent = 'Nhập API Key';
+    closeKeyDialog();
+    attemptIndex = 0;
+    loadQuiz();
   });
 
   // Tải câu hỏi đầu tiên
