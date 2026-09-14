@@ -4,6 +4,21 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-14 08:30] - Nâng Cấp Thiết Kế Nút Đóng Modal Thư Mục (Apple iOS Circular Glass Style) 🎨✨
+
+- **🎯 Yêu cầu từ người dùng**: *"nút tắt đang hơi xấu chỉnh lại"*.
+  - Người dùng gửi ảnh chụp Modal Thư Mục (Folder Detail Modal): Nút đóng góc trên bên phải trước đó là thẻ `<button class="modal-close-btn">&times;</button>` chưa có CSS style, hiển thị dưới dạng ô vuông màu trắng xám mặc định của trình duyệt với ký tự `×`, thiếu đồng bộ với phong cách Dark Mode và kính mờ iOS của ứng dụng.
+- **🛠 Triển khai kỹ thuật**:
+  1. **Tái Cấu Trúc Nút Đóng ([`src/1.Frontend/components/modals/FolderDetailModal.js`](file:///c:/Users/Acer/Documents/Dự án ma/tools_3/src/1.Frontend/components/modals/FolderDetailModal.js))**:
+     - Thay thế ký tự thô `&times;` bằng icon FontAwesome chuẩn mực `<i class="fa-solid fa-xmark"></i>`.
+     - Chuyển class sang `modal-folder-close-btn` kèm `type="button"`, `title="Đóng (ESC)"` và `aria-label="Đóng thư mục"`.
+     - Bổ sung phím tắt `ESC` toàn cục khi đang mở Folder Modal để người dùng có thể bấm phím thoát ngay lập tức mà không cần click chuột.
+  2. **Thiết Kế Giao Diện Tròn Đẳng Cấp ([`src/1.Frontend/styles/12.backpack-folder.css`](file:///c:/Users/Acer/Documents/Dự án ma/tools_3/src/1.Frontend/styles/12.backpack-folder.css))**:
+     - Định hình nút đóng bo tròn 50% (`width: 34px; height: 34px; border-radius: 50%`).
+     - Tông màu nền kính mờ `rgba(255, 255, 255, 0.08)` với viền bán trong suốt `border: 1px solid rgba(255, 255, 255, 0.12)`.
+     - Hiệu ứng Hover mượt mà: Nền chuyển sang đỏ mờ dạ quang `rgba(239, 68, 68, 0.18)`, icon đổi sang đỏ rực rỡ `#ef4444`, xoay nhẹ 90 độ (`rotate(90deg)`) và phóng lớn tinh tế (`scale(1.08)`).
+- **✅ Kết quả**: Nút đóng hiện đại, sang trọng, hài hòa 100% với giao diện Dark Mode cao cấp của Chiếc Cặp Google Drive!
+
 ## 📅 [2026-09-14 00:25] - Hover Vào Chữ Có Highlight Hiện Dấu Bỏ Highlight (Floating Badge & Toggle Highlight) 💡✨
 
 - **🎯 Yêu cầu từ người dùng**:

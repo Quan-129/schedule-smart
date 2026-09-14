@@ -15,6 +15,7 @@ import { showToast } from '../Toast.js';
 // 2. CONSTANTS & DOM SELECTORS
 const MODAL_ID = 'folder-detail-modal';
 let currentFolderId = null;
+let escKeyListener = null;
 
 // 3. TEMPLATES / DOM GENERATION
 export function ensureFolderDetailModalDom() {
@@ -70,7 +71,7 @@ export function openFolderDetailModal(folderId) {
           title="Bấm vào để đổi tên thư mục"
         />
       </div>
-      <button class="modal-close-btn" id="close-folder-detail-btn" title="Đóng">&times;</button>
+      <button type="button" class="modal-folder-close-btn" id="close-folder-detail-btn" title="Đóng (ESC)" aria-label="Đóng thư mục"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
     <div class="modal-folder-grid" id="folder-items-grid">
@@ -96,6 +97,15 @@ export function openFolderDetailModal(folderId) {
     </div>
   `;
 
+  // Lắng nghe phím ESC để đóng nhanh modal
+  if (escKeyListener) window.removeEventListener('keydown', escKeyListener);
+  escKeyListener = (e) => {
+    if (e.key === 'Escape') {
+      closeFolderDetailModal();
+    }
+  };
+  window.addEventListener('keydown', escKeyListener);
+
   bindModalEvents(folderId);
 
   modalWrapper.classList.remove('hidden');
@@ -112,6 +122,10 @@ export function closeFolderDetailModal() {
   }
   document.body.style.overflow = '';
   currentFolderId = null;
+  if (escKeyListener) {
+    window.removeEventListener('keydown', escKeyListener);
+    escKeyListener = null;
+  }
 }
 
 // 4. EVENT HANDLERS
