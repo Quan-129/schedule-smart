@@ -4,15 +4,23 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
-## 📅 [2026-09-14 08:30] - Nâng Cấp Thiết Kế Nút Đóng Modal Thư Mục (Apple iOS Circular Glass Style) 🎨✨
+## 📅 [2026-09-14 08:35] - Nâng Cấp Toàn Diện Nút Tắt Modal Thư Mục (Apple iOS Circular Glassmorphism & Red Glow Hover) 🎨✨
 
 - **🎯 Yêu cầu từ người dùng**: *"nút tắt đang hơi xấu chỉnh lại"*.
-  - Người dùng gửi ảnh chụp Modal Thư Mục (Folder Detail Modal): Nút đóng góc trên bên phải trước đó là thẻ `<button class="modal-close-btn">&times;</button>` chưa có CSS style, hiển thị dưới dạng ô vuông màu trắng xám mặc định của trình duyệt với ký tự `×`, thiếu đồng bộ với phong cách Dark Mode và kính mờ iOS của ứng dụng.
-- **🛠 Triển khai kỹ thuật**:
-  1. **Tái Cấu Trúc Nút Đóng ([`src/1.Frontend/components/modals/FolderDetailModal.js`](file:///c:/Users/Acer/Documents/Dự án ma/tools_3/src/1.Frontend/components/modals/FolderDetailModal.js))**:
-     - Thay thế ký tự thô `&times;` bằng icon FontAwesome chuẩn mực `<i class="fa-solid fa-xmark"></i>`.
-     - Chuyển class sang `modal-folder-close-btn` kèm `type="button"`, `title="Đóng (ESC)"` và `aria-label="Đóng thư mục"`.
-     - Bổ sung phím tắt `ESC` toàn cục khi đang mở Folder Modal để người dùng có thể bấm phím thoát ngay lập tức mà không cần click chuột.
+  - Người dùng gửi ảnh chụp Modal Thư Mục (Folder Detail Modal): Nút đóng góc trên bên phải bị giật về dạng ô vuông màu trắng xám nhỏ thô kệch mặc định của trình duyệt (`☒`), thiếu phong cách Glassmorphism và không hài hòa với Dark Mode của ứng dụng.
+- **🛠 Triển khai kỹ thuật ([`FolderDetailModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/FolderDetailModal.js), [`12.backpack-folder.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/12.backpack-folder.css), [`6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Tái Cấu Trúc & Thiết Kế Nút Đóng Chuẩn Glassmorphism Cao Cấp**:
+     - Gắn đa lớp class: `class="modal-folder-close-btn btn-modal-close"` kèm icon FontAwesome `<i class="fa-solid fa-xmark"></i>`.
+     - Kích thước chuẩn tròn 36px, `border-radius: 50%`, nền kính mờ `backdrop-filter: blur(12px)`, viền ánh bạc tinh tế `rgba(255, 255, 255, 0.16)`.
+     - Hiệu ứng Hover ấn tượng: Xoay 90 độ, phóng to 1.08x, chuyển sang tông màu đỏ cảnh báo `rgba(239, 68, 68, 0.25)` kèm bóng phát sáng neon `box-shadow: 0 0 16px rgba(239, 68, 68, 0.4)`.
+     - Hiệu ứng Active: Nhấn giữ co nhẹ `scale(0.92)` mang lại cảm giác phản hồi xúc giác chân thực.
+  2. **Đồng Bộ Fallback Trong [`6.modals.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/6.modals.css)**:
+     - Bổ sung selector `.modal-folder-close-btn` vào hệ thống style modal chung để đảm bảo ngay cả khi stylesheet riêng chưa tải xong thì nút vẫn luôn có giao diện cao cấp, xóa bỏ hoàn toàn nguy cơ hiển thị ô vuông trắng mặc định.
+  3. **Nâng Cấp Nút "Xong" Ở Footer**:
+     - Nút `.btn-close-folder-modal` được phủ gradient tím indigo hiện đại (`#6366f1` -> `#4f46e5`), bổ sung icon `<i class="fa-solid fa-check"></i>`, viền phát sáng nhẹ khi hover.
+  4. **Cập Nhật PWA Service Worker Cache v127 ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Thêm `./src/1.Frontend/styles/10.onboarding-tour.css` và `./src/1.Frontend/styles/12.backpack-folder.css` vào danh sách `STATIC_ASSETS`.
+     - Nâng `CACHE_NAME` lên `smart-schedule-modular-v127` để tự động làm mới tài nguyên trên trình duyệt.
   2. **Thiết Kế Giao Diện Tròn Đẳng Cấp ([`src/1.Frontend/styles/12.backpack-folder.css`](file:///c:/Users/Acer/Documents/Dự án ma/tools_3/src/1.Frontend/styles/12.backpack-folder.css))**:
      - Định hình nút đóng bo tròn 50% (`width: 34px; height: 34px; border-radius: 50%`).
      - Tông màu nền kính mờ `rgba(255, 255, 255, 0.08)` với viền bán trong suốt `border: 1px solid rgba(255, 255, 255, 0.12)`.

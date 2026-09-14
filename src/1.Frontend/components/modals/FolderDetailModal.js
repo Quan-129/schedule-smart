@@ -71,7 +71,9 @@ export function openFolderDetailModal(folderId) {
           title="Bấm vào để đổi tên thư mục"
         />
       </div>
-      <button type="button" class="modal-folder-close-btn" id="close-folder-detail-btn" title="Đóng (ESC)" aria-label="Đóng thư mục"><i class="fa-solid fa-xmark"></i></button>
+      <button type="button" class="modal-folder-close-btn btn-modal-close" id="close-folder-detail-btn" title="Đóng (ESC)" aria-label="Đóng thư mục">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
     </div>
 
     <div class="modal-folder-grid" id="folder-items-grid">
@@ -91,8 +93,8 @@ export function openFolderDetailModal(folderId) {
       <button type="button" class="btn-dissolve-folder" id="btn-dissolve-folder-action" title="Giải tán thư mục và trả toàn bộ môn về màn hình chính">
         <i class="fa-solid fa-folder-minus"></i> <span>Giải tán thư mục</span>
       </button>
-      <button type="button" class="btn-close-folder-modal" id="btn-done-folder-action">
-        Xong
+      <button type="button" class="btn-close-folder-modal" id="btn-done-folder-action" title="Hoàn tất và đóng thư mục">
+        <i class="fa-solid fa-check"></i> Xong
       </button>
     </div>
   `;

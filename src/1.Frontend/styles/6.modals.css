@@ -125,9 +125,11 @@
   color: var(--text-muted);
 }
 
-.btn-modal-close {
-  width: 34px;
-  height: 34px;
+.btn-modal-close,
+.modal-folder-close-btn,
+.modal-close-btn {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
@@ -135,17 +137,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.95rem;
+  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   flex-shrink: 0;
+  outline: none;
+  padding: 0;
 }
 
-.btn-modal-close:hover {
-  background: rgba(239, 68, 68, 0.2);
+.btn-modal-close:hover,
+.modal-folder-close-btn:hover,
+.modal-close-btn:hover {
+  background: rgba(239, 68, 68, 0.22);
   color: #ef4444;
-  border-color: rgba(239, 68, 68, 0.4);
-  transform: rotate(90deg);
+  border-color: rgba(239, 68, 68, 0.45);
+  transform: rotate(90deg) scale(1.08);
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.3);
+}
+
+.btn-modal-close:active,
+.modal-folder-close-btn:active,
+.modal-close-btn:active {
+  transform: rotate(90deg) scale(0.92);
 }
 
 /* 3-Segment Navigation Bar */

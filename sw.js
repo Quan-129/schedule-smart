@@ -4,7 +4,7 @@
  * ==========================================================================
  */
 
-const CACHE_NAME = 'smart-schedule-modular-v126';
+const CACHE_NAME = 'smart-schedule-modular-v127';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -18,7 +18,9 @@ const STATIC_ASSETS = [
   './src/1.Frontend/styles/7.markdown-editor.css',
   './src/1.Frontend/styles/8.responsive.css',
   './src/1.Frontend/styles/9.heatmap-view.css',
+  './src/1.Frontend/styles/10.onboarding-tour.css',
   './src/1.Frontend/styles/11.space-selector.css',
+  './src/1.Frontend/styles/12.backpack-folder.css',
   './src/1.Frontend/styles/13.neural-knowledge.css',
   './manifest.json',
   './src/1.Frontend/main.js',
