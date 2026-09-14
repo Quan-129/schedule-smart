@@ -4,6 +4,25 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-14 20:48] - Tinh Chỉnh Hit-Test Chuẩn Xác Cho Cây Bút (✎) & Chặn Tự Động Mở Ghi Chú Khi Click Thân Node 🎯🖱️
+
+- **🎯 Yêu cầu từ người dùng**: *"sao giờ bấm node nó hiện luôn phần ghi chú rồi bấm vào bút hiện là dc r chứ"*.
+  - Người dùng bấm vào thân node để chọn hoặc kéo di chuyển node nhưng hệ thống lại tự động bật bảng ghi chú ra.
+  - **Nguyên nhân**:
+    1. Bán kính hit-test cây bút trước đó dùng cố định `14px` mà không so sánh với tâm node, khiến các cú click vào nửa dưới bên trái của thân node bị nhận nhầm thành click trúng cây bút.
+    2. Trong hàm `handleMouseDown` có đoạn mã tự động cập nhật/mở lại Notepad khi bấm vào bất kỳ node nào nếu sidebar từng mở.
+- **🛠 Triển khai kỹ thuật ([`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Siết Chặt Hit-Test Badge Cây Bút ([`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js))**:
+     - Bán kính nhận diện chỉ bằng kích thước thực của badge: `distToNoteBadge <= (noteR + 1)`.
+     - Bắt buộc khoảng cách đến tâm cây bút phải gần hơn tâm node: `distToNoteBadge < distToCenter`. Ngăn chặn 100% tình trạng click vào thân node bị nhận nhầm.
+  2. **Bỏ Cơ Chế Tự Động Bật Bảng Ghi Chú Khi Click Thân Node**:
+     - Bấm vào thân node giờ chỉ phục vụ việc chọn node và kéo thả di chuyển (`isDraggingNode`).
+     - Bảng ghi chú **chỉ được mở khi và chỉ khi** người dùng click chính xác vào cây bút `✎` (hoặc bấm nút "Ghi chú" trên toolbar).
+  3. **Nâng Cấp Service Worker Cache v129 ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Đổi sang `smart-schedule-modular-v129`.
+- **✅ Kết quả**: Bấm vào thân node không bao giờ bị bật bảng ghi chú; chỉ khi bấm trúng cây bút nhỏ ở góc thì bảng ghi chú mới xuất hiện!
+
+
 ## 📅 [2026-09-14 20:35] - Đồng Bộ Hiển Thị Biểu Tượng Cây Bút (✎) Ngoài Node Cây Kiến Thức Khi Phần Ghi Chú Có Nội Dung 🧠✏️
 
 - **🎯 Yêu cầu từ người dùng**: *"hiện tại ở cây kiến thức tại 1 node chỉ khi sửa phần soạn thảo nó mới hiện cây bút, giờ t muốn khi phần ghi chú thay đổi cũng hiên cây bút ngoài node luôn bạn hiểu không"*.

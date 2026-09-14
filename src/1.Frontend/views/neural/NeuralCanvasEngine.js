@@ -395,18 +395,24 @@ export class NeuralCanvasEngine {
       const pos = this.worldToScreen(clickedNode.x, clickedNode.y);
       const radius = (clickedNode.parentId === null ? ROOT_RADIUS : NODE_RADIUS) * this.zoom;
 
+      const distToCenter = Math.hypot(sx - pos.x, sy - pos.y);
+
       // 1. Check if clicked the URL badge on top-right of node
       const badgeX = pos.x + radius * 0.7;
       const badgeY = pos.y - radius * 0.7;
-      if (clickedNode.url && Math.hypot(sx - badgeX, sy - badgeY) <= 14 * this.zoom) {
+      const badgeR = Math.max(7, 10 * this.zoom);
+      const distToBadge = Math.hypot(sx - badgeX, sy - badgeY);
+      if (clickedNode.url && distToBadge <= badgeR && distToBadge < distToCenter) {
         window.open(clickedNode.url, '_blank');
         return;
       }
 
-      // 2. Check if clicked the Notes badge on bottom-left
+      // 2. Check if clicked the Notes badge on bottom-left (Chỉ mở khi click chính xác trúng badge cây bút)
       const noteX = pos.x - radius * 0.7;
       const noteY = pos.y + radius * 0.7;
-      if (nodeHasAnyNotes(clickedNode) && Math.hypot(sx - noteX, sy - noteY) <= 14 * this.zoom) {
+      const noteR = Math.max(7, 9.5 * this.zoom);
+      const distToNoteBadge = Math.hypot(sx - noteX, sy - noteY);
+      if (nodeHasAnyNotes(clickedNode) && distToNoteBadge <= (noteR + 1) && distToNoteBadge < distToCenter) {
         if (this.onOpenNotepad) {
           this.onOpenNotepad(clickedNode);
           return;
@@ -418,12 +424,6 @@ export class NeuralCanvasEngine {
       this.selectedNodeId = clickedNode.id;
       const worldPos = this.screenToWorld(sx, sy);
       this.dragOffset = { x: worldPos.x - clickedNode.x, y: worldPos.y - clickedNode.y };
-
-      // Nếu Notepad Sidebar 50% đang mở, tự động cập nhật nội dung sang node vừa chọn
-      const activeSidebar = document.getElementById('neural-notepad-sidebar-panel');
-      if (activeSidebar && this.onOpenNotepad) {
-        this.onOpenNotepad(clickedNode);
-      }
     } else {
       this.isDraggingCanvas = true;
       this.selectedNodeId = null;
