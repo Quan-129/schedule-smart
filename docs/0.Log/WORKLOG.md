@@ -4,6 +4,42 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-14 21:25] - Ra Mắt Tính Năng AI Trắc Nghiệm Nơ-ron (Active Recall & Bóc Tách Bẫy Tư Duy 5 Chiều) 🧠✨🎯
+
+- **🎯 Yêu cầu từ người dùng**: *"giờ tôi có ý tưởn tại 1 node bất kì có tri thức về ghi chú, từ những kién thức đó tích hợp AI để gen ra 1 câu trắc nghiệm A, B, C, D chọn dáp án, sửa sai và giải thích kiểu các khía cạnh... có icon bên ngoài node ấy cứ bấm vào hiện popup câu trắc nghiệm ra, và lưu nếu muốn ôn những câu đã ôn thì vào phần bút ghi chú"*.
+- **🛠 Triển khai kỹ thuật ([`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js), [`NeuralQuizModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralQuizModal.js), [`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js), [`NeuralKnowledgeModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralKnowledgeModal.js), [`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`state.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/state.js), [`14.neural-quiz.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/14.neural-quiz.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Dịch Vụ AI & Phân Tích Bẫy Tư Duy ([`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js))**:
+     - Tích hợp Google Gemini REST API (`gemini-1.5-flash`) với Structured JSON Schema.
+     - Sinh câu hỏi tình huống thực tế kèm đầy đủ 5 khía cạnh bóc tách:
+       * **Chủ đề / Khái niệm cốt lõi (`coreConcept`)**
+       * **Đáp án đúng & Giải thích ngắn gọn (`explanation`)**
+       * **Bẫy / Sai lầm thường gặp (`trap`)** (chỉ rõ vì sao sinh viên hay bị lừa)
+       * **Quy tắc / Bản chất cần nhớ (`rule`)** (chuỗi logic $A \rightarrow B \rightarrow C$)
+       * **Source trích dẫn (`source`)** từ ghi chú môn học.
+     - Cơ chế **Fallback Generator thông minh**: Tự động bóc tách từ khóa trong ghi chú của node để tạo câu hỏi mẫu ngay lập tức nếu chưa cấu hình API Key hoặc mất mạng.
+     - Hỗ trợ lưu trữ API Key cá nhân trong `localStorage`.
+  2. **Icon Badge Quiz Ngoài Node Canvas ([`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js))**:
+     - Vẽ Quiz Badge màu vàng hổ phách `✨` ở góc dưới-phải (`Bottom-Right`), đối xứng hoàn hảo với Cây Bút `✎` (`Bottom-Left`), Trạng thái (`Top-Left`) và Link Drive (`Top-Right`).
+     - Chỉ xuất hiện khi node có ghi chú (`nodeHasAnyNotes(node)`).
+     - Hit-test chuẩn xác: Chỉ kích hoạt khi click trúng badge `✨` (`distToQuizBadge <= (quizR + 1) && distToQuizBadge < distToCenter`), không ảnh hưởng đến thao tác kéo thả node.
+  3. **Popup Modal Khảo Hạch AI Tương Tác ([`NeuralQuizModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralQuizModal.js))**:
+     - Thiết kế Glassmorphism Dark Mode cao cấp.
+     - 4 lựa chọn A, B, C, D: Hiệu ứng chọn đáp án tức thì (Đúng: Xanh neon `#10b981`, Sai: Đỏ `#ef4444`).
+     - Hộp bóc tách 5 chiều trượt mở mượt mà.
+     - Nút `💾 Lưu câu này`, `🎲 Đổi câu khác`, `🔑 Nhập API Key`.
+  4. **Kho Ôn Tập Trắc Nghiệm Trong Bảng Ghi Chú ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Bổ sung tab thứ 4: **`🎯 Trắc nghiệm (n)`** trong Notepad Sidebar.
+     - Hiển thị danh sách toàn bộ các câu trắc nghiệm đã lưu của node.
+     - Tính năng xem lại câu hỏi, ẩn/hiện đáp án và bóc tách bẫy để tự ôn thi trước kỳ thi.
+     - Cho phép xóa câu hoặc bấm "AI Gen Câu Mới" trực tiếp trong kho.
+  5. **Quản Lý Trạng Thái Database ([`state.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/state.js))**:
+     - Bổ sung hàm `saveNeuralNodeQuiz` và `deleteNeuralNodeQuiz`, đồng bộ với LocalStorage engine.
+  6. **Modular CSS & Service Worker Cache v130 ([`14.neural-quiz.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/14.neural-quiz.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Tách riêng `14.neural-quiz.css` theo chuẩn kiến trúc mô-đun < 250 dòng.
+     - Nâng `CACHE_NAME` lên `smart-schedule-modular-v130`.
+- **✅ Kết quả**: Tạo nên chu trình học tập khép kín hoàn hảo: Ghi chép ➔ Khảo bài nhanh 1-chạm bằng AI ➔ Bóc tách bẫy tư duy ➔ Lưu vào kho để ôn thi trước ngày thi!
+
+
 ## 📅 [2026-09-14 20:48] - Tinh Chỉnh Hit-Test Chuẩn Xác Cho Cây Bút (✎) & Chặn Tự Động Mở Ghi Chú Khi Click Thân Node 🎯🖱️
 
 - **🎯 Yêu cầu từ người dùng**: *"sao giờ bấm node nó hiện luôn phần ghi chú rồi bấm vào bút hiện là dc r chứ"*.

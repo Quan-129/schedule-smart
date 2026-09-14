@@ -6,6 +6,7 @@ import { escapeHtml } from '../../../4.Security/sanitizer.js';
 import { NeuralCanvasEngine } from '../../views/neural/NeuralCanvasEngine.js';
 import { openEditNeuralNodeModal } from './EditNeuralNodeModal.js';
 import { openNeuralNotepadSidebar, closeNeuralNotepadSidebar } from './NeuralNotepadSidebar.js';
+import { openNeuralQuizModal } from './NeuralQuizModal.js';
 
 // ==========================================================================
 // 2. TEMPLATES
@@ -151,6 +152,12 @@ export function openNeuralKnowledgeModal(subjectCode) {
     // Callback khi click icon ghi chú hoặc mở Notepad Sidepanel
     (nodeWithNotes) => {
       openNeuralNotepadSidebar(overlay, subjectCode, nodeWithNotes, () => {
+        activeCanvasEngine.updateNodes(getSubjectKnowledgeNodes(subjectCode));
+      });
+    },
+    // Callback khi click icon Quiz AI ✨
+    (nodeForQuiz) => {
+      openNeuralQuizModal(overlay, subjectCode, nodeForQuiz, () => {
         activeCanvasEngine.updateNodes(getSubjectKnowledgeNodes(subjectCode));
       });
     }

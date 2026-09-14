@@ -684,6 +684,55 @@ export function updateNeuralNode(subjectCode, nodeId, updates = {}) {
 }
 
 /**
+ * Lưu câu hỏi trắc nghiệm vào kho câu hỏi của node nơ-ron
+ * @param {string} subjectCode 
+ * @param {string} nodeId 
+ * @param {Object} quizData 
+ * @returns {boolean}
+ */
+export function saveNeuralNodeQuiz(subjectCode, nodeId, quizData) {
+  const subject = (state.driveSubjects || []).find(s => s.code === subjectCode);
+  if (!subject || !Array.isArray(subject.knowledgeNodes)) return false;
+
+  const node = subject.knowledgeNodes.find(n => n.id === nodeId);
+  if (!node) return false;
+
+  if (!Array.isArray(node.quizzes)) {
+    node.quizzes = [];
+  }
+
+  const existingIdx = node.quizzes.findIndex(q => q.id === quizData.id || q.question === quizData.question);
+  if (existingIdx !== -1) {
+    node.quizzes[existingIdx] = quizData;
+  } else {
+    node.quizzes.unshift(quizData);
+  }
+
+  persistDriveSubjects();
+  return true;
+}
+
+/**
+ * Xóa một câu hỏi trắc nghiệm khỏi node nơ-ron
+ * @param {string} subjectCode 
+ * @param {string} nodeId 
+ * @param {string} quizId 
+ * @returns {boolean}
+ */
+export function deleteNeuralNodeQuiz(subjectCode, nodeId, quizId) {
+  const subject = (state.driveSubjects || []).find(s => s.code === subjectCode);
+  if (!subject || !Array.isArray(subject.knowledgeNodes)) return false;
+
+  const node = subject.knowledgeNodes.find(n => n.id === nodeId);
+  if (!node || !Array.isArray(node.quizzes)) return false;
+
+  node.quizzes = node.quizzes.filter(q => q.id !== quizId);
+  persistDriveSubjects();
+  return true;
+}
+
+
+/**
  * Xóa một node nơ-ron và toàn bộ các node con cháu đệ quy
  * @param {string} subjectCode 
  * @param {string} nodeId 

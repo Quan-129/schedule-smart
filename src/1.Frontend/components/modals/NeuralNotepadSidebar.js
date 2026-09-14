@@ -2,8 +2,9 @@
 // 1. IMPORTS
 // ==========================================================================
 import { escapeHtml } from '../../../4.Security/sanitizer.js';
-import { updateNeuralNode } from '../../../3.Database/state.js';
+import { updateNeuralNode, deleteNeuralNodeQuiz } from '../../../3.Database/state.js';
 import { renderMarkdownToHtml } from '../../../2.Backend/utils/markdownRenderer.js';
+import { openNeuralQuizModal } from './NeuralQuizModal.js';
 
 // ==========================================================================
 // 2. HELPER FUNCTIONS: SMART FORMATTING & CONTEXT MATCHING
@@ -201,6 +202,9 @@ function renderNotepadTemplate(node) {
           <button type="button" class="neural-np-tab ${defaultTab === 'visual' ? 'active' : ''}" data-tab="visual" title="Ghi chú tự do & chèn ảnh nổi đè lên">
             <i class="fa-solid fa-paintbrush"></i> Ghi chú
           </button>
+          <button type="button" class="neural-np-tab" data-tab="quiz" title="Ngân hàng câu hỏi trắc nghiệm đã lưu">
+            <i class="fa-solid fa-bullseye"></i> Trắc nghiệm (${(node.quizzes || []).length})
+          </button>
         </div>
         <button type="button" class="neural-close-btn" id="btn-close-neural-notepad" title="Đóng bảng ghi chú">
           <i class="fa-solid fa-xmark"></i>
@@ -317,6 +321,22 @@ function renderNotepadTemplate(node) {
           <div class="visual-images-layer" id="visual-images-layer"></div>
         </div>
       </div>
+
+      <!-- 4. Pane Ngân Hàng Câu Hỏi Trắc Nghiệm Đã Lưu (Quiz Vault) -->
+      <div class="neural-np-pane hidden" id="neural-np-quiz-pane">
+        <div class="quiz-vault-header-row" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 4px 2px;">
+          <div style="font-size: 0.85rem; font-weight: 700; color: #f59e0b; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-bullseye"></i>
+            <span>Kho Câu Hỏi Trắc Nghiệm Của Khái Niệm</span>
+          </div>
+          <button type="button" class="btn-neural-quiz-action next" id="btn-open-quiz-from-vault" style="padding: 5px 12px; font-size: 0.78rem;">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> AI Gen Câu Mới
+          </button>
+        </div>
+        <div class="quiz-vault-list" id="quiz-vault-list-container">
+          <!-- Sẽ được fill bằng JavaScript -->
+        </div>
+      </div>
     </div>
 
     <!-- Footer Action -->
@@ -361,6 +381,9 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   const editPane = sidebar.querySelector('#neural-np-edit-pane');
   const previewPane = sidebar.querySelector('#neural-np-preview-pane');
   const visualPane = sidebar.querySelector('#neural-np-visual-pane');
+  const quizPane = sidebar.querySelector('#neural-np-quiz-pane');
+  const quizVaultContainer = sidebar.querySelector('#quiz-vault-list-container');
+  const btnOpenQuizFromVault = sidebar.querySelector('#btn-open-quiz-from-vault');
   const visualEditor = sidebar.querySelector('#visual-rich-editor');
   const visualImagesLayer = sidebar.querySelector('#visual-images-layer');
   const canvasWrapper = sidebar.querySelector('#visual-note-canvas-wrapper');
@@ -457,7 +480,107 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   });
 
   // ========================================================================
-  // TAB SWITCHING (ĐÃ GEN RA vs SOẠN THẢO vs GHI CHÚ)
+  // QUIZ VAULT CONTROLLER & RENDERING
+  // ========================================================================
+  const updateQuizTabBadge = () => {
+    const quizTabBtn = sidebar.querySelector('[data-tab="quiz"]');
+    if (quizTabBtn) {
+      const count = Array.isArray(node.quizzes) ? node.quizzes.length : 0;
+      quizTabBtn.innerHTML = `<i class="fa-solid fa-bullseye"></i> Trắc nghiệm (${count})`;
+    }
+  };
+
+  const renderQuizVaultList = () => {
+    if (!quizVaultContainer) return;
+    const quizzes = Array.isArray(node.quizzes) ? node.quizzes : [];
+
+    if (quizzes.length === 0) {
+      quizVaultContainer.innerHTML = `
+        <div class="quiz-vault-empty">
+          <i class="fa-solid fa-wand-magic-sparkles" style="font-size: 2.2rem; color: #f59e0b; margin-bottom: 12px; display: block;"></i>
+          <p style="font-weight: 600; color: #f8fafc; margin-bottom: 4px;">Chưa có câu hỏi trắc nghiệm nào được lưu</p>
+          <p style="font-size: 0.8rem; color: #94a3b8; margin-bottom: 16px;">Bấm nút "AI Gen Câu Mới" ở góc trên hoặc icon ✨ ngoài Cây Kiến Thức để bắt đầu khảo hạch.</p>
+        </div>
+      `;
+      return;
+    }
+
+    quizVaultContainer.innerHTML = quizzes.map((q, qIdx) => {
+      const optionsHtml = (q.options || []).map((opt, oIdx) => {
+        const prefix = ['A', 'B', 'C', 'D'][oIdx] || '';
+        const cleanOpt = opt.replace(/^[A-D]\.\s*/i, '');
+        return `
+          <div style="font-size: 0.84rem; padding: 6px 10px; border-radius: 6px; background: rgba(255,255,255,0.025); margin-bottom: 4px; display: flex; gap: 8px;">
+            <strong style="color: #f59e0b;">${prefix}.</strong>
+            <span style="color: #cbd5e1;">${escapeHtml(cleanOpt)}</span>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="quiz-vault-item-card" data-quiz-id="${q.id}">
+          <div class="quiz-vault-item-top">
+            <span style="font-size: 0.75rem; font-weight: 700; color: #f59e0b; background: rgba(245, 158, 11, 0.12); padding: 2px 7px; border-radius: 5px;">
+              Câu ${qIdx + 1}
+            </span>
+            <button type="button" class="quiz-vault-btn-del" data-action="delete-quiz" data-id="${q.id}" title="Xóa câu này">
+              <i class="fa-solid fa-trash-can"></i> Xóa
+            </button>
+          </div>
+
+          <div class="quiz-vault-item-title">${escapeHtml(q.question)}</div>
+
+          <div style="margin: 6px 0;">
+            ${optionsHtml}
+          </div>
+
+          <details style="margin-top: 6px; font-size: 0.82rem; background: rgba(0,0,0,0.25); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+            <summary style="cursor: pointer; font-weight: 600; color: #818cf8; user-select: none;">
+              <i class="fa-solid fa-lightbulb"></i> Xem đáp án &amp; Bóc tách bẫy tư duy
+            </summary>
+            <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
+              <div style="color: #10b981;">
+                <strong>Đáp án đúng:</strong> ${['A', 'B', 'C', 'D'][q.correctIndex]}
+              </div>
+              <div style="color: #cbd5e1;">
+                <strong>💡 Giải thích:</strong> ${escapeHtml(q.explanation || '')}
+              </div>
+              <div style="background: rgba(245, 158, 11, 0.08); border-left: 3px solid #f59e0b; padding: 6px 10px; border-radius: 0 6px 6px 0; color: #fef3c7;">
+                <strong style="color: #f59e0b;">⚠️ Bẫy thường gặp:</strong> ${escapeHtml(q.trap || '')}
+              </div>
+              <div style="background: rgba(16, 185, 129, 0.08); border-left: 3px solid #10b981; padding: 6px 10px; border-radius: 0 6px 6px 0; color: #d1fae5;">
+                <strong style="color: #10b981;">💎 Bản chất cốt lõi:</strong> ${escapeHtml(q.rule || '')}
+              </div>
+            </div>
+          </details>
+        </div>
+      `;
+    }).join('');
+
+    // Gắn sự kiện nút xóa câu
+    quizVaultContainer.querySelectorAll('[data-action="delete-quiz"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const qId = btn.dataset.id;
+        deleteNeuralNodeQuiz(subjectCode, node.id, qId);
+        updateQuizTabBadge();
+        renderQuizVaultList();
+        if (onSavedCallback) onSavedCallback(node.id, textarea.value);
+      });
+    });
+  };
+
+  if (btnOpenQuizFromVault) {
+    btnOpenQuizFromVault.addEventListener('click', () => {
+      openNeuralQuizModal(parentContainer, subjectCode, node, () => {
+        updateQuizTabBadge();
+        renderQuizVaultList();
+        if (onSavedCallback) onSavedCallback(node.id, textarea.value);
+      });
+    });
+  }
+
+  // ========================================================================
+  // TAB SWITCHING (ĐÃ GEN RA vs SOẠN THẢO vs GHI CHÚ vs TRẮC NGHIỆM)
   // ========================================================================
   const switchViewTab = (tab) => {
     deselectAllVisualCards();
@@ -471,17 +594,27 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       if (mdToolbar) mdToolbar.style.display = 'flex';
       editPane.classList.add('hidden');
       if (visualPane) visualPane.classList.add('hidden');
+      if (quizPane) quizPane.classList.add('hidden');
       previewPane.classList.remove('hidden');
     } else if (tab === 'visual') {
       if (mdToolbar) mdToolbar.style.display = 'none';
       editPane.classList.add('hidden');
       previewPane.classList.add('hidden');
+      if (quizPane) quizPane.classList.add('hidden');
       if (visualPane) visualPane.classList.remove('hidden');
       if (visualEditor) visualEditor.focus();
+    } else if (tab === 'quiz') {
+      if (mdToolbar) mdToolbar.style.display = 'none';
+      editPane.classList.add('hidden');
+      previewPane.classList.add('hidden');
+      if (visualPane) visualPane.classList.add('hidden');
+      if (quizPane) quizPane.classList.remove('hidden');
+      renderQuizVaultList();
     } else {
       if (mdToolbar) mdToolbar.style.display = 'flex';
       previewPane.classList.add('hidden');
       if (visualPane) visualPane.classList.add('hidden');
+      if (quizPane) quizPane.classList.add('hidden');
       editPane.classList.remove('hidden');
       textarea.focus();
     }

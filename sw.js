@@ -4,7 +4,7 @@
  * ==========================================================================
  */
 
-const CACHE_NAME = 'smart-schedule-modular-v129';
+const CACHE_NAME = 'smart-schedule-modular-v130';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -22,12 +22,15 @@ const STATIC_ASSETS = [
   './src/1.Frontend/styles/11.space-selector.css',
   './src/1.Frontend/styles/12.backpack-folder.css',
   './src/1.Frontend/styles/13.neural-knowledge.css',
+  './src/1.Frontend/styles/14.neural-quiz.css',
   './manifest.json',
   './src/1.Frontend/main.js',
   './src/1.Frontend/components/CircularNode.js',
   './src/1.Frontend/components/EditModal.js',
   './src/1.Frontend/components/modals/NeuralNotepadSidebar.js',
   './src/1.Frontend/components/modals/NeuralKnowledgeModal.js',
+  './src/1.Frontend/components/modals/NeuralQuizModal.js',
+  './src/2.Backend/services/GeminiAIService.js',
   './src/1.Frontend/components/modals/EditNeuralNodeModal.js',
   './src/1.Frontend/views/neural/NeuralCanvasEngine.js',
   './src/1.Frontend/components/modals/EditSubjectModal.js',
