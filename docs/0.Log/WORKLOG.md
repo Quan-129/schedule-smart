@@ -4,6 +4,30 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-14 21:40] - Sửa Lỗi Nút "Đổi Câu Khác" & Nâng Cấp Hệ Thống Đa Góc Độ Câu Hỏi (Dynamic Quiz Archetypes) 🎲🔄
+
+- **🎯 Yêu cầu từ người dùng**: *"sao hiện tại đổi câu khác không được"*.
+  - **Nguyên nhân**:
+    1. Trong chế độ mô phỏng / khi chưa cấu hình API Key, hàm `generateFallbackQuiz` trước đó chỉ dùng câu đầu tiên và thứ hai cố định của ghi chú với đáp án A cố định, khiến mỗi lần người dùng bấm "Đổi câu khác" thì câu hỏi và 4 đáp án sinh ra giống hệt 100% câu cũ.
+    2. Chưa truyền biến đếm số lần sinh câu (`attemptIndex`) và thiếu độ trễ loading trực quan, khiến người dùng không thấy được sự thay đổi.
+- **🛠 Triển khai kỹ thuật ([`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js), [`NeuralQuizModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralQuizModal.js), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Nâng Cấp Hệ Thống 4 Góc Độ Câu Hỏi Phong Phú ([`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js))**:
+     - Xây dựng 4 Question Archetypes xoay vòng:
+       * **Góc độ 1**: Tiến trình & Bản chất quy luật vận hành.
+       * **Góc độ 2**: Chẩn đoán Ngộ nhận tư duy & Bẫy thực tế.
+       * **Góc độ 3**: Tình huống Ứng dụng & Ra quyết định đòn bẩy.
+       * **Góc độ 4**: Phân định Ranh giới & Điều kiện biên áp dụng.
+     - Xáo trộn ngẫu nhiên vị trí đáp án đúng `correctIndex` (từ A đến D).
+     - Xoay vòng các câu văn ngữ liệu trong ghi chú của người dùng theo `attemptIndex`.
+     - Với Gemini API: Bổ sung chỉ dẫn `ĐÂY LÀ LẦN KHẢO HẠCH THỨ ${attemptIndex + 1}` kèm `temperature: 0.88` để AI luôn sinh câu hỏi mới lạ, không trùng lặp.
+  2. **Hiệu Ứng Tải Mượt Mà & Tăng Attempt Index ([`NeuralQuizModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralQuizModal.js))**:
+     - Nút `btn-quiz-next` tự động tăng `attemptIndex++` mỗi lần bấm.
+     - Thêm hiệu ứng loading spinner tối thiểu 450ms và hiển thị số thứ tự góc độ câu hỏi đang tạo.
+  3. **Nâng Cấp Service Worker Cache v131 ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Đổi sang `smart-schedule-modular-v131`.
+- **✅ Kết quả**: Bấm "Đổi câu khác" lập tức xoay vòng sang các câu hỏi trắc nghiệm hoàn toàn mới với các góc nhìn phân tích bẫy và đáp án đúng được xáo trộn ngẫu nhiên!
+
+
 ## 📅 [2026-09-14 21:25] - Ra Mắt Tính Năng AI Trắc Nghiệm Nơ-ron (Active Recall & Bóc Tách Bẫy Tư Duy 5 Chiều) 🧠✨🎯
 
 - **🎯 Yêu cầu từ người dùng**: *"giờ tôi có ý tưởn tại 1 node bất kì có tri thức về ghi chú, từ những kién thức đó tích hợp AI để gen ra 1 câu trắc nghiệm A, B, C, D chọn dáp án, sửa sai và giải thích kiểu các khía cạnh... có icon bên ngoài node ấy cứ bấm vào hiện popup câu trắc nghiệm ra, và lưu nếu muốn ôn những câu đã ôn thì vào phần bút ghi chú"*.

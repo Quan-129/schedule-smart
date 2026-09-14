@@ -94,6 +94,7 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
 
   let currentQuiz = null;
   let isSaved = false;
+  let attemptIndex = 0;
 
   const loadQuiz = async () => {
     const bodyEl = overlay.querySelector('#neural-quiz-body');
@@ -104,8 +105,8 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
     bodyEl.innerHTML = `
       <div class="neural-quiz-loading-state">
         <div class="neural-quiz-spinner"></div>
-        <div class="neural-quiz-loading-text">AI đang phân tích tri thức ghi chú...</div>
-        <div class="neural-quiz-loading-hint">Bóc tách bản chất, tạo lập các phương án nhiễu và thiết lập cảnh báo bẫy tư duy.</div>
+        <div class="neural-quiz-loading-text">AI đang phân tích tri thức ghi chú (Góc độ #${attemptIndex + 1})...</div>
+        <div class="neural-quiz-loading-hint">Đang bóc tách bản chất, tạo lập các phương án nhiễu mới và thiết lập cảnh báo bẫy tư duy.</div>
       </div>
     `;
     footerEl.style.display = 'none';
@@ -117,7 +118,12 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
     isSaved = false;
 
     try {
-      currentQuiz = await generateQuizFromNodeKnowledge(node.label, getCombinedNotes());
+      // Đảm bảo có hiệu ứng loading tối thiểu 450ms để người dùng thấy rõ AI đang suy nghĩ đổi câu
+      const [quiz] = await Promise.all([
+        generateQuizFromNodeKnowledge(node.label, getCombinedNotes(), attemptIndex),
+        new Promise(resolve => setTimeout(resolve, 450))
+      ]);
+      currentQuiz = quiz;
       renderQuizContent(currentQuiz);
       footerEl.style.display = 'flex';
     } catch (err) {
@@ -242,6 +248,7 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
   // Nút Đổi câu khác
   const nextBtn = overlay.querySelector('#btn-quiz-next');
   nextBtn.addEventListener('click', () => {
+    attemptIndex++;
     loadQuiz();
   });
 
