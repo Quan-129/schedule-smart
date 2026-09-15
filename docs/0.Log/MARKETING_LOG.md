@@ -5,6 +5,26 @@
 
 ---
 
+## 💎 ENTRY 12: [2026-09-15] - "iOS Squircle Adaptive Folder": Thư Mục Ô Vuông Bo Góc Tự Co Giãn Lưới 2x2, 3x3, 4x4 Cực Đã Mắt 📁✨📱
+
+### 📌 Phân Loại & Tags:
+`#SquircleDesign` `#AppleFolderUI` `#AdaptiveGrid` `#SatisfyingInteraction` `#UIUXDesign` `#SinhVienTech`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Khung Vuông Bo Góc Chuẩn Tỉ Lệ Vàng (Apple Squircle Aesthetics)**: Không còn là hình tròn nhạt nhòa, thư mục môn học khoác lên diện mạo khối vuông bo góc kính mờ siêu sang của iOS.
+- **Lưới Icon Tự Động Co Giãn Thông Minh (Adaptive Matrix)**:
+  * 1 - 4 môn: Tự phóng to ô icon lên 36px, xếp lưới 2x2, căn chính giữa tâm không góc chết.
+  * 5 - 9 môn: Tự chuyển lưới 3x3, 9 icon xếp ngay ngắn như màn hình App Library.
+  * 10 - 16 môn: Tự mở rộng ma trận 4x4 sắc sảo, thỏa mãn mọi tín đồ sắp xếp ngăn nắp.
+
+### 2. 🎣 Bộ Viral Hooks TikTok / Reels / Threads:
+1. **Satisfying UI Hook**:
+   > *"Nhìn chiếc thư mục môn học kéo thả tự động chia lưới 2x2 rồi 3x3 như iPhone này đi, ai mê giao diện công nghệ nhìn cái là mê tít thò lò luôn!..."*
+2. **Organization / Productivity Hook**:
+   > *"Gom 10 môn học vào 1 folder mà vẫn nhìn rõ mồn một từng logo môn học bên trong nhờ ma trận icon tự scale cực thông minh này!..."*
+
+---
+
 ## 💎 ENTRY 11: [2026-09-15] - "Neural Gamification Mastery": Nạp Năng Lượng Đổi Màu Theo Nấc 1/3 & Vòng Cung Tiến Trình Hoàn Thành 100% 🎯🧠⚡
 
 ### 📌 Phân Loại & Tags:

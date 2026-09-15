@@ -4,6 +4,20 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-15 18:25] - Nâng Cấp Thư Mục Chiếc Cặp: Khung Squircle Vuông Bo Góc & Ma Trận Lưới Thích Ứng Tự Scale (2x2, 3x3, 4x4) 📁✨📱
+
+- **🎯 Yêu cầu từ người dùng**: Thay đổi hiển thị thư mục môn học trong Chiếc Cặp: chuyển từ hình tròn sang ô vuông hơi bo góc (phong cách iOS Squircle App Folder), các icon môn học bên trong tự động co giãn (scale) theo ma trận hình vuông (2x2, 3x3, 4x4) và căn giữa cân đối, khắc phục tình trạng bị lệch và trống trải khi thư mục chỉ có 2 môn.
+- **🛠 Triển khai kỹ thuật ([`FolderNode.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/FolderNode.js), [`12.backpack-folder.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/12.backpack-folder.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Khung Thư Mục Squircle Vuông Bo Góc ([`12.backpack-folder.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/12.backpack-folder.css))**:
+     - `.bp-app-btn.bp-folder-btn .bp-circle-wrapper`: Đổi `border-radius: 26px` (chuẩn bo góc mềm Squircle của Apple iOS), phủ hiệu ứng kính mờ `backdrop-filter: blur(16px)` và đổ bóng chiều sâu 3D sang trọng.
+  2. **Ma Trận Lưới Thích Ứng Tự Động Co Giãn (Adaptive Matrix) ([`FolderNode.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/FolderNode.js), [`12.backpack-folder.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/12.backpack-folder.css))**:
+     - **1 - 4 môn học**: Tự động xếp lưới `.grid-2x2` (kích thước icon phóng to lên 36x36px, bo góc 10px). Dùng `grid-auto-rows: 36px` kết hợp `align-content: center` để khi chỉ có 2 môn học, 2 icon sẽ được căn **CHÍNH GIỮA TÂM THƯ MỤC**, loại bỏ hoàn toàn hiện tượng lệch lên trên!
+     - **5 - 9 môn học**: Tự động chuyển thành lưới `.grid-3x3` (kích thước icon 24x24px, bo góc 6.5px), xếp 3 hàng 3 cột ngay ngắn như App Library.
+     - **10 - 16 môn học**: Tự động chuyển thành lưới `.grid-4x4` (kích thước icon 18x18px, bo góc 4.5px), hiển thị ma trận ứng dụng trọn vẹn.
+  3. **Icon Con Mini Squircle**:
+     - Từng ô icon con chuyển sang hình vuông bo góc nhẹ với viền sáng neon và shadow sắc sảo, hover phóng to nhẹ.
+  4. **Nâng Cấp Service Worker Cache v139 ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**.
+
 ## 📅 [2026-09-15 09:55] - Ra Mắt Hệ Thống Thử Thách Câu Hỏi Nơ-ron & Cơ Chế Đổi Màu Theo Nấc Tiến Độ (Gamification Mastery) 🎯🧠🌈
 
 - **🎯 Yêu cầu từ người dùng**: Có nút setup chung để cài đặt số câu hỏi thử thách mục tiêu cho mỗi node (ví dụ: 3 câu). Cứ mỗi lần người dùng làm xong 1 câu trắc nghiệm tại node đó thì node sẽ đổi màu theo từng 1/3 nấc tiến độ trực quan.
