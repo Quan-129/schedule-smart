@@ -73,6 +73,11 @@ function renderNeuralModalShell(subject) {
         <span>Căn Giữa</span>
       </button>
 
+      <button type="button" class="neural-tool-btn" id="btn-neural-auto-layout" title="Tối ưu bố cục cây tri thức gọn gàng, chống bè ngang">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span>Sắp Xếp Gọn</span>
+      </button>
+
       <button type="button" class="neural-tool-btn" id="btn-neural-zoom-in" title="Phóng to">
         <i class="fa-solid fa-magnifying-glass-plus"></i>
       </button>
@@ -169,6 +174,13 @@ export function openNeuralKnowledgeModal(subjectCode) {
 
   const centerBtn = overlay.querySelector('#btn-neural-center');
   centerBtn.addEventListener('click', () => activeCanvasEngine.centerOnRoot());
+
+  const autoLayoutBtn = overlay.querySelector('#btn-neural-auto-layout');
+  if (autoLayoutBtn) {
+    autoLayoutBtn.addEventListener('click', () => {
+      activeCanvasEngine.autoLayoutCompactTree();
+    });
+  }
 
   const zoomInBtn = overlay.querySelector('#btn-neural-zoom-in');
   zoomInBtn.addEventListener('click', () => activeCanvasEngine.zoomIn());

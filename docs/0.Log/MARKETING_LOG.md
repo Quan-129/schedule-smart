@@ -5,6 +5,24 @@
 
 ---
 
+## 💎 ENTRY 10: [2026-09-15] - "Magic Compact Tree": Tự Động Xuống Dòng, Thu Gọn/Bung Nhánh [+N] & Đũa Thần Sắp Xếp Cây Nơ-ron Gọn Gàng 🪄🌳✨
+
+### 📌 Phân Loại & Tags:
+`#NeuralMindmap` `#CompactTreeLayout` `#MindmapHacks` `#SatisfyingUI` `#StudyWithMe` `#SinhVienTech`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Đập tan nỗi ám ảnh Cây Mindmap bị bè ngang dạt ra xa hàng nghìn pixel**: Tự động ngắt chữ dài 50-65 ký tự thành nhiều dòng ngắn cân xứng ngay trên canvas, giữ các node con luôn ở cự ly gần gũi trực quan.
+- **Thu gọn / Bung nhánh đệ quy kèm huy hiệu [+N] đếm con cháu ẩn**: Bấm vào nút tròn ở đỉnh node cha để thu gọn toàn bộ cây con vào một badge phát sáng rực rỡ, hiển thị chính xác tổng số tri thức con đang ẩn bên trong.
+- **Nút "🪄 Sắp Xếp Gọn" (One-click Auto-Layout)**: Một chạm duy nhất để thuật toán hướng tâm ziczac tự động nắn chỉnh lại toàn bộ các nhánh toả tròn 360 độ, so le bán kính chống đè hàng, đưa cây tri thức về bố cục thẩm mỹ chuẩn chỉ nhất.
+
+### 2. 🎣 Bộ Viral Hooks TikTok / Reels / Threads:
+1. **Satisfying Interaction Hook**:
+   > *"Vẽ mindmap mà ghét nhất các nhánh con bị bè ngang dài ngoằng trôi dạt ra tận rìa màn hình? Xem chiếc nút Đũa Thần này: bấm 1 cái toàn bộ cây kiến thức tự gom gọn lại tròn trịa đẹp mắt, bấm thu gọn hiện badge +15 con cháu nhìn bao phê!..."*
+2. **Productivity / Study Hack Hook**:
+   > *"Bí quyết quản lý 100 nhánh kiến thức ôn thi mà màn hình vẫn gọn gàng tinh tươm: gom các chương đã học vào badge nơ-ron, chừng nào cần ôn thì bung ra kiểm tra, không sợ rối mắt tí nào!..."*
+
+---
+
 ## 💎 ENTRY 9: [2026-09-13] - "Visual Canvas Note": Dán Ảnh Bài Giảng Đè Lên Chữ Bằng Ctrl+V, Co Giãn 4 Góc & Kéo Thả Tự Do Như Sticker Notion/GoodNotes 🎨🖼️✨
 
 ### 📌 Phân Loại & Tags:

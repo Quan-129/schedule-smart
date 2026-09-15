@@ -4,6 +4,31 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-15 07:20] - Tối Ưu Bố Cục Nơ-ron: Xuống Dòng Cân Đối, Thu Gọn/Bung Nhánh [+N] & Nút Sắp Xếp Cây Gọn Gàng 🪄🌳
+
+- **🎯 Yêu cầu từ người dùng**: Giải quyết vấn đề các nhánh cây nằm dưới bị bè ngang quá mức gây tốn diện tích canvas (khi các node con có nhãn dài hoặc nhiều nhánh con). Kết hợp 3 giải pháp: (1) Tự động ngắt dòng thông minh; (3) Thu gọn/bung nhánh con kèm đếm số lượng node ẩn; (4) Nút Tự động sắp xếp cây tri thức nhỏ gọn (Auto-Layout Compact Tree).
+- **🛠 Triển khai kỹ thuật ([`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js), [`NeuralKnowledgeModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralKnowledgeModal.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Ngắt Dòng Nhãn Tự Động Thông Minh ([`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js))**:
+     - Xây dựng hàm `wrapCanvasText(text, maxCharsPerLine, maxLines)`: Tự động phân tách chuỗi nhãn dài 50-65 ký tự thành các dòng ngắn (15-18 ký tự/dòng, tối đa 3 dòng), gắn `...` nếu vượt quá giới hạn.
+     - `drawNode()` vẽ từng dòng văn bản căn giữa theo trục dọc, giúp loại bỏ hoàn toàn hiện tượng nhãn chữ trải dài hàng trăm pixel làm đẩy các node con ra xa.
+  2. **Cơ Chế Thu Gọn / Bung Nhánh Con Kèm Huy Hiệu [+N] ([`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js))**:
+     - `getVisibleNodes()`: Lọc các node đang hiển thị, tự động ẩn toàn bộ cây con nếu bất kỳ node tổ tiên nào có `collapsed === true`.
+     - `getDescendantCount()`: Đếm đệ quy chính xác số lượng con cháu ẩn trong nhánh.
+     - Huy hiệu tương tác ở đỉnh trên node (`pos.x, pos.y - radius * 0.95`):
+       * Khi mở: Nút tròn xám nhỏ `−`.
+       * Khi thu gọn: Huy hiệu đỏ cam nổi bật `+N` (với N là số node con cháu ẩn).
+     - Bắt click đỉnh trên node để lật trạng thái `node.collapsed = !node.collapsed` và tự động lưu vào LocalStorage qua `saveSubjectKnowledgeNodes()`.
+  3. **Thuật Toán Sắp Xếp Gọn Cây Tri Thức (Auto-Layout Compact Tree) ([`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js))**:
+     - Thêm phương thức `autoLayoutCompactTree()`:
+       * Node Root đặt tại gốc tọa độ `(0, 0)`.
+       * Các nhánh Cấp 1 phân bổ đều 360 độ quanh Root.
+       * Các nhánh Cấp 2, 3, 4+ mở theo hình quạt hướng tâm với góc giới hạn hẹp (`maxSpread <= 65°`), so le ziczac bán kính (+30px cho node lẻ) giúp các node con không đè lên nhau và không bị bè ngang.
+       * Tự động lưu tọa độ mới và căn giữa màn hình mượt mà.
+  4. **Nút "🪄 Sắp Xếp Gọn" Trên Toolbar ([`NeuralKnowledgeModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralKnowledgeModal.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Thêm nút `#btn-neural-auto-layout` màu tím ma thuật cạnh nút Căn Giữa trên thanh công cụ HUD dưới màn hình.
+  5. **Nâng Cấp Service Worker Cache v136 ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Kích hoạt cập nhật phiên bản cache `smart-schedule-modular-v136` để người dùng nhận ngay giao diện và thuật toán mới.
+
 ## 📅 [2026-09-15 00:10] - Ra Mắt Tính Năng Backtracking Phả Hệ Tri Thức Nơ-ron & Kích Hoạt Khảo Hạch AI Tại Mọi Node 🌿🧠🎯
 
 - **🎯 Yêu cầu từ người dùng**: *"đó là những node có tài liệu thì tự động hiện như vậy nhưng tôi muốn có thêm tùy chọn để tạo gen câu hỏi ai đấy tại node bất kỳ nữa, tra cứu theo câu ví vụ tại node con thứ tư thì tra ngược lên node 3 , 2, 1, node gốc để hiểu ngữ cảnh để gen cho đúng, với lại các node hiện tại đang có chức năng gen đó cũng theo tư duy đó backtracking 4, 3,2,1, gốc kèm ghi chú để hiêu ngữ cảnh chính xác nhất để gen..."*

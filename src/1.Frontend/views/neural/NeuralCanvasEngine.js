@@ -46,6 +46,80 @@ export function nodeHasAnyNotes(node) {
   return false;
 }
 
+/**
+ * Tách nhãn chữ dài thành nhiều dòng ngắn cân đối (chống bè ngang)
+ * @param {string} text - Chuỗi nhãn của node
+ * @param {number} maxCharsPerLine - Số ký tự tối đa trên 1 dòng
+ * @param {number} maxLines - Số dòng tối đa
+ * @returns {Array<string>}
+ */
+export function wrapCanvasText(text, maxCharsPerLine = 17, maxLines = 3) {
+  if (!text) return ['Node'];
+  const words = text.trim().split(/\s+/);
+  const lines = [];
+  let currentLine = '';
+
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i];
+    if (!currentLine) {
+      currentLine = word;
+    } else if ((currentLine + ' ' + word).length <= maxCharsPerLine) {
+      currentLine += ' ' + word;
+    } else {
+      lines.push(currentLine);
+      currentLine = word;
+      if (lines.length === maxLines - 1) break;
+    }
+  }
+
+  if (currentLine && lines.length < maxLines) {
+    lines.push(currentLine);
+  }
+
+  // Nếu còn từ chưa đưa vào mà đã hết số dòng -> gắn dấu "..."
+  const totalRenderedWords = lines.join(' ').split(/\s+/).length;
+  if (totalRenderedWords < words.length && lines.length > 0) {
+    lines[lines.length - 1] = lines[lines.length - 1].replace(/[\.,\s]+$/, '') + '...';
+  }
+
+  return lines;
+}
+
+/**
+ * Lấy danh sách các node đang được hiển thị (không bị ẩn bởi cha/tổ tiên collapsed)
+ * @param {Array<Object>} nodes 
+ * @returns {Array<Object>}
+ */
+export function getVisibleNodes(nodes) {
+  if (!Array.isArray(nodes)) return [];
+  const nodeMap = new Map(nodes.map(n => [n.id, n]));
+  return nodes.filter(node => {
+    let curr = node;
+    while (curr.parentId) {
+      const parent = nodeMap.get(curr.parentId);
+      if (!parent) break;
+      if (parent.collapsed) return false;
+      curr = parent;
+    }
+    return true;
+  });
+}
+
+/**
+ * Đếm tổng số node con cháu (đệ quy) của một node
+ * @param {string} nodeId 
+ * @param {Array<Object>} nodes 
+ * @returns {number}
+ */
+export function getDescendantCount(nodeId, nodes) {
+  if (!Array.isArray(nodes)) return 0;
+  const directChildren = nodes.filter(n => n.parentId === nodeId);
+  let total = directChildren.length;
+  for (const child of directChildren) {
+    total += getDescendantCount(child.id, nodes);
+  }
+  return total;
+}
 
 // ==========================================================================
 // 3. NEURAL CANVAS ENGINE CLASS
@@ -145,6 +219,10 @@ export class NeuralCanvasEngine {
     this.unbindEvents();
   }
 
+  getVisibleNodes() {
+    return getVisibleNodes(this.nodes);
+  }
+
   draw() {
     const ctx = this.ctx;
     ctx.clearRect(0, 0, this.width, this.height);
@@ -152,11 +230,14 @@ export class NeuralCanvasEngine {
     // 1. Draw Grid Dots in Background
     this.drawBackgroundGrid(ctx);
 
-    // 2. Draw Connections & Pulses
-    this.drawConnections(ctx);
+    // 2. Visible nodes only (ẩn các nhánh con của node bị collapsed)
+    const visibleNodes = this.getVisibleNodes();
 
-    // 3. Draw Nodes
-    this.nodes.forEach(node => this.drawNode(ctx, node));
+    // 3. Draw Connections & Pulses
+    this.drawConnections(ctx, visibleNodes);
+
+    // 4. Draw Nodes
+    visibleNodes.forEach(node => this.drawNode(ctx, node));
   }
 
   drawBackgroundGrid(ctx) {
@@ -177,11 +258,12 @@ export class NeuralCanvasEngine {
     ctx.restore();
   }
 
-  drawConnections(ctx) {
+  drawConnections(ctx, visibleNodes = this.nodes) {
     const nodeMap = new Map(this.nodes.map(n => [n.id, n]));
+    const visibleSet = new Set(visibleNodes.map(n => n.id));
 
-    this.nodes.forEach(node => {
-      if (!node.parentId) return;
+    visibleNodes.forEach(node => {
+      if (!node.parentId || !visibleSet.has(node.parentId)) return;
       const parent = nodeMap.get(node.parentId);
       if (!parent) return;
 
@@ -265,14 +347,19 @@ export class NeuralCanvasEngine {
     ctx.strokeStyle = isSelected ? '#ffffff' : nodeColor;
     ctx.stroke();
 
-    // 4. Node Label Text
-    ctx.font = `${Math.max(10, (isRoot ? 13 : 11.5) * this.zoom)}px 'Outfit', sans-serif`;
+    // 4. Node Label Text (Tự động xuống dòng thông minh cân đối, chống bè ngang)
+    const labelLines = wrapCanvasText(node.label || 'Node', isRoot ? 18 : 15, 3);
+    const fontSize = Math.max(9.5, (isRoot ? 12.5 : 11) * this.zoom);
+    const lineHeight = fontSize * 1.25;
+    ctx.font = `${fontSize}px 'Outfit', sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     ctx.fillStyle = '#f8fafc';
     ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
     ctx.shadowBlur = 6;
-    ctx.fillText(node.label || 'Node', pos.x, pos.y + radius + 6);
+    labelLines.forEach((line, idx) => {
+      ctx.fillText(line, pos.x, pos.y + radius + 6 + idx * lineHeight);
+    });
 
     // 5. Status Badge on Top-Left (✓ hoặc ⚡)
     if (node.status === 'completed' || node.status === 'learning') {
@@ -358,6 +445,40 @@ export class NeuralCanvasEngine {
     ctx.textBaseline = 'middle';
     ctx.fillText('✨', quizX, quizY);
 
+    // 9. Toggle Collapse / Expand Badge (ở đỉnh trên node, chỉ hiện khi node có con)
+    const hasChildren = this.nodes.some(n => n.parentId === node.id);
+    if (hasChildren) {
+      const toggleX = pos.x;
+      const toggleY = pos.y - radius * 0.95;
+      const isCollapsed = !!node.collapsed;
+      const toggleR = Math.max(8, (isCollapsed ? 11 : 9) * this.zoom);
+
+      ctx.beginPath();
+      ctx.arc(toggleX, toggleY, toggleR, 0, Math.PI * 2);
+      ctx.fillStyle = isCollapsed ? '#ef4444' : '#1e293b';
+      ctx.shadowColor = isCollapsed ? 'rgba(239, 68, 68, 0.6)' : 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowBlur = isCollapsed ? 8 : 4;
+      ctx.fill();
+      ctx.strokeStyle = isCollapsed ? '#ffffff' : '#64748b';
+      ctx.lineWidth = isCollapsed ? 1.8 : 1.2;
+      ctx.stroke();
+
+      if (isCollapsed) {
+        const count = getDescendantCount(node.id, this.nodes);
+        ctx.font = `bold ${Math.max(7, 8.5 * this.zoom)}px 'Outfit', sans-serif`;
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(`+${count}`, toggleX, toggleY);
+      } else {
+        ctx.font = `bold ${Math.max(9, 10 * this.zoom)}px sans-serif`;
+        ctx.fillStyle = '#94a3b8';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('−', toggleX, toggleY);
+      }
+    }
+
     ctx.restore();
   }
 
@@ -390,8 +511,9 @@ export class NeuralCanvasEngine {
   }
 
   findNodeAt(screenX, screenY) {
-    for (let i = this.nodes.length - 1; i >= 0; i--) {
-      const node = this.nodes[i];
+    const visibleNodes = this.getVisibleNodes();
+    for (let i = visibleNodes.length - 1; i >= 0; i--) {
+      const node = visibleNodes[i];
       const pos = this.worldToScreen(node.x, node.y);
       const isRoot = node.parentId === null;
       const radius = (isRoot ? ROOT_RADIUS : NODE_RADIUS) * this.zoom + 10;
@@ -417,6 +539,20 @@ export class NeuralCanvasEngine {
       const radius = (clickedNode.parentId === null ? ROOT_RADIUS : NODE_RADIUS) * this.zoom;
 
       const distToCenter = Math.hypot(sx - pos.x, sy - pos.y);
+
+      // 0. Check if clicked the Toggle Collapse/Expand badge at top center
+      const hasChildren = this.nodes.some(n => n.parentId === clickedNode.id);
+      if (hasChildren) {
+        const toggleX = pos.x;
+        const toggleY = pos.y - radius * 0.95;
+        const toggleR = Math.max(8, (clickedNode.collapsed ? 11 : 9) * this.zoom);
+        const distToToggle = Math.hypot(sx - toggleX, sy - toggleY);
+        if (distToToggle <= toggleR + 3) {
+          clickedNode.collapsed = !clickedNode.collapsed;
+          saveSubjectKnowledgeNodes(this.subjectCode, this.nodes);
+          return;
+        }
+      }
 
       // 1. Check if clicked the URL badge on top-right of node
       const badgeX = pos.x + radius * 0.7;
@@ -527,6 +663,71 @@ export class NeuralCanvasEngine {
 
   resetZoom() {
     this.zoom = 1;
+    this.centerOnRoot();
+  }
+
+  /**
+   * Tự động tái bố cục cây tri thức nhỏ gọn (Compact Tree Layout), chống bè ngang
+   */
+  autoLayoutCompactTree() {
+    if (!this.nodes || this.nodes.length === 0) return;
+
+    // 1. Tìm node gốc (root)
+    const root = this.nodes.find(n => n.parentId === null) || this.nodes[0];
+    root.x = 0;
+    root.y = 0;
+
+    // 2. Gom nhóm con theo parentId
+    const childrenMap = new Map();
+    this.nodes.forEach(node => {
+      if (node.parentId) {
+        if (!childrenMap.has(node.parentId)) {
+          childrenMap.set(node.parentId, []);
+        }
+        childrenMap.get(node.parentId).push(node);
+      }
+    });
+
+    // 3. Phân bổ các con cấp 1 (con trực tiếp của root) theo hình tròn 360 độ
+    const directChildren = childrenMap.get(root.id) || [];
+    const k = directChildren.length;
+    const r1 = k > 6 ? 220 : (k > 3 ? 190 : 160);
+
+    // Sắp xếp các con cấp 2, 3, 4+ theo hình quạt hướng tâm (fan spread)
+    const layoutSubtree = (parentNode, parentAngle, depth) => {
+      const children = childrenMap.get(parentNode.id) || [];
+      const count = children.length;
+      if (count === 0) return;
+
+      // Góc mở tối đa của quạt (hẹp để chống bè ngang, tối đa ~65 độ)
+      const maxSpread = Math.min(Math.PI * 0.45, Math.max(0.2, (count - 1) * 0.2));
+      const startAngle = count === 1 ? parentAngle : (parentAngle - maxSpread / 2);
+      const stepAngle = count === 1 ? 0 : maxSpread / (count - 1);
+
+      // Bán kính từng cấp với so le ziczac (+30px cho node lẻ để không trùng bán kính)
+      const baseDist = 135;
+      children.forEach((child, idx) => {
+        const childAngle = startAngle + idx * stepAngle;
+        const dist = baseDist + (idx % 2 === 1 ? 30 : 0);
+        child.x = Math.round(parentNode.x + Math.cos(childAngle) * dist);
+        child.y = Math.round(parentNode.y + Math.sin(childAngle) * dist);
+
+        // Đệ quy cho các cấp sâu hơn
+        layoutSubtree(child, childAngle, depth + 1);
+      });
+    };
+
+    directChildren.forEach((child, idx) => {
+      // Phân bố đều góc quanh root bắt đầu từ hướng 12h xoay theo chiều kim đồng hồ
+      const angle = (2 * Math.PI * idx) / Math.max(1, k) - Math.PI / 2;
+      child.x = Math.round(Math.cos(angle) * r1);
+      child.y = Math.round(Math.sin(angle) * r1);
+
+      layoutSubtree(child, angle, 1);
+    });
+
+    // 4. Lưu lại tọa độ mới vào Database và căn giữa
+    saveSubjectKnowledgeNodes(this.subjectCode, this.nodes);
     this.centerOnRoot();
   }
 }

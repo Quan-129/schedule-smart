@@ -175,6 +175,19 @@
   box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
 }
 
+#btn-neural-auto-layout {
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(168, 85, 247, 0.35);
+  color: #c084fc;
+}
+
+#btn-neural-auto-layout:hover {
+  background: rgba(168, 85, 247, 0.3);
+  border-color: rgba(192, 132, 252, 0.6);
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.4);
+}
+
 .neural-toolbar-separator {
   width: 1px;
   height: 20px;
