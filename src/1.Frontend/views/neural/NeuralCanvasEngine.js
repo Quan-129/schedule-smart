@@ -667,66 +667,155 @@ export class NeuralCanvasEngine {
   }
 
   /**
-   * Tự động tái bố cục cây tri thức nhỏ gọn (Compact Tree Layout), chống bè ngang
+   * Tự động tái bố cục cây tri thức thông minh (Smart Compact Layout):
+   * Phân bổ góc theo trọng số lá (Sector Weighting) + Giải tỏa va chạm chống đè cục (Anti-Collision Relaxation)
    */
   autoLayoutCompactTree() {
     if (!this.nodes || this.nodes.length === 0) return;
 
-    // 1. Tìm node gốc (root)
+    // 1. Xác định node gốc (root)
     const root = this.nodes.find(n => n.parentId === null) || this.nodes[0];
-    root.x = 0;
-    root.y = 0;
+    const nodeMap = new Map(this.nodes.map(n => [n.id, n]));
 
-    // 2. Gom nhóm con theo parentId
+    // 2. Xây dựng cây phân cấp (childrenMap)
     const childrenMap = new Map();
-    this.nodes.forEach(node => {
-      if (node.parentId) {
-        if (!childrenMap.has(node.parentId)) {
-          childrenMap.set(node.parentId, []);
-        }
-        childrenMap.get(node.parentId).push(node);
+    this.nodes.forEach(n => childrenMap.set(n.id, []));
+    this.nodes.forEach(n => {
+      if (n.parentId && childrenMap.has(n.parentId)) {
+        childrenMap.get(n.parentId).push(n);
       }
     });
 
-    // 3. Phân bổ các con cấp 1 (con trực tiếp của root) theo hình tròn 360 độ
-    const directChildren = childrenMap.get(root.id) || [];
-    const k = directChildren.length;
-    const r1 = k > 6 ? 220 : (k > 3 ? 190 : 160);
+    // 3. Tính số lượng node lá (leaf weight) đệ quy cho từng nhánh
+    const leafCountMap = new Map();
+    const computeLeafCount = (nodeId) => {
+      const children = childrenMap.get(nodeId) || [];
+      if (children.length === 0) {
+        leafCountMap.set(nodeId, 1);
+        return 1;
+      }
+      let sum = 0;
+      for (const child of children) {
+        sum += computeLeafCount(child.id);
+      }
+      leafCountMap.set(nodeId, sum);
+      return sum;
+    };
+    computeLeafCount(root.id);
 
-    // Sắp xếp các con cấp 2, 3, 4+ theo hình quạt hướng tâm (fan spread)
-    const layoutSubtree = (parentNode, parentAngle, depth) => {
+    // 4. Bố cục cây phân tán góc không chồng chéo (Non-overlapping Angular Allocation)
+    root.x = 0;
+    root.y = 0;
+
+    const layoutSubtree = (parentNode, startAngle, endAngle, radius) => {
       const children = childrenMap.get(parentNode.id) || [];
-      const count = children.length;
-      if (count === 0) return;
+      if (children.length === 0) return;
 
-      // Góc mở tối đa của quạt (hẹp để chống bè ngang, tối đa ~65 độ)
-      const maxSpread = Math.min(Math.PI * 0.45, Math.max(0.2, (count - 1) * 0.2));
-      const startAngle = count === 1 ? parentAngle : (parentAngle - maxSpread / 2);
-      const stepAngle = count === 1 ? 0 : maxSpread / (count - 1);
+      const totalLeaves = leafCountMap.get(parentNode.id) || 1;
+      const angleSpan = endAngle - startAngle;
+      let currentAngle = startAngle;
 
-      // Bán kính từng cấp với so le ziczac (+30px cho node lẻ để không trùng bán kính)
-      const baseDist = 135;
       children.forEach((child, idx) => {
-        const childAngle = startAngle + idx * stepAngle;
-        const dist = baseDist + (idx % 2 === 1 ? 30 : 0);
+        const childLeaves = leafCountMap.get(child.id) || 1;
+        const childFraction = childLeaves / Math.max(1, totalLeaves);
+        const childSpan = childFraction * angleSpan;
+        const childAngle = currentAngle + childSpan / 2;
+
+        // Bán kính từng nhánh (so le nhẹ để không trùng bán kính)
+        const dist = radius + (idx % 2 === 1 ? 25 : 0);
         child.x = Math.round(parentNode.x + Math.cos(childAngle) * dist);
         child.y = Math.round(parentNode.y + Math.sin(childAngle) * dist);
 
-        // Đệ quy cho các cấp sâu hơn
-        layoutSubtree(child, childAngle, depth + 1);
+        // Góc mở cho các thế hệ con tiếp theo
+        const nextSpan = Math.min(Math.PI * 1.3, Math.max(0.6, childSpan * 1.25));
+        const nextStart = childAngle - nextSpan / 2;
+        const nextEnd = childAngle + nextSpan / 2;
+        const nextRadius = 165;
+
+        layoutSubtree(child, nextStart, nextEnd, nextRadius);
+        currentAngle += childSpan;
       });
     };
 
-    directChildren.forEach((child, idx) => {
-      // Phân bố đều góc quanh root bắt đầu từ hướng 12h xoay theo chiều kim đồng hồ
-      const angle = (2 * Math.PI * idx) / Math.max(1, k) - Math.PI / 2;
-      child.x = Math.round(Math.cos(angle) * r1);
-      child.y = Math.round(Math.sin(angle) * r1);
+    const rootChildren = childrenMap.get(root.id) || [];
+    if (rootChildren.length === 1) {
+      // Nếu root chỉ có 1 con trực tiếp (như chỉ có 1 Chương):
+      // Đặt con đó ở phía trên và CHO PHÉP CON ĐÓ MỞ 360 ĐỘ TOÀN DIỆN quanh nó
+      const onlyChild = rootChildren[0];
+      onlyChild.x = 0;
+      onlyChild.y = -190;
 
-      layoutSubtree(child, angle, 1);
+      const grandChildren = childrenMap.get(onlyChild.id) || [];
+      if (grandChildren.length > 0) {
+        layoutSubtree(onlyChild, -Math.PI, Math.PI, 195);
+      }
+    } else {
+      // Phân bổ 360 độ quanh root
+      layoutSubtree(root, -Math.PI, Math.PI, 210);
+    }
+
+    // 5. Relaxation Pass: Giải tỏa va chạm vật lý chống đè cục (Anti-Collision Simulation)
+    // Đảm bảo không có 2 node nào bị dồn đè lên nhau, nhãn text luôn có đủ không gian
+    const MIN_DISTANCE = 115; // Bán kính cách ly an toàn giữa 2 tâm node
+    const iterations = 60;
+
+    for (let iter = 0; iter < iterations; iter++) {
+      // A. Đẩy các node va chạm ra xa nhau
+      for (let i = 0; i < this.nodes.length; i++) {
+        const nA = this.nodes[i];
+        for (let j = i + 1; j < this.nodes.length; j++) {
+          const nB = this.nodes[j];
+          const dx = nB.x - nA.x;
+          const dy = nB.y - nA.y;
+          const dist = Math.hypot(dx, dy) || 0.001;
+
+          if (dist < MIN_DISTANCE) {
+            const overlap = (MIN_DISTANCE - dist) * 0.5;
+            const nx = dx / dist;
+            const ny = dy / dist;
+
+            if (nA !== root) {
+              nA.x -= nx * overlap;
+              nA.y -= ny * overlap;
+            }
+            if (nB !== root) {
+              nB.x += nx * overlap;
+              nB.y += ny * overlap;
+            }
+          }
+        }
+      }
+
+      // B. Lực kéo lò xo (Spring constraint) giữ node con gắn kết quanh cha, chống trôi dạt quá xa
+      this.nodes.forEach(node => {
+        if (!node.parentId || node === root) return;
+        const parent = nodeMap.get(node.parentId);
+        if (!parent) return;
+
+        const dx = node.x - parent.x;
+        const dy = node.y - parent.y;
+        const dist = Math.hypot(dx, dy) || 0.001;
+        const idealDist = 165;
+
+        if (dist > 250) {
+          const pull = (dist - idealDist) * 0.08;
+          node.x -= (dx / dist) * pull;
+          node.y -= (dy / dist) * pull;
+        } else if (dist < 100) {
+          const push = (idealDist - dist) * 0.08;
+          node.x += (dx / dist) * push;
+          node.y += (dy / dist) * push;
+        }
+      });
+    }
+
+    // 6. Làm tròn tọa độ sau khi hoàn tất
+    this.nodes.forEach(n => {
+      n.x = Math.round(n.x);
+      n.y = Math.round(n.y);
     });
 
-    // 4. Lưu lại tọa độ mới vào Database và căn giữa
+    // 7. Lưu lại tọa độ mới vào Database và căn giữa
     saveSubjectKnowledgeNodes(this.subjectCode, this.nodes);
     this.centerOnRoot();
   }

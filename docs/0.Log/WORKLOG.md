@@ -4,6 +4,19 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-15 09:35] - Nâng Cấp Thuật Toán Bố Cục Nơ-ron: Sector Weighting & Anti-Collision Relaxation (Khắc Phục Lỗi Dồn Cục) 🪄🚀
+
+- **🎯 Phản hồi & Vấn đề**: Khi bấm nút "Sắp Xếp Gọn", cây có cấu trúc đơn nhánh sâu (như môn chỉ có 1 Chương với 30+ node con cháu) bị dồn thẳng trục đứng và các node con cháu cấp sâu đè nát lên nhau thành một cục nho dày đặc.
+- **🛠 Triển khai kỹ thuật ([`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Cơ Chế Phân Nhánh Đa Hướng Cấp Độc Lập**:
+     - Khi root chỉ có 1 con (như "Chương III"), cho phép con này được toả tròn 360 độ quanh tâm thay vì bị gò bó trong một góc hẹp hướng 12h.
+  2. **Phân Bổ Góc Theo Trọng Số Lá (Sector Weighting)**:
+     - Tính số node lá đệ quy `leafCount` của từng nhánh con. Nhánh nào nhiều con cháu sẽ được chia cung góc mở rộng hơn, nhánh ít con chiếm cung góc hẹp hơn, đảm bảo các nhánh không bao giờ bị cắt chéo hoặc đè góc lên nhau.
+  3. **Vòng Lặp Vật Lý Giải Tỏa Va Chạm (Relaxation Pass - 60 iterations)**:
+     - Áp dụng lực đẩy phân ly giữa mọi cặp node nếu khoảng cách `< 115px`, tạo vùng cách ly an toàn xung quanh từng node và nhãn chữ.
+     - Đồng thời áp dụng lực kéo lò xo (Spring constraint) giữ node con trong bán kính lý tưởng 165px quanh cha, ngăn không cho các nhánh bị văng xa mất kiểm soát.
+  4. **Nâng Cấp Service Worker Cache v137 ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**.
+
 ## 📅 [2026-09-15 07:20] - Tối Ưu Bố Cục Nơ-ron: Xuống Dòng Cân Đối, Thu Gọn/Bung Nhánh [+N] & Nút Sắp Xếp Cây Gọn Gàng 🪄🌳
 
 - **🎯 Yêu cầu từ người dùng**: Giải quyết vấn đề các nhánh cây nằm dưới bị bè ngang quá mức gây tốn diện tích canvas (khi các node con có nhãn dài hoặc nhiều nhánh con). Kết hợp 3 giải pháp: (1) Tự động ngắt dòng thông minh; (3) Thu gọn/bung nhánh con kèm đếm số lượng node ẩn; (4) Nút Tự động sắp xếp cây tri thức nhỏ gọn (Auto-Layout Compact Tree).
