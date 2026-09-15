@@ -4,6 +4,30 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-15 09:55] - Ra Mắt Hệ Thống Thử Thách Câu Hỏi Nơ-ron & Cơ Chế Đổi Màu Theo Nấc Tiến Độ (Gamification Mastery) 🎯🧠🌈
+
+- **🎯 Yêu cầu từ người dùng**: Có nút setup chung để cài đặt số câu hỏi thử thách mục tiêu cho mỗi node (ví dụ: 3 câu). Cứ mỗi lần người dùng làm xong 1 câu trắc nghiệm tại node đó thì node sẽ đổi màu theo từng 1/3 nấc tiến độ trực quan.
+- **🛠 Triển khai kỹ thuật ([`state.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/state.js), [`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js), [`NeuralKnowledgeModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralKnowledgeModal.js), [`NeuralQuizModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralQuizModal.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`14.neural-quiz.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/14.neural-quiz.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Quản Lý Cấu Hình Mục Tiêu & Tích Lũy Tiến Độ ([`state.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/state.js))**:
+     - `getSubjectTargetQuizCount()` & `setSubjectTargetQuizCount()`: Lưu trữ mục tiêu số câu hỏi theo môn hoặc toàn cục vào LocalStorage (mặc định là 3 câu/node).
+     - `recordNodeQuizPassed(subjectCode, nodeId)`: Tăng đếm `node.quizPassedCount`, tự động chuyển trạng thái `status = 'learning'` khi bắt đầu và `status = 'completed'` khi đạt 100% mục tiêu.
+  2. **Vòng Cung Năng Lượng & Đổi Màu Theo Nấc Trên Canvas ([`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js))**:
+     - Tỉ lệ tiến độ: `progress = node.quizPassedCount / targetCount`.
+     - Phân tầng nấc màu (Color Steps):
+       * `progress === 0`: Màu cơ bản tím nơ-ron (`#6366f1`).
+       * `0 < progress < 0.5` (Nấc 1 / dưới 50%): Cyan / Xanh biển sáng (`#06b6d4`).
+       * `0.5 <= progress < 1` (Nấc 2 / từ 50% đến dưới 100%): Cam hổ phách / Vàng năng lượng (`#f59e0b`).
+       * `progress >= 1` (100% Mastery): Xanh Ngọc Lục Bảo (`#10b981`).
+     - **Vòng Cung Năng Lượng (Progress Arc Ring)**: Vẽ đường tròn cung neon ôm quanh node theo đúng góc `progress * 360°`.
+     - **Huy Hiệu Tiến Trình Tức Thì**: Góc dưới-phải hiển thị số nấc `⚡ 1/3`, `⚡ 2/3` cực kỳ đã mắt!
+  3. **Nút Setup & Dialog Mục Tiêu Trên Thanh HUD ([`NeuralKnowledgeModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralKnowledgeModal.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Thêm nút `#btn-neural-target-setup` trên toolbar hiển thị: `🎯 Mục Tiêu: 3 câu`.
+     - Popover dialog cho phép chọn nhanh: 1 câu, 2 câu, 3 câu, 5 câu hoặc nhập số tùy chỉnh. Đổi mục tiêu là toàn bộ cây nơ-ron cập nhật lại nấc màu ngay.
+  4. **Tích Hợp Khảo Hạch AI & Thanh Nạp Năng Lượng ([`NeuralQuizModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralQuizModal.js), [`14.neural-quiz.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/14.neural-quiz.css))**:
+     - Khi người dùng trả lời chính xác câu hỏi, modal lập tức hiển thị thanh tiến độ năng lượng: *"⚡ Đã nạp thêm 1 nấc! Đạt 1/3 câu (33%)"*.
+     - Khi đạt 100%, hiển thị banner *"🏆 ĐẠT CHUẨN 100% MASTERY!"* và canvas nền đổi màu ngọc lục bảo ngay lập tức.
+  5. **Nâng Cấp Service Worker Cache v138 ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**.
+
 ## 📅 [2026-09-15 09:35] - Nâng Cấp Thuật Toán Bố Cục Nơ-ron: Sector Weighting & Anti-Collision Relaxation (Khắc Phục Lỗi Dồn Cục) 🪄🚀
 
 - **🎯 Phản hồi & Vấn đề**: Khi bấm nút "Sắp Xếp Gọn", cây có cấu trúc đơn nhánh sâu (như môn chỉ có 1 Chương với 30+ node con cháu) bị dồn thẳng trục đứng và các node con cháu cấp sâu đè nát lên nhau thành một cục nho dày đặc.

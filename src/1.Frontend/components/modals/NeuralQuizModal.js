@@ -3,7 +3,7 @@
 // ==========================================================================
 import { escapeHtml } from '../../../4.Security/sanitizer.js';
 import { generateQuizFromNodeKnowledge, getGeminiApiKey, setGeminiApiKey, validateGeminiApiKey, traceNodeAncestryPath } from '../../../2.Backend/services/GeminiAIService.js';
-import { saveNeuralNodeQuiz, getSubjectKnowledgeNodes } from '../../../3.Database/state.js';
+import { saveNeuralNodeQuiz, getSubjectKnowledgeNodes, recordNodeQuizPassed, getSubjectTargetQuizCount } from '../../../3.Database/state.js';
 
 // ==========================================================================
 // 2. STATE & CONTROLLER
@@ -292,6 +292,14 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
     const isCorrect = (selectedIdx === quiz.correctIndex);
     const analysisBox = overlay.querySelector('#neural-quiz-analysis-container');
 
+    let progressInfo = null;
+    if (isCorrect) {
+      progressInfo = recordNodeQuizPassed(subjectCode, node.id);
+      if (onSavedCallback) {
+        onSavedCallback(node.id, quiz);
+      }
+    }
+
     optionBtns.forEach((b, idx) => {
       b.disabled = true;
       if (idx === quiz.correctIndex) {
@@ -312,6 +320,27 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
             Đáp án đúng: <strong>${['A', 'B', 'C', 'D'][quiz.correctIndex]}</strong>
           </span>
         </div>
+
+        ${progressInfo ? `
+          <div class="neural-quiz-energy-box">
+            <div class="neural-quiz-energy-header">
+              <span class="energy-title"><i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> Năng Lượng Nơ-ron: <strong>+1 nấc</strong></span>
+              <span class="energy-score">Tiến độ: <strong>${progressInfo.count} / ${progressInfo.target} câu</strong> (${Math.round((progressInfo.count / progressInfo.target) * 100)}%)</span>
+            </div>
+            <div class="neural-quiz-energy-track">
+              <div class="neural-quiz-energy-fill" style="width: ${Math.min(100, Math.round((progressInfo.count / progressInfo.target) * 100))}%;"></div>
+            </div>
+            ${progressInfo.isMastered ? `
+              <div class="neural-quiz-mastery-alert">
+                🏆 <strong>ĐẠT CHUẨN 100% MASTERY!</strong> Node này đã đổi sang màu Ngọc Lục Bảo và gắn huy hiệu Hoàn Thành trên Canvas!
+              </div>
+            ` : `
+              <div class="neural-quiz-energy-tip">
+                ⚡ Node trên Canvas vừa đổi thêm 1 nấc màu. Bấm <em>"Đổi câu khác"</em> để làm tiếp câu ${progressInfo.count + 1}/${progressInfo.target}!
+              </div>
+            `}
+          </div>
+        ` : ''}
 
         <div class="neural-quiz-item-concept">
           <i class="fa-solid fa-atom"></i>

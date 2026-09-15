@@ -125,7 +125,7 @@ export function getDescendantCount(nodeId, nodes) {
 // 3. NEURAL CANVAS ENGINE CLASS
 // ==========================================================================
 export class NeuralCanvasEngine {
-  constructor(canvasElement, subjectCode, nodes, onNodeEditRequest, onNodeAddChild, onOpenNotepad, onOpenQuiz) {
+  constructor(canvasElement, subjectCode, nodes, onNodeEditRequest, onNodeAddChild, onOpenNotepad, onOpenQuiz, targetQuizCount = 3) {
     this.canvas = canvasElement;
     this.ctx = canvasElement.getContext('2d');
     this.subjectCode = subjectCode;
@@ -134,6 +134,7 @@ export class NeuralCanvasEngine {
     this.onNodeAddChild = onNodeAddChild;
     this.onOpenNotepad = onOpenNotepad;
     this.onOpenQuiz = onOpenQuiz;
+    this.targetQuizCount = typeof targetQuizCount === 'number' && targetQuizCount > 0 ? targetQuizCount : 3;
 
     // Viewport transform
     this.panX = 0;
@@ -183,6 +184,10 @@ export class NeuralCanvasEngine {
 
   updateNodes(newNodes) {
     this.nodes = Array.isArray(newNodes) ? newNodes : [];
+  }
+
+  setTargetQuizCount(newTarget) {
+    this.targetQuizCount = Math.max(1, parseInt(newTarget, 10) || 3);
   }
 
   // World to Screen & Screen to World transforms
@@ -323,10 +328,24 @@ export class NeuralCanvasEngine {
     const isSelected = this.selectedNodeId === node.id;
     const isHovered = this.hoveredNode && this.hoveredNode.id === node.id;
 
+    // 0. Tính toán Tiến Trình Thử Thách & Nấc Màu Nơ-ron
+    const passedCount = parseInt(node.quizPassedCount, 10) || 0;
+    const targetCount = this.targetQuizCount || 3;
+    const progress = Math.min(1, passedCount / targetCount);
+
+    // 1. Nấc Màu Nơ-ron (Đổi màu theo 1/3 nấc, 2/3 nấc, 3/3 nấc)
+    let nodeColor = node.color || '#6366f1';
+    if (progress >= 1 || node.status === 'completed') {
+      nodeColor = '#10b981'; // 100% Mastered: Xanh Ngọc Lục Bảo
+    } else if (progress >= 0.5) {
+      nodeColor = '#f59e0b'; // Nấc 2 (>= 50%): Cam hổ phách năng lượng
+    } else if (progress > 0) {
+      nodeColor = '#06b6d4'; // Nấc 1 (> 0%): Cyan / Xanh lam sáng
+    }
+
     ctx.save();
 
     // 1. Aura Glow
-    const nodeColor = node.color || (node.status === 'completed' ? '#10b981' : (node.status === 'learning' ? '#f59e0b' : '#6366f1'));
     ctx.beginPath();
     ctx.arc(pos.x, pos.y, radius + (isSelected ? 10 * this.zoom : 5 * this.zoom), 0, Math.PI * 2);
     ctx.fillStyle = isSelected ? `${nodeColor}45` : (isHovered ? `${nodeColor}30` : `${nodeColor}18`);
@@ -347,6 +366,23 @@ export class NeuralCanvasEngine {
     ctx.strokeStyle = isSelected ? '#ffffff' : nodeColor;
     ctx.stroke();
 
+    // 3.5. Vòng Cung Năng Lượng (Progress Arc Ring) bao quanh node khi có tiến trình
+    if (progress > 0) {
+      const progressRadius = radius + Math.max(3.5, 4.5 * this.zoom);
+      const startArc = -Math.PI / 2; // Bắt đầu từ 12h
+      const endArc = startArc + progress * (Math.PI * 2);
+
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, progressRadius, startArc, endArc);
+      ctx.strokeStyle = nodeColor;
+      ctx.lineWidth = Math.max(2.5, 3.5 * this.zoom);
+      ctx.lineCap = 'round';
+      ctx.shadowColor = nodeColor;
+      ctx.shadowBlur = progress >= 1 ? 14 : 7;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+
     // 4. Node Label Text (Tự động xuống dòng thông minh cân đối, chống bè ngang)
     const labelLines = wrapCanvasText(node.label || 'Node', isRoot ? 18 : 15, 3);
     const fontSize = Math.max(9.5, (isRoot ? 12.5 : 11) * this.zoom);
@@ -358,19 +394,19 @@ export class NeuralCanvasEngine {
     ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
     ctx.shadowBlur = 6;
     labelLines.forEach((line, idx) => {
-      ctx.fillText(line, pos.x, pos.y + radius + 6 + idx * lineHeight);
+      ctx.fillText(line, pos.x, pos.y + radius + 7 + idx * lineHeight);
     });
 
     // 5. Status Badge on Top-Left (✓ hoặc ⚡)
-    if (node.status === 'completed' || node.status === 'learning') {
-      const isCompleted = node.status === 'completed';
+    if (progress >= 1 || node.status === 'completed' || progress > 0 || node.status === 'learning') {
+      const isCompleted = progress >= 1 || node.status === 'completed';
       const statusX = pos.x - radius * 0.7;
       const statusY = pos.y - radius * 0.7;
       const statusR = Math.max(7, 9.5 * this.zoom);
 
       ctx.beginPath();
       ctx.arc(statusX, statusY, statusR, 0, Math.PI * 2);
-      ctx.fillStyle = isCompleted ? '#10b981' : '#f59e0b';
+      ctx.fillStyle = isCompleted ? '#10b981' : nodeColor;
       ctx.fill();
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 1.5;
@@ -404,7 +440,7 @@ export class NeuralCanvasEngine {
       ctx.fillText('↗', badgeX, badgeY);
     }
 
-    // 7. Mini Notes Badge (📝) on Bottom-Left if node has notes (cả Soạn thảo và Ghi chú)
+    // 7. Mini Notes Badge (📝) on Bottom-Left if node has notes
     if (nodeHasAnyNotes(node)) {
       const noteX = pos.x - radius * 0.7;
       const noteY = pos.y + radius * 0.7;
@@ -425,25 +461,34 @@ export class NeuralCanvasEngine {
       ctx.fillText('✎', noteX, noteY);
     }
 
-    // 8. Mini Quiz AI Badge (✨) on Bottom-Right (Hiển thị trên MỌI node - kích hoạt khảo hạch phả hệ)
+    // 8. Mini Quiz AI Badge / Progress Counter on Bottom-Right
     const hasNotes = nodeHasAnyNotes(node);
     const quizX = pos.x + radius * 0.7;
     const quizY = pos.y + radius * 0.7;
-    const quizR = Math.max(7, 9.5 * this.zoom);
+    const quizR = Math.max(7, (progress > 0 && progress < 1 ? 11 : 9.5) * this.zoom);
 
     ctx.beginPath();
     ctx.arc(quizX, quizY, quizR, 0, Math.PI * 2);
-    ctx.fillStyle = hasNotes ? '#f59e0b' : '#8b5cf6';
+    ctx.fillStyle = (progress > 0 && progress < 1) ? '#0f172a' : (progress >= 1 ? '#10b981' : (hasNotes ? '#f59e0b' : '#8b5cf6'));
     ctx.fill();
-    ctx.strokeStyle = '#ffffff';
+    ctx.strokeStyle = (progress > 0 && progress < 1) ? nodeColor : '#ffffff';
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    ctx.font = `${Math.max(7, 8.5 * this.zoom)}px sans-serif`;
-    ctx.fillStyle = hasNotes ? '#0f172a' : '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('✨', quizX, quizY);
+    if (progress > 0 && progress < 1) {
+      // Hiển thị nấc câu: ví dụ "1/3" hoặc "2/3"
+      ctx.font = `bold ${Math.max(6.5, 7.5 * this.zoom)}px 'Outfit', sans-serif`;
+      ctx.fillStyle = nodeColor;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${passedCount}/${targetCount}`, quizX, quizY);
+    } else {
+      ctx.font = `${Math.max(7, 8.5 * this.zoom)}px sans-serif`;
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('✨', quizX, quizY);
+    }
 
     // 9. Toggle Collapse / Expand Badge (ở đỉnh trên node, chỉ hiện khi node có con)
     const hasChildren = this.nodes.some(n => n.parentId === node.id);

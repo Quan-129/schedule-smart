@@ -1,7 +1,7 @@
 // ==========================================================================
 // 1. IMPORTS
 // ==========================================================================
-import { state, getSubjectKnowledgeNodes, addNeuralNode } from '../../../3.Database/state.js';
+import { state, getSubjectKnowledgeNodes, addNeuralNode, getSubjectTargetQuizCount, setSubjectTargetQuizCount } from '../../../3.Database/state.js';
 import { escapeHtml } from '../../../4.Security/sanitizer.js';
 import { NeuralCanvasEngine } from '../../views/neural/NeuralCanvasEngine.js';
 import { openEditNeuralNodeModal } from './EditNeuralNodeModal.js';
@@ -12,6 +12,8 @@ import { openNeuralQuizModal } from './NeuralQuizModal.js';
 // 2. TEMPLATES
 // ==========================================================================
 function renderNeuralModalShell(subject) {
+  const targetQuizCount = getSubjectTargetQuizCount(subject.code);
+
   return `
     <div class="neural-header">
       <div class="neural-title-group">
@@ -78,6 +80,11 @@ function renderNeuralModalShell(subject) {
         <span>Sắp Xếp Gọn</span>
       </button>
 
+      <button type="button" class="neural-tool-btn target-setup-btn" id="btn-neural-target-setup" title="Thiết lập số câu hỏi thử thách mục tiêu cho mỗi node">
+        <i class="fa-solid fa-bullseye"></i>
+        <span>Mục Tiêu: <strong id="lbl-target-quiz-count">${targetQuizCount} câu</strong></span>
+      </button>
+
       <button type="button" class="neural-tool-btn" id="btn-neural-zoom-in" title="Phóng to">
         <i class="fa-solid fa-magnifying-glass-plus"></i>
       </button>
@@ -96,6 +103,35 @@ function renderNeuralModalShell(subject) {
         <i class="fa-solid fa-file-pen"></i>
         <span>Ghi Chú (.md)</span>
       </button>
+    </div>
+
+    <!-- Popover Thiết Lập Số Câu Thử Thách Mục Tiêu Mỗi Node -->
+    <div class="neural-target-dialog" id="neural-target-dialog" style="display: none;">
+      <div class="neural-target-card">
+        <div class="neural-target-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-bullseye" style="color: #f59e0b;"></i>
+            <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: #f8fafc;">Thử Thách Khảo Hạch Node</h4>
+          </div>
+          <button type="button" class="neural-target-close" id="btn-close-target-dialog">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <p style="margin: 6px 0 12px; font-size: 0.8rem; color: #94a3b8; line-height: 1.4;">
+          Chọn số câu trắc nghiệm cần hoàn thành để đổi màu nấc và đạt 100% Mastery tại mỗi node tri thức.
+        </p>
+        <div class="neural-target-options" id="neural-target-preset-buttons">
+          <button type="button" class="btn-target-opt ${targetQuizCount === 1 ? 'active' : ''}" data-val="1">1 câu / node</button>
+          <button type="button" class="btn-target-opt ${targetQuizCount === 2 ? 'active' : ''}" data-val="2">2 câu / node</button>
+          <button type="button" class="btn-target-opt ${targetQuizCount === 3 ? 'active' : ''}" data-val="3">3 câu (Khuyên dùng)</button>
+          <button type="button" class="btn-target-opt ${targetQuizCount === 5 ? 'active' : ''}" data-val="5">5 câu (Chuyên sâu)</button>
+        </div>
+        <div style="margin-top: 12px; display: flex; align-items: center; gap: 8px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
+          <span style="font-size: 0.78rem; color: #cbd5e1;">Hoặc số khác:</span>
+          <input type="number" id="input-custom-target-quiz" min="1" max="20" value="${targetQuizCount}" style="width: 60px; padding: 4px 8px; border-radius: 6px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 0.85rem; text-align: center;" />
+          <button type="button" class="neural-tool-btn primary" id="btn-save-custom-target" style="padding: 5px 12px; font-size: 0.78rem;">Áp dụng</button>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -165,7 +201,9 @@ export function openNeuralKnowledgeModal(subjectCode) {
       openNeuralQuizModal(overlay, subjectCode, nodeForQuiz, () => {
         activeCanvasEngine.updateNodes(getSubjectKnowledgeNodes(subjectCode));
       });
-    }
+    },
+    // Số câu hỏi thử thách mục tiêu mỗi node
+    getSubjectTargetQuizCount(subjectCode)
   );
 
   // Gắn sự kiện các nút trên Toolbar
@@ -180,6 +218,58 @@ export function openNeuralKnowledgeModal(subjectCode) {
     autoLayoutBtn.addEventListener('click', () => {
       activeCanvasEngine.autoLayoutCompactTree();
     });
+  }
+
+  // Quản lý Dialog Thiết Lập Mục Tiêu Thử Thách
+  const targetSetupBtn = overlay.querySelector('#btn-neural-target-setup');
+  const targetDialog = overlay.querySelector('#neural-target-dialog');
+  const closeTargetDialogBtn = overlay.querySelector('#btn-close-target-dialog');
+  const targetPresetBtns = overlay.querySelectorAll('.btn-target-opt');
+  const customTargetInput = overlay.querySelector('#input-custom-target-quiz');
+  const saveCustomTargetBtn = overlay.querySelector('#btn-save-custom-target');
+  const lblTargetQuizCount = overlay.querySelector('#lbl-target-quiz-count');
+
+  const updateActiveTarget = (newCount) => {
+    const saved = setSubjectTargetQuizCount(subjectCode, newCount);
+    activeCanvasEngine.setTargetQuizCount(saved);
+    if (lblTargetQuizCount) lblTargetQuizCount.textContent = `${saved} câu`;
+    if (customTargetInput) customTargetInput.value = saved;
+    targetPresetBtns.forEach(btn => {
+      btn.classList.toggle('active', parseInt(btn.dataset.val, 10) === saved);
+    });
+    activeCanvasEngine.updateNodes(getSubjectKnowledgeNodes(subjectCode));
+  };
+
+  if (targetSetupBtn && targetDialog) {
+    targetSetupBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isVisible = targetDialog.style.display === 'flex';
+      targetDialog.style.display = isVisible ? 'none' : 'flex';
+    });
+
+    if (closeTargetDialogBtn) {
+      closeTargetDialogBtn.addEventListener('click', () => {
+        targetDialog.style.display = 'none';
+      });
+    }
+
+    targetPresetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const val = parseInt(btn.dataset.val, 10);
+        updateActiveTarget(val);
+        setTimeout(() => { targetDialog.style.display = 'none'; }, 200);
+      });
+    });
+
+    if (saveCustomTargetBtn && customTargetInput) {
+      saveCustomTargetBtn.addEventListener('click', () => {
+        const val = parseInt(customTargetInput.value, 10);
+        if (val && val > 0) {
+          updateActiveTarget(val);
+          targetDialog.style.display = 'none';
+        }
+      });
+    }
   }
 
   const zoomInBtn = overlay.querySelector('#btn-neural-zoom-in');

@@ -188,6 +188,93 @@
   box-shadow: 0 0 16px rgba(168, 85, 247, 0.4);
 }
 
+#btn-neural-target-setup {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+}
+
+#btn-neural-target-setup:hover {
+  background: rgba(245, 158, 11, 0.28);
+  border-color: rgba(245, 158, 11, 0.6);
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.4);
+}
+
+/* Popover Dialog Thiết Lập Mục Tiêu Thử Thách */
+.neural-target-dialog {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  animation: fadeInPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.neural-target-card {
+  width: 320px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 24px rgba(245, 158, 11, 0.15);
+  backdrop-filter: blur(20px);
+}
+
+.neural-target-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.neural-target-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.neural-target-close:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.neural-target-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.btn-target-opt {
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.btn-target-opt:hover {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #ffffff;
+}
+
+.btn-target-opt.active {
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+}
+
 .neural-toolbar-separator {
   width: 1px;
   height: 20px;

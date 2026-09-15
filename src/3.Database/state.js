@@ -731,6 +731,66 @@ export function deleteNeuralNodeQuiz(subjectCode, nodeId, quizId) {
   return true;
 }
 
+const DEFAULT_TARGET_QUIZ_COUNT = 3;
+
+/**
+ * Lấy số lượng câu hỏi mục tiêu của môn học (mặc định là 3 câu/node)
+ * @param {string} subjectCode 
+ * @returns {number}
+ */
+export function getSubjectTargetQuizCount(subjectCode) {
+  const subject = (state.driveSubjects || []).find(s => s.code === subjectCode);
+  if (subject && typeof subject.targetQuizCount === 'number' && subject.targetQuizCount > 0) {
+    return subject.targetQuizCount;
+  }
+  const globalSetting = parseInt(localStorage.getItem('smart_schedule_neural_target_quiz'), 10);
+  return (globalSetting && globalSetting > 0) ? globalSetting : DEFAULT_TARGET_QUIZ_COUNT;
+}
+
+/**
+ * Thiết lập số lượng câu hỏi mục tiêu cho môn học
+ * @param {string} subjectCode 
+ * @param {number} count 
+ * @returns {number}
+ */
+export function setSubjectTargetQuizCount(subjectCode, count) {
+  const validCount = Math.max(1, Math.min(20, parseInt(count, 10) || DEFAULT_TARGET_QUIZ_COUNT));
+  localStorage.setItem('smart_schedule_neural_target_quiz', validCount.toString());
+  const subject = (state.driveSubjects || []).find(s => s.code === subjectCode);
+  if (subject) {
+    subject.targetQuizCount = validCount;
+    persistDriveSubjects();
+  }
+  return validCount;
+}
+
+/**
+ * Ghi nhận hoàn thành 1 câu hỏi tại node nơ-ron
+ * @param {string} subjectCode 
+ * @param {string} nodeId 
+ * @returns {{ count: number, target: number, isMastered: boolean }}
+ */
+export function recordNodeQuizPassed(subjectCode, nodeId) {
+  const subject = (state.driveSubjects || []).find(s => s.code === subjectCode);
+  if (!subject || !Array.isArray(subject.knowledgeNodes)) return { count: 0, target: DEFAULT_TARGET_QUIZ_COUNT, isMastered: false };
+
+  const node = subject.knowledgeNodes.find(n => n.id === nodeId);
+  if (!node) return { count: 0, target: DEFAULT_TARGET_QUIZ_COUNT, isMastered: false };
+
+  node.quizPassedCount = (parseInt(node.quizPassedCount, 10) || 0) + 1;
+  const target = getSubjectTargetQuizCount(subjectCode);
+  const isMastered = node.quizPassedCount >= target;
+
+  if (isMastered) {
+    node.status = 'completed';
+  } else if (node.quizPassedCount > 0 && node.status !== 'completed') {
+    node.status = 'learning';
+  }
+
+  persistDriveSubjects();
+  return { count: node.quizPassedCount, target, isMastered };
+}
+
 
 /**
  * Xóa một node nơ-ron và toàn bộ các node con cháu đệ quy
