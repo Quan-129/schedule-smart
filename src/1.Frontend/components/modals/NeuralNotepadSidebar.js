@@ -275,7 +275,7 @@ function renderNotepadTemplate(node) {
       </div>
 
       <!-- 3. Pane Ghi Chú Tự Do Đa Tầng (Visual Canvas Note & Overlay Floating Images) -->
-      <div class="neural-np-pane ${defaultTab === 'visual' ? '' : 'hidden'}" id="neural-np-visual-pane">
+      <div class="neural-np-pane neural-np-visual-pane ${defaultTab === 'visual' ? '' : 'hidden'}" id="neural-np-visual-pane">
         <!-- Toolbar riêng cho tab Ghi Chú -->
         <div class="neural-visual-toolbar" id="neural-visual-toolbar">
           <button type="button" class="neural-np-tool-btn" id="btn-vis-undo" title="Hoàn tác (Ctrl+Z)">
@@ -715,6 +715,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       if (quizPane) quizPane.classList.add('hidden');
       if (visualPane) visualPane.classList.remove('hidden');
       if (visualEditor) visualEditor.focus();
+      setTimeout(updateCanvasWrapperHeight, 60);
     } else if (tab === 'quiz') {
       if (mdToolbar) mdToolbar.style.display = 'none';
       editPane.classList.add('hidden');
@@ -779,6 +780,24 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   const visualNotes = node.visualNotes || { html: '', images: [] };
   let currentImages = Array.isArray(visualNotes.images) ? [...visualNotes.images] : [];
 
+  // Tự động tính toán và mở rộng chiều cao tối thiểu cho Canvas Wrapper khi nội dung/ảnh dài xuống dưới
+  const updateCanvasWrapperHeight = () => {
+    if (!canvasWrapper) return;
+    let maxBottom = 650;
+    if (visualEditor) {
+      maxBottom = Math.max(maxBottom, visualEditor.scrollHeight + 140);
+    }
+    if (Array.isArray(currentImages) && currentImages.length > 0) {
+      currentImages.forEach(img => {
+        const bottom = (Number(img.y) || 0) + (Number(img.height) || 0) + 160;
+        if (bottom > maxBottom) {
+          maxBottom = bottom;
+        }
+      });
+    }
+    canvasWrapper.style.minHeight = `${maxBottom}px`;
+  };
+
   // Render các ảnh nổi đè lên văn bản
   const renderVisualImages = () => {
     if (!visualImagesLayer) return;
@@ -807,6 +826,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
         e.stopPropagation();
         currentImages = currentImages.filter(i => i.id !== imgItem.id);
         card.remove();
+        updateCanvasWrapperHeight();
         saveAllNotes();
       });
 
@@ -854,6 +874,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
             card.classList.add('active');
           }
 
+          updateCanvasWrapperHeight();
           saveAllNotes();
         };
 
@@ -922,6 +943,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
               card.classList.remove('active');
             }
 
+            updateCanvasWrapperHeight();
             saveAllNotes();
           };
 
@@ -935,6 +957,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   };
 
   renderVisualImages();
+  setTimeout(updateCanvasWrapperHeight, 80);
 
   // 4. Lắng nghe click/pointerdown ra vùng ngoài card để tự động hủy chọn (ẩn khung viền & núm chỉnh)
   const onOutsidePointerDown = (e) => {
@@ -1003,6 +1026,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
           newCard.classList.add('active');
         }
 
+        updateCanvasWrapperHeight();
         saveAllNotes();
       };
       tempImg.src = dataUrl;
@@ -1240,6 +1264,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
   if (visualEditor) {
     visualEditor.addEventListener('input', () => {
+      updateCanvasWrapperHeight();
       debouncedSave();
     });
   }

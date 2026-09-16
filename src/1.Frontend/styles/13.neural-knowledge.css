@@ -921,6 +921,13 @@ body.neural-resizing-active {
   height: 100%;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+}
+
+#neural-np-quiz-pane {
+  padding: 16px 20px;
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .neural-np-pane.hidden {
@@ -1287,21 +1294,44 @@ body.neural-resizing-active {
    VISUAL CANVAS NOTE & OVERLAY IMAGES LAYER (TAB GHI CHÚ TỰ DO)
    ========================================================================== */
 
-/* Container Pane cho Visual Note */
+/* Container Pane cho Visual Note (Hỗ trợ lăn chuột cuộn mượt mà khi nội dung dài) */
+#neural-np-visual-pane,
 .neural-np-visual-pane {
+  flex: 1;
+  min-height: 0;
   width: 100%;
   height: 100%;
   position: relative;
-  overflow: auto;
+  overflow-y: auto !important;
+  overflow-x: hidden;
   background: radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.02) 0%, transparent 70%);
   display: flex;
   flex-direction: column;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
 }
 
-/* Toolbar cho Tab Ghi Chú */
+#neural-np-visual-pane::-webkit-scrollbar {
+  width: 6px;
+}
+
+#neural-np-visual-pane::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+#neural-np-visual-pane::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+#neural-np-visual-pane::-webkit-scrollbar-thumb:hover {
+  background: #818cf8;
+}
+
+/* Toolbar cho Tab Ghi Chú - Dính cố định ở trên đầu */
 .neural-visual-toolbar {
   padding: 8px 16px;
-  background: rgba(13, 17, 28, 0.95);
+  background: rgba(13, 17, 28, 0.96);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-wrap: wrap;
@@ -1310,7 +1340,9 @@ body.neural-resizing-active {
   position: sticky;
   top: 0;
   z-index: 50;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  flex-shrink: 0;
 }
 
 .neural-visual-toolbar select.visual-font-size-select {
@@ -1391,8 +1423,9 @@ body.neural-resizing-active {
 .visual-note-canvas-wrapper {
   position: relative;
   flex: 1;
-  min-height: 500px;
-  padding: 20px 24px 80px 24px;
+  min-height: 600px;
+  padding: 20px 24px 160px 24px;
+  box-sizing: border-box;
 }
 
 .visual-rich-editor {
@@ -1431,7 +1464,7 @@ body.neural-resizing-active {
   position: absolute;
   pointer-events: auto;
   user-select: none;
-  touch-action: none;
+  touch-action: pan-y; /* Cho phép lăn chuột hoặc vuốt cuộn dọc trang ngay cả khi trỏ chuột trên ảnh */
   cursor: pointer;
   border-radius: 10px;
   overflow: visible;
@@ -1439,6 +1472,10 @@ body.neural-resizing-active {
   border: 2px solid transparent;
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
   background: rgba(15, 23, 42, 0.6);
+}
+
+.visual-floating-img-card.dragging {
+  touch-action: none;
 }
 
 .visual-floating-img-card:hover:not(.active) {

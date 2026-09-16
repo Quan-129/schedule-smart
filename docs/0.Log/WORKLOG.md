@@ -4,6 +4,20 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-16 21:22] - Khắc Phục Lỗi Cuộn Dọc Tab Ghi Chú: Mở Khóa Cuộn Chuột & Tự Động Co Giãn Canvas Theo Ảnh Nổi 📜🖱️✨
+
+- **🎯 Yêu cầu từ người dùng**: Sửa lỗi không lăn chuột / cuộn xuống dưới được khi nội dung ghi chú và các ảnh dán kéo dài vượt quá khung màn hình trong tab "Ghi chú".
+- **🛠 Triển khai kỹ thuật ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Khắc Phục Xung Đột CSS Selector & Flexbox Scrollbar ([`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Sửa selector `#neural-np-visual-pane, .neural-np-visual-pane` bổ sung `overflow-y: auto !important`, `min-height: 0` và `flex: 1` để triệt tiêu hiện tượng flexbox con bị cha `overflow: hidden` cắt cụt nội dung.
+     - Thiết lập thanh cuộn Neon mỏng mượt mà (6px) có hover đổi màu tím `#818cf8`.
+     - Cố định toolbar `neural-visual-toolbar` với `position: sticky; top: 0; z-index: 50; flex-shrink: 0` để khi cuộn văn bản dài, các nút định dạng và dán ảnh luôn nằm trên đầu.
+     - Đổi `touch-action: pan-y` trên `.visual-floating-img-card` để người dùng có thể lăn chuột và vuốt trackpad bình thường ngay cả khi con trỏ chuột đang nằm trên ảnh dán.
+  2. **Thuật Toán Tự Động Co Giãn Chiều Cao Canvas Wrapper ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Hàm `updateCanvasWrapperHeight()`: Tự động quét vị trí đáy xa nhất của toàn bộ ảnh nổi (`img.y + img.height + 160px`) và chiều cao văn bản trong editor để tăng `canvasWrapper.style.minHeight`.
+     - Tự động kích hoạt lại khi kéo/thả ảnh, co giãn góc ảnh, xóa ảnh, dán ảnh mới, gõ thêm văn bản hoặc khi chuyển tab sang "Ghi chú".
+  3. **Nâng Cấp Service Worker Cache v141 ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**.
+
 ## 📅 [2026-09-16 21:03] - Ra Mắt Thanh 3 Chấm Kéo Tỉ Lệ (Splitter Resizer Bar) Giữa Cây Nơ-ron & Notepad Sidebar ↔️✨📑
 
 - **🎯 Yêu cầu từ người dùng**: Thêm thanh 3 chấm giữa Cây Kiến Thức Nơ-ron và Bảng Ghi Chú Thông Minh (Neural Notepad Sidebar) để người dùng có thể nhấn giữ và kéo chuột thay đổi tỉ lệ/độ rộng linh hoạt theo ý muốn.
