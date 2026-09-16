@@ -4,6 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-16 21:26] - Nâng Cấp Dán Ảnh Thông Minh: Xuất Hiện Chuẩn Vị Trí Con Nháy Chuột & Tự Động Tạo Khoảng Cách Văn Bản 🎯🖼️✍️
+
+- **🎯 Yêu cầu từ người dùng**: Khi dán ảnh (Paste ảnh), ảnh không bị rơi vào một chỗ cố định ở trên đầu nữa, mà phải xuất hiện ngay tại vị trí con nháy chuột (caret) hiện tại, các dòng chữ tiếp theo không bị đè/dồn lên trên và màn hình tự động focus vào đó.
+- **🛠 Triển khai kỹ thuật ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Định Vị Tọa Độ Con Nháy Chuột (Caret Coordinate Engine) ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Cập nhật `trackVisualSelection` ghi nhớ liên tục `lastCaretRange` khi click, gõ chữ, selectionchange (kể cả khi range bị collapsed).
+     - Hàm `getCaretTargetPosition()`: Đo toạ độ pixel chính xác của con nháy so với `canvasWrapper`.
+     - Đặt ảnh dán xuất hiện ngay bên dưới vị trí con nháy (`y = caret.bottom + 10px`, căn lề theo con nháy).
+  2. **Tự Động Tạo Khoảng Cách & Đẩy Con Nháy Xuống Dưới Ảnh ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Tự động chèn thẻ đệm `.visual-note-img-gap` đúng bằng chiều cao ảnh (`height + 20px`, gắn `data-img-id`) ngay tại vị trí dán.
+     - Tự động tạo dòng trống `nextLine` bên dưới ảnh và chuyển con nháy chuột xuống đó để người dùng có thể gõ ngay các bước tiếp theo ("Bước 2", "Bước 3"...) mà không bị ảnh che khuất.
+     - Khi xóa ảnh hoặc kéo co giãn góc ảnh, khoảng trống trong văn bản sẽ tự động biến mất hoặc co giãn tương ứng.
+  3. **Auto Focus & Cuộn Màn Hình Tự Động**:
+     - Gọi `newCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' })` và `visualEditor.focus()` ngay sau khi dán.
+  4. **Nâng Cấp Service Worker Cache v142 ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**.
+
 ## 📅 [2026-09-16 21:22] - Khắc Phục Lỗi Cuộn Dọc Tab Ghi Chú: Mở Khóa Cuộn Chuột & Tự Động Co Giãn Canvas Theo Ảnh Nổi 📜🖱️✨
 
 - **🎯 Yêu cầu từ người dùng**: Sửa lỗi không lăn chuột / cuộn xuống dưới được khi nội dung ghi chú và các ảnh dán kéo dài vượt quá khung màn hình trong tab "Ghi chú".

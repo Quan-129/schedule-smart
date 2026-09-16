@@ -826,6 +826,13 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
         e.stopPropagation();
         currentImages = currentImages.filter(i => i.id !== imgItem.id);
         card.remove();
+
+        // Đồng bộ xóa khoảng trống tương ứng trong văn bản nếu có
+        if (visualEditor) {
+          const relatedGap = visualEditor.querySelector(`.visual-note-img-gap[data-img-id="${imgItem.id}"]`);
+          if (relatedGap) relatedGap.remove();
+        }
+
         updateCanvasWrapperHeight();
         saveAllNotes();
       });
@@ -943,6 +950,14 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
               card.classList.remove('active');
             }
 
+            // Đồng bộ chiều cao khoảng trống trong văn bản
+            if (visualEditor) {
+              const relatedGap = visualEditor.querySelector(`.visual-note-img-gap[data-img-id="${imgItem.id}"]`);
+              if (relatedGap) {
+                relatedGap.style.height = `${imgItem.height + 20}px`;
+              }
+            }
+
             updateCanvasWrapperHeight();
             saveAllNotes();
           };
@@ -991,7 +1006,66 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     visualEditor.addEventListener('click', deselectAllVisualCards);
   }
 
-  // Hàm nạp file ảnh vào Canvas
+  // ========================================================================
+  // SELECTION & CARET TRACKING ENGINE
+  // ========================================================================
+  let lastVisualRange = null; // Vùng chọn bôi đen text (format B, I, U, HL)
+  let lastCaretRange = null;  // Vị trí con nháy chuột gõ chữ (dán ảnh tại chỗ)
+
+  const trackVisualSelection = () => {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) {
+      const r = sel.getRangeAt(0);
+      if (visualEditor && visualEditor.contains(r.commonAncestorContainer)) {
+        lastCaretRange = r.cloneRange();
+        if (!sel.isCollapsed) {
+          lastVisualRange = r.cloneRange();
+        }
+      }
+    }
+  };
+
+  if (visualEditor) {
+    visualEditor.addEventListener('mouseup', trackVisualSelection);
+    visualEditor.addEventListener('keyup', trackVisualSelection);
+    visualEditor.addEventListener('touchend', trackVisualSelection);
+    visualEditor.addEventListener('click', trackVisualSelection);
+    visualEditor.addEventListener('input', trackVisualSelection);
+    document.addEventListener('selectionchange', trackVisualSelection);
+  }
+
+  // Đo toạ độ pixel tương đối của con nháy so với container
+  const getCaretTargetPosition = (range, containerEl) => {
+    if (!range || !containerEl) return null;
+    try {
+      let rect = range.getBoundingClientRect();
+
+      // Nếu con nháy ở dòng trống hoặc rect rỗng
+      if (!rect || (rect.width === 0 && rect.height === 0 && rect.top === 0 && rect.left === 0)) {
+        const dummy = document.createElement('span');
+        dummy.textContent = '\u200b'; // Zero-width space
+        const clone = range.cloneRange();
+        clone.insertNode(dummy);
+        rect = dummy.getBoundingClientRect();
+        if (dummy.parentNode) {
+          dummy.parentNode.removeChild(dummy);
+        }
+      }
+
+      const containerRect = containerEl.getBoundingClientRect();
+      return {
+        x: Math.round(rect.left - containerRect.left),
+        y: Math.round(rect.top - containerRect.top),
+        bottom: Math.round(rect.bottom - containerRect.top),
+        height: Math.round(rect.height || 24)
+      };
+    } catch (err) {
+      console.warn('Lỗi đo toạ độ con nháy:', err);
+      return null;
+    }
+  };
+
+  // Hàm nạp file ảnh vào Canvas (Focus chính xác vào vị trí con nháy chuột hiện tại)
   const handleImageFile = (file) => {
     if (!file || !file.type || !file.type.startsWith('image/')) return;
     const reader = new FileReader();
@@ -1001,29 +1075,83 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       tempImg.onload = () => {
         const naturalW = tempImg.naturalWidth || 300;
         const naturalH = tempImg.naturalHeight || 200;
-        const width = Math.min(280, naturalW);
+        const width = Math.min(320, naturalW);
         const height = Math.round(width * (naturalH / naturalW));
         const wrapperW = canvasWrapper ? canvasWrapper.clientWidth : 400;
-        const x = Math.max(20, Math.round((wrapperW - width) / 2));
-        const y = Math.max(20, (visualPane ? visualPane.scrollTop : 0) + 40);
+
+        // 1. Xác định vị trí con nháy chuột hiện tại
+        let activeRange = null;
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0 && visualEditor && visualEditor.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+          activeRange = sel.getRangeAt(0).cloneRange();
+        } else if (lastCaretRange && visualEditor && visualEditor.contains(lastCaretRange.commonAncestorContainer)) {
+          activeRange = lastCaretRange.cloneRange();
+        }
+
+        const caret = getCaretTargetPosition(activeRange, canvasWrapper);
+        let targetX = Math.max(20, Math.round((wrapperW - width) / 2));
+        let targetY = Math.max(20, (visualPane ? visualPane.scrollTop : 0) + 40);
+
+        if (caret && caret.bottom >= 0) {
+          // Xuất hiện chuẩn xác ngay bên dưới vị trí con nháy chuột hiện tại!
+          targetX = Math.max(20, Math.min(caret.x > 30 ? caret.x : targetX, wrapperW - width - 20));
+          targetY = caret.bottom + 10;
+        }
 
         const newImg = {
           id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
           src: dataUrl,
-          x,
-          y,
+          x: targetX,
+          y: targetY,
           width,
           height
         };
 
+        // 2. Chèn khoảng trống (gap) nhường chỗ cho ảnh và đẩy con nháy xuống dưới để gõ tiếp
+        if (activeRange && visualEditor && visualEditor.contains(activeRange.commonAncestorContainer)) {
+          try {
+            const gap = document.createElement('div');
+            gap.className = 'visual-note-img-gap';
+            gap.setAttribute('data-img-id', newImg.id);
+            gap.setAttribute('contenteditable', 'false');
+            gap.style.height = `${height + 20}px`;
+
+            const nextLine = document.createElement('div');
+            nextLine.innerHTML = '<br>';
+
+            activeRange.collapse(false);
+            activeRange.insertNode(nextLine);
+            activeRange.insertNode(gap);
+
+            // Chuyển con nháy chuột xuống dòng mới ngay bên dưới ảnh
+            if (sel) {
+              const newRange = document.createRange();
+              newRange.setStart(nextLine, 0);
+              newRange.collapse(true);
+              sel.removeAllRanges();
+              sel.addRange(newRange);
+              lastCaretRange = newRange.cloneRange();
+            }
+          } catch (err) {
+            console.warn('Lỗi chèn khoảng cách dưới ảnh:', err);
+          }
+        }
+
         currentImages.push(newImg);
         renderVisualImages();
 
-        // Tự động chọn ảnh mới thêm để hiển thị khung căn chỉnh ngay lập tức
+        // 3. Tự động chọn ảnh mới thêm, focus và cuộn màn hình tới vị trí con nháy / ảnh
         const newCard = visualImagesLayer.querySelector(`[data-id="${newImg.id}"]`);
         if (newCard) {
           deselectAllVisualCards();
           newCard.classList.add('active');
+          setTimeout(() => {
+            newCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 40);
+        }
+
+        if (visualEditor) {
+          visualEditor.focus();
         }
 
         updateCanvasWrapperHeight();
@@ -1060,28 +1188,6 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
         e.target.value = '';
       }
     });
-  }
-
-  // ========================================================================
-  // SELECTION TRACKING & VISUAL FORMATTING ENGINE
-  // ========================================================================
-  let lastVisualRange = null;
-
-  const trackVisualSelection = () => {
-    const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
-      const r = sel.getRangeAt(0);
-      if (visualEditor && visualEditor.contains(r.commonAncestorContainer)) {
-        lastVisualRange = r.cloneRange();
-      }
-    }
-  };
-
-  if (visualEditor) {
-    visualEditor.addEventListener('mouseup', trackVisualSelection);
-    visualEditor.addEventListener('keyup', trackVisualSelection);
-    visualEditor.addEventListener('touchend', trackVisualSelection);
-    document.addEventListener('selectionchange', trackVisualSelection);
   }
 
   // Hàm khôi phục hoặc lấy vùng chọn hiện thời trong visualEditor

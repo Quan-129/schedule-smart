@@ -1478,6 +1478,18 @@ body.neural-resizing-active {
   touch-action: none;
 }
 
+/* Khoảng cách đệm tự động nhường chỗ cho ảnh dán trong văn bản */
+.visual-note-img-gap {
+  display: block;
+  width: 100%;
+  pointer-events: none;
+  user-select: none;
+  margin: 6px 0;
+  border-radius: 8px;
+  background: transparent;
+  transition: height 0.15s ease;
+}
+
 .visual-floating-img-card:hover:not(.active) {
   /* Khi rê chuột nhưng chưa click chọn: không hiện khung viền/núm chỉnh, chỉ tăng nhẹ bóng 3D */
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55);
