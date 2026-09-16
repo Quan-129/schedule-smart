@@ -28,6 +28,7 @@ export const CLIENT_SESSION_ID = 'sess_' + Date.now() + '_' + Math.random().toSt
 let firebaseApp = null;
 let auth = null;
 let db = null;
+let storage = null;
 let currentUser = null;
 let firestoreUnsubscribe = null;
 let syncDebounceTimer = null;
@@ -86,6 +87,9 @@ export function initFirebaseAuth(onAuthChangedCallback) {
       }
       auth = firebase.auth();
       db = firebase.firestore();
+      if (typeof firebase.storage === 'function') {
+        storage = firebase.storage();
+      }
     }
   } catch (err) {
     console.warn('[FirebaseAuth] Lỗi khởi tạo Firebase:', err);
@@ -617,4 +621,42 @@ export function syncUserDataToCloud(customWeeks = [], customMds = {}) {
 
 if (typeof window !== 'undefined') {
   window.__scheduleSmartSyncToCloud = debounceSyncToCloud;
+}
+
+/**
+ * Tải ảnh ghi chú lên Firebase Cloud Storage để lấy URL vĩnh viễn
+ * @param {Blob|File} fileOrBlob 
+ * @param {string} fileNamePrefix 
+ * @returns {Promise<string|null>} URL ảnh hoặc null nếu chưa đăng nhập / lỗi
+ */
+export async function uploadNoteImageToStorage(fileOrBlob, fileNamePrefix = 'note_img') {
+  try {
+    if (!storage && typeof firebase !== 'undefined' && typeof firebase.storage === 'function') {
+      storage = firebase.storage();
+    }
+    if (!storage) return null;
+
+    const user = currentUser || getCurrentUser();
+    const userFolder = user && (user.uid || user.email) 
+      ? (user.uid || user.email.replace(/[^a-z0-9]/g, '_')) 
+      : 'shared_notes';
+
+    const timestamp = Date.now();
+    const rand = Math.random().toString(36).substring(2, 7);
+    const fileName = `${fileNamePrefix}_${timestamp}_${rand}.webp`;
+    const storageRef = storage.ref().child(`users/${userFolder}/notes/${fileName}`);
+
+    const metadata = {
+      contentType: 'image/webp',
+      cacheControl: 'public, max-age=31536000'
+    };
+
+    const snapshot = await storageRef.put(fileOrBlob, metadata);
+    const downloadUrl = await snapshot.ref.getDownloadURL();
+    console.log('[FirebaseStorage] Đã tải ảnh lên Cloud thành công:', downloadUrl);
+    return downloadUrl;
+  } catch (err) {
+    console.warn('[FirebaseStorage] Không thể tải ảnh lên Storage (Fallback sang nén local):', err);
+    return null;
+  }
 }

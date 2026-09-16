@@ -5,6 +5,8 @@ import { escapeHtml } from '../../../4.Security/sanitizer.js';
 import { updateNeuralNode, deleteNeuralNodeQuiz } from '../../../3.Database/state.js';
 import { renderMarkdownToHtml } from '../../../2.Backend/utils/markdownRenderer.js';
 import { openNeuralQuizModal } from './NeuralQuizModal.js';
+import { compressImage } from '../../../2.Backend/utils/imageCompressor.js';
+import { uploadNoteImageToStorage } from '../../../3.Database/auth/FirebaseAuthService.js';
 
 // ==========================================================================
 // 2. HELPER FUNCTIONS: SMART FORMATTING & CONTEXT MATCHING
@@ -1065,101 +1067,126 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     }
   };
 
-  // Hàm nạp file ảnh vào Canvas (Focus chính xác vào vị trí con nháy chuột hiện tại)
-  const handleImageFile = (file) => {
+  // Hàm nạp file ảnh vào Canvas (Nén WebP & Upload Firebase Cloud Storage)
+  const handleImageFile = async (file) => {
     if (!file || !file.type || !file.type.startsWith('image/')) return;
-    const reader = new FileReader();
-    reader.onload = (evt) => {
-      const dataUrl = evt.target.result;
-      const tempImg = new Image();
-      tempImg.onload = () => {
-        const naturalW = tempImg.naturalWidth || 300;
-        const naturalH = tempImg.naturalHeight || 200;
-        const width = Math.min(320, naturalW);
-        const height = Math.round(width * (naturalH / naturalW));
-        const wrapperW = canvasWrapper ? canvasWrapper.clientWidth : 400;
 
-        // 1. Xác định vị trí con nháy chuột hiện tại
-        let activeRange = null;
-        const sel = window.getSelection();
-        if (sel && sel.rangeCount > 0 && visualEditor && visualEditor.contains(sel.getRangeAt(0).commonAncestorContainer)) {
-          activeRange = sel.getRangeAt(0).cloneRange();
-        } else if (lastCaretRange && visualEditor && visualEditor.contains(lastCaretRange.commonAncestorContainer)) {
-          activeRange = lastCaretRange.cloneRange();
+    if (saveStatus) {
+      saveStatus.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang nén & tối ưu ảnh...';
+    }
+
+    try {
+      // 1. Nén ảnh thông minh sang WebP (giảm 95% dung lượng)
+      const compressed = await compressImage(file, 1280, 1280, 0.82);
+      const naturalW = compressed.width || 300;
+      const naturalH = compressed.height || 200;
+      const width = Math.min(320, naturalW);
+      const height = Math.round(width * (naturalH / naturalW));
+      const wrapperW = canvasWrapper ? canvasWrapper.clientWidth : 400;
+
+      // 2. Xác định vị trí con nháy chuột hiện tại
+      let activeRange = null;
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0 && visualEditor && visualEditor.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+        activeRange = sel.getRangeAt(0).cloneRange();
+      } else if (lastCaretRange && visualEditor && visualEditor.contains(lastCaretRange.commonAncestorContainer)) {
+        activeRange = lastCaretRange.cloneRange();
+      }
+
+      const caret = getCaretTargetPosition(activeRange, canvasWrapper);
+      let targetX = Math.max(20, Math.round((wrapperW - width) / 2));
+      let targetY = Math.max(20, (visualPane ? visualPane.scrollTop : 0) + 40);
+
+      if (caret && caret.bottom >= 0) {
+        // Xuất hiện chuẩn xác ngay bên dưới vị trí con nháy chuột hiện tại!
+        targetX = Math.max(20, Math.min(caret.x > 30 ? caret.x : targetX, wrapperW - width - 20));
+        targetY = caret.bottom + 10;
+      }
+
+      // 3. Hiển thị tức thì cho người dùng bằng dataUrl WebP siêu nhẹ
+      const tempImgId = `img_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+      const newImg = {
+        id: tempImgId,
+        src: compressed.dataUrl,
+        x: targetX,
+        y: targetY,
+        width,
+        height
+      };
+
+      // Chèn khoảng trống nhường chỗ cho ảnh trong editor
+      if (activeRange && visualEditor && visualEditor.contains(activeRange.commonAncestorContainer)) {
+        try {
+          const gap = document.createElement('div');
+          gap.className = 'visual-note-img-gap';
+          gap.setAttribute('data-img-id', newImg.id);
+          gap.setAttribute('contenteditable', 'false');
+          gap.style.height = `${height + 20}px`;
+
+          const nextLine = document.createElement('div');
+          nextLine.innerHTML = '<br>';
+
+          activeRange.collapse(false);
+          activeRange.insertNode(nextLine);
+          activeRange.insertNode(gap);
+
+          if (sel) {
+            const newRange = document.createRange();
+            newRange.setStart(nextLine, 0);
+            newRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+            lastCaretRange = newRange.cloneRange();
+          }
+        } catch (err) {
+          console.warn('Lỗi chèn khoảng cách dưới ảnh:', err);
         }
+      }
 
-        const caret = getCaretTargetPosition(activeRange, canvasWrapper);
-        let targetX = Math.max(20, Math.round((wrapperW - width) / 2));
-        let targetY = Math.max(20, (visualPane ? visualPane.scrollTop : 0) + 40);
+      currentImages.push(newImg);
+      renderVisualImages();
 
-        if (caret && caret.bottom >= 0) {
-          // Xuất hiện chuẩn xác ngay bên dưới vị trí con nháy chuột hiện tại!
-          targetX = Math.max(20, Math.min(caret.x > 30 ? caret.x : targetX, wrapperW - width - 20));
-          targetY = caret.bottom + 10;
-        }
+      // Cuộn tới ảnh vừa chèn
+      const newCard = visualImagesLayer.querySelector(`[data-id="${newImg.id}"]`);
+      if (newCard) {
+        deselectAllVisualCards();
+        newCard.classList.add('active');
+        setTimeout(() => {
+          newCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 40);
+      }
 
-        const newImg = {
-          id: `img_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-          src: dataUrl,
-          x: targetX,
-          y: targetY,
-          width,
-          height
-        };
+      if (visualEditor) {
+        visualEditor.focus();
+      }
 
-        // 2. Chèn khoảng trống (gap) nhường chỗ cho ảnh và đẩy con nháy xuống dưới để gõ tiếp
-        if (activeRange && visualEditor && visualEditor.contains(activeRange.commonAncestorContainer)) {
-          try {
-            const gap = document.createElement('div');
-            gap.className = 'visual-note-img-gap';
-            gap.setAttribute('data-img-id', newImg.id);
-            gap.setAttribute('contenteditable', 'false');
-            gap.style.height = `${height + 20}px`;
+      updateCanvasWrapperHeight();
+      saveAllNotes();
 
-            const nextLine = document.createElement('div');
-            nextLine.innerHTML = '<br>';
-
-            activeRange.collapse(false);
-            activeRange.insertNode(nextLine);
-            activeRange.insertNode(gap);
-
-            // Chuyển con nháy chuột xuống dòng mới ngay bên dưới ảnh
-            if (sel) {
-              const newRange = document.createRange();
-              newRange.setStart(nextLine, 0);
-              newRange.collapse(true);
-              sel.removeAllRanges();
-              sel.addRange(newRange);
-              lastCaretRange = newRange.cloneRange();
-            }
-          } catch (err) {
-            console.warn('Lỗi chèn khoảng cách dưới ảnh:', err);
+      // 4. BẬT UPLOAD CLOUD TRONG NỀN: Tải ảnh lên Firebase Storage để đồng bộ đa thiết bị
+      if (saveStatus) {
+        saveStatus.innerHTML = '<i class="fa-solid fa-cloud-arrow-up fa-bounce"></i> Đang tải lên Cloud...';
+      }
+      uploadNoteImageToStorage(compressed.blob, 'visual_note').then(cloudUrl => {
+        if (cloudUrl) {
+          // Thay thế dataUrl bằng Cloud Storage URL vĩnh viễn!
+          newImg.src = cloudUrl;
+          const renderedImgTag = visualImagesLayer ? visualImagesLayer.querySelector(`[data-id="${newImg.id}"] img`) : null;
+          if (renderedImgTag) {
+            renderedImgTag.src = cloudUrl;
+          }
+          saveAllNotes();
+          if (saveStatus) {
+            saveStatus.innerHTML = '<i class="fa-solid fa-cloud"></i> Đã đồng bộ Cloud!';
           }
         }
+      }).catch(e => {
+        console.warn('Upload Firebase Storage bỏ qua, giữ WebP nén:', e);
+      });
 
-        currentImages.push(newImg);
-        renderVisualImages();
-
-        // 3. Tự động chọn ảnh mới thêm, focus và cuộn màn hình tới vị trí con nháy / ảnh
-        const newCard = visualImagesLayer.querySelector(`[data-id="${newImg.id}"]`);
-        if (newCard) {
-          deselectAllVisualCards();
-          newCard.classList.add('active');
-          setTimeout(() => {
-            newCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }, 40);
-        }
-
-        if (visualEditor) {
-          visualEditor.focus();
-        }
-
-        updateCanvasWrapperHeight();
-        saveAllNotes();
-      };
-      tempImg.src = dataUrl;
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('Lỗi nén và xử lý ảnh:', err);
+    }
   };
 
   // Lắng nghe Ctrl + V dán ảnh từ Clipboard
