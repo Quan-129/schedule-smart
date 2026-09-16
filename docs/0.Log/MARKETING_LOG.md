@@ -5,6 +5,25 @@
 
 ---
 
+## 💎 ENTRY 13: [2026-09-16] - "Splitter 3 Chấm Đa Tỉ Lệ": Kéo Co Giãn Không Gian Cực Phê Giữa Cây Tri Thức & Ghi Chú Markdown ↔️✨📑
+
+### 📌 Phân Loại & Tags:
+`#SplitterResize` `#SatisfyingInteraction` `#Glassmorphism` `#ProductivityTool` `#NotepadMarkdown` `#UIUXDesign`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Thanh Kéo 3 Chấm Thủy Tinh (Glassmorphism Pill Splitter)**: Nút tay nắm viên thuốc kính mờ 3 chấm dọc nằm ngay ranh giới giữa Cây Kiến Thức và Bảng Ghi Chú, rê chuột vào là bừng sáng dải neon xanh tím cực đã mắt.
+- **Kéo Thả Siêu Mượt 60fps Không Rớt Chuột (Pointer Capture Engine)**: Khóa con trỏ hiện đại giúp người dùng thoải mái lia chuột nhanh trên toàn màn hình mà khung vẫn co giãn tức thì, không khựng, không delay.
+- **Tùy Biến Tỉ Lệ Không Gian 100% Theo Ý Thích**: Lúc cần xem sơ đồ nơ-ron tổng thể thì thu hẹp ghi chú; lúc cần tập trung viết luận, chèn ảnh, soạn bài thi thì kéo rộng bảng Notepad chiếm trọn 80% màn hình!
+- **Nhấp Đúp Reset Tức Thì & Tự Động Lưu**: Nhấp đúp chuột là tự động hoàn về tỉ lệ 50-50 cân đối, tắt trình duyệt mở lại vẫn nhớ y nguyên độ rộng ưa thích.
+
+### 2. 🎣 Bộ Viral Hooks TikTok / Reels / Threads:
+1. **Satisfying Drag Hook**:
+   > *"Giao diện học tập mà mượt như VS Code hay Notion: Nhấn giữ thanh 3 chấm kéo nhẹ một cái là mở rộng cả kho kiến thức, thu hẹp hay phóng to ghi chú tùy ý cực kỳ thỏa mãn!..."*
+2. **Focus Mode / UX Hook**:
+   > *"Học kiểu này mới đúng là đa nhiệm: Vừa nhìn bản đồ nơ-ron liên kết kiến thức, vừa kéo độ rộng bảng ghi chú sang trái để viết bài không bị che khuất!..."*
+
+---
+
 ## 💎 ENTRY 12: [2026-09-15] - "iOS Squircle Adaptive Folder": Thư Mục Ô Vuông Bo Góc Tự Co Giãn Lưới 2x2, 3x3, 4x4 Cực Đã Mắt 📁✨📱
 
 ### 📌 Phân Loại & Tags:

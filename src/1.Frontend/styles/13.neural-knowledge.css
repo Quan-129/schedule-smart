@@ -618,8 +618,8 @@
   right: 0;
   bottom: 0;
   width: 50%;
-  min-width: 360px;
-  max-width: 680px;
+  min-width: 340px;
+  max-width: min(85vw, 1200px);
   background: linear-gradient(180deg, rgba(16, 20, 38, 0.96) 0%, rgba(10, 13, 26, 0.98) 100%);
   border-left: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow: -20px 0 45px rgba(0, 0, 0, 0.65), 0 0 30px rgba(99, 102, 241, 0.1);
@@ -634,6 +634,115 @@
 
 .neural-notepad-sidebar.active {
   transform: translateX(0);
+}
+
+.neural-notepad-sidebar.is-resizing {
+  transition: none !important;
+  user-select: none !important;
+}
+
+body.neural-resizing-active {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+/* ==========================================================================
+   NEURAL SIDEBAR SPLITTER RESIZER (THANH 3 CHẤM KÉO TỈ LỆ)
+   ========================================================================== */
+.neural-sidebar-resizer {
+  position: absolute;
+  top: 0;
+  left: -8px;
+  width: 16px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  user-select: none;
+}
+
+/* Đường rãnh chỉ phát sáng dọc mép */
+.neural-resizer-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 7px;
+  width: 2px;
+  background: transparent;
+  pointer-events: none;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.neural-sidebar-resizer:hover .neural-resizer-line,
+.neural-notepad-sidebar.is-resizing .neural-resizer-line {
+  background: #818cf8;
+  box-shadow: 0 0 10px rgba(129, 140, 248, 0.8), 0 0 20px rgba(129, 140, 248, 0.4);
+}
+
+/* Viên thuốc 3 chấm (Pill Handle Grip) */
+.neural-resizer-pill {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4.5px;
+  width: 18px;
+  height: 52px;
+  background: rgba(22, 27, 46, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.65), 0 0 12px rgba(99, 102, 241, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+/* 3 Chấm Tròn Bên Trong */
+.neural-resizer-pill .resizer-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #94a3b8;
+  transition: all 0.2s ease;
+}
+
+/* Hover & Active / Dragging Effects */
+.neural-sidebar-resizer:hover .neural-resizer-pill {
+  transform: scale(1.18);
+  background: rgba(30, 36, 62, 0.98);
+  border-color: #818cf8;
+  box-shadow: 0 0 16px rgba(129, 140, 248, 0.65), 0 4px 20px rgba(0, 0, 0, 0.8);
+}
+
+.neural-sidebar-resizer:hover .resizer-dot {
+  background: #ffffff;
+  box-shadow: 0 0 6px #ffffff;
+}
+
+.neural-notepad-sidebar.is-resizing .neural-resizer-pill {
+  transform: scale(1.25);
+  background: linear-gradient(180deg, #6366f1 0%, #a855f7 100%);
+  border-color: #c084fc;
+  box-shadow: 0 0 22px rgba(168, 85, 247, 0.85), 0 0 10px rgba(99, 102, 241, 0.8);
+}
+
+.neural-notepad-sidebar.is-resizing .resizer-dot {
+  background: #ffffff;
+  transform: scale(1.2);
+  box-shadow: 0 0 8px #ffffff;
+}
+
+/* Ẩn thanh kéo trên Mobile */
+@media (max-width: 768px) {
+  .neural-sidebar-resizer {
+    display: none !important;
+  }
 }
 
 /* Notepad Header */

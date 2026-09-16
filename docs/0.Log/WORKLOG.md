@@ -4,6 +4,22 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-16 21:03] - Ra Mắt Thanh 3 Chấm Kéo Tỉ Lệ (Splitter Resizer Bar) Giữa Cây Nơ-ron & Notepad Sidebar ↔️✨📑
+
+- **🎯 Yêu cầu từ người dùng**: Thêm thanh 3 chấm giữa Cây Kiến Thức Nơ-ron và Bảng Ghi Chú Thông Minh (Neural Notepad Sidebar) để người dùng có thể nhấn giữ và kéo chuột thay đổi tỉ lệ/độ rộng linh hoạt theo ý muốn.
+- **🛠 Triển khai kỹ thuật ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Thanh Kéo Phân Cách & Nút 3 Chấm Thủy Tinh (Splitter Pill Handle) ([`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Tạo `.neural-sidebar-resizer` đặt ngay mép phân chia viền trái của sidebar, hỗ trợ con trỏ `col-resize` (↔️).
+     - Thiết kế nút tay nắm dạng viên thuốc Glassmorphism bo tròn `.neural-resizer-pill` (18x52px, bo góc 12px) với 3 chấm tròn xếp dọc thẳng hàng (`.resizer-dot`), phủ kính mờ `backdrop-filter: blur(12px)`.
+     - Hiệu ứng Hover & Dragging: Đường chỉ viền bừng sáng đèn neon xanh tím `#818cf8` (`box-shadow: 0 0 10px rgba(129, 140, 248, 0.8)`), nút 3 chấm phóng to scale(1.25) chuyển sang gradient tím hồng rực rỡ và 3 chấm phát sáng tuyết trắng.
+  2. **Cơ Chế Kéo Thả Trơn Tru Chuẩn Pointer Events ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - `initSidebarResizer()`: Bắt sự kiện `pointerdown` kết hợp `setPointerCapture(e.pointerId)` để kéo thả 60fps mượt mà, không bao giờ bị rớt chuột dù rê nhanh ra ngoài mép cửa sổ.
+     - Tự động tắt `transition` trong khi kéo (`.neural-notepad-sidebar.is-resizing`) và khóa con trỏ `user-select: none` để chống giật/lag.
+     - Tự tính toán độ rộng thích ứng với giới hạn an toàn (`minWidth: 340px`, `maxWidth: min(85vw, 1200px)`), nhường không gian quan sát Cây Nơ-ron.
+     - **Nhấp đúp chuột (Double-click)**: Đặt lại tức thì về độ rộng chuẩn 50% màn hình.
+     - **Ghi nhớ LocalStorage**: Tự động lưu `schedule_smart_neural_sidebar_width` để mở lại những lần sau mà không cần chỉnh lại.
+  3. **Nâng Cấp Service Worker Cache v140 ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**.
+
 ## 📅 [2026-09-15 18:25] - Nâng Cấp Thư Mục Chiếc Cặp: Khung Squircle Vuông Bo Góc & Ma Trận Lưới Thích Ứng Tự Scale (2x2, 3x3, 4x4) 📁✨📱
 
 - **🎯 Yêu cầu từ người dùng**: Thay đổi hiển thị thư mục môn học trong Chiếc Cặp: chuyển từ hình tròn sang ô vuông hơi bo góc (phong cách iOS Squircle App Folder), các icon môn học bên trong tự động co giãn (scale) theo ma trận hình vuông (2x2, 3x3, 4x4) và căn giữa cân đối, khắc phục tình trạng bị lệch và trống trải khi thư mục chỉ có 2 môn.

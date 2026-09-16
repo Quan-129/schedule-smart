@@ -184,6 +184,16 @@ function renderNotepadTemplate(node) {
   }
 
   return `
+    <!-- Splitter Resizer Handle (Thanh 3 chấm kéo tỉ lệ) -->
+    <div class="neural-sidebar-resizer" id="neural-sidebar-resizer" role="separator" aria-orientation="vertical" title="Nhấn giữ và kéo sang trái/phải để đổi độ rộng (Nhấp đúp để về 50%)">
+      <div class="neural-resizer-line"></div>
+      <div class="neural-resizer-pill">
+        <span class="resizer-dot"></span>
+        <span class="resizer-dot"></span>
+        <span class="resizer-dot"></span>
+      </div>
+    </div>
+
     <div class="neural-notepad-header">
       <div class="neural-notepad-title-group">
         <span class="neural-notepad-badge"><i class="fa-solid fa-file-pen"></i></span>
@@ -356,6 +366,104 @@ let currentNotepadEl = null;
 let notepadCleanupFns = [];
 
 /**
+ * Khởi tạo thanh kéo 3 chấm phân tách (Splitter Resizer) cho Notepad Sidebar
+ * @param {HTMLElement} sidebar 
+ * @returns {Function} Hàm dọn dẹp khi đóng sidebar
+ */
+function initSidebarResizer(sidebar) {
+  const resizer = sidebar.querySelector('#neural-sidebar-resizer');
+  if (!resizer) return () => {};
+
+  // Khôi phục chiều rộng đã lưu trước đó nếu có (chỉ trên màn hình > 768px)
+  const savedWidth = localStorage.getItem('schedule_smart_neural_sidebar_width');
+  if (savedWidth && window.innerWidth > 768) {
+    const parsed = parseInt(savedWidth, 10);
+    const minW = Math.max(340, Math.floor(window.innerWidth * 0.25));
+    const maxW = Math.min(Math.floor(window.innerWidth * 0.85), window.innerWidth - 180);
+    if (!isNaN(parsed) && parsed >= minW && parsed <= maxW) {
+      sidebar.style.width = `${parsed}px`;
+    }
+  }
+
+  let isDragging = false;
+  let startX = 0;
+  let startWidth = 0;
+
+  const onPointerDown = (e) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    if (window.innerWidth <= 768) return;
+
+    isDragging = true;
+    startX = e.clientX;
+    startWidth = sidebar.getBoundingClientRect().width;
+
+    try {
+      resizer.setPointerCapture(e.pointerId);
+    } catch (err) {}
+
+    sidebar.classList.add('is-resizing');
+    document.body.classList.add('neural-resizing-active');
+    e.preventDefault();
+  };
+
+  const onPointerMove = (e) => {
+    if (!isDragging) return;
+
+    const deltaX = startX - e.clientX;
+    let newWidth = startWidth + deltaX;
+
+    const minW = Math.max(340, Math.floor(window.innerWidth * 0.25));
+    const maxW = Math.min(Math.floor(window.innerWidth * 0.85), window.innerWidth - 180);
+
+    newWidth = Math.max(minW, Math.min(maxW, newWidth));
+    sidebar.style.width = `${newWidth}px`;
+  };
+
+  const onPointerUp = (e) => {
+    if (!isDragging) return;
+    isDragging = false;
+
+    try {
+      resizer.releasePointerCapture(e.pointerId);
+    } catch (err) {}
+
+    sidebar.classList.remove('is-resizing');
+    document.body.classList.remove('neural-resizing-active');
+
+    const finalWidth = Math.round(sidebar.getBoundingClientRect().width);
+    if (finalWidth > 0) {
+      localStorage.setItem('schedule_smart_neural_sidebar_width', finalWidth);
+    }
+  };
+
+  const onDblClick = () => {
+    if (window.innerWidth <= 768) return;
+    sidebar.style.transition = 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+    const defaultWidth = Math.min(680, Math.max(480, Math.floor(window.innerWidth * 0.5)));
+    sidebar.style.width = `${defaultWidth}px`;
+    localStorage.setItem('schedule_smart_neural_sidebar_width', defaultWidth);
+    setTimeout(() => {
+      sidebar.style.transition = '';
+    }, 320);
+  };
+
+  resizer.addEventListener('pointerdown', onPointerDown);
+  resizer.addEventListener('pointermove', onPointerMove);
+  resizer.addEventListener('pointerup', onPointerUp);
+  resizer.addEventListener('pointercancel', onPointerUp);
+  resizer.addEventListener('dblclick', onDblClick);
+
+  return () => {
+    resizer.removeEventListener('pointerdown', onPointerDown);
+    resizer.removeEventListener('pointermove', onPointerMove);
+    resizer.removeEventListener('pointerup', onPointerUp);
+    resizer.removeEventListener('pointercancel', onPointerUp);
+    resizer.removeEventListener('dblclick', onDblClick);
+    document.body.classList.remove('neural-resizing-active');
+  };
+}
+
+/**
  * Mở bảng Notepad Sidepanel 50% bên phải cho một node nơ-ron
  * @param {HTMLElement} parentContainer - Container cha (thường là .neural-modal-overlay)
  * @param {string} subjectCode - Mã môn học
@@ -371,6 +479,10 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   sidebar.innerHTML = renderNotepadTemplate(node);
   parentContainer.appendChild(sidebar);
   currentNotepadEl = sidebar;
+
+  // Khởi tạo tính năng kéo chỉnh độ rộng bằng thanh 3 chấm
+  const cleanupResizer = initSidebarResizer(sidebar);
+  notepadCleanupFns.push(cleanupResizer);
 
   requestAnimationFrame(() => {
     sidebar.classList.add('active');
