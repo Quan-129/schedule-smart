@@ -2,6 +2,7 @@
 // 1. IMPORTS
 // ==========================================================================
 import { saveSubjectKnowledgeNodes } from '../../../3.Database/state.js';
+import { showToast } from '../../components/Toast.js';
 
 // ==========================================================================
 // 2. CONSTANTS & CONFIG
@@ -9,6 +10,28 @@ import { saveSubjectKnowledgeNodes } from '../../../3.Database/state.js';
 const NODE_RADIUS = 26;
 const ROOT_RADIUS = 34;
 const PULSE_SPEED = 0.008;
+
+/**
+ * Kiểm tra xem potentialAncestorId có phải là tổ tiên của targetNodeId không
+ * (Để chống nối cành tạo chu trình vòng lặp vô tận)
+ * @param {string} potentialAncestorId 
+ * @param {string} targetNodeId 
+ * @param {Array<Object>} nodes 
+ * @returns {boolean}
+ */
+export function isAncestorOf(potentialAncestorId, targetNodeId, nodes) {
+  if (!potentialAncestorId || !targetNodeId || !Array.isArray(nodes)) return false;
+  if (potentialAncestorId === targetNodeId) return true;
+  const nodeMap = new Map(nodes.map(n => [n.id, n]));
+  let curr = nodeMap.get(targetNodeId);
+  while (curr && curr.parentId) {
+    if (curr.parentId === potentialAncestorId) {
+      return true;
+    }
+    curr = nodeMap.get(curr.parentId);
+  }
+  return false;
+}
 
 /**
  * Kiểm tra xem node có chứa nội dung (ở phần Soạn thảo hoặc phần Ghi chú) hay không
@@ -151,6 +174,17 @@ export class NeuralCanvasEngine {
     this.selectedNodeId = null;
     this.hasMovedDrag = false;
 
+    // Connection wire & Branch cutting state (Cắt cành & Kéo nối node)
+    this.hoveredConnection = null;
+    this.isHoveringCutButton = false;
+    this.isConnectingWire = false;
+    this.wireStartNode = null;
+    this.wireEndPos = { x: 0, y: 0 };
+    this.wireTargetNode = null;
+    this.wireCycleBlocked = false;
+    this.potentialDropTargetNode = null;
+    this.connectPortHovered = false;
+
     // Animation loop
     this.animationFrameId = null;
     this.pulsePhase = 0;
@@ -238,11 +272,30 @@ export class NeuralCanvasEngine {
     // 2. Visible nodes only (ẩn các nhánh con của node bị collapsed)
     const visibleNodes = this.getVisibleNodes();
 
-    // 3. Draw Connections & Pulses
+    // 3. Draw Connections & Pulses (kèm nút cắt cành ✂️)
     this.drawConnections(ctx, visibleNodes);
 
     // 4. Draw Nodes
     visibleNodes.forEach(node => this.drawNode(ctx, node));
+
+    // 5. Draw Connecting Wire (Sợi dây điện quang phát sáng khi đang kéo nối)
+    if (this.isConnectingWire && this.wireStartNode) {
+      this.drawConnectingWire(ctx);
+    }
+
+    // 6. Draw Drop Target Tooltip nếu đang kéo thả node đè lên node khác
+    if (this.potentialDropTargetNode && this.draggedNode) {
+      const pos = this.worldToScreen(this.draggedNode.x, this.draggedNode.y);
+      this.drawTooltipBadge(
+        ctx,
+        `🔗 Thả để nối vào "${this.potentialDropTargetNode.label}"`,
+        pos.x,
+        pos.y - 35 * this.zoom,
+        'rgba(6, 78, 59, 0.95)',
+        '#34d399',
+        '#10b981'
+      );
+    }
   }
 
   drawBackgroundGrid(ctx) {
@@ -266,6 +319,7 @@ export class NeuralCanvasEngine {
   drawConnections(ctx, visibleNodes = this.nodes) {
     const nodeMap = new Map(this.nodes.map(n => [n.id, n]));
     const visibleSet = new Set(visibleNodes.map(n => n.id));
+    let activeHoverConn = null;
 
     visibleNodes.forEach(node => {
       if (!node.parentId || !visibleSet.has(node.parentId)) return;
@@ -282,6 +336,12 @@ export class NeuralCanvasEngine {
       const cy1 = pPos.y;
       const cx2 = pPos.x + dx * 0.5;
       const cy2 = cPos.y;
+
+      const isHoveredConn = this.hoveredConnection && this.hoveredConnection.child.id === node.id;
+      if (isHoveredConn) {
+        activeHoverConn = { node, parent, pPos, cPos, cx1, cy1, cx2, cy2 };
+        return; // Để vẽ sau cùng giúp cành hover và nút kéo nổi lên trên các cành khác
+      }
 
       // Draw connection axon line
       ctx.save();
@@ -303,6 +363,222 @@ export class NeuralCanvasEngine {
       ctx.fill();
       ctx.restore();
     });
+
+    // Vẽ cành đang hover & Nút Cắt Cành ✂️ (nổi lên trên cùng)
+    if (activeHoverConn) {
+      const { node, parent, pPos, cPos, cx1, cy1, cx2, cy2 } = activeHoverConn;
+      const midPt = this.getBezierPoint(0.5, pPos, { x: cx1, y: cy1 }, { x: cx2, y: cy2 }, cPos);
+      const isBtnHovered = this.isHoveringCutButton;
+
+      ctx.save();
+      // Đường cành bừng sáng đỏ neon cảnh báo ngắt cành
+      ctx.beginPath();
+      ctx.moveTo(pPos.x, pPos.y);
+      ctx.bezierCurveTo(cx1, cy1, cx2, cy2, cPos.x, cPos.y);
+      ctx.strokeStyle = '#f43f5e';
+      ctx.lineWidth = Math.max(2.5, 4 * this.zoom);
+      ctx.shadowColor = '#f43f5e';
+      ctx.shadowBlur = 14;
+      ctx.stroke();
+
+      // Nút Cắt Cành ✂️
+      const btnRadius = Math.max(10.5, 12.5 * this.zoom) * (isBtnHovered ? 1.25 : 1);
+      ctx.beginPath();
+      ctx.arc(midPt.x, midPt.y, btnRadius, 0, Math.PI * 2);
+      ctx.fillStyle = isBtnHovered ? '#f43f5e' : 'rgba(15, 23, 42, 0.94)';
+      ctx.fill();
+      ctx.strokeStyle = '#f43f5e';
+      ctx.lineWidth = isBtnHovered ? 2.5 : 1.8;
+      ctx.stroke();
+
+      // Icon cây kéo
+      ctx.font = `bold ${Math.max(10, 11 * this.zoom) * (isBtnHovered ? 1.2 : 1)}px sans-serif`;
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('✂', midPt.x, midPt.y);
+      ctx.restore();
+
+      // Tooltip hướng dẫn
+      this.drawTooltipBadge(
+        ctx,
+        isBtnHovered ? '✂ Bấm để ngắt cành này' : '✂ Di chuột vào kéo để cắt cành',
+        midPt.x,
+        midPt.y - btnRadius - 4,
+        'rgba(15, 23, 42, 0.95)',
+        '#ffffff',
+        '#f43f5e'
+      );
+    }
+  }
+
+  /**
+   * Vẽ Sợi dây điện quang nối 2 node (Interactive Connecting Wire)
+   * @param {CanvasRenderingContext2D} ctx 
+   */
+  drawConnectingWire(ctx) {
+    const startPos = this.worldToScreen(this.wireStartNode.x, this.wireStartNode.y);
+    const endPos = this.wireEndPos;
+
+    const dx = endPos.x - startPos.x;
+    const dy = endPos.y - startPos.y;
+    const cx1 = startPos.x + dx * 0.5;
+    const cy1 = startPos.y;
+    const cx2 = startPos.x + dx * 0.5;
+    const cy2 = endPos.y;
+
+    let wireColor = '#38bdf8'; // Cyan mặc định
+    let badgeText = '🔗 Kéo đến node đích để kết nối (Esc để hủy)';
+    let badgeBg = 'rgba(15, 23, 42, 0.95)';
+    let badgeTextCol = '#38bdf8';
+
+    if (this.wireCycleBlocked) {
+      wireColor = '#ef4444';
+      badgeText = `🚫 Không thể nối: Sẽ tạo vòng lặp vô tận!`;
+      badgeBg = 'rgba(69, 10, 10, 0.95)';
+      badgeTextCol = '#fca5a5';
+    } else if (this.wireTargetNode) {
+      wireColor = '#10b981';
+      badgeText = `🔗 Thả chuột để kết nối với "${this.wireTargetNode.label}"`;
+      badgeBg = 'rgba(6, 78, 59, 0.95)';
+      badgeTextCol = '#6ee7b7';
+    }
+
+    ctx.save();
+    // Đường dây điện quang
+    ctx.beginPath();
+    ctx.moveTo(startPos.x, startPos.y);
+    ctx.bezierCurveTo(cx1, cy1, cx2, cy2, endPos.x, endPos.y);
+    ctx.strokeStyle = wireColor;
+    ctx.lineWidth = Math.max(2.5, 3.5 * this.zoom);
+    ctx.shadowColor = wireColor;
+    ctx.shadowBlur = 12;
+    ctx.setLineDash([8, 6]);
+    ctx.lineDashOffset = -this.pulsePhase * 36;
+    ctx.stroke();
+
+    // Điểm mút phát sáng ở con trỏ chuột
+    ctx.beginPath();
+    ctx.arc(endPos.x, endPos.y, Math.max(6, 8 * this.zoom), 0, Math.PI * 2);
+    ctx.fillStyle = wireColor;
+    ctx.shadowBlur = 16;
+    ctx.fill();
+    ctx.restore();
+
+    // Tooltip ngay trên con trỏ chuột
+    this.drawTooltipBadge(
+      ctx,
+      badgeText,
+      endPos.x,
+      endPos.y - 18,
+      badgeBg,
+      badgeTextCol,
+      wireColor
+    );
+  }
+
+  /**
+   * Vẽ khung badge tooltip nhỏ tinh gọn trên Canvas
+   */
+  drawTooltipBadge(ctx, text, x, y, bgColor = '#0f172a', textColor = '#ffffff', borderColor = '#38bdf8') {
+    ctx.save();
+    const fontSize = 11.5;
+    ctx.font = `600 ${fontSize}px 'Outfit', sans-serif`;
+    const textMetrics = ctx.measureText(text);
+    const boxW = textMetrics.width + 20;
+    const boxH = 26;
+    const boxX = Math.max(8, Math.min(this.width - boxW - 8, x - boxW / 2));
+    const boxY = Math.max(8, y - boxH);
+
+    ctx.beginPath();
+    if (typeof ctx.roundRect === 'function') {
+      ctx.roundRect(boxX, boxY, boxW, boxH, 6);
+    } else {
+      ctx.rect(boxX, boxY, boxW, boxH);
+    }
+    ctx.fillStyle = bgColor;
+    ctx.shadowColor = borderColor;
+    ctx.shadowBlur = 10;
+    ctx.fill();
+    ctx.strokeStyle = borderColor;
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
+
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = textColor;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, boxX + boxW / 2, boxY + boxH / 2);
+    ctx.restore();
+  }
+
+  /**
+   * Tìm cành nối và vị trí nút cắt ✂️ tại tọa độ màn hình
+   * @param {number} screenX 
+   * @param {number} screenY 
+   * @returns {Object|null}
+   */
+  findConnectionAt(screenX, screenY) {
+    const visibleNodes = this.getVisibleNodes();
+    const nodeMap = new Map(this.nodes.map(n => [n.id, n]));
+    const visibleSet = new Set(visibleNodes.map(n => n.id));
+
+    for (const node of visibleNodes) {
+      if (!node.parentId || !visibleSet.has(node.parentId)) continue;
+      const parent = nodeMap.get(node.parentId);
+      if (!parent) continue;
+
+      const pPos = this.worldToScreen(parent.x, parent.y);
+      const cPos = this.worldToScreen(node.x, node.y);
+
+      const dx = cPos.x - pPos.x;
+      const cx1 = pPos.x + dx * 0.5;
+      const cy1 = pPos.y;
+      const cx2 = pPos.x + dx * 0.5;
+      const cy2 = cPos.y;
+
+      const p0 = pPos;
+      const p1 = { x: cx1, y: cy1 };
+      const p2 = { x: cx2, y: cy2 };
+      const p3 = cPos;
+
+      const midPt = this.getBezierPoint(0.5, p0, p1, p2, p3);
+      const distToMid = Math.hypot(screenX - midPt.x, screenY - midPt.y);
+      const btnRadius = Math.max(10.5, 12.5 * this.zoom);
+
+      // Nếu đang hover trúng nút cắt
+      if (distToMid <= btnRadius + 6) {
+        return {
+          child: node,
+          parent,
+          midPt,
+          isCutButton: true
+        };
+      }
+
+      // Kiểm tra khoảng cách chuột tới các điểm trên đường cong Bezier
+      let minDistanceToCurve = Infinity;
+      const sampleCount = 14;
+      for (let s = 1; s <= sampleCount; s++) {
+        const t = s / (sampleCount + 1);
+        const pt = this.getBezierPoint(t, p0, p1, p2, p3);
+        const dist = Math.hypot(screenX - pt.x, screenY - pt.y);
+        if (dist < minDistanceToCurve) {
+          minDistanceToCurve = dist;
+        }
+      }
+
+      if (minDistanceToCurve <= Math.max(9, 11 * this.zoom)) {
+        return {
+          child: node,
+          parent,
+          midPt,
+          isCutButton: distToMid <= btnRadius + 6
+        };
+      }
+    }
+
+    return null;
   }
 
   getBezierPoint(t, p0, p1, p2, p3) {
@@ -345,11 +621,30 @@ export class NeuralCanvasEngine {
 
     ctx.save();
 
-    // 1. Aura Glow
+    const isTargetOfDrop = this.potentialDropTargetNode && this.potentialDropTargetNode.id === node.id;
+    const isTargetOfWire = this.wireTargetNode && this.wireTargetNode.id === node.id;
+    const isConnectionTarget = isTargetOfDrop || isTargetOfWire;
+
+    // 1. Aura Glow (và Hào quang khi là mục tiêu kết nối)
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, radius + (isSelected ? 10 * this.zoom : 5 * this.zoom), 0, Math.PI * 2);
-    ctx.fillStyle = isSelected ? `${nodeColor}45` : (isHovered ? `${nodeColor}30` : `${nodeColor}18`);
+    ctx.arc(pos.x, pos.y, radius + (isConnectionTarget ? 16 * this.zoom : (isSelected ? 10 * this.zoom : 5 * this.zoom)), 0, Math.PI * 2);
+    if (isConnectionTarget) {
+      ctx.fillStyle = this.wireCycleBlocked ? 'rgba(239, 68, 68, 0.35)' : 'rgba(16, 185, 129, 0.35)';
+    } else {
+      ctx.fillStyle = isSelected ? `${nodeColor}45` : (isHovered ? `${nodeColor}30` : `${nodeColor}18`);
+    }
     ctx.fill();
+
+    if (isConnectionTarget) {
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, radius + Math.max(8, 12 * this.zoom), 0, Math.PI * 2);
+      ctx.strokeStyle = this.wireCycleBlocked ? '#ef4444' : '#10b981';
+      ctx.lineWidth = Math.max(2, 3 * this.zoom);
+      ctx.setLineDash([5, 4]);
+      ctx.lineDashOffset = -this.pulsePhase * 24;
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
 
     // 2. Node Core Sphere
     ctx.beginPath();
@@ -524,6 +819,43 @@ export class NeuralCanvasEngine {
       }
     }
 
+    // 10. Núm Tròn Kết Nối Dây (Connect Port ⚯) ở mép phải của node khi hover
+    if (isHovered && !this.isConnectingWire && !this.isDraggingNode) {
+      const portX = pos.x + radius + Math.max(10, 13 * this.zoom);
+      const portY = pos.y;
+      const portRadius = Math.max(8, 10 * this.zoom);
+      const isPortHovered = this.connectPortHovered;
+
+      ctx.beginPath();
+      ctx.arc(portX, portY, portRadius * (isPortHovered ? 1.25 : 1), 0, Math.PI * 2);
+      ctx.fillStyle = isPortHovered ? '#38bdf8' : 'rgba(15, 23, 42, 0.94)';
+      ctx.shadowColor = '#38bdf8';
+      ctx.shadowBlur = isPortHovered ? 14 : 6;
+      ctx.fill();
+      ctx.strokeStyle = isPortHovered ? '#ffffff' : '#38bdf8';
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      ctx.font = `bold ${Math.max(8.5, 9.5 * this.zoom) * (isPortHovered ? 1.2 : 1)}px sans-serif`;
+      ctx.fillStyle = isPortHovered ? '#0f172a' : '#38bdf8';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('⚯', portX, portY);
+
+      if (isPortHovered) {
+        this.drawTooltipBadge(
+          ctx,
+          'Kéo để nối cành (hoặc giữ Shift + kéo)',
+          portX,
+          portY - portRadius - 6,
+          'rgba(15, 23, 42, 0.95)',
+          '#38bdf8',
+          '#38bdf8'
+        );
+      }
+    }
+
     ctx.restore();
   }
 
@@ -537,6 +869,14 @@ export class NeuralCanvasEngine {
     this.onWheelBound = this.handleWheel.bind(this);
     this.onDblClickBound = this.handleDoubleClick.bind(this);
     this.onResizeBound = () => this.initCanvasSize();
+    this.onKeyDownBound = (e) => {
+      if (e.key === 'Escape') {
+        this.isConnectingWire = false;
+        this.wireStartNode = null;
+        this.wireTargetNode = null;
+        this.potentialDropTargetNode = null;
+      }
+    };
 
     this.canvas.addEventListener('mousedown', this.onMouseDownBound);
     window.addEventListener('mousemove', this.onMouseMoveBound);
@@ -544,6 +884,7 @@ export class NeuralCanvasEngine {
     this.canvas.addEventListener('wheel', this.onWheelBound, { passive: false });
     this.canvas.addEventListener('dblclick', this.onDblClickBound);
     window.addEventListener('resize', this.onResizeBound);
+    window.addEventListener('keydown', this.onKeyDownBound);
   }
 
   unbindEvents() {
@@ -553,6 +894,7 @@ export class NeuralCanvasEngine {
     this.canvas.removeEventListener('wheel', this.onWheelBound);
     this.canvas.removeEventListener('dblclick', this.onDblClickBound);
     window.removeEventListener('resize', this.onResizeBound);
+    window.removeEventListener('keydown', this.onKeyDownBound);
   }
 
   findNodeAt(screenX, screenY) {
@@ -578,12 +920,40 @@ export class NeuralCanvasEngine {
     this.lastPointerPos = { x: sx, y: sy };
     this.hasMovedDrag = false;
 
+    // 0. Kiểm tra nếu click trúng nút Cắt Cành ✂️
+    const connHit = this.findConnectionAt(sx, sy);
+    if (connHit && connHit.isCutButton) {
+      const { child, parent } = connHit;
+      if (child) {
+        child.parentId = null;
+        saveSubjectKnowledgeNodes(this.subjectCode, this.nodes);
+        showToast(`Đã ngắt cành nối giữa "${parent ? parent.label : 'Cha'}" và "${child.label}"! ✂️`, 'info');
+        this.hoveredConnection = null;
+        this.isHoveringCutButton = false;
+        return;
+      }
+    }
+
     const clickedNode = this.findNodeAt(sx, sy);
     if (clickedNode) {
       const pos = this.worldToScreen(clickedNode.x, clickedNode.y);
       const radius = (clickedNode.parentId === null ? ROOT_RADIUS : NODE_RADIUS) * this.zoom;
-
       const distToCenter = Math.hypot(sx - pos.x, sy - pos.y);
+
+      // A. Kéo dây nối từ Núm ⚯ hoặc khi giữ phím Shift
+      const portX = pos.x + radius + Math.max(10, 13 * this.zoom);
+      const portY = pos.y;
+      const portRadius = Math.max(8, 10 * this.zoom);
+      const distToPort = Math.hypot(sx - portX, sy - portY);
+
+      if (e.shiftKey || distToPort <= portRadius + 4) {
+        this.isConnectingWire = true;
+        this.wireStartNode = clickedNode;
+        this.wireEndPos = { x: sx, y: sy };
+        this.wireTargetNode = null;
+        this.wireCycleBlocked = false;
+        return;
+      }
 
       // 0. Check if clicked the Toggle Collapse/Expand badge at top center
       const hasChildren = this.nodes.some(n => n.parentId === clickedNode.id);
@@ -649,26 +1019,149 @@ export class NeuralCanvasEngine {
     const sx = e.clientX - rect.left;
     const sy = e.clientY - rect.top;
 
+    // A. Đang kéo dây nối (Interactive Wire)
+    if (this.isConnectingWire && this.wireStartNode) {
+      this.wireEndPos = { x: sx, y: sy };
+      const hovered = this.findNodeAt(sx, sy);
+      if (hovered && hovered.id !== this.wireStartNode.id) {
+        // Kiểm tra xem có bị chu trình không (nếu hovered là tổ tiên của startNode thì không thể nối)
+        if (isAncestorOf(hovered.id, this.wireStartNode.id, this.nodes)) {
+          this.wireTargetNode = hovered;
+          this.wireCycleBlocked = true;
+        } else {
+          this.wireTargetNode = hovered;
+          this.wireCycleBlocked = false;
+        }
+      } else {
+        this.wireTargetNode = null;
+        this.wireCycleBlocked = false;
+      }
+      this.canvas.style.cursor = 'crosshair';
+      return;
+    }
+
+    // B. Đang kéo di chuyển node (Drag & Drop)
     if (this.isDraggingNode && this.draggedNode) {
       this.hasMovedDrag = true;
       const worldPos = this.screenToWorld(sx, sy);
       this.draggedNode.x = Math.round(worldPos.x - this.dragOffset.x);
       this.draggedNode.y = Math.round(worldPos.y - this.dragOffset.y);
-    } else if (this.isDraggingCanvas) {
+
+      // Kiểm tra xem có đang rê chuột đè lên node khác không (để gợi ý nối)
+      const targetUnderMouse = this.findNodeAt(sx, sy);
+      if (targetUnderMouse && targetUnderMouse.id !== this.draggedNode.id) {
+        if (!isAncestorOf(this.draggedNode.id, targetUnderMouse.id, this.nodes)) {
+          this.potentialDropTargetNode = targetUnderMouse;
+        } else {
+          this.potentialDropTargetNode = null;
+        }
+      } else {
+        this.potentialDropTargetNode = null;
+      }
+
+      this.canvas.style.cursor = this.potentialDropTargetNode ? 'copy' : 'grabbing';
+      return;
+    }
+
+    // C. Đang kéo lia canvas (Pan)
+    if (this.isDraggingCanvas) {
       this.hasMovedDrag = true;
       this.panX += (sx - this.lastPointerPos.x);
       this.panY += (sy - this.lastPointerPos.y);
       this.lastPointerPos = { x: sx, y: sy };
-    } else {
-      this.hoveredNode = this.findNodeAt(sx, sy);
-      this.canvas.style.cursor = this.hoveredNode ? 'pointer' : 'grab';
+      this.canvas.style.cursor = 'grabbing';
+      return;
     }
+
+    // D. Trạng thái rê chuột bình thường (Hover check)
+    this.hoveredNode = this.findNodeAt(sx, sy);
+
+    // Kiểm tra hover vào Núm Kết Nối ⚯ ở mép phải của node
+    this.connectPortHovered = false;
+    if (this.hoveredNode) {
+      const pos = this.worldToScreen(this.hoveredNode.x, this.hoveredNode.y);
+      const isRoot = this.hoveredNode.parentId === null;
+      const radius = (isRoot ? ROOT_RADIUS : NODE_RADIUS) * this.zoom;
+      const portX = pos.x + radius + Math.max(10, 13 * this.zoom);
+      const portY = pos.y;
+      const portRadius = Math.max(8, 10 * this.zoom);
+      if (Math.hypot(sx - portX, sy - portY) <= portRadius + 4) {
+        this.connectPortHovered = true;
+        this.canvas.style.cursor = 'crosshair';
+        return;
+      }
+    }
+
+    // Kiểm tra hover vào cành nối hoặc nút cắt ✂️
+    const connHit = this.findConnectionAt(sx, sy);
+    if (connHit) {
+      this.hoveredConnection = connHit;
+      this.isHoveringCutButton = connHit.isCutButton;
+      this.canvas.style.cursor = connHit.isCutButton ? 'pointer' : 'crosshair';
+      return;
+    } else {
+      this.hoveredConnection = null;
+      this.isHoveringCutButton = false;
+    }
+
+    this.canvas.style.cursor = this.hoveredNode ? 'pointer' : 'grab';
   }
 
   handleMouseUp() {
-    if (this.isDraggingNode && this.draggedNode && this.hasMovedDrag) {
-      saveSubjectKnowledgeNodes(this.subjectCode, this.nodes);
+    // 1. Kết thúc kéo dây nối (Wire Connection)
+    if (this.isConnectingWire) {
+      if (this.wireTargetNode && this.wireStartNode && this.wireTargetNode.id !== this.wireStartNode.id) {
+        const startNode = this.wireStartNode;
+        const targetNode = this.wireTargetNode;
+
+        if (this.wireCycleBlocked) {
+          showToast(`Không thể nối: "${targetNode.label}" là tổ tiên của "${startNode.label}"! 🚫`, 'warning');
+        } else {
+          // Nối targetNode làm con của startNode (kéo từ startNode sang targetNode)
+          if (!isAncestorOf(targetNode.id, startNode.id, this.nodes)) {
+            targetNode.parentId = startNode.id;
+            saveSubjectKnowledgeNodes(this.subjectCode, this.nodes);
+            showToast(`Đã nối "${targetNode.label}" vào "${startNode.label}"! 🔗`, 'success');
+          } else if (!isAncestorOf(startNode.id, targetNode.id, this.nodes)) {
+            startNode.parentId = targetNode.id;
+            saveSubjectKnowledgeNodes(this.subjectCode, this.nodes);
+            showToast(`Đã nối "${startNode.label}" vào "${targetNode.label}"! 🔗`, 'success');
+          } else {
+            showToast(`Không thể tạo vòng lặp vô tận! 🚫`, 'warning');
+          }
+        }
+      }
+      this.isConnectingWire = false;
+      this.wireStartNode = null;
+      this.wireTargetNode = null;
+      this.wireCycleBlocked = false;
     }
+
+    // 2. Kết thúc kéo thả node (Drag & Drop Node)
+    if (this.isDraggingNode && this.draggedNode) {
+      if (this.potentialDropTargetNode && this.potentialDropTargetNode.id !== this.draggedNode.id) {
+        const dragged = this.draggedNode;
+        const target = this.potentialDropTargetNode;
+
+        if (!isAncestorOf(dragged.id, target.id, this.nodes)) {
+          dragged.parentId = target.id;
+          // Tách nhẹ vị trí nếu đang đè sát
+          const dist = Math.hypot(dragged.x - target.x, dragged.y - target.y);
+          if (dist < 90) {
+            dragged.x = target.x + 130;
+            dragged.y = target.y + 45;
+          }
+          saveSubjectKnowledgeNodes(this.subjectCode, this.nodes);
+          showToast(`Đã nối "${dragged.label}" làm nhánh con của "${target.label}"! 🔗`, 'success');
+        } else {
+          showToast(`Không thể nối: Sẽ tạo vòng lặp vô tận! 🚫`, 'warning');
+        }
+      } else if (this.hasMovedDrag) {
+        saveSubjectKnowledgeNodes(this.subjectCode, this.nodes);
+      }
+    }
+
+    this.potentialDropTargetNode = null;
     this.isDraggingNode = false;
     this.draggedNode = null;
     this.isDraggingCanvas = false;

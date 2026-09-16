@@ -4,6 +4,28 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-16 21:55] - Tối Ưu Tương Tác Cây Tri Thức Nơ-ron: Nút Cắt Cành ✂️ & Kéo Thả Nối 2 Node (Drag & Wire Connection) ✂️🔗🧠
+
+- **🎯 Yêu cầu từ người dùng**: Cho phép người dùng xóa cành giữa 2 node một cách linh hoạt, và có thể giữ node 1 kéo sang node 2 để nối 1 với 2.
+- **🛠 Triển khai kỹ thuật ([`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Nút Cắt Cành Nơ-ron ✂️ (Interactive Branch Cutter) ([`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js))**:
+     - Thêm hàm `findConnectionAt(screenX, screenY)`: Lấy mẫu đa điểm trên đường cong Bezier và tính toán điểm chính giữa (`t = 0.5`) của từng cành liên kết.
+     - Khi rê chuột vào cành: Cành bừng sáng viền đỏ neon `#f43f5e`, hiển thị nút tròn Cắt Cành ✂️ viền phát sáng tại trung tâm cành kèm tooltip hướng dẫn `"✂ Bấm để ngắt cành này"`.
+     - Nhấp chuột vào nút ✂️: Tức thì ngắt liên kết `child.parentId = null`, lưu ngay vào Database và hiển thị thông báo Toast xác nhận.
+  2. **Kéo Node 1 Thả Đè Lên Node 2 (Drag & Drop Node Re-parenting) ([`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js))**:
+     - Trong lúc kéo di chuyển Node 1, nếu rê chuột lên trên Node 2: Node 2 bừng sáng vòng hào quang xanh ngọc neon (emerald aura ring) với hiệu ứng xung sóng năng lượng.
+     - Hiển thị badge gợi ý thời gian thực: `🔗 Thả để nối vào "[Tên Node 2]"`.
+     - Khi thả chuột: Node 1 tự động trở thành nhánh con của Node 2, dãn cách vị trí cân đối chống đè cục và lưu vào LocalStorage.
+  3. **Kéo Dây Nối Điện Quang (Connecting Wire Port & Shift + Drag) ([`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js))**:
+     - Khi hover vào bất kỳ node nào: Xuất hiện **Núm Kết Nối `⚯`** phát sáng ở mép phải của node.
+     - Người dùng có thể nhấn giữ núm `⚯` (hoặc giữ phím `Shift` rồi kéo node) để kéo một **Sợi Dây Điện Quang Neon Uốn Lượn (Glowing Plasma Wire)** bay theo con trỏ chuột đến node đích.
+     - Hỗ trợ hủy nhanh bằng phím `Escape`.
+  4. **Thuật Toán Chống Vòng Lặp Vô Tận (Anti-Cycle Guard)**:
+     - Tích hợp hàm `isAncestorOf`: Kiểm tra toàn diện gia phả cây tri thức trước khi tạo liên kết.
+     - Nếu phát hiện người dùng kéo nối node cha vào con cháu của chính nó: Dây nối lập tức chuyển sang màu đỏ cảnh báo `🚫 Không thể tạo vòng lặp vô tận!` và chặn thao tác kết nối để bảo toàn cấu trúc cây.
+  5. **Nâng Cấp Cache Service Worker ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Tăng phiên bản cache lên **`v143`** để người dùng nhận ngay tính năng mới mà không bị vướng cache cũ.
+
 ## 📅 [2026-09-16 21:26] - Nâng Cấp Dán Ảnh Thông Minh: Xuất Hiện Chuẩn Vị Trí Con Nháy Chuột & Tự Động Tạo Khoảng Cách Văn Bản 🎯🖼️✍️
 
 - **🎯 Yêu cầu từ người dùng**: Khi dán ảnh (Paste ảnh), ảnh không bị rơi vào một chỗ cố định ở trên đầu nữa, mà phải xuất hiện ngay tại vị trí con nháy chuột (caret) hiện tại, các dòng chữ tiếp theo không bị đè/dồn lên trên và màn hình tự động focus vào đó.

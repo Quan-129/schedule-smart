@@ -5,6 +5,27 @@
 
 ---
 
+## 💎 ENTRY 14: [2026-09-16] - "Cây Kéo Thần Kỳ ✂️ & Dây Nối Điện Quang 🔗": Tái Cấu Trúc Bản Đồ Tri Thức Nơ-ron Dễ Dàng Như Chơi Lego! 🧠✨✂️
+
+### 📌 Phân Loại & Tags:
+`#MindmapMastery` `#NeuralGraph` `#SatisfyingInteraction` `#CanvasEngine` `#AntiCycle` `#UIUXDesign` `#StudentTech`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Cắt Cành 1 Chạm Với Nút Cây Kéo ✂️**: Rê chuột lên cành nối bất kỳ là cành bừng sáng đỏ neon `#f43f5e`, hiện ngay nút cây kéo ✂️ ở điểm uốn giữa. Nhấp một phát là ngắt liên kết trong 0.1s, không cần menu chuột phải rườm rà.
+- **Kéo Thả Node 1 Đè Lên Node 2 (Intuitive Drag & Drop)**: Chỉ cần túm Node con thả đè lên Node cha, hào quang xanh ngọc bừng sáng báo hiệu và tự động gắn kết thành cây phân cấp hoàn hảo.
+- **Kéo Dây Điện Quang Uốn Lượn (Plasma Wire Port & Shift + Drag)**: Nhấp núm tròn `⚯` hoặc giữ `Shift` kéo sang node khác để vẽ sợi dây điện quang phát sáng uốn lượn theo chuột siêu đã mắt.
+- **Bảo Vệ Cấu Trúc Tuyệt Đối (Anti-Cycle Guard)**: Thuật toán AI tự động quét chu trình thời gian thực, ngăn chặn người dùng vô tình tạo vòng lặp vô tận (Node cha không thể làm con của chính con cháu mình).
+
+### 2. 🎣 Bộ Viral Hooks TikTok / Reels / Threads:
+1. **Satisfying Interaction Hook**:
+   * *"Ê có ai xài app vẽ mindmap mà muốn đổi nhánh cha con phải xóa đi vẽ lại từ đầu không? Nhìn con app sinh viên này làm nè: Rê chuột hiện cây kéo ✂️ bấm cái đứt cành, túm node này ném vào node kia là tự nối cành mới mượt như nhung!"*
+2. **Visual Aesthetics Hook**:
+   * *"Tính năng nối dây điện quang neon uốn lượn theo con trỏ chuột nhìn như game sci-fi tương lai vậy! Cảm giác học bài và sắp xếp kiến thức không còn chán nữa mà cuốn dã man."*
+3. **Anti-Stupid Design Hook**:
+   * *"Cái hay nhất là app có AI chống lặp vòng: Bạn thử kéo node cha làm con của node cháu xem, dây đỏ rực lên báo cấm ngay! Thiết kế quá tinh tế và bảo vệ dữ liệu học tập chuẩn chỉ."*
+
+---
+
 ## 💎 ENTRY 13: [2026-09-16] - "Splitter 3 Chấm Đa Tỉ Lệ": Kéo Co Giãn Không Gian Cực Phê Giữa Cây Tri Thức & Ghi Chú Markdown ↔️✨📑
 
 ### 📌 Phân Loại & Tags:
