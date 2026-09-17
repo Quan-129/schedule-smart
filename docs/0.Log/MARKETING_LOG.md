@@ -5,6 +5,27 @@
 
 ---
 
+## 💎 ENTRY 16: [2026-09-17] - "Chỉ Cần Khoanh Chuột - AI Đọc Trọn Mọi Con Số Trên Ảnh": Multimodal Vision Copilot Thấu Suốt Ma Trận, Slide & Bài Viết Tay ⛶👁️⚡
+
+### 📌 Phân Loại & Tags:
+`#MultimodalVision` `#Gemini25Flash` `#AICopilot` `#SnippingTool` `#EdTechInnovation` `#MatrixSolver` `#VisualLearning`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Một Lượt Kéo Chuột - Bắt Trọn Tiêu Điểm Học Tập**: Bấm nút `⛶ Khoanh hỏi AI`, kéo một khung chữ nhật phát sáng neon qua bất kỳ góc nào (ma trận tương quan, công thức toán học, biểu đồ hay ảnh chụp slide), thả chuột là con trỏ lập tức trở lại bình thường và một khung chat AI Copilot hiện ngay bên cạnh.
+- **Thị Giác AI Trực Tiếp (Multimodal Vision)**: Không chỉ đọc text thông thường, hệ thống tự động crop vùng ảnh bạn vừa khoanh trên màn hình, nén ảnh và chuyển pixel trực tiếp sang Google Gemini 2.5 Flash (`inlineData`). Dù ghi chú **chỉ toàn là ảnh chụp màn hình slide bài giảng hay bài viết tay**, AI vẫn nhìn thấu từng con số và giải đáp 100%!
+- **Anti-Generic & Laser-Focused (Chấm Dứt Trả Lời Lan Man)**: AI không tóm tắt dông dài cả bài học hay cả chương, mà lập tức bóc tách trực diện: giải thích ý nghĩa từng phần tử hàng-cột $r_{ij}$ trong ma trận tương quan, đường chéo chính, cặp biến nào có tương quan mạnh nhất, và ý nghĩa kinh tế/kỹ thuật thực tế.
+- **Trải Nghiệm Mượt Mà Không Bị Che Mờ**: Khung khoanh hoàn toàn trong suốt và cho phép lăn chuột cuộn nội dung ghi chú thoải mái mà không bị khựng lại hay mờ mịt màn hình.
+
+### 2. 🎣 Bộ Viral Hooks TikTok / Reels / Threads:
+1. **The "Matrix Nightmare" Solver Hook**:
+   * *"Học Xác suất Thống kê hay Machine Learning mà nhìn vào cái bảng ma trận tương quan hoa cả mắt? Xem cách mình dùng tính năng Khoanh hỏi AI trên app nè: Chỉ cần kéo chuột khoanh đúng cái ma trận trên slide, AI đọc từng pixel trên ảnh và chỉ ra ngay con số nào quan trọng nhất, biến nào tác động mạnh nhất. Đỉnh chóp luôn!"*
+2. **"Lazy Student" Screenshot Notes Hook**:
+   * *"Ghi chú bài học mà lười gõ chữ, chỉ toàn chụp màn hình slide của thầy cô thì AI có hiểu không? Thử ngay Multimodal Vision: Cắt ảnh bài giảng dán vào, khoanh một vùng công thức rồi hỏi, AI đọc thẳng từ ảnh như một gia sư kèm 1-1!"*
+3. **Productivity Magic Hook**:
+   * *"App ghi chú tích hợp AI bình thường bắt bạn copy-paste cả đoạn văn bản dài ngoằng? Quên đi! Với công cụ One-shot Snipping này, chỉ cần 1 thao tác kéo chuột: AI nhìn thấy ngay cái bạn đang nhìn, giải thích đúng cái bạn đang thắc mắc!"*
+
+---
+
 ## 💎 ENTRY 15: [2026-09-16] - "Giải Cứu Quạt Máy Tính & Đồng Bộ Đa Thiết Bị": Nén Ảnh WebP 98% + Firebase Cloud Storage Đỉnh Cao ☁️🚀🔇
 
 ### 📌 Phân Loại & Tags:

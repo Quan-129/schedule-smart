@@ -1835,6 +1835,16 @@ body.neural-resizing-active {
   max-width: 90%;
 }
 
+.neural-ai-focal-thumb {
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  object-fit: cover;
+  border: 1.5px solid rgba(56, 189, 248, 0.7);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+  flex-shrink: 0;
+}
+
 .neural-ai-focal-tag {
   background: rgba(168, 85, 247, 0.2);
   border: 1px solid rgba(168, 85, 247, 0.4);

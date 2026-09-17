@@ -4,6 +4,27 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-17 19:00] - AI Copilot Snipping Tool: Tích Hợp Multimodal Vision Trực Tiếp (Đọc Ma Trận/Ảnh/Slide Chụp Màn Hình Bằng Gemini 2.5 Flash) ⛶👁️⚡
+
+- **🎯 Yêu cầu & Vấn đề từ người dùng**:
+  1. Người dùng muốn biết hệ thống có hoạt động tốt khi ghi chú **chỉ toàn là ảnh** (ví dụ ảnh chụp slide bài giảng, đề thi, bài viết tay) hoặc kết hợp cả ảnh và chữ hay không.
+  2. Trợ lý AI trước đó khi khoanh hỏi về một ma trận tương quan lại tóm tắt chung chung cả chương bài học thay vì giải thích cụ thể ý nghĩa từng phần tử trong ma trận.
+  3. Người dùng muốn AI thực sự "nhìn thấy" trực tiếp hình ảnh, bóc tách chính xác các con số và ý nghĩa trong vùng vừa khoanh.
+- **🛠 Triển khai kỹ thuật ([`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js), [`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Tích Hợp Google Gemini Multimodal Vision API ([`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js))**:
+     - Nâng cấp hàm `askContextualNoteQuestion` nhận thêm mảng `focalImages` chứa dữ liệu ảnh `{ mimeType, base64 }`.
+     - Tạo payload REST chuẩn đa phương thức với `inlineData: { mimeType, data: cleanBase64 }` truyền thẳng vào các parts của Gemini 2.5 Flash.
+     - Cập nhật System Prompt hướng dẫn thị giác: Yêu cầu AI quan sát trực tiếp các pixel trên ảnh, đọc chính xác từng con số, ký hiệu ma trận hàng - cột, hệ số tương quan, phương trình toán học trên ảnh mà không đoán mò.
+     - Hỗ trợ hoàn hảo ghi chú chỉ toàn ảnh: AI tự động dựa vào ảnh chụp đề bài / slide để trả lời toàn diện, sâu sắc.
+  2. **Trích Xuất & Crop Ảnh Vùng Khoanh Thông Minh ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Xây dựng hàm `extractImageBase64WithCrop(imgEl, cropRect)`: Tính toán giao điểm giữa vùng khoanh của chuột và ảnh trên màn hình, crop chính xác phần ma trận/biểu đồ được khoanh và nén về JPEG chất lượng cao (giới hạn 1024px) để giảm tải token và tăng tốc phản hồi.
+     - Tự động gom các ảnh trong bài ghi chú (`currentImages`, `.visual-pane img`, `.preview-pane img`) khi ghi chú chỉ toàn ảnh hoặc khi người dùng hỏi ở thanh AI Drawer bên phải.
+  3. **Giao Diện Floating Popup Hiển Thị Thumbnail Thị Giác ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Hiển thị thumbnail xem trước `.neural-ai-focal-thumb` ngay trong thanh tiêu điểm cùng badge `🖼️ Thị giác AI` màu cyan nổi bật.
+     - Tin nhắn mở đầu chào đón thông minh báo hiệu AI đã nhìn thấy hình ảnh trong vùng khoanh.
+  4. **Nâng Cấp Cache Service Worker ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Tăng phiên bản cache lên **`v149`** (`smart-schedule-modular-v149`).
+
 ## 📅 [2026-09-16 23:25] - Đại Tu Hiệu Năng & Đồng Bộ Ảnh Đa Thiết Bị: Tích Hợp Firebase Cloud Storage, Nén WebP Tự Động & Smart 30/60 FPS Canvas Engine ☁️🚀⚡
 
 - **🎯 Yêu cầu & Vấn đề từ người dùng**:

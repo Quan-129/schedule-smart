@@ -438,6 +438,7 @@ export function generateFallbackQuiz(nodeLabel, notesContent, reason = 'demo', a
  * @param {Array<Object>} [params.allNodes] - Toàn bộ node nơ-ron của môn học
  * @param {string} [params.fullContext] - Toàn văn ghi chú của node (Markdown + Visual)
  * @param {string} params.focalText - Đoạn văn bản hoặc trích đoạn đang được bôi đen
+ * @param {Array<Object>} [params.focalImages] - Danh sách ảnh trích xuất từ vùng khoanh hoặc bài ghi chú [{ mimeType, base64 }]
  * @param {string} params.userQuestion - Câu hỏi hoặc yêu cầu của sinh viên
  * @param {Array<Object>} [params.chatHistory] - Lịch sử hội thoại trước đó [{ role: 'user'|'model', text: string }]
  * @returns {Promise<{ text: string, modelUsed: string, ancestryBreadcrumb: string }>}
@@ -448,6 +449,7 @@ export async function askContextualNoteQuestion({
   allNodes = [],
   fullContext = '',
   focalText = '',
+  focalImages = [],
   userQuestion = '',
   chatHistory = []
 }) {
@@ -472,20 +474,31 @@ export async function askContextualNoteQuestion({
     };
   }
 
+  // Hướng dẫn Multimodal Vision nếu có ảnh đính kèm
+  const hasImages = Array.isArray(focalImages) && focalImages.length > 0;
+  const imageVisionGuide = hasImages ? `
+🖼️ DỮ LIỆU THỊ GIÁC TRỰC TIẾP ĐƯỢC ĐÍNH KÈM (MULTIMODAL VISION):
+- Hệ thống đã gửi kèm trực tiếp ${focalImages.length} hình ảnh (ảnh chụp slide bài giảng, ảnh ma trận tương quan, biểu đồ đồ thị, bảng số liệu hoặc bài viết tay) từ bài ghi chú hoặc từ vùng sinh viên vừa khoanh chọn.
+- BẮT BUỘC BẠN PHẢI "NHÌN VÀ QUAN SÁT TRỰC TIẾP TỪNG PIXEL TRÊN HÌNH ẢNH":
+  * Đọc chính xác từng con số, ký hiệu ma trận hàng - cột, hệ số tương quan, phương trình toán học trên ảnh.
+  * Nếu ghi chú chỉ toàn ảnh (không có chữ gõ văn bản), bạn hoàn toàn dựa vào nội dung trong ảnh và câu hỏi của sinh viên để bóc tách và giải thích cặn kẽ, đầy đủ 100%.
+  * Không đoán mò, hãy đọc đúng con số hiển thị trên ảnh.` : '';
+
   // Xây dựng System Prompt sư phạm cao cấp: TIÊU ĐIỂM HÓA CHUYÊN SÂU
   const systemInstruction = `Bạn là Trợ lý Học tập & Cố vấn Nghiên cứu AI Chuyên Sâu cấp Đại học.
 
 🎯 TIÊU ĐIỂM BẮT BUỘC PHẢN HỒI (VÙNG MÀ SINH VIÊN VỪA KHOANH CHỌN ĐỂ HỎI):
 """
-${focalText ? focalText.slice(0, 3000) : '(Không trích xuất được văn bản trực tiếp, hãy dựa vào câu hỏi sinh viên)'}
+${focalText ? focalText.slice(0, 3000) : (hasImages ? '(Sinh viên khoanh chọn vùng hình ảnh / bảng biểu, hãy quan sát trực tiếp dữ liệu ảnh đính kèm)' : '(Không trích xuất được văn bản trực tiếp, hãy dựa vào câu hỏi sinh viên)')}
 """
+${imageVisionGuide}
 
 ❓ CÂU HỎI TRỌNG TÂM CỦA SINH VIÊN:
 "${userQuestion.trim() || 'Giải thích chi tiết ý nghĩa cụ thể của từng phần tử / con số trong vùng được chọn này.'}"
 
 📖 TÀI LIỆU TOÀN BÀI ĐỂ TRA CỨU PHỤ (CHỈ DÙNG ĐỂ ĐỐI CHIẾU KÝ HIỆU, TÊN BIẾN - TUYỆT ĐỐI KHÔNG TÓM TẮT TOÀN BỘ TÀI LIỆU NÀY):
 """
-${effectiveFullNotes ? effectiveFullNotes.slice(0, 5000) : '(Không có ghi chú phụ)'}
+${effectiveFullNotes ? effectiveFullNotes.slice(0, 5000) : '(Ghi chú dạng thị giác / hình ảnh trực tiếp)'}
 """
 
 ⚡ QUY TẮC PHẢN HỒI BẮT BUỘC (ANTI-GENERIC & LASER-FOCUSED):
@@ -495,7 +508,7 @@ ${effectiveFullNotes ? effectiveFullNotes.slice(0, 5000) : '(Không có ghi chú
    - Trả lời TRỰC DIỆN, BÓC TÁCH TỪNG PHẦN TỬ:
      * Nếu là Ma trận (ví dụ: Ma trận tương quan): Giải thích ngay ý nghĩa cụ thể của từng phần tử hàng-cột $r_{ij}$, đường chéo chính (tự tương quan = 1), các hệ số tương quan giữa từng cặp biến (âm/dương, mạnh/yếu), và biến nào tương quan mạnh nhất đến biến phụ thuộc.
      * Nếu là Công thức: Phân tích trực tiếp từng biến số, tham số, dấu phép toán và ý nghĩa thực tiễn.
-     * Nếu là Bảng số liệu: Nhận xét trực tiếp các giá trị đột biến, xu hướng hoặc tương quan cụ thể.
+     * Nếu là Bảng số liệu hoặc Biểu đồ trên ảnh: Đọc và nhận xét trực tiếp các giá trị đột biến, xu hướng hoặc tương quan cụ thể.
 2. SỬ DỤNG NGỮ CẢNH TOÀN BÀI MỘT CÁCH THẨM THẤU (SUBTLE CONTEXT INTEGRATION):
    - Chỉ dùng tài liệu toàn bài để biết các ký hiệu trong vùng chọn đại diện cho đại lượng thực tế nào trong bài tập (ví dụ: x1 là gì, x2 là gì, y là gì...). Hãy gọi đúng tên biến thực tế đó khi giải thích từng phần tử trong vùng chọn!
 3. TRÌNH BÀY GỌN GÀNG, SƯ PHẠM, ĐẦY ĐỦ Ý:
@@ -509,11 +522,29 @@ ${effectiveFullNotes ? effectiveFullNotes.slice(0, 5000) : '(Không có ghi chú
   // Lượt hỏi ban đầu có kèm ngữ cảnh hệ thống
   const initialUserPrompt = `${systemInstruction}\n\n❓ CÂU HỎI CỦA SINH VIÊN:\n"${userQuestion.trim() || 'Hãy giải thích cặn kẽ đoạn trích này theo bối cảnh toàn bộ ghi chú.'}"`;
 
+  // Chuẩn bị parts cho turn đầu tiên (bao gồm Text Prompt + Multimodal Image Parts)
+  const initialParts = [{ text: initialUserPrompt }];
+  if (hasImages) {
+    focalImages.forEach(img => {
+      if (img && img.base64) {
+        const cleanBase64 = img.base64.replace(/^data:[^;]+;base64,/, '').trim();
+        if (cleanBase64) {
+          initialParts.push({
+            inlineData: {
+              mimeType: img.mimeType || 'image/jpeg',
+              data: cleanBase64
+            }
+          });
+        }
+      }
+    });
+  }
+
   if (Array.isArray(chatHistory) && chatHistory.length > 0) {
     // Đưa câu mở đầu vào turn đầu tiên
     contents.push({
       role: 'user',
-      parts: [{ text: initialUserPrompt }]
+      parts: initialParts
     });
 
     // Các turn tiếp theo
@@ -541,7 +572,7 @@ ${effectiveFullNotes ? effectiveFullNotes.slice(0, 5000) : '(Không có ghi chú
   } else {
     contents.push({
       role: 'user',
-      parts: [{ text: initialUserPrompt }]
+      parts: initialParts
     });
   }
 

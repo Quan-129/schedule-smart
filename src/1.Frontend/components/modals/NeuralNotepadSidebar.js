@@ -1909,6 +1909,90 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     });
   }
 
+  // ========================================================================
+  // TIỆN ÍCH TRÍCH XUẤT ẢNH CHO GEMINI MULTIMODAL VISION
+  // ========================================================================
+  const extractImageBase64WithCrop = async (imgEl, cropRect = null) => {
+    try {
+      if (!imgEl) return null;
+
+      // Nếu không cần crop và đã là Data URL
+      if (!cropRect && typeof imgEl.src === 'string' && imgEl.src.startsWith('data:image/')) {
+        const parts = imgEl.src.split(',');
+        const mimeMatch = parts[0].match(/:(.*?);/);
+        return {
+          mimeType: mimeMatch ? mimeMatch[1] : 'image/jpeg',
+          base64: parts[1],
+          dataUrl: imgEl.src
+        };
+      }
+
+      const natW = imgEl.naturalWidth || imgEl.width || 400;
+      const natH = imgEl.naturalHeight || imgEl.height || 300;
+      if (natW <= 0 || natH <= 0) return null;
+
+      let sx = 0;
+      let sy = 0;
+      let sWidth = natW;
+      let sHeight = natH;
+
+      if (cropRect) {
+        const iRect = imgEl.getBoundingClientRect();
+        const ix = Math.max(cropRect.left, iRect.left);
+        const iy = Math.max(cropRect.top, iRect.top);
+        const iw = Math.min(cropRect.right, iRect.right) - ix;
+        const ih = Math.min(cropRect.bottom, iRect.bottom) - iy;
+
+        if (iw > 10 && ih > 10 && iRect.width > 0 && iRect.height > 0) {
+          const scaleX = natW / iRect.width;
+          const scaleY = natH / iRect.height;
+          sx = Math.max(0, (ix - iRect.left) * scaleX);
+          sy = Math.max(0, (iy - iRect.top) * scaleY);
+          sWidth = Math.min(natW - sx, iw * scaleX);
+          sHeight = Math.min(natH - sy, ih * scaleY);
+        }
+      }
+
+      // Giới hạn max dimension để phản hồi AI siêu tốc và tiết kiệm token (tối đa 1024px)
+      const MAX_DIM = 1024;
+      let targetW = sWidth;
+      let targetH = sHeight;
+      if (targetW > MAX_DIM || targetH > MAX_DIM) {
+        const ratio = Math.min(MAX_DIM / targetW, MAX_DIM / targetH);
+        targetW = Math.max(1, Math.round(targetW * ratio));
+        targetH = Math.max(1, Math.round(targetH * ratio));
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(targetW));
+      canvas.height = Math.max(1, Math.round(targetH));
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return null;
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(imgEl, sx, sy, sWidth, sHeight, 0, 0, canvas.width, canvas.height);
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+      return {
+        mimeType: 'image/jpeg',
+        base64: dataUrl.split(',')[1],
+        dataUrl
+      };
+    } catch (err) {
+      console.warn('Canvas export failed (likely CORS on external image):', err);
+      if (typeof imgEl.src === 'string' && imgEl.src.startsWith('data:image/')) {
+        const parts = imgEl.src.split(',');
+        return {
+          mimeType: 'image/jpeg',
+          base64: parts[1],
+          dataUrl: imgEl.src
+        };
+      }
+      return null;
+    }
+  };
+
   // Xử lý gửi câu hỏi cho AI
   const sendAiQuestion = async (customPrompt = '') => {
     const question = (customPrompt || (aiInput ? aiInput.value : '')).trim();
@@ -1928,7 +2012,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     const loadingEl = document.createElement('div');
     loadingEl.className = 'neural-ai-loading';
     loadingEl.innerHTML = `
-      <span>Gemini đang đọc toàn bài ghi chú</span>
+      <span>Gemini đang quan sát bài học và suy luận</span>
       <div class="neural-ai-loading-dots">
         <div class="neural-ai-loading-dot"></div>
         <div class="neural-ai-loading-dot"></div>
@@ -1947,12 +2031,23 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
       const allNodes = getSubjectKnowledgeNodes(subjectCode);
 
+      // Tự động thu thập hình ảnh bài ghi chú nếu bài có ảnh / thuần ảnh (Multimodal Vision)
+      let docImages = [];
+      const noteImgs = Array.from(sidebar.querySelectorAll('.visual-pane img, .preview-pane img, #neural-canvas-wrapper img'));
+      if (noteImgs.length > 0) {
+        for (const imgEl of noteImgs.slice(0, 3)) {
+          const imgData = await extractImageBase64WithCrop(imgEl, null);
+          if (imgData) docImages.push(imgData);
+        }
+      }
+
       const res = await askContextualNoteQuestion({
         subjectCode,
         targetNode: node,
         allNodes,
         fullContext: fullNoteText,
         focalText: currentFocalText || fullNoteText.slice(0, 160),
+        focalImages: docImages,
         userQuestion: question,
         chatHistory: aiChatHistory
       });
@@ -2096,9 +2191,10 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     }
   };
 
-  // Trích xuất nội dung (chữ & link ảnh) từ vùng màn hình được khoanh
+  // Trích xuất nội dung (chữ & link ảnh & danh sách thẻ ảnh) từ vùng màn hình được khoanh
   const extractContentFromScreenRect = (rect) => {
     let extractedParts = [];
+    let matchedImgs = [];
     const isVisualTab = visualPane && !visualPane.classList.contains('hidden');
     const isPreviewTab = previewPane && !previewPane.classList.contains('hidden');
 
@@ -2163,7 +2259,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
         }
       });
 
-      // 3. Quét các thẻ ảnh (bao gồm cả ảnh nổi trong Visual Notes)
+      // 3. Quét các thẻ ảnh (bao gồm cả ảnh nổi trong Visual Notes và Markdown preview)
       const imgs = targetContainer.querySelectorAll('img');
       imgs.forEach(img => {
         if (handledElements.has(img)) return;
@@ -2176,6 +2272,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
         );
         if (intersects && img.src) {
           extractedParts.push(`[Hình ảnh sơ đồ / biểu đồ: ${img.alt || 'Ảnh minh họa'}](${img.src})`);
+          matchedImgs.push(img);
           handledElements.add(img);
         }
       });
@@ -2238,11 +2335,14 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       }
     }
 
-    return extractedParts.join('\n\n').trim();
+    return {
+      text: extractedParts.join('\n\n').trim(),
+      matchedImgs
+    };
   };
 
   // Mở Popup Chat AI nổi tại đúng vị trí khung chữ nhật vừa khoanh
-  const openInSituAiPopup = (boundingBox, focalText) => {
+  const openInSituAiPopup = (boundingBox, focalText, focalImages = []) => {
     closeFloatingPopup();
     currentFocalText = focalText;
 
@@ -2267,6 +2367,17 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     popup.style.top = `${Math.round(posY)}px`;
 
     const displaySnippet = focalText.length > 55 ? `${focalText.slice(0, 55)}...` : focalText;
+    const hasFocalImages = Array.isArray(focalImages) && focalImages.length > 0;
+    const thumbHtml = hasFocalImages
+      ? `<img src="${focalImages[0].dataUrl}" class="neural-ai-focal-thumb" alt="Ảnh khoanh" />`
+      : '';
+    const tagHtml = hasFocalImages
+      ? `<span class="neural-ai-focal-tag" style="background: rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.5); color: #38bdf8;"><i class="fa-solid fa-eye"></i> Thị giác AI</span>`
+      : `<span class="neural-ai-focal-tag">🎯 Đã khoanh</span>`;
+
+    const welcomeMsg = hasFocalImages
+      ? '✨ Mình đã **nhìn thấy hình ảnh/bảng biểu** trong vùng bạn vừa khoanh! Sẵn sàng bóc tách chi tiết từng con số, ma trận, công thức hoặc biểu đồ.'
+      : `✨ Mình đã nắm nội dung vùng bạn vừa khoanh trong bài <strong>${escapeHtml(node.label || 'ghi chú')}</strong>. Bạn muốn mình giải đáp thế nào?`;
 
     popup.innerHTML = `
       <div class="neural-ai-drawer-header">
@@ -2288,7 +2399,8 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
       <div class="neural-ai-focal-bar">
         <div class="neural-ai-focal-chip" title="${escapeHtml(focalText)}">
-          <span class="neural-ai-focal-tag">🎯 Đã khoanh</span>
+          ${thumbHtml}
+          ${tagHtml}
           <span class="neural-ai-focal-quote">"${escapeHtml(displaySnippet)}"</span>
         </div>
       </div>
@@ -2308,7 +2420,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       <div class="neural-ai-chat-body" id="floating-popup-chat-body">
         <div class="neural-ai-msg model">
           <div class="neural-ai-bubble">
-            <p>✨ Mình đã nắm nội dung vùng bạn vừa khoanh trong bài <strong>${escapeHtml(node.label || 'ghi chú')}</strong>. Bạn muốn mình giải đáp thế nào?</p>
+            <p>${welcomeMsg}</p>
           </div>
         </div>
       </div>
@@ -2351,7 +2463,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       const loadingEl = document.createElement('div');
       loadingEl.className = 'neural-ai-loading';
       loadingEl.innerHTML = `
-        <span>Gemini đang phân tích toàn bài ghi chú</span>
+        <span>${hasFocalImages ? 'Gemini đang quan sát hình ảnh và bóc tách dữ liệu' : 'Gemini đang phân tích toàn bài ghi chú'}</span>
         <div class="neural-ai-loading-dots">
           <div class="neural-ai-loading-dot"></div>
           <div class="neural-ai-loading-dot"></div>
@@ -2375,6 +2487,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
           allNodes,
           fullContext: fullNoteText,
           focalText: focalText,
+          focalImages: focalImages,
           userQuestion: question,
           chatHistory: floatingHistory
         });
@@ -2528,7 +2641,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       box.style.height = `${height}px`;
     });
 
-    overlay.addEventListener('mouseup', (e) => {
+    overlay.addEventListener('mouseup', async (e) => {
       if (!isDrawing) {
         cleanupSnipping();
         return;
@@ -2549,10 +2662,38 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       }
 
       const boundingBox = { left, top, right: left + width, bottom: top + height, width, height };
-      const extracted = extractContentFromScreenRect(boundingBox);
-      const focalText = extracted || 'Vùng ma trận / sơ đồ số liệu vừa khoanh chọn';
+      const { text, matchedImgs } = extractContentFromScreenRect(boundingBox);
 
-      openInSituAiPopup(boundingBox, focalText);
+      // Trích xuất hình ảnh Multimodal Vision từ vùng khoanh
+      let focalImages = [];
+      if (matchedImgs && matchedImgs.length > 0) {
+        for (const imgEl of matchedImgs.slice(0, 3)) {
+          const imgData = await extractImageBase64WithCrop(imgEl, boundingBox);
+          if (imgData) focalImages.push(imgData);
+        }
+      }
+
+      // Nếu không có chữ VÀ không bắt được ảnh trong vùng khoanh, nhưng bài ghi chú có ảnh
+      if (!text && focalImages.length === 0) {
+        const allDocImgs = Array.from(sidebar.querySelectorAll('.visual-pane img, .preview-pane img, #neural-canvas-wrapper img'));
+        if (allDocImgs.length > 0) {
+          for (const imgEl of allDocImgs.slice(0, 2)) {
+            const imgData = await extractImageBase64WithCrop(imgEl, null);
+            if (imgData) focalImages.push(imgData);
+          }
+        }
+      }
+
+      let focalText = text;
+      if (!focalText) {
+        if (focalImages.length > 0) {
+          focalText = `[Hình ảnh / sơ đồ số liệu vừa khoanh chọn (${focalImages.length} ảnh)]`;
+        } else {
+          focalText = 'Vùng ma trận / sơ đồ số liệu vừa khoanh chọn';
+        }
+      }
+
+      openInSituAiPopup(boundingBox, focalText, focalImages);
     });
   };
 
