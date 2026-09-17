@@ -257,7 +257,8 @@ function renderNotepadTemplate(node) {
         <div class="neural-np-tool-divider"></div>
 
         <button type="button" class="neural-np-tool-btn neural-btn-snipping" id="btn-snipe-ai-md" title="Khoanh vùng hỏi AI (Kéo chuột chọn bất kỳ đoạn nào để hỏi)">
-          <i class="fa-solid fa-crop-simple"></i> Khoanh hỏi AI
+          <i class="fa-solid fa-crop-simple"></i>
+          <span>Khoanh hỏi AI</span>
         </button>
       </div>
 
@@ -331,7 +332,8 @@ function renderNotepadTemplate(node) {
           </label>
           <div class="neural-np-tool-divider"></div>
           <button type="button" class="neural-np-tool-btn neural-btn-snipping" id="btn-snipe-ai-vis" title="Khoanh vùng hỏi AI (Kéo chuột chọn bất kỳ đoạn nào để hỏi)">
-            <i class="fa-solid fa-crop-simple"></i> Khoanh hỏi AI
+            <i class="fa-solid fa-crop-simple"></i>
+            <span>Khoanh hỏi AI</span>
           </button>
         </div>
 

@@ -4,6 +4,26 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-17 23:26] - Sửa Triệt Để Lỗi Vỡ Layout & Tràn Viền Nút "Khoanh Hỏi AI" Trên Toolbar Ghi Chú 🎨📐✨
+
+- **🎯 Yêu cầu & Vấn đề từ người dùng**:
+  - Người dùng gửi ảnh phóng to nút **"Khoanh hỏi AI"** bị lỗi hiển thị: Icon chiếc crop cyan bị lệch ra ngoài mép trái, chữ "Khoanh" và "hỏi AI" bị rớt thành 2 hàng và tràn phình ra ngoài khung viền bo góc màu tím.
+  - Người dùng phản hồi: *"đoạn này đang thiết kế hơi xấu này"*.
+  - Phân tích nguyên nhân:
+    1. Selector chung `.neural-np-tool-btn` trên toolbar quy định kích thước cố định `width: 32px; height: 32px;` cho các nút icon đơn.
+    2. Nút `.neural-btn-snipping` kế thừa cả class `.neural-np-tool-btn` nhưng thiếu thuộc tính `width: auto !important; min-width: max-content;` và `white-space: nowrap;`.
+    3. Trình duyệt ép toàn bộ icon crop và dòng chữ dài "Khoanh hỏi AI" vào một khung vuông 32px x 32px, làm chữ bị gãy thành 2 dòng, tràn ra ngoài và đẩy icon vẹo sang bên trái đè lên đường separator.
+- **🛠 Triển khai kỹ thuật ([`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Đại Tu Định Tuyến CSS Cho `.neural-btn-snipping` ([`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Thiết lập `width: auto !important; min-width: max-content !important; height: 32px !important;` đồng bộ chiều cao chuẩn với thanh công cụ.
+     - Bổ sung `white-space: nowrap !important; line-height: 1;` chống tuyệt đối hiện tượng rớt dòng.
+     - Căn lề đệm `padding: 0 12px !important; gap: 7px !important; border-radius: 8px !important;`.
+     - Tinh chỉnh gradient Cyberpunk Neon tím - cyan (`linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(56, 189, 248, 0.18) 100%)`), chữ `#f8fafc` sắc nét, icon crop cyan `#38bdf8` thẳng hàng hoàn hảo.
+  2. **Chuẩn Hóa Markup HTML ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Bọc nhãn văn bản `<span>Khoanh hỏi AI</span>` trên cả Markdown Toolbar (`#btn-snipe-ai-md`) và Visual Toolbar (`#btn-snipe-ai-vis`).
+  3. **Nâng Cấp Cache Service Worker ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Tăng phiên bản cache lên **`v156`** (`smart-schedule-modular-v156`).
+
 ## 📅 [2026-09-17 23:15] - Đại Tu Responsive Toàn Diện Cho Thanh Công Cụ Đáy (Neural Toolbar) & Vùng Hiển Thị Canvas 📱✨🎛️
 
 - **🎯 Yêu cầu & Vấn đề từ người dùng**:
