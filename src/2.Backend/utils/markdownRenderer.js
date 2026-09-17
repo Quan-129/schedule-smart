@@ -4,8 +4,85 @@
 import { escapeHtml } from '../../4.Security/sanitizer.js';
 
 // ==========================================================================
-// 2. HELPER FUNCTIONS: TABLE DELIMITER NORMALIZER
+// 2. HELPER FUNCTIONS: TABLE DELIMITER & MATH FORMULAS NORMALIZER
 // ==========================================================================
+
+/**
+ * Chuyển đổi các công thức LaTeX ($...$ và $$...$$) sang HTML và Unicode toán học trực quan
+ * @param {string} text - Nội dung thô
+ * @returns {string} Văn bản đã định dạng công thức toán
+ */
+function formatMathFormulas(text) {
+  if (!text || typeof text !== 'string') return '';
+
+  // 1. Dọn dẹp các ký tự LaTeX gãy hoặc chưa đóng ở cuối chuỗi (ví dụ: `$\` hoặc `$` lẻ loi)
+  let result = text.replace(/\$\s*\\?\s*$/g, '');
+
+  // 2. Chuyển đổi công thức toán khối ($$ ... $$)
+  result = result.replace(/\$\$([\s\S]*?)\$\$/g, (match, formula) => {
+    const cleaned = prettifyLatexString(formula.trim());
+    return `<div class="neural-math-block"><code>${cleaned}</code></div>`;
+  });
+
+  // 3. Chuyển đổi công thức toán nội dòng ($ ... $)
+  result = result.replace(/\$([^\$\n]+)\$/g, (match, formula) => {
+    const cleaned = prettifyLatexString(formula.trim());
+    return `<span class="neural-math-inline">${cleaned}</span>`;
+  });
+
+  return result;
+}
+
+/**
+ * Thay thế các lệnh LaTeX cơ bản thành Unicode toán học trang nhã, sắc nét
+ */
+function prettifyLatexString(str) {
+  if (!str) return '';
+  return str
+    .replace(/\\hat\{([a-zA-Z\\]+)\}/g, '$1̂')
+    .replace(/\\hat\s+([a-zA-Z\\])/g, '$1̂')
+    .replace(/\\beta/g, 'β')
+    .replace(/\\alpha/g, 'α')
+    .replace(/\\gamma/g, 'γ')
+    .replace(/\\theta/g, 'θ')
+    .replace(/\\lambda/g, 'λ')
+    .replace(/\\sigma/g, 'σ')
+    .replace(/\\mu/g, 'μ')
+    .replace(/\\epsilon/g, 'ε')
+    .replace(/\\Delta/g, 'Δ')
+    .replace(/\\sum/g, '∑')
+    .replace(/\\prod/g, '∏')
+    .replace(/\\int/g, '∫')
+    .replace(/\\approx/g, '≈')
+    .replace(/\\le(q)?/g, '≤')
+    .replace(/\\ge(q)?/g, '≥')
+    .replace(/\\neq/g, '≠')
+    .replace(/\\times/g, '×')
+    .replace(/\\cdot/g, '·')
+    .replace(/\\pm/g, '±')
+    .replace(/\\infty/g, '∞')
+    .replace(/\\rightarrow/g, '→')
+    .replace(/\\to/g, '→')
+    .replace(/\\in/g, '∈')
+    .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1 / $2)')
+    .replace(/\\sqrt\{([^}]+)\}/g, '√($1)')
+    .replace(/\\mathbf\{([^}]+)\}/g, '$1')
+    .replace(/\\text\{([^}]+)\}/g, '$1')
+    .replace(/\^T\b/g, 'ᵀ')
+    .replace(/\^T(?=[^a-zA-Z0-9])/g, 'ᵀ')
+    .replace(/\^\{T\}/g, 'ᵀ')
+    .replace(/\^\{-1\}/g, '⁻¹')
+    .replace(/\^2\b/g, '²')
+    .replace(/\^3\b/g, '³')
+    .replace(/_1\b/g, '₁')
+    .replace(/_2\b/g, '₂')
+    .replace(/_3\b/g, '₃')
+    .replace(/_0\b/g, '₀')
+    .replace(/_i\b/g, 'ᵢ')
+    .replace(/_j\b/g, 'ⱼ')
+    .replace(/_\{ij\}/g, 'ᵢⱼ')
+    .replace(/\\/g, '');
+}
 
 /**
  * Tự động làm sạch các thẻ HTML hoặc ký tự rác vô tình lọt vào dòng phân cách cột bảng (delimiter).
@@ -47,8 +124,9 @@ export function renderMarkdownToHtml(rawMarkdown) {
     return '<p class="neural-notepad-empty-text">Chưa có nội dung ghi chú nào...</p>';
   }
 
-  // 1. Tự động chuẩn hóa và làm sạch dòng phân cách bảng (ngăn ngừa lỗi vỡ Table do thẻ rác)
-  const cleanMarkdown = normalizeTableDelimiters(rawMarkdown);
+  // 1. Tự động chuẩn hóa công thức toán LaTeX & dòng phân cách bảng
+  const mathCleaned = formatMathFormulas(rawMarkdown);
+  const cleanMarkdown = normalizeTableDelimiters(mathCleaned);
 
   // 2. Kiểm tra bộ máy Marked.js tiêu chuẩn
   const markedEngine = (typeof window !== 'undefined' && window.marked) ? window.marked : null;

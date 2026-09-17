@@ -269,8 +269,10 @@ Cấu trúc JSON bắt buộc:
         break;
       }
 
-      const data = await response.json();
-      const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const rawQuizParts = data.candidates?.[0]?.content?.parts;
+      const candidateText = Array.isArray(rawQuizParts)
+        ? rawQuizParts.map(p => p.text || '').join('')
+        : (rawQuizParts?.[0]?.text || '');
       
       // Parse JSON
       let cleaned = candidateText.trim();
@@ -511,9 +513,9 @@ ${effectiveFullNotes ? effectiveFullNotes.slice(0, 5000) : '(Ghi chú dạng th�
      * Nếu là Bảng số liệu hoặc Biểu đồ trên ảnh: Đọc và nhận xét trực tiếp các giá trị đột biến, xu hướng hoặc tương quan cụ thể.
 2. SỬ DỤNG NGỮ CẢNH TOÀN BÀI MỘT CÁCH THẨM THẤU (SUBTLE CONTEXT INTEGRATION):
    - Chỉ dùng tài liệu toàn bài để biết các ký hiệu trong vùng chọn đại diện cho đại lượng thực tế nào trong bài tập (ví dụ: x1 là gì, x2 là gì, y là gì...). Hãy gọi đúng tên biến thực tế đó khi giải thích từng phần tử trong vùng chọn!
-3. TRÌNH BÀY GỌN GÀNG, SƯ PHẠM, ĐẦY ĐỦ Ý:
-   - Dùng Markdown phong phú (danh sách gạch đầu dòng, in đậm tên phần tử/cặp biến, công thức LaTeX $...$).
-   - Văn phong thông minh, chuẩn xác, trực diện, không dài dòng văn tự.
+3. TRÌNH BÀY GỌN GÀNG, SƯ PHẠM, ĐẦY ĐỦ Ý & TRỌN VẸN (KHÔNG NGẮT GIỮA CHỪNG):
+   - Trả lời TRỌN VẸN câu kết luận, tuyệt đối KHÔNG dừng lửng lơ hay ngắt câu giữa chừng.
+   - Về công thức & ký hiệu toán học: Hãy viết bằng ký hiệu Unicode trực quan (ví dụ: XᵀX, r_ij, x₁, x₂, β̂ = (XᵀX)⁻¹Xᵀy) hoặc đặt trong khối mã ```math để sinh viên đọc rõ ràng, tuyệt đối KHÔNG để sót các ký hiệu gãy như `$\` hoặc `$` không đóng.
 4. Trả lời bằng Tiếng Việt chuẩn mực.`;
 
   // Xây dựng lịch sử hội thoại nội dung
@@ -588,7 +590,7 @@ ${effectiveFullNotes ? effectiveFullNotes.slice(0, 5000) : '(Ghi chú dạng th�
           generationConfig: {
             temperature: 0.35,
             topP: 0.95,
-            maxOutputTokens: 2048
+            maxOutputTokens: 4096
           }
         })
       });
@@ -599,7 +601,11 @@ ${effectiveFullNotes ? effectiveFullNotes.slice(0, 5000) : '(Ghi chú dạng th�
       }
 
       const data = await response.json();
-      const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      const rawParts = data.candidates?.[0]?.content?.parts;
+      const generatedText = Array.isArray(rawParts)
+        ? rawParts.map(p => p.text || '').join('')
+        : (rawParts?.[0]?.text || '');
+
       if (!generatedText) {
         throw new Error('Gemini không trả về nội dung.');
       }

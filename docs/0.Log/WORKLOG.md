@@ -4,6 +4,28 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-17 20:25] - Sửa Triệt Để Lỗi Phông Toán & Câu Trả Lời Bị Cắt Cụt Ngang: Ghép Đầy Đủ Content Parts & Bộ Định Dạng Math LaTeX Sang Unicode Sắc Nét 🔣📐⚡
+
+- **🎯 Yêu cầu & Vấn đề từ người dùng**:
+  1. Người dùng gửi ảnh phản hồi: "sao nó toàn bị trả lời lỗi phông và bị ngắt giữa chừng không vậy".
+  2. Phân tích nguyên nhân gốc rễ từ ảnh chụp:
+     - **Bị ngắt giữa chừng**: Trong `GeminiAIService.js`, code lấy `data.candidates?.[0]?.content?.parts?.[0]?.text`. Khi Gemini trả về câu trả lời có công thức toán hoặc nhiều block, API chia nội dung thành nhiều `parts` (`parts[0]`, `parts[1]`...). Việc chỉ lấy `parts[0]` khiến câu trả lời bị cắt ngang đúng ở dấu `$\` và vứt bỏ toàn bộ phần sau!
+     - **Lỗi phông (Font / LaTeX notation)**: Ký hiệu toán học như `$X^T X$` hay `$\hat{\beta}$` không được parse thành công thức toán mà hiển thị nguyên dấu `$`, `^`, `\` thô, khiến người dùng nhìn thấy như bị vỡ font.
+- **🛠 Triển khai kỹ thuật ([`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js), [`markdownRenderer.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/utils/markdownRenderer.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Ghép Toàn Bộ Content Parts & Tăng Token ([`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js))**:
+     - Thay thế `parts?.[0]?.text` bằng `rawParts.map(p => p.text || '').join('')`, đảm bảo mọi mảnh văn bản và công thức từ Gemini đều được thu thập 100% nguyên vẹn.
+     - Tăng `maxOutputTokens` từ `2048` lên `4096` để câu trả lời dài và chi tiết không bao giờ bị cắt.
+     - Dặn AI trong System Prompt ưu tiên sử dụng Unicode toán học trực quan (`XᵀX`, `r_ij`, `β̂ = (XᵀX)⁻¹Xᵀy`), trả lời trọn vẹn và không bỏ lửng.
+  2. **Bộ Chuyển Đổi Math LaTeX Sang Unicode Sắc Nét ([`markdownRenderer.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/utils/markdownRenderer.js))**:
+     - Xây dựng hàm `formatMathFormulas(text)` và `prettifyLatexString(str)`:
+       * Tự động dọn dẹp các ký tự `$\` hoặc `$` chưa đóng ở cuối văn bản.
+       * Chuyển đổi `$X^T X$` thành `<span class="neural-math-inline">XᵀX</span>`.
+       * Chuyển đổi `^{-1}` thành `⁻¹`, `_1` thành `₁`, `\hat{\beta}` thành `β̂`, `\times` thành `×`, `\sum` thành `∑`...
+  3. **CSS Styling Cho Công Thức Toán ([`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Tạo class `.neural-math-inline` với phông `'JetBrains Mono', 'Segoe UI Symbol', monospace`, viền và màu cyan `#38bdf8` sáng rõ, tạo cảm giác học thuật cao cấp và triệt tiêu hoàn toàn cảm giác "lỗi phông".
+  4. **Nâng Cấp Cache Service Worker ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Tăng phiên bản cache lên **`v151`** (`smart-schedule-modular-v151`).
+
 ## 📅 [2026-09-17 20:15] - Sửa Triệt Để Lỗi Cuộn Trang (Wheel / Roll) Trong Chế Độ Khoanh Vùng Hỏi AI 🖱️🔄⚡
 
 - **🎯 Yêu cầu & Vấn đề từ người dùng**:
