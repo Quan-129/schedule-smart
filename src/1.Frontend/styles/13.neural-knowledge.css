@@ -2165,33 +2165,24 @@ body.neural-resizing-active {
   transform: scale(1.15);
 }
 
-/* Lớp phủ Snipping Overlay toàn màn hình */
+/* Lớp phủ Snipping Overlay toàn màn hình (Trong suốt hoàn toàn, không mờ nền, cho phép nhìn rõ bài học) */
 .neural-snipping-overlay {
   position: fixed;
   inset: 0;
   z-index: 1200;
   cursor: crosshair;
-  background: rgba(10, 15, 30, 0.28);
-  backdrop-filter: blur(1.5px);
-  -webkit-backdrop-filter: blur(1.5px);
+  background: transparent;
   user-select: none;
-  touch-action: none;
-  animation: snipping-fade-in 0.15s ease-out;
 }
 
-@keyframes snipping-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* Khung chữ nhật khi đang kéo chuột */
+/* Khung chữ nhật khi đang kéo chuột (Viền neon sắc nét, không phủ bóng tối làm mờ nội dung) */
 .neural-snipping-box {
   position: fixed;
   z-index: 1201;
   pointer-events: none;
   border: 2px dashed #38bdf8;
-  background: rgba(56, 189, 248, 0.12);
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.32), 0 0 18px rgba(56, 189, 248, 0.5);
+  background: rgba(56, 189, 248, 0.08);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.6), inset 0 0 12px rgba(56, 189, 248, 0.15);
   border-radius: 4px;
 }
 

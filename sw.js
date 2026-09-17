@@ -4,7 +4,7 @@
  * ==========================================================================
  */
 
-const CACHE_NAME = 'smart-schedule-modular-v146';
+const CACHE_NAME = 'smart-schedule-modular-v147';
 const STATIC_ASSETS = [
   './',
   './index.html',

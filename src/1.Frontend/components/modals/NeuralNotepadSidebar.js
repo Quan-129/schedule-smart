@@ -2407,6 +2407,18 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     };
     window.addEventListener('keydown', onKeyDown);
 
+    // Cho phép lăn chuột cuộn nội dung bài học mượt mà khi đang ở chế độ Snipping
+    const onWheel = (e) => {
+      const isVisualTab = visualPane && !visualPane.classList.contains('hidden');
+      const isPreviewTab = previewPane && !previewPane.classList.contains('hidden');
+      const scrollTarget = isVisualTab ? visualPane : (isPreviewTab ? previewPane : textarea);
+      if (scrollTarget) {
+        scrollTarget.scrollTop += e.deltaY;
+        scrollTarget.scrollLeft += e.deltaX;
+      }
+    };
+    overlay.addEventListener('wheel', onWheel, { passive: true });
+
     overlay.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return;
       isDrawing = true;
