@@ -4,6 +4,24 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-17 20:15] - Sửa Triệt Để Lỗi Cuộn Trang (Wheel / Roll) Trong Chế Độ Khoanh Vùng Hỏi AI 🖱️🔄⚡
+
+- **🎯 Yêu cầu & Vấn đề từ người dùng**:
+  1. Người dùng phản hồi: "hiện tại ở chế độ này vẫn chưa roll được" (khi bấm vào nút Khoanh hỏi AI, dùng con lăn chuột để cuộn bài học lên xuống thì trang không nhúc nhích).
+  2. Nguyên nhân gốc rễ:
+     - Trong tab Xem trước (Preview): `#neural-np-preview-pane` không có thanh cuộn (overflow: hidden), mà phần tử cuộn thực sự là `#neural-notepad-preview-content`. Code cũ gán `scrollTop` vào `previewPane` nên không có tác dụng.
+     - Lớp phủ overlay cố định toàn màn hình (`position: fixed; inset: 0`) nếu đăng ký `{ passive: true }` sẽ bị trình duyệt chặn cuộn do overlay không có scroll height.
+     - `#neural-np-visual-pane` có CSS `scroll-behavior: smooth` gây xung đột giật khựng với sự kiện gán cuộn wheel liên tục.
+- **🛠 Triển khai kỹ thuật ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Thuật Toán Dò Tìm Phần Tử Cuộn Theo Tọa Độ Chuột ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Sử dụng `document.elementFromPoint(e.clientX, e.clientY)` (kèm toggle `pointerEvents = 'none'`) để xác định chính xác phần tử người dùng đang rê chuột lên bên dưới lớp phủ.
+     - Truy vết tìm đúng container có thanh cuộn thực sự (`#neural-notepad-preview-content`, `#neural-np-visual-pane`, `#neural-notepad-textarea`, `#neural-np-quiz-pane`).
+     - Gọi `scrollTarget.scrollBy({ top: e.deltaY, left: e.deltaX, behavior: 'auto' })` với `e.preventDefault()` trên `{ passive: false }`, triệt tiêu hoàn toàn hiện tượng nuốt sự kiện wheel của fixed overlay.
+  2. **Tối Ưu CSS Cuộn Tức Thì ([`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Đổi `scroll-behavior: smooth` thành `scroll-behavior: auto !important` trên `#neural-np-visual-pane` để con lăn chuột phản hồi tức thì 1:1, không bị delay.
+  3. **Nâng Cấp Cache Service Worker ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Tăng phiên bản cache lên **`v150`** (`smart-schedule-modular-v150`).
+
 ## 📅 [2026-09-17 19:00] - AI Copilot Snipping Tool: Tích Hợp Multimodal Vision Trực Tiếp (Đọc Ma Trận/Ảnh/Slide Chụp Màn Hình Bằng Gemini 2.5 Flash) ⛶👁️⚡
 
 - **🎯 Yêu cầu & Vấn đề từ người dùng**:

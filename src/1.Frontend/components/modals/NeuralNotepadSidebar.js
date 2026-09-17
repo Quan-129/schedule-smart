@@ -2600,15 +2600,70 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
     // Cho phép lăn chuột cuộn nội dung bài học mượt mà khi đang ở chế độ Snipping
     const onWheel = (e) => {
-      const isVisualTab = visualPane && !visualPane.classList.contains('hidden');
-      const isPreviewTab = previewPane && !previewPane.classList.contains('hidden');
-      const scrollTarget = isVisualTab ? visualPane : (isPreviewTab ? previewPane : textarea);
+      e.preventDefault();
+
+      // 1. Dò tìm phần tử cuộn nằm ngay bên dưới con trỏ chuột
+      let scrollTarget = null;
+      overlay.style.pointerEvents = 'none';
+      const underEl = document.elementFromPoint(e.clientX, e.clientY);
+      overlay.style.pointerEvents = 'auto';
+
+      if (underEl) {
+        let curr = underEl;
+        while (curr && curr !== document.body && curr !== document.documentElement) {
+          if (
+            curr === previewContent ||
+            curr === visualPane ||
+            curr === textarea ||
+            curr.id === 'neural-notepad-preview-content' ||
+            curr.id === 'neural-np-visual-pane' ||
+            curr.id === 'neural-notepad-textarea' ||
+            curr.id === 'neural-np-quiz-pane'
+          ) {
+            scrollTarget = curr;
+            break;
+          }
+          const cs = window.getComputedStyle(curr);
+          if ((cs.overflowY === 'auto' || cs.overflowY === 'scroll') && (curr.scrollHeight > curr.clientHeight)) {
+            scrollTarget = curr;
+            break;
+          }
+          curr = curr.parentElement;
+        }
+      }
+
+      // 2. Fallback: Xác định container cuộn theo tab hiện tại nếu không dò được qua tọa độ
+      if (!scrollTarget) {
+        const isVisualTab = visualPane && !visualPane.classList.contains('hidden');
+        const isPreviewTab = previewPane && !previewPane.classList.contains('hidden');
+        const isEditTab = editPane && !editPane.classList.contains('hidden');
+
+        if (isVisualTab) {
+          scrollTarget = visualPane;
+        } else if (isPreviewTab) {
+          scrollTarget = previewContent || previewPane;
+        } else if (isEditTab) {
+          scrollTarget = textarea;
+        } else {
+          scrollTarget = previewContent || visualPane || textarea;
+        }
+      }
+
+      // 3. Thực hiện cuộn dứt khoát không bị delay
       if (scrollTarget) {
-        scrollTarget.scrollTop += e.deltaY;
-        scrollTarget.scrollLeft += e.deltaX;
+        if (typeof scrollTarget.scrollBy === 'function') {
+          scrollTarget.scrollBy({
+            top: e.deltaY,
+            left: e.deltaX,
+            behavior: 'auto'
+          });
+        } else {
+          scrollTarget.scrollTop += e.deltaY;
+          scrollTarget.scrollLeft += e.deltaX;
+        }
       }
     };
-    overlay.addEventListener('wheel', onWheel, { passive: true });
+    overlay.addEventListener('wheel', onWheel, { passive: false });
 
     overlay.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return;
