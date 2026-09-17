@@ -4,6 +4,24 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-17 20:33] - Đại Tu Hiển Thị Ma Trận LaTeX (\begin{bmatrix}): Tự Động Chuyển Thành Khung Ma Trận Ngoặc Vuông Chuẩn Toán Học [ ... ] 📐🔲⚡
+
+- **🎯 Yêu cầu & Vấn đề từ người dùng**:
+  - Người dùng gửi ảnh phản hồi: "vẫn bị lỗi hiển thị này: `begin{bmatrix} 3 & 6 & 4 6 & 14 & 9 4 & 9 & 6 end{bmatrix}`".
+  - Phân tích nguyên nhân:
+    1. Khi Gemini trả về cấu trúc ma trận LaTeX `\begin{bmatrix} 3 & 6 & 4 \\ 6 & 14 & 9 \\ 4 & 9 & 6 \end{bmatrix}`, đoạn mã dọn dẹp trước đó vô tình xóa sạch dấu `\` dẫn đến `\begin{bmatrix}` thành `begin{bmatrix}` và xóa mất dấu xuống dòng hàng `\\`, khiến các số bị dính chùm vào nhau.
+    2. Marked.js không hỗ trợ môi trường `bmatrix` của LaTeX nên đẩy nguyên xi chuỗi thô ra màn hình.
+- **🛠 Triển khai kỹ thuật ([`markdownRenderer.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/utils/markdownRenderer.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Bộ Parser Ma Trận LaTeX Chuyên Dụng ([`markdownRenderer.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/utils/markdownRenderer.js))**:
+     - Viết hàm `renderLatexMatrix(matrixInner)`: Tự động nhận diện cấu trúc `\begin{bmatrix}`, `\begin{pmatrix}`, `\begin{matrix}`... bóc tách các hàng theo `\\` và các cột theo `&`.
+     - Chuyển đổi thành bảng ma trận HTML gồm các ô số `<td class="neural-matrix-cell">` căn giữa ngay ngắn.
+     - Bảo vệ nguyên vẹn các dấu phân cách `\\` và `&` khi xử lý chuỗi toán.
+  2. **Tạo Dấu Ngoặc Vuông Neon Học Thuật Bằng CSS ([`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Thiết kế `.neural-matrix-bracket` với hai viền cạnh trái/phải màu cyan `#38bdf8` và 4 góc gập ngang trên/dưới `::before` & `::after` mô phỏng chính xác dấu ngoặc vuông toán học `[` và `]`.
+     - Phông số `'JetBrains Mono', monospace` màu cyan sắc nét, nền tối sâu `rgba(15, 23, 42, 0.75)` chuẩn giao diện cao cấp.
+  3. **Nâng Cấp Cache Service Worker ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Tăng phiên bản cache lên **`v153`** (`smart-schedule-modular-v153`).
+
 ## 📅 [2026-09-17 20:28] - Fix Hot Lỗi Cú Pháp Template String (Unexpected identifier 'math') & Phục Hồi Đăng Nhập Ứng Dụng 🩹🛠️
 
 - **🎯 Yêu cầu & Vấn đề từ người dùng**:

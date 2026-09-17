@@ -12,21 +12,71 @@ import { escapeHtml } from '../../4.Security/sanitizer.js';
  * @param {string} text - Nội dung thô
  * @returns {string} Văn bản đã định dạng công thức toán
  */
+/**
+ * Chuyển đổi mã ma trận LaTeX (\begin{bmatrix} ... \end{bmatrix}) thành bảng ma trận ngoặc vuông HTML/CSS tuyệt đẹp
+ * @param {string} matrixInner - Nội dung giữa \begin{...matrix} và \end{...matrix}
+ * @returns {string} HTML bảng ma trận ngoặc vuông
+ */
+function renderLatexMatrix(matrixInner) {
+  if (!matrixInner || typeof matrixInner !== 'string') return '';
+
+  // Tách các hàng theo dấu xuống dòng \\ hoặc \cr hoặc xuống dòng vật lý
+  const rawRows = matrixInner
+    .trim()
+    .split(/\\\\|\\cr|\r?\n/)
+    .map(r => r.trim())
+    .filter(r => r.length > 0);
+
+  if (rawRows.length === 0) return '';
+
+  const tableRows = rawRows.map(row => {
+    // Tách các cột theo dấu &
+    const cells = row.split('&').map(c => c.trim()).filter(c => c.length > 0);
+    const tds = cells.map(val => `<td class="neural-matrix-cell">${prettifyLatexString(val)}</td>`).join('');
+    return `<tr>${tds}</tr>`;
+  }).join('');
+
+  return `<div class="neural-matrix-wrapper"><div class="neural-matrix-bracket"><table class="neural-matrix-table"><tbody>${tableRows}</tbody></table></div></div>`;
+}
+
+/**
+ * Chuyển đổi các công thức LaTeX ($...$ và $$...$$) và Ma trận sang HTML và Unicode toán học trực quan
+ * @param {string} text - Nội dung thô
+ * @returns {string} Văn bản đã định dạng công thức toán
+ */
 function formatMathFormulas(text) {
   if (!text || typeof text !== 'string') return '';
 
   // 1. Dọn dẹp các ký tự LaTeX gãy hoặc chưa đóng ở cuối chuỗi (ví dụ: `$\` hoặc `$` lẻ loi)
   let result = text.replace(/\$\s*\\?\s*$/g, '');
 
-  // 2. Chuyển đổi công thức toán khối ($$ ... $$)
+  // 2. Regex nhận diện cấu trúc ma trận LaTeX (bmatrix, pmatrix, matrix, vmatrix)
+  const matrixRegex = /\\?begin\{(?:b|p|v|V)?matrix\}([\s\S]*?)\\?end\{(?:b|p|v|V)?matrix\}/gi;
+
+  // 3. Chuyển đổi công thức toán khối ($$ ... $$)
   result = result.replace(/\$\$([\s\S]*?)\$\$/g, (match, formula) => {
-    const cleaned = prettifyLatexString(formula.trim());
+    const trimmed = formula.trim();
+    if (matrixRegex.test(trimmed)) {
+      matrixRegex.lastIndex = 0;
+      return trimmed.replace(matrixRegex, (m, inner) => renderLatexMatrix(inner));
+    }
+    const cleaned = prettifyLatexString(trimmed);
     return `<div class="neural-math-block"><code>${cleaned}</code></div>`;
   });
 
-  // 3. Chuyển đổi công thức toán nội dòng ($ ... $)
+  // 4. Chuyển đổi ma trận LaTeX nếu nằm độc lập bên ngoài $$
+  result = result.replace(matrixRegex, (match, inner) => {
+    return renderLatexMatrix(inner);
+  });
+
+  // 5. Chuyển đổi công thức toán nội dòng ($ ... $)
   result = result.replace(/\$([^\$\n]+)\$/g, (match, formula) => {
-    const cleaned = prettifyLatexString(formula.trim());
+    const trimmed = formula.trim();
+    if (matrixRegex.test(trimmed)) {
+      matrixRegex.lastIndex = 0;
+      return trimmed.replace(matrixRegex, (m, inner) => renderLatexMatrix(inner));
+    }
+    const cleaned = prettifyLatexString(trimmed);
     return `<span class="neural-math-inline">${cleaned}</span>`;
   });
 
@@ -81,7 +131,8 @@ function prettifyLatexString(str) {
     .replace(/_i\b/g, 'ᵢ')
     .replace(/_j\b/g, 'ⱼ')
     .replace(/_\{ij\}/g, 'ᵢⱼ')
-    .replace(/\\/g, '');
+    .replace(/\\[a-zA-Z]+/g, '')
+    .replace(/\\(?![a-zA-Z0-9])/g, '');
 }
 
 /**
