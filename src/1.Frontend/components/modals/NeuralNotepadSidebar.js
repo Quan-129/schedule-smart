@@ -253,6 +253,12 @@ function renderNotepadTemplate(node) {
         <button type="button" class="neural-np-tool-btn highlight" id="btn-fmt-highlight" title="Tô sáng dạ quang (==văn bản==)">
           <i class="fa-solid fa-highlighter"></i> HL
         </button>
+
+        <div class="neural-np-tool-divider"></div>
+
+        <button type="button" class="neural-np-tool-btn neural-btn-snipping" id="btn-snipe-ai-md" title="Khoanh vùng hỏi AI (Kéo chuột chọn bất kỳ đoạn nào để hỏi)">
+          <i class="fa-solid fa-crop-simple"></i> Khoanh hỏi AI
+        </button>
       </div>
 
       <div class="neural-notepad-save-indicator" id="neural-notepad-save-status">
@@ -323,6 +329,10 @@ function renderNotepadTemplate(node) {
             <i class="fa-regular fa-image"></i> Dán ảnh (Ctrl+V)
             <input type="file" id="vis-file-input" accept="image/*" style="display: none;">
           </label>
+          <div class="neural-np-tool-divider"></div>
+          <button type="button" class="neural-np-tool-btn neural-btn-snipping" id="btn-snipe-ai-vis" title="Khoanh vùng hỏi AI (Kéo chuột chọn bất kỳ đoạn nào để hỏi)">
+            <i class="fa-solid fa-crop-simple"></i> Khoanh hỏi AI
+          </button>
         </div>
 
         <!-- Canvas Wrapper chứa Text Editor nền & Lớp ảnh nổi đè lên -->
@@ -2072,8 +2082,397 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     });
   }
 
-  // Dọn dẹp selection pill và listeners khi đóng sidebar
+  // ========================================================================
+  // 13. ONE-SHOT SNIPPING AI & IN-SITU FLOATING POPUP CONTROLLER
+  // ========================================================================
+  const btnSnipeMd = sidebar.querySelector('#btn-snipe-ai-md');
+  const btnSnipeVis = sidebar.querySelector('#btn-snipe-ai-vis');
+  let activeFloatingPopup = null;
+
+  const closeFloatingPopup = () => {
+    if (activeFloatingPopup && activeFloatingPopup.parentNode) {
+      activeFloatingPopup.parentNode.removeChild(activeFloatingPopup);
+      activeFloatingPopup = null;
+    }
+  };
+
+  // Trích xuất nội dung (chữ & link ảnh) từ vùng màn hình được khoanh
+  const extractContentFromScreenRect = (rect) => {
+    let extractedParts = [];
+    const isVisualTab = visualPane && !visualPane.classList.contains('hidden');
+    const isPreviewTab = previewPane && !previewPane.classList.contains('hidden');
+
+    const targetContainer = isVisualTab ? canvasWrapper : (isPreviewTab ? previewContent : textarea);
+
+    if (targetContainer && targetContainer !== textarea) {
+      const walker = document.createTreeWalker(
+        targetContainer,
+        NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT,
+        null,
+        false
+      );
+      let currNode;
+      while ((currNode = walker.nextNode())) {
+        if (currNode.nodeType === Node.TEXT_NODE) {
+          const txt = currNode.textContent.trim();
+          if (!txt) continue;
+          try {
+            const range = document.createRange();
+            range.selectNodeContents(currNode);
+            const r = range.getBoundingClientRect();
+            const intersects = !(
+              r.right < rect.left ||
+              r.left > rect.right ||
+              r.bottom < rect.top ||
+              r.top > rect.bottom
+            );
+            if (intersects) {
+              extractedParts.push(txt);
+            }
+          } catch (e) {}
+        } else if (currNode.nodeName === 'IMG') {
+          try {
+            const r = currNode.getBoundingClientRect();
+            const intersects = !(
+              r.right < rect.left ||
+              r.left > rect.right ||
+              r.bottom < rect.top ||
+              r.top > rect.bottom
+            );
+            if (intersects && currNode.src) {
+              extractedParts.push(`[Hình ảnh: ${currNode.alt || 'Ghi chú'}](${currNode.src})`);
+            }
+          } catch (e) {}
+        }
+      }
+    } else if (textarea) {
+      const sel = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd).trim();
+      if (sel) {
+        extractedParts.push(sel);
+      } else {
+        const tRect = textarea.getBoundingClientRect();
+        const lines = textarea.value.split('\n');
+        const lineHeight = tRect.height / Math.max(1, lines.length);
+        const startLineIdx = Math.max(0, Math.floor((rect.top - tRect.top) / Math.max(16, lineHeight)));
+        const endLineIdx = Math.min(lines.length - 1, Math.ceil((rect.bottom - tRect.top) / Math.max(16, lineHeight)));
+        const sliced = lines.slice(startLineIdx, endLineIdx + 1).join('\n').trim();
+        if (sliced) extractedParts.push(sliced);
+      }
+    }
+
+    return extractedParts.join(' ').replace(/\s+/g, ' ').trim();
+  };
+
+  // Mở Popup Chat AI nổi tại đúng vị trí khung chữ nhật vừa khoanh
+  const openInSituAiPopup = (boundingBox, focalText) => {
+    closeFloatingPopup();
+    currentFocalText = focalText;
+
+    const popup = document.createElement('div');
+    popup.className = 'neural-ai-floating-popup';
+
+    const popupWidth = 410;
+    const popupHeight = 440;
+    let posX = boundingBox.left;
+    let posY = boundingBox.bottom + 10;
+
+    if (posX + popupWidth > window.innerWidth - 16) {
+      posX = window.innerWidth - popupWidth - 16;
+    }
+    if (posX < 16) posX = 16;
+
+    if (posY + popupHeight > window.innerHeight - 16) {
+      posY = Math.max(16, boundingBox.top - popupHeight - 10);
+    }
+
+    popup.style.left = `${Math.round(posX)}px`;
+    popup.style.top = `${Math.round(posY)}px`;
+
+    const displaySnippet = focalText.length > 55 ? `${focalText.slice(0, 55)}...` : focalText;
+
+    popup.innerHTML = `
+      <div class="neural-ai-drawer-header">
+        <div class="neural-ai-drawer-title-group">
+          <div class="neural-ai-drawer-badge"><i class="fa-solid fa-crop-simple"></i></div>
+          <div>
+            <span class="neural-ai-drawer-title">
+              AI Copilot
+              <span class="neural-ai-drawer-sub">Vùng vừa khoanh</span>
+            </span>
+          </div>
+        </div>
+        <div class="neural-ai-drawer-actions">
+          <button type="button" class="neural-ai-drawer-btn" id="btn-close-floating-popup" title="Đóng popup">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="neural-ai-focal-bar">
+        <div class="neural-ai-focal-chip" title="${escapeHtml(focalText)}">
+          <span class="neural-ai-focal-tag">🎯 Đã khoanh</span>
+          <span class="neural-ai-focal-quote">"${escapeHtml(displaySnippet)}"</span>
+        </div>
+      </div>
+
+      <div class="neural-ai-quick-chips">
+        <button type="button" class="neural-ai-quick-chip" data-prompt="Giải thích chi tiết đoạn trích vừa khoanh này theo bối cảnh toàn bài">
+          💡 Giải thích
+        </button>
+        <button type="button" class="neural-ai-quick-chip" data-prompt="Cho ví dụ minh họa thực tế về phần vừa khoanh này">
+          📝 Cho ví dụ
+        </button>
+        <button type="button" class="neural-ai-quick-chip" data-prompt="Tóm tắt 3 ý cốt lõi quan trọng nhất của phần này">
+          ⚡ 3 ý cốt lõi
+        </button>
+      </div>
+
+      <div class="neural-ai-chat-body" id="floating-popup-chat-body">
+        <div class="neural-ai-msg model">
+          <div class="neural-ai-bubble">
+            <p>✨ Mình đã nắm nội dung vùng bạn vừa khoanh trong bài <strong>${escapeHtml(node.label || 'ghi chú')}</strong>. Bạn muốn mình giải đáp thế nào?</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="neural-ai-input-row">
+        <input type="text" class="neural-ai-input" id="floating-popup-input" placeholder="Hỏi bất kỳ điều gì về vùng này (Enter)..." />
+        <button type="button" class="neural-ai-send-btn" id="btn-floating-send" title="Gửi câu hỏi">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+    `;
+
+    document.body.appendChild(popup);
+    activeFloatingPopup = popup;
+
+    const closeBtn = popup.querySelector('#btn-close-floating-popup');
+    closeBtn.addEventListener('click', closeFloatingPopup);
+
+    const chatBody = popup.querySelector('#floating-popup-chat-body');
+    const input = popup.querySelector('#floating-popup-input');
+    const sendBtn = popup.querySelector('#btn-floating-send');
+    const chips = popup.querySelectorAll('.neural-ai-quick-chip');
+
+    let floatingHistory = [];
+    let isFloatingGenerating = false;
+
+    const sendFloatingQuestion = async (customPrompt = '') => {
+      const question = (customPrompt || input.value).trim();
+      if (!question || isFloatingGenerating) return;
+
+      input.value = '';
+      isFloatingGenerating = true;
+      sendBtn.disabled = true;
+
+      const userMsg = document.createElement('div');
+      userMsg.className = 'neural-ai-msg user';
+      userMsg.innerHTML = `<div class="neural-ai-bubble">${escapeHtml(question)}</div>`;
+      chatBody.appendChild(userMsg);
+
+      const loadingEl = document.createElement('div');
+      loadingEl.className = 'neural-ai-loading';
+      loadingEl.innerHTML = `
+        <span>Gemini đang phân tích toàn bài ghi chú</span>
+        <div class="neural-ai-loading-dots">
+          <div class="neural-ai-loading-dot"></div>
+          <div class="neural-ai-loading-dot"></div>
+          <div class="neural-ai-loading-dot"></div>
+        </div>
+      `;
+      chatBody.appendChild(loadingEl);
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+      try {
+        const fullNoteText = [
+          textarea ? textarea.value : (node.notes || ''),
+          visualEditor ? visualEditor.innerText : (node.visualNotes?.html?.replace(/<[^>]*>/g, ' ') || '')
+        ].filter(Boolean).join('\n\n');
+
+        const allNodes = getSubjectKnowledgeNodes(subjectCode);
+
+        const res = await askContextualNoteQuestion({
+          subjectCode,
+          targetNode: node,
+          allNodes,
+          fullContext: fullNoteText,
+          focalText: focalText,
+          userQuestion: question,
+          chatHistory: floatingHistory
+        });
+
+        if (loadingEl.parentNode) loadingEl.remove();
+
+        const aiMsg = document.createElement('div');
+        aiMsg.className = 'neural-ai-msg model';
+        aiMsg.innerHTML = `
+          <div class="neural-ai-bubble">
+            ${renderMarkdownToHtml(res.text)}
+          </div>
+          <div class="neural-ai-msg-actions">
+            <button type="button" class="neural-ai-action-btn copy-btn" title="Sao chép">
+              <i class="fa-regular fa-copy"></i> Sao chép
+            </button>
+            <button type="button" class="neural-ai-action-btn insert-btn" title="Chèn vào bài ghi chú">
+              <i class="fa-solid fa-file-circle-plus"></i> Chèn vào ghi chú
+            </button>
+          </div>
+        `;
+
+        aiMsg.querySelector('.copy-btn').addEventListener('click', () => {
+          navigator.clipboard.writeText(res.text).then(() => {
+            showToast('Đã sao chép câu trả lời!');
+          });
+        });
+
+        aiMsg.querySelector('.insert-btn').addEventListener('click', () => {
+          insertAiAnswerIntoNote(res.text);
+        });
+
+        chatBody.appendChild(aiMsg);
+        chatBody.scrollTop = chatBody.scrollHeight;
+
+        floatingHistory.push(
+          { role: 'user', text: question },
+          { role: 'model', text: res.text }
+        );
+      } catch (err) {
+        if (loadingEl.parentNode) loadingEl.remove();
+        const errEl = document.createElement('div');
+        errEl.className = 'neural-ai-msg model';
+        errEl.innerHTML = `
+          <div class="neural-ai-bubble" style="background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5;">
+            <i class="fa-solid fa-triangle-exclamation"></i> <strong>Lỗi:</strong> ${escapeHtml(err.message)}
+          </div>
+        `;
+        chatBody.appendChild(errEl);
+        chatBody.scrollTop = chatBody.scrollHeight;
+      } finally {
+        isFloatingGenerating = false;
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    };
+
+    chips.forEach(c => {
+      c.addEventListener('click', () => sendFloatingQuestion(c.dataset.prompt));
+    });
+
+    sendBtn.addEventListener('click', () => sendFloatingQuestion());
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendFloatingQuestion();
+      }
+    });
+
+    setTimeout(() => input.focus(), 150);
+  };
+
+  // Khởi động Chế độ Khoanh vùng 1 lần (One-shot Snipping Mode)
+  const startSnippingMode = () => {
+    closeFloatingPopup();
+    hideSelectionPill();
+
+    const overlay = document.createElement('div');
+    overlay.className = 'neural-snipping-overlay';
+
+    const box = document.createElement('div');
+    box.className = 'neural-snipping-box';
+
+    const badge = document.createElement('div');
+    badge.className = 'neural-snipping-cursor-badge';
+    badge.innerHTML = '<i class="fa-solid fa-crop-simple"></i> Kéo chuột để khoanh vùng hỏi AI';
+
+    document.body.appendChild(overlay);
+    document.body.appendChild(box);
+    document.body.appendChild(badge);
+
+    let isDrawing = false;
+    let startX = 0;
+    let startY = 0;
+
+    const cleanupSnipping = () => {
+      window.removeEventListener('keydown', onKeyDown);
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      if (box.parentNode) box.parentNode.removeChild(box);
+      if (badge.parentNode) badge.parentNode.removeChild(badge);
+    };
+
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        cleanupSnipping();
+        showToast('Đã hủy khoanh vùng');
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+
+    overlay.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      isDrawing = true;
+      startX = e.clientX;
+      startY = e.clientY;
+      box.style.left = `${startX}px`;
+      box.style.top = `${startY}px`;
+      box.style.width = '0px';
+      box.style.height = '0px';
+      box.style.display = 'block';
+      badge.style.display = 'none';
+    });
+
+    overlay.addEventListener('mousemove', (e) => {
+      badge.style.left = `${e.clientX}px`;
+      badge.style.top = `${e.clientY}px`;
+
+      if (!isDrawing) return;
+      const curX = e.clientX;
+      const curY = e.clientY;
+      const left = Math.min(startX, curX);
+      const top = Math.min(startY, curY);
+      const width = Math.abs(curX - startX);
+      const height = Math.abs(curY - startY);
+
+      box.style.left = `${left}px`;
+      box.style.top = `${top}px`;
+      box.style.width = `${width}px`;
+      box.style.height = `${height}px`;
+    });
+
+    overlay.addEventListener('mouseup', (e) => {
+      if (!isDrawing) {
+        cleanupSnipping();
+        return;
+      }
+      isDrawing = false;
+
+      const curX = e.clientX;
+      const curY = e.clientY;
+      const left = Math.min(startX, curX);
+      const top = Math.min(startY, curY);
+      const width = Math.abs(curX - startX);
+      const height = Math.abs(curY - startY);
+
+      cleanupSnipping();
+
+      if (width < 12 && height < 12) {
+        return;
+      }
+
+      const boundingBox = { left, top, right: left + width, bottom: top + height, width, height };
+      const extracted = extractContentFromScreenRect(boundingBox);
+      const focalText = extracted || (textarea ? textarea.value.slice(0, 160) : 'Đoạn trích vừa khoanh');
+
+      openInSituAiPopup(boundingBox, focalText);
+    });
+  };
+
+  // Gắn sự kiện nút Khoanh hỏi AI trên Markdown toolbar & Visual toolbar
+  if (btnSnipeMd) btnSnipeMd.addEventListener('click', startSnippingMode);
+  if (btnSnipeVis) btnSnipeVis.addEventListener('click', startSnippingMode);
+
+  // Dọn dẹp selection pill, popup và listeners khi đóng sidebar
   notepadCleanupFns.push(() => {
+    closeFloatingPopup();
     document.removeEventListener('selectionchange', onSelectionEvent);
     sidebar.removeEventListener('mouseup', onSelectionEvent);
     sidebar.removeEventListener('keyup', onSelectionEvent);

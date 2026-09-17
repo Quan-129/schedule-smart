@@ -2127,6 +2127,133 @@ body.neural-resizing-active {
   box-shadow: none;
 }
 
+/* ==========================================================================
+   ONE-SHOT SNIPPING AI & IN-SITU FLOATING POPUP
+   ========================================================================== */
+
+/* Nút Khoanh Vùng Hỏi AI trên Toolbar */
+.neural-btn-snipping {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.22) 0%, rgba(56, 189, 248, 0.18) 100%) !important;
+  border: 1px solid rgba(168, 85, 247, 0.45) !important;
+  color: #e2e8f0 !important;
+  font-weight: 600 !important;
+  font-size: 0.74rem !important;
+  padding: 3px 10px !important;
+  border-radius: 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.2);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  cursor: pointer;
+}
+
+.neural-btn-snipping:hover {
+  background: linear-gradient(135deg, #a855f7 0%, #38bdf8 100%) !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.55);
+}
+
+.neural-btn-snipping i {
+  color: #38bdf8;
+  transition: transform 0.2s;
+}
+
+.neural-btn-snipping:hover i {
+  color: #ffffff;
+  transform: scale(1.15);
+}
+
+/* Lớp phủ Snipping Overlay toàn màn hình */
+.neural-snipping-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  cursor: crosshair;
+  background: rgba(10, 15, 30, 0.28);
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
+  user-select: none;
+  touch-action: none;
+  animation: snipping-fade-in 0.15s ease-out;
+}
+
+@keyframes snipping-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Khung chữ nhật khi đang kéo chuột */
+.neural-snipping-box {
+  position: fixed;
+  z-index: 1201;
+  pointer-events: none;
+  border: 2px dashed #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.32), 0 0 18px rgba(56, 189, 248, 0.5);
+  border-radius: 4px;
+}
+
+/* Nhãn hướng dẫn bám theo con trỏ chuột khi snipping */
+.neural-snipping-cursor-badge {
+  position: fixed;
+  z-index: 1202;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(30, 27, 75, 0.96) 0%, rgba(15, 23, 42, 0.98) 100%);
+  border: 1px solid rgba(168, 85, 247, 0.6);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 12px rgba(168, 85, 247, 0.4);
+  white-space: nowrap;
+  transform: translate(16px, 16px);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.neural-snipping-cursor-badge i {
+  color: #38bdf8;
+  animation: ai-pill-sparkle 2s infinite ease-in-out;
+}
+
+/* In-situ Floating AI Chat Popup (Hiện ngay tại vùng vừa kéo) */
+.neural-ai-floating-popup {
+  position: fixed;
+  z-index: 1250;
+  width: 410px;
+  max-width: min(92vw, 440px);
+  max-height: min(78vh, 580px);
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(8, 12, 26, 0.99) 100%);
+  border: 1px solid rgba(168, 85, 247, 0.5);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(168, 85, 247, 0.25);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: ai-popup-scale-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes ai-popup-scale-in {
+  from { opacity: 0; transform: scale(0.92) translateY(6px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.neural-ai-floating-popup .neural-ai-drawer-header {
+  background: rgba(168, 85, 247, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.neural-ai-floating-popup .neural-ai-chat-body {
+  max-height: 320px;
+}
+
+
 
 
 
