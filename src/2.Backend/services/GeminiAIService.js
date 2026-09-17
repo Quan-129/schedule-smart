@@ -423,3 +423,164 @@ export function generateFallbackQuiz(nodeLabel, notesContent, reason = 'demo', a
   };
 }
 
+// ==========================================================================
+// 4. CONTEXTUAL NOTE COPILOT ENGINE (HỎI ĐÁP THEO NGỮ CẢNH GHI CHÚ)
+// ==========================================================================
+
+/**
+ * Hỏi đáp AI chuyên sâu theo ngữ cảnh toàn bài ghi chú (Contextual Note Q&A)
+ * AI tiếp thu toàn bộ bài ghi chú + phả hệ nơ-ron môn học để nắm chắc định nghĩa và bối cảnh,
+ * sau đó tập trung phân tích sâu sắc đoạn trích (focalText) theo câu hỏi của sinh viên.
+ *
+ * @param {Object} params
+ * @param {string} [params.subjectCode] - Mã môn học
+ * @param {Object} [params.targetNode] - Node nơ-ron hiện tại
+ * @param {Array<Object>} [params.allNodes] - Toàn bộ node nơ-ron của môn học
+ * @param {string} [params.fullContext] - Toàn văn ghi chú của node (Markdown + Visual)
+ * @param {string} params.focalText - Đoạn văn bản hoặc trích đoạn đang được bôi đen
+ * @param {string} params.userQuestion - Câu hỏi hoặc yêu cầu của sinh viên
+ * @param {Array<Object>} [params.chatHistory] - Lịch sử hội thoại trước đó [{ role: 'user'|'model', text: string }]
+ * @returns {Promise<{ text: string, modelUsed: string, ancestryBreadcrumb: string }>}
+ */
+export async function askContextualNoteQuestion({
+  subjectCode = '',
+  targetNode = null,
+  allNodes = [],
+  fullContext = '',
+  focalText = '',
+  userQuestion = '',
+  chatHistory = []
+}) {
+  const apiKey = getGeminiApiKey();
+
+  // Truy vết phả hệ nơ-ron từ Root đến Node hiện tại
+  const nodes = Array.isArray(allNodes) ? allNodes : [];
+  const node = targetNode || { label: 'Ghi chú học tập' };
+  const ancestry = traceNodeAncestryPath(nodes, node);
+  const targetLabel = node.label || 'Khái niệm';
+  const breadcrumb = ancestry.breadcrumbStr || targetLabel;
+
+  // Tổng hợp toàn cảnh ghi chú
+  const effectiveFullNotes = (fullContext || ancestry.cumulativeNotes || extractNodeText(node) || '').trim();
+
+  // Nếu chưa cấu hình API Key, thông báo hướng dẫn người dùng
+  if (!apiKey) {
+    return {
+      text: `⚠️ **Chưa cấu hình Google Gemini API Key!**\n\nĐể AI có thể đọc toàn bộ ghi chú và giải thích chuyên sâu đoạn trích này, bạn vui lòng:\n1. Mở Cài đặt hoặc modal API Key.\n2. Lấy API Key miễn phí từ [Google AI Studio](https://aistudio.google.com/app/apikey).\n3. Dán vào hệ thống để kích hoạt trợ lý AI Copilot.\n\n*Trích đoạn bạn vừa chọn:* "${focalText.slice(0, 100)}${focalText.length > 100 ? '...' : ''}"`,
+      modelUsed: 'none',
+      ancestryBreadcrumb: breadcrumb
+    };
+  }
+
+  // Xây dựng System Prompt sư phạm cao cấp
+  const systemInstruction = `Bạn là Trợ lý Học tập & Cố vấn Nghiên cứu AI cấp Đại học (Academic AI Copilot).
+Nhiệm vụ của bạn là giải đáp thắc mắc của sinh viên dựa trên bối cảnh học tập thực tế.
+
+📌 BỐI CẢNH MÔN HỌC & CÂY TRI THỨC NƠ-RON:
+- Môn học / Chuỗi phả hệ: ${breadcrumb}
+- Chủ đề / Node hiện tại: "${targetLabel}"
+
+📚 TOÀN VĂN BẢN GHI CHÚ CỦA SINH VIÊN (DÙNG ĐỂ HIỂU ĐẦY ĐỦ BỐI CẢNH, ĐỊNH NGHĨA & TIỀN ĐỀ):
+"""
+${effectiveFullNotes ? effectiveFullNotes.slice(0, 8000) : '(Bản ghi chú chưa có nội dung văn bản dài)'}
+"""
+
+🎯 ĐOẠN TRÍCH MỤC TIÊU MÀ SINH VIÊN ĐANG BÔI ĐEN / KHOANH VÙNG:
+"""
+${focalText.slice(0, 2000)}
+"""
+
+QUY TẮC PHẢN HỒI BẮT BUỘC:
+1. ĐỌC KỸ BỐI CẢNH TOÀN BÀI: Hãy dùng toàn bộ bản ghi chú ở trên để nắm rõ các ký hiệu toán học, định nghĩa và ngữ cảnh tác giả đang hướng đến trước khi trả lời.
+2. TẬP TRUNG TRỌNG TÂM VÀO ĐOẠN TRÍCH: Giải thích cặn kẽ câu hỏi của sinh viên về đoạn trích này, làm sáng tỏ tại sao nó lại được suy ra từ các phần trước.
+3. SƯ PHẠM VÀ TRỰC QUAN:
+   - Dùng ngôn từ chuẩn mực, súc tích, dễ hiểu.
+   - Sử dụng định dạng Markdown phong phú (tiêu đề nhỏ, in đậm từ khóa quan trọng, danh sách gạch đầu dòng, khối code hoặc công thức toán học dạng LaTeX $...$ nếu cần).
+   - Nếu sinh viên yêu cầu ví dụ, hãy cho ví dụ cụ thể, thực tế và dễ hình dung.
+4. Trả lời bằng Tiếng Việt chuẩn mực.`;
+
+  // Xây dựng lịch sử hội thoại nội dung
+  const contents = [];
+
+  // Lượt hỏi ban đầu có kèm ngữ cảnh hệ thống
+  const initialUserPrompt = `${systemInstruction}\n\n❓ CÂU HỎI CỦA SINH VIÊN:\n"${userQuestion.trim() || 'Hãy giải thích cặn kẽ đoạn trích này theo bối cảnh toàn bộ ghi chú.'}"`;
+
+  if (Array.isArray(chatHistory) && chatHistory.length > 0) {
+    // Đưa câu mở đầu vào turn đầu tiên
+    contents.push({
+      role: 'user',
+      parts: [{ text: initialUserPrompt }]
+    });
+
+    // Các turn tiếp theo
+    chatHistory.forEach((turn, idx) => {
+      if (idx === 0) {
+        contents.push({
+          role: 'model',
+          parts: [{ text: turn.modelText || turn.text || '' }]
+        });
+      } else {
+        contents.push({
+          role: turn.role === 'user' ? 'user' : 'model',
+          parts: [{ text: turn.text || '' }]
+        });
+      }
+    });
+
+    // Câu hỏi mới nhất nếu có khác
+    if (userQuestion && chatHistory[chatHistory.length - 1]?.text !== userQuestion) {
+      contents.push({
+        role: 'user',
+        parts: [{ text: userQuestion.trim() }]
+      });
+    }
+  } else {
+    contents.push({
+      role: 'user',
+      parts: [{ text: initialUserPrompt }]
+    });
+  }
+
+  let lastError = null;
+  for (const model of BACKUP_MODELS) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents,
+          generationConfig: {
+            temperature: 0.35,
+            topP: 0.95,
+            maxOutputTokens: 2048
+          }
+        })
+      });
+
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}));
+        throw new Error(errJson.error?.message || `HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!generatedText) {
+        throw new Error('Gemini không trả về nội dung.');
+      }
+
+      return {
+        text: generatedText.trim(),
+        modelUsed: model,
+        ancestryBreadcrumb: breadcrumb
+      };
+    } catch (err) {
+      lastError = err;
+      console.warn(`Thử model ${model} thất bại:`, err.message);
+    }
+  }
+
+  throw new Error(`Không thể nhận phản hồi từ Gemini: ${lastError?.message || 'Lỗi không xác định'}`);
+}
+
+

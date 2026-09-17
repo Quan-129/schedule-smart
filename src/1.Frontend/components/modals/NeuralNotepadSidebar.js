@@ -2,11 +2,13 @@
 // 1. IMPORTS
 // ==========================================================================
 import { escapeHtml } from '../../../4.Security/sanitizer.js';
-import { updateNeuralNode, deleteNeuralNodeQuiz } from '../../../3.Database/state.js';
+import { updateNeuralNode, deleteNeuralNodeQuiz, getSubjectKnowledgeNodes } from '../../../3.Database/state.js';
 import { renderMarkdownToHtml } from '../../../2.Backend/utils/markdownRenderer.js';
 import { openNeuralQuizModal } from './NeuralQuizModal.js';
 import { compressImage } from '../../../2.Backend/utils/imageCompressor.js';
 import { uploadNoteImageToStorage } from '../../../3.Database/auth/FirebaseAuthService.js';
+import { askContextualNoteQuestion } from '../../../2.Backend/services/GeminiAIService.js';
+import { showToast } from '../Toast.js';
 
 // ==========================================================================
 // 2. HELPER FUNCTIONS: SMART FORMATTING & CONTEXT MATCHING
@@ -217,6 +219,9 @@ function renderNotepadTemplate(node) {
           <button type="button" class="neural-np-tab" data-tab="quiz" title="Ngân hàng câu hỏi trắc nghiệm đã lưu">
             <i class="fa-solid fa-bullseye"></i> Trắc nghiệm (${(node.quizzes || []).length})
           </button>
+          <button type="button" class="neural-np-tab" id="btn-toggle-ai-copilot" title="Mở Trợ lý AI Copilot đọc hiểu ngữ cảnh" style="color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> AI Copilot
+          </button>
         </div>
         <button type="button" class="neural-close-btn" id="btn-close-neural-notepad" title="Đóng bảng ghi chú">
           <i class="fa-solid fa-xmark"></i>
@@ -348,6 +353,69 @@ function renderNotepadTemplate(node) {
         <div class="quiz-vault-list" id="quiz-vault-list-container">
           <!-- Sẽ được fill bằng JavaScript -->
         </div>
+      </div>
+    </div>
+
+    <!-- 5. Contextual AI Copilot Drawer (Hỏi đáp ngữ cảnh thông minh) -->
+    <div class="neural-ai-copilot-drawer" id="neural-ai-copilot-drawer">
+      <div class="neural-ai-drawer-header" id="neural-ai-drawer-header" title="Nhấp để thu nhỏ / mở rộng">
+        <div class="neural-ai-drawer-title-group">
+          <div class="neural-ai-drawer-badge"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+          <div>
+            <span class="neural-ai-drawer-title">
+              AI Copilot
+              <span class="neural-ai-drawer-sub">Đọc hiểu toàn bài</span>
+            </span>
+          </div>
+        </div>
+        <div class="neural-ai-drawer-actions">
+          <button type="button" class="neural-ai-drawer-btn" id="btn-minimize-ai-drawer" title="Thu nhỏ / Mở rộng">
+            <i class="fa-solid fa-minus"></i>
+          </button>
+          <button type="button" class="neural-ai-drawer-btn" id="btn-close-ai-drawer" title="Đóng AI Copilot">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Focal Context Bar -->
+      <div class="neural-ai-focal-bar">
+        <div class="neural-ai-focal-chip" id="neural-ai-focal-chip">
+          <span class="neural-ai-focal-tag">🎯 Tiêu điểm</span>
+          <span class="neural-ai-focal-quote" id="neural-ai-focal-quote">Toàn bộ bài ghi chú</span>
+        </div>
+        <button type="button" class="neural-ai-drawer-btn" id="btn-clear-focal" title="Chọn lại toàn bài">
+          <i class="fa-solid fa-arrows-rotate"></i>
+        </button>
+      </div>
+
+      <!-- Quick Action Chips -->
+      <div class="neural-ai-quick-chips">
+        <button type="button" class="neural-ai-quick-chip" data-prompt="Giải thích chi tiết đoạn trích này theo bối cảnh toàn bài ghi chú">
+          <i class="fa-regular fa-lightbulb"></i> Giải thích chi tiết
+        </button>
+        <button type="button" class="neural-ai-quick-chip" data-prompt="Hãy cho ví dụ minh họa thực tế dễ hiểu về phần này">
+          <i class="fa-solid fa-pen-fancy"></i> Cho ví dụ
+        </button>
+        <button type="button" class="neural-ai-quick-chip" data-prompt="Chỉ ra các bẫy thi và sai lầm thường gặp mà sinh viên hay mắc ở đoạn này">
+          <i class="fa-solid fa-triangle-exclamation"></i> Bẫy thi & Sai lầm
+        </button>
+        <button type="button" class="neural-ai-quick-chip" data-prompt="Tóm tắt 3 quy tắc bản chất cốt lõi cần nhớ nhất">
+          <i class="fa-solid fa-bolt"></i> 3 ý cốt lõi
+        </button>
+      </div>
+
+      <!-- Chat Body -->
+      <div class="neural-ai-chat-body" id="neural-ai-chat-body">
+        <!-- Messages will be rendered here -->
+      </div>
+
+      <!-- Chat Input Row -->
+      <div class="neural-ai-input-row">
+        <input type="text" class="neural-ai-input" id="neural-ai-input" placeholder="Hỏi bất kỳ điều gì về đoạn này (Enter để gửi)..." />
+        <button type="button" class="neural-ai-send-btn" id="btn-ai-send" title="Gửi câu hỏi">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
       </div>
     </div>
 
@@ -1604,6 +1672,415 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     unhighlightBadge.removeEventListener('click', onBadgeClick);
     if (unhighlightBadge.parentNode) {
       unhighlightBadge.parentNode.removeChild(unhighlightBadge);
+    }
+  });
+
+  // ========================================================================
+  // 12. CONTEXTUAL AI COPILOT & FLOATING SELECTION PILL CONTROLLER
+  // ========================================================================
+  const aiDrawer = sidebar.querySelector('#neural-ai-copilot-drawer');
+  const btnCloseAiDrawer = sidebar.querySelector('#btn-close-ai-drawer');
+  const btnMinimizeAiDrawer = sidebar.querySelector('#btn-minimize-ai-drawer');
+  const btnClearFocal = sidebar.querySelector('#btn-clear-focal');
+  const focalQuoteEl = sidebar.querySelector('#neural-ai-focal-quote');
+  const aiChatBody = sidebar.querySelector('#neural-ai-chat-body');
+  const aiInput = sidebar.querySelector('#neural-ai-input');
+  const btnAiSend = sidebar.querySelector('#btn-ai-send');
+  const quickChips = sidebar.querySelectorAll('.neural-ai-quick-chip');
+  const btnToggleAiCopilot = sidebar.querySelector('#btn-toggle-ai-copilot');
+  const drawerHeader = sidebar.querySelector('#neural-ai-drawer-header');
+
+  // Khởi tạo Floating Selection Pill gắn vào document.body để không bao giờ bị cắt xén (overflow clip)
+  const selectionPill = document.createElement('button');
+  selectionPill.type = 'button';
+  selectionPill.className = 'neural-ai-selection-pill';
+  selectionPill.id = 'neural-ai-selection-pill';
+  selectionPill.title = 'Hỏi AI giải thích đoạn trích này';
+  selectionPill.innerHTML = `
+    <span class="neural-ai-pill-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+    <span class="neural-ai-pill-text">Hỏi AI về đoạn này</span>
+  `;
+  document.body.appendChild(selectionPill);
+
+  let currentFocalText = '';
+  let aiChatHistory = [];
+  let isAiGenerating = false;
+  let selectionDebounceTimer = null;
+  let lastMouseCoord = { x: 0, y: 0 };
+
+  // Theo dõi tọa độ con trỏ chuột bên trong sidebar
+  const onSidebarMouseMove = (e) => {
+    lastMouseCoord.x = e.clientX;
+    lastMouseCoord.y = e.clientY;
+  };
+  sidebar.addEventListener('mousemove', onSidebarMouseMove);
+
+  const hideSelectionPill = () => {
+    if (selectionPill) {
+      selectionPill.classList.remove('visible');
+    }
+  };
+
+  const showSelectionPillAt = (x, y, text) => {
+    if (!selectionPill || !text || text.length < 2) return;
+    currentFocalText = text.trim();
+
+    const pillW = 190;
+    const pillH = 36;
+    let posX = x - pillW / 2;
+    let posY = y - pillH - 12;
+
+    if (posX < 12) posX = 12;
+    if (posX + pillW > window.innerWidth - 12) posX = window.innerWidth - pillW - 12;
+    if (posY < 12) posY = y + 24;
+
+    selectionPill.style.left = `${Math.round(posX)}px`;
+    selectionPill.style.top = `${Math.round(posY)}px`;
+    selectionPill.classList.add('visible');
+  };
+
+  // Kiểm tra sự kiện bôi đen trong Preview, Visual Editor hoặc Textarea
+  const checkTextSelection = () => {
+    // 1. Selection trong DOM (Preview Content hoặc Visual Editor)
+    const domSel = (typeof window !== 'undefined' && window.getSelection) ? window.getSelection() : null;
+    if (domSel && !domSel.isCollapsed && domSel.rangeCount > 0) {
+      const anchor = domSel.anchorNode;
+      // Bỏ qua nếu đang bôi đen bên trong chính AI Copilot Drawer
+      if (aiDrawer && anchor && aiDrawer.contains(anchor)) {
+        return;
+      }
+
+      const domText = domSel.toString().trim();
+      if (domText && domText.length >= 2) {
+        const isInPreview = previewContent && previewContent.contains(anchor);
+        const isInVisual = visualEditor && visualEditor.contains(anchor);
+
+        if (isInPreview || isInVisual) {
+          try {
+            const range = domSel.getRangeAt(0);
+            const rect = range.getBoundingClientRect();
+            if (rect.width > 0 || rect.height > 0) {
+              showSelectionPillAt(rect.left + rect.width / 2, rect.top, domText);
+              return;
+            }
+          } catch (err) {}
+        }
+      }
+    }
+
+    // 2. Selection trong Textarea Markdown
+    if (textarea && textarea.selectionStart !== textarea.selectionEnd) {
+      const selText = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd).trim();
+      if (selText && selText.length >= 2) {
+        showSelectionPillAt(lastMouseCoord.x || (sidebar.getBoundingClientRect().left + 150), lastMouseCoord.y || 200, selText);
+        return;
+      }
+    }
+
+    hideSelectionPill();
+  };
+
+  const onSelectionEvent = () => {
+    clearTimeout(selectionDebounceTimer);
+    selectionDebounceTimer = setTimeout(checkTextSelection, 130);
+  };
+
+  document.addEventListener('selectionchange', onSelectionEvent);
+  sidebar.addEventListener('mouseup', onSelectionEvent);
+  sidebar.addEventListener('keyup', onSelectionEvent);
+
+  // Mở AI Copilot Drawer
+  const openAiCopilot = (focalSnippet = '') => {
+    hideSelectionPill();
+    if (focalSnippet && typeof focalSnippet === 'string') {
+      currentFocalText = focalSnippet.trim();
+    }
+    if (!currentFocalText) {
+      const sampleText = (textarea.value || node.notes || '').trim();
+      currentFocalText = sampleText.slice(0, 160);
+    }
+
+    // Cập nhật tiêu điểm hiển thị
+    if (focalQuoteEl) {
+      const displayQuote = currentFocalText.length > 55
+        ? `"${currentFocalText.slice(0, 55)}..."`
+        : `"${currentFocalText || 'Toàn bộ bài ghi chú'}"`;
+      focalQuoteEl.textContent = displayQuote;
+      focalQuoteEl.title = currentFocalText || 'Toàn bộ bài ghi chú';
+    }
+
+    if (aiDrawer) {
+      aiDrawer.classList.remove('minimized');
+      aiDrawer.classList.add('active');
+    }
+
+    // Nếu chưa có tin nhắn nào, render lời chào mở đầu
+    if (aiChatBody && aiChatBody.children.length === 0) {
+      renderAiWelcomeMsg();
+    }
+
+    if (aiInput) {
+      setTimeout(() => aiInput.focus(), 160);
+    }
+  };
+
+  const renderAiWelcomeMsg = () => {
+    if (!aiChatBody) return;
+    aiChatBody.innerHTML = `
+      <div class="neural-ai-msg model">
+        <div class="neural-ai-bubble">
+          <p>👋 <strong>Chào bạn!</strong> Mình là Trợ lý Học tập AI Copilot của môn học.</p>
+          <p>Mình đã nạp <strong>toàn bộ nội dung bài ghi chú "${escapeHtml(node.label || 'này')}"</strong> để hiểu sâu ngữ cảnh. Hãy chọn các nút gợi ý nhanh ở trên hoặc gõ câu hỏi thắc mắc về đoạn trích nhé!</p>
+        </div>
+      </div>
+    `;
+  };
+
+  // Ngăn chặn sự kiện click vào pill làm mất selection
+  selectionPill.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+  });
+
+  selectionPill.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openAiCopilot(currentFocalText);
+  });
+
+  // Nút AI Copilot trên Header Tabs
+  if (btnToggleAiCopilot) {
+    btnToggleAiCopilot.addEventListener('click', () => {
+      if (aiDrawer && aiDrawer.classList.contains('active')) {
+        aiDrawer.classList.toggle('minimized');
+      } else {
+        openAiCopilot();
+      }
+    });
+  }
+
+  // Thu nhỏ / Đóng Drawer
+  if (btnCloseAiDrawer) {
+    btnCloseAiDrawer.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (aiDrawer) {
+        aiDrawer.classList.remove('active');
+        aiDrawer.classList.remove('minimized');
+      }
+    });
+  }
+
+  if (btnMinimizeAiDrawer) {
+    btnMinimizeAiDrawer.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (aiDrawer) {
+        aiDrawer.classList.toggle('minimized');
+      }
+    });
+  }
+
+  if (drawerHeader) {
+    drawerHeader.addEventListener('click', (e) => {
+      if (e.target.closest('.neural-ai-drawer-btn')) return;
+      if (aiDrawer) {
+        aiDrawer.classList.toggle('minimized');
+      }
+    });
+  }
+
+  // Nút chọn lại toàn bài (reset focal)
+  if (btnClearFocal) {
+    btnClearFocal.addEventListener('click', () => {
+      currentFocalText = '';
+      if (focalQuoteEl) {
+        focalQuoteEl.textContent = 'Toàn bộ bài ghi chú';
+        focalQuoteEl.title = 'Toàn bộ bài ghi chú';
+      }
+      showToast('Đã chuyển tiêu điểm sang: Toàn bộ bài ghi chú');
+    });
+  }
+
+  // Xử lý gửi câu hỏi cho AI
+  const sendAiQuestion = async (customPrompt = '') => {
+    const question = (customPrompt || (aiInput ? aiInput.value : '')).trim();
+    if (!question || isAiGenerating) return;
+
+    if (aiInput) aiInput.value = '';
+    isAiGenerating = true;
+    if (btnAiSend) btnAiSend.disabled = true;
+
+    // 1. Thêm tin nhắn của sinh viên
+    const userMsgEl = document.createElement('div');
+    userMsgEl.className = 'neural-ai-msg user';
+    userMsgEl.innerHTML = `<div class="neural-ai-bubble">${escapeHtml(question)}</div>`;
+    aiChatBody.appendChild(userMsgEl);
+
+    // 2. Thêm loading indicator
+    const loadingEl = document.createElement('div');
+    loadingEl.className = 'neural-ai-loading';
+    loadingEl.innerHTML = `
+      <span>Gemini đang đọc toàn bài ghi chú</span>
+      <div class="neural-ai-loading-dots">
+        <div class="neural-ai-loading-dot"></div>
+        <div class="neural-ai-loading-dot"></div>
+        <div class="neural-ai-loading-dot"></div>
+      </div>
+    `;
+    aiChatBody.appendChild(loadingEl);
+    aiChatBody.scrollTop = aiChatBody.scrollHeight;
+
+    // 3. Chuẩn bị ngữ cảnh toàn bài và gọi Gemini
+    try {
+      const fullNoteText = [
+        textarea ? textarea.value : (node.notes || ''),
+        visualEditor ? visualEditor.innerText : (node.visualNotes?.html?.replace(/<[^>]*>/g, ' ') || '')
+      ].filter(Boolean).join('\n\n');
+
+      const allNodes = getSubjectKnowledgeNodes(subjectCode);
+
+      const res = await askContextualNoteQuestion({
+        subjectCode,
+        targetNode: node,
+        allNodes,
+        fullContext: fullNoteText,
+        focalText: currentFocalText || fullNoteText.slice(0, 160),
+        userQuestion: question,
+        chatHistory: aiChatHistory
+      });
+
+      if (loadingEl.parentNode) loadingEl.remove();
+
+      // Render bong bóng tin nhắn của AI
+      const aiMsgEl = document.createElement('div');
+      aiMsgEl.className = 'neural-ai-msg model';
+
+      const formattedHtml = renderMarkdownToHtml(res.text);
+      aiMsgEl.innerHTML = `
+        <div class="neural-ai-bubble">
+          ${formattedHtml}
+        </div>
+        <div class="neural-ai-msg-actions">
+          <button type="button" class="neural-ai-action-btn copy-btn" title="Sao chép câu trả lời">
+            <i class="fa-regular fa-copy"></i> Sao chép
+          </button>
+          <button type="button" class="neural-ai-action-btn insert-btn" title="Chèn trực tiếp vào bài ghi chú">
+            <i class="fa-solid fa-file-circle-plus"></i> Chèn vào ghi chú
+          </button>
+        </div>
+      `;
+
+      // Nút sao chép
+      const copyBtn = aiMsgEl.querySelector('.copy-btn');
+      copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(res.text).then(() => {
+          showToast('Đã sao chép câu trả lời vào Clipboard!');
+        });
+      });
+
+      // Nút chèn vào ghi chú
+      const insertBtn = aiMsgEl.querySelector('.insert-btn');
+      insertBtn.addEventListener('click', () => {
+        insertAiAnswerIntoNote(res.text);
+      });
+
+      aiChatBody.appendChild(aiMsgEl);
+      aiChatBody.scrollTop = aiChatBody.scrollHeight;
+
+      // Lưu lại lịch sử hội thoại nhiều lượt
+      aiChatHistory.push(
+        { role: 'user', text: question },
+        { role: 'model', text: res.text }
+      );
+
+    } catch (err) {
+      if (loadingEl.parentNode) loadingEl.remove();
+      const errEl = document.createElement('div');
+      errEl.className = 'neural-ai-msg model';
+      errEl.innerHTML = `
+        <div class="neural-ai-bubble" style="background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5;">
+          <i class="fa-solid fa-triangle-exclamation"></i> <strong>Lỗi:</strong> ${escapeHtml(err.message)}
+        </div>
+      `;
+      aiChatBody.appendChild(errEl);
+      aiChatBody.scrollTop = aiChatBody.scrollHeight;
+    } finally {
+      isAiGenerating = false;
+      if (btnAiSend) btnAiSend.disabled = false;
+      if (aiInput) aiInput.focus();
+    }
+  };
+
+  // Hàm chèn lời giải của AI vào bản ghi chú
+  const insertAiAnswerIntoNote = (answerText) => {
+    const isVisualTab = visualPane && !visualPane.classList.contains('hidden');
+    const snippetTitle = currentFocalText ? (currentFocalText.slice(0, 32) + '...') : 'Khái niệm';
+
+    if (isVisualTab && visualEditor) {
+      // Chèn vào Visual Rich Editor
+      const quoteBlock = document.createElement('div');
+      quoteBlock.style.cssText = 'border-left: 3px solid #a855f7; background: rgba(168, 85, 247, 0.08); padding: 10px 14px; margin: 12px 0; border-radius: 0 8px 8px 0;';
+      quoteBlock.innerHTML = `
+        <div style="font-size: 0.75rem; font-weight: 700; color: #c084fc; margin-bottom: 4px;">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> AI Copilot Giải Thích (${escapeHtml(snippetTitle)}):
+        </div>
+        <div style="font-size: 0.85rem; color: #e2e8f0; line-height: 1.5;">
+          ${renderMarkdownToHtml(answerText)}
+        </div>
+      `;
+      visualEditor.appendChild(quoteBlock);
+      const spacer = document.createElement('p');
+      spacer.innerHTML = '<br>';
+      visualEditor.appendChild(spacer);
+      updateCanvasWrapperHeight();
+      saveAllNotes();
+      showToast('Đã chèn giải thích của AI vào Ghi Chú!');
+    } else {
+      // Chèn vào Markdown Textarea
+      const currentVal = textarea.value;
+      const formattedQuote = `\n\n> 💡 **AI Copilot Giải Thích (${snippetTitle}):**\n` +
+        answerText.split('\n').map(line => `> ${line}`).join('\n') + '\n\n';
+
+      const newText = currentVal + formattedQuote;
+      textarea.value = newText;
+      updateLivePreview();
+      pushHistory(newText, newText.length, newText.length);
+      saveAllNotes();
+      showToast('Đã chèn giải thích của AI vào bài Markdown!');
+    }
+  };
+
+  // Bắt sự kiện click các chip gợi ý nhanh
+  quickChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const prompt = chip.dataset.prompt;
+      if (prompt) {
+        sendAiQuestion(prompt);
+      }
+    });
+  });
+
+  // Bắt sự kiện nhập và bấm nút gửi
+  if (btnAiSend) {
+    btnAiSend.addEventListener('click', () => sendAiQuestion());
+  }
+
+  if (aiInput) {
+    aiInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendAiQuestion();
+      }
+    });
+  }
+
+  // Dọn dẹp selection pill và listeners khi đóng sidebar
+  notepadCleanupFns.push(() => {
+    document.removeEventListener('selectionchange', onSelectionEvent);
+    sidebar.removeEventListener('mouseup', onSelectionEvent);
+    sidebar.removeEventListener('keyup', onSelectionEvent);
+    sidebar.removeEventListener('mousemove', onSidebarMouseMove);
+    clearTimeout(selectionDebounceTimer);
+    if (selectionPill && selectionPill.parentNode) {
+      selectionPill.parentNode.removeChild(selectionPill);
     }
   });
 
