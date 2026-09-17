@@ -4,6 +4,28 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-17 23:15] - Đại Tu Responsive Toàn Diện Cho Thanh Công Cụ Đáy (Neural Toolbar) & Vùng Hiển Thị Canvas 📱✨🎛️
+
+- **🎯 Yêu cầu & Vấn đề từ người dùng**:
+  - Người dùng gửi ảnh phản hồi: *"phần dưới này vẫn chưa responsive kìa"*.
+  - Phân tích nguyên nhân:
+    1. Thanh công cụ đáy `.neural-toolbar` (gồm 8 nút: Thêm Nhánh Con, Căn Giữa, Sắp Xếp Gọn, Mục Tiêu, Zoom In/Out/100%, Ghi Chú .md) có kích thước cố định dài hơn 820px, được neo bằng `left: 50%; transform: translateX(-50%)` theo toàn bộ modal overlay.
+    2. Khi người dùng mở Notepad Sidebar (chiếm 40% - 50% bên phải) hoặc trên màn hình laptop/tablet hẹp, không gian canvas thực tế bên trái bị thu hẹp đáng kể (chỉ còn khoảng 450px - 600px).
+    3. Thanh toolbar không tự động điều chỉnh tọa độ theo khoảng trống canvas bên trái và không có cơ chế rút gọn nhãn chữ, dẫn đến nút "Thêm Nhánh Con" bị cắt cụt ở lề trái (thành "lhánh Con") và nút "Ghi Chú" bị che khuất ở lề phải bởi thanh cuộn/resizer của sidebar.
+- **🛠 Triển khai kỹ thuật ([`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`NeuralKnowledgeModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralKnowledgeModal.js), [`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Định Vị Tự Động Theo Khung Canvas Thực Tế ([`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Thiết lập biến CSS động `--neural-sidebar-w` gắn trên `parentContainer` và liên tục cập nhật theo bề rộng thực tế của sidebar khi mở hoặc kéo giãn resizer (`onPointerMove`, `onPointerUp`, `onDblClick`).
+     - Tự động căn giữa `.neural-toolbar` vào phần diện tích canvas còn lại bên trái: `left: calc((100% - var(--neural-sidebar-w, 0px)) / 2); transform: translateX(-50%)` kèm `max-width: calc(100% - var(--neural-sidebar-w, 0px) - 24px)`.
+     - Tương tự, căn chỉnh đồng bộ cho `#neural-target-dialog` và dịch chuyển `.neural-legend-badge` sang bên trái sidebar (`right: calc(var(--neural-sidebar-w, 0px) + 24px)`).
+  2. **Cơ Chế Rút Gọn Nhãn Thông Minh (Smart Adaptive Labels) ([`NeuralKnowledgeModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralKnowledgeModal.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Bọc nhãn văn bản thành `.btn-text-full` và `.btn-text-short`.
+     - Khi mở Sidebar (`.has-notepad-sidebar`) hoặc khi màn hình < 1024px: Tự động ẩn các nhãn dài của Căn Giữa, Sắp Xếp Gọn, Mục Tiêu, Ghi Chú (chuyển sang chế độ Icon Mode thanh lịch có tooltip), rút gọn "Thêm Nhánh Con" thành "Thêm".
+     - Giảm bề rộng tổng thể của Toolbar từ **820px xuống chỉ còn ~330px** (tiết kiệm hơn 60% diện tích), nằm trọn vẹn và cân đối trong khoảng canvas bên trái.
+  3. **Cơ Chế Chống Tràn Ngang Mượt Mà (Touch & Horizontal Scroll Fallback)**:
+     - Bổ sung `overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;` để trên các màn hình di động nhỏ (360px - 480px), thanh công cụ vẫn cho phép trượt ngón tay mượt mà mà không bao giờ bị cắt xén hay đè chữ.
+  4. **Nâng Cấp Cache Service Worker ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Tăng phiên bản cache lên **`v155`** (`smart-schedule-modular-v155`).
+
 ## 📅 [2026-09-17 20:40] - Triển Khai Thanh Trượt Ngang Cyberpunk Neon & Bộ Chuyển Đổi Con Lăn Chuột Sang Cuộn Ngang Cho Công Thức Toán & Ma Trận 📐🌊🔲
 
 - **🎯 Yêu cầu & Vấn đề từ người dùng**:

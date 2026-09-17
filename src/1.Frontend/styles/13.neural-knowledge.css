@@ -145,30 +145,43 @@
   display: block;
 }
 
-/* Floating Bottom Control Bar */
+/* Floating Bottom Control Bar - Responsive Thông Minh Theo Khung Canvas & Màn Hình */
 .neural-toolbar {
   position: absolute;
   bottom: 24px;
-  left: 50%;
+  left: calc((100% - var(--neural-sidebar-w, 0px)) / 2);
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: rgba(18, 22, 42, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 20px;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45), 0 0 24px rgba(99, 102, 241, 0.15);
-  backdrop-filter: blur(16px);
-  z-index: 10;
+  gap: 6px;
+  padding: 6px 10px;
+  background: rgba(18, 22, 42, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), 0 0 24px rgba(99, 102, 241, 0.2);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  z-index: 15;
+  max-width: calc(100% - var(--neural-sidebar-w, 0px) - 24px);
+  box-sizing: border-box;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  transition: left 0.25s cubic-bezier(0.16, 1, 0.3, 1), max-width 0.25s cubic-bezier(0.16, 1, 0.3, 1), bottom 0.2s ease;
+}
+
+.neural-toolbar::-webkit-scrollbar {
+  display: none;
 }
 
 .neural-tool-btn {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: #e2e8f0;
-  padding: 8px 14px;
-  border-radius: 12px;
+  padding: 7px 12px;
+  border-radius: 10px;
   font-size: 0.82rem;
   font-weight: 600;
   display: flex;
@@ -177,6 +190,15 @@
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.neural-tool-btn .btn-text-full {
+  display: inline;
+}
+
+.neural-tool-btn .btn-text-short {
+  display: none;
 }
 
 .neural-tool-btn:hover {
@@ -223,14 +245,89 @@
   box-shadow: 0 0 16px rgba(245, 158, 11, 0.4);
 }
 
+/* Khi có Notepad Sidebar mở bên phải: Tự động thu gọn các nhãn chữ để toolbar vừa vặn trong vùng canvas */
+.neural-modal-overlay.has-notepad-sidebar .neural-toolbar {
+  gap: 4px;
+  padding: 5px 8px;
+  bottom: 16px;
+}
+
+.neural-modal-overlay.has-notepad-sidebar .neural-tool-btn {
+  padding: 6px 9px;
+  font-size: 0.76rem;
+  gap: 4px;
+}
+
+.neural-modal-overlay.has-notepad-sidebar #btn-neural-center .btn-text-full,
+.neural-modal-overlay.has-notepad-sidebar #btn-neural-auto-layout .btn-text-full,
+.neural-modal-overlay.has-notepad-sidebar #btn-neural-target-setup .btn-text-full,
+.neural-modal-overlay.has-notepad-sidebar #btn-neural-open-notepad .btn-text-full {
+  display: none !important;
+}
+
+.neural-modal-overlay.has-notepad-sidebar #btn-neural-add-node .btn-text-full {
+  display: none !important;
+}
+.neural-modal-overlay.has-notepad-sidebar #btn-neural-add-node .btn-text-short {
+  display: inline !important;
+}
+
+/* Responsive theo kích thước màn hình */
+@media (max-width: 1024px) {
+  .neural-toolbar {
+    gap: 4px;
+    padding: 5px 8px;
+    bottom: 16px;
+  }
+  
+  .neural-tool-btn {
+    padding: 6px 9px;
+    font-size: 0.76rem;
+  }
+
+  #btn-neural-center .btn-text-full,
+  #btn-neural-auto-layout .btn-text-full,
+  #btn-neural-target-setup .btn-text-full,
+  #btn-neural-open-notepad .btn-text-full {
+    display: none !important;
+  }
+
+  #btn-neural-add-node .btn-text-full {
+    display: none !important;
+  }
+  #btn-neural-add-node .btn-text-short {
+    display: inline !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .neural-toolbar {
+    bottom: 12px;
+    padding: 4px 6px;
+    border-radius: 14px;
+    max-width: calc(100% - 16px);
+  }
+
+  .neural-tool-btn {
+    padding: 5px 8px;
+    font-size: 0.72rem;
+    gap: 4px;
+  }
+
+  #btn-neural-add-node .btn-text-short {
+    display: none !important;
+  }
+}
+
 /* Popover Dialog Thiết Lập Mục Tiêu Thử Thách */
 .neural-target-dialog {
   position: absolute;
   bottom: 80px;
-  left: 50%;
+  left: calc((100% - var(--neural-sidebar-w, 0px)) / 2);
   transform: translateX(-50%);
   z-index: 100;
   animation: fadeInPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .neural-target-card {
@@ -308,7 +405,7 @@
 .neural-legend-badge {
   position: absolute;
   top: 76px;
-  right: 24px;
+  right: calc(var(--neural-sidebar-w, 0px) + 24px);
   padding: 8px 14px;
   border-radius: 12px;
   background: rgba(15, 18, 35, 0.75);
@@ -321,6 +418,17 @@
   backdrop-filter: blur(10px);
   z-index: 10;
   pointer-events: none;
+  transition: right 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+}
+
+.neural-modal-overlay.has-notepad-sidebar .neural-legend-badge,
+@media (max-width: 900px) {
+  .neural-legend-badge {
+    padding: 6px 10px;
+    font-size: 0.68rem;
+    gap: 4px;
+    opacity: 0.85;
+  }
 }
 
 .neural-legend-item {

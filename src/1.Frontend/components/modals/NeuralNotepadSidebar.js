@@ -497,6 +497,9 @@ function initSidebarResizer(sidebar) {
 
     newWidth = Math.max(minW, Math.min(maxW, newWidth));
     sidebar.style.width = `${newWidth}px`;
+    if (sidebar.parentNode) {
+      sidebar.parentNode.style.setProperty('--neural-sidebar-w', `${Math.round(newWidth)}px`);
+    }
   };
 
   const onPointerUp = (e) => {
@@ -513,6 +516,9 @@ function initSidebarResizer(sidebar) {
     const finalWidth = Math.round(sidebar.getBoundingClientRect().width);
     if (finalWidth > 0) {
       localStorage.setItem('schedule_smart_neural_sidebar_width', finalWidth);
+      if (sidebar.parentNode) {
+        sidebar.parentNode.style.setProperty('--neural-sidebar-w', `${finalWidth}px`);
+      }
     }
   };
 
@@ -521,6 +527,9 @@ function initSidebarResizer(sidebar) {
     sidebar.style.transition = 'width 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
     const defaultWidth = Math.min(680, Math.max(480, Math.floor(window.innerWidth * 0.5)));
     sidebar.style.width = `${defaultWidth}px`;
+    if (sidebar.parentNode) {
+      sidebar.parentNode.style.setProperty('--neural-sidebar-w', `${defaultWidth}px`);
+    }
     localStorage.setItem('schedule_smart_neural_sidebar_width', defaultWidth);
     setTimeout(() => {
       sidebar.style.transition = '';
@@ -559,12 +568,18 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   sidebar.innerHTML = renderNotepadTemplate(node);
   parentContainer.appendChild(sidebar);
   currentNotepadEl = sidebar;
+  parentContainer.classList.add('has-notepad-sidebar');
 
   // Khởi tạo tính năng kéo chỉnh độ rộng bằng thanh 3 chấm
   const cleanupResizer = initSidebarResizer(sidebar);
   notepadCleanupFns.push(cleanupResizer);
 
+  // Cập nhật biến độ rộng ban đầu cho CSS responsive của thanh công cụ
   requestAnimationFrame(() => {
+    const initialW = Math.round(sidebar.getBoundingClientRect().width);
+    if (initialW > 0) {
+      parentContainer.style.setProperty('--neural-sidebar-w', `${initialW}px`);
+    }
     sidebar.classList.add('active');
   });
 
@@ -2818,6 +2833,11 @@ export function closeNeuralNotepadSidebar() {
   }
 
   if (currentNotepadEl) {
+    const parent = currentNotepadEl.parentNode;
+    if (parent) {
+      parent.classList.remove('has-notepad-sidebar');
+      parent.style.removeProperty('--neural-sidebar-w');
+    }
     currentNotepadEl.classList.remove('active');
     setTimeout(() => {
       if (currentNotepadEl && currentNotepadEl.parentNode) {

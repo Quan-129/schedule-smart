@@ -63,26 +63,28 @@ function renderNeuralModalShell(subject) {
 
     <!-- Floating HUD Toolbar -->
     <div class="neural-toolbar">
-      <button type="button" class="neural-tool-btn primary" id="btn-neural-add-node">
+      <button type="button" class="neural-tool-btn primary" id="btn-neural-add-node" title="Thêm Nhánh Con">
         <i class="fa-solid fa-plus"></i>
-        <span>Thêm Nhánh Con</span>
+        <span class="btn-text-full">Thêm Nhánh Con</span>
+        <span class="btn-text-short">Thêm</span>
       </button>
 
       <div class="neural-toolbar-separator"></div>
 
       <button type="button" class="neural-tool-btn" id="btn-neural-center" title="Căn giữa vào Node Gốc">
         <i class="fa-solid fa-crosshairs"></i>
-        <span>Căn Giữa</span>
+        <span class="btn-text-full">Căn Giữa</span>
       </button>
 
       <button type="button" class="neural-tool-btn" id="btn-neural-auto-layout" title="Tối ưu bố cục cây tri thức gọn gàng, chống bè ngang">
         <i class="fa-solid fa-wand-magic-sparkles"></i>
-        <span>Sắp Xếp Gọn</span>
+        <span class="btn-text-full">Sắp Xếp Gọn</span>
       </button>
 
       <button type="button" class="neural-tool-btn target-setup-btn" id="btn-neural-target-setup" title="Thiết lập số câu hỏi thử thách mục tiêu cho mỗi node">
         <i class="fa-solid fa-bullseye"></i>
-        <span>Mục Tiêu: <strong id="lbl-target-quiz-count">${targetQuizCount} câu</strong></span>
+        <span class="btn-text-full">Mục Tiêu: </span>
+        <strong id="lbl-target-quiz-count">${targetQuizCount} câu</strong>
       </button>
 
       <button type="button" class="neural-tool-btn" id="btn-neural-zoom-in" title="Phóng to">
@@ -101,7 +103,7 @@ function renderNeuralModalShell(subject) {
 
       <button type="button" class="neural-tool-btn" id="btn-neural-open-notepad" title="Mở Bảng Notepad Markdown (50% bên phải)">
         <i class="fa-solid fa-file-pen"></i>
-        <span>Ghi Chú (.md)</span>
+        <span class="btn-text-full">Ghi Chú</span>
       </button>
     </div>
 
