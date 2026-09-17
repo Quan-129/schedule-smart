@@ -2341,6 +2341,32 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     };
   };
 
+  /**
+   * Tự động chuyển đổi con lăn chuột (Mouse Wheel) thành trượt ngang mượt mà cho các khối công thức toán, ma trận, code và bảng
+   */
+  const handleHorizontalWheelScroll = (e) => {
+    const scrollable = e.target.closest(
+      '.neural-math-block, .neural-matrix-wrapper, .neural-table-wrapper, .neural-ai-bubble pre, .neural-notepad-rendered-content pre, .neural-modal-inline-preview pre, .neural-math-inline'
+    );
+    if (!scrollable) return;
+
+    // Kiểm tra nếu phần tử có nội dung thực sự bị tràn ngang
+    if (scrollable.scrollWidth > scrollable.clientWidth + 2) {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        const maxScrollLeft = scrollable.scrollWidth - scrollable.clientWidth;
+        const atLeftEdge = scrollable.scrollLeft <= 0 && e.deltaY < 0;
+        const atRightEdge = scrollable.scrollLeft >= maxScrollLeft - 1 && e.deltaY > 0;
+
+        // Chỉ chặn cuộn dọc khi đang cuộn trong phạm vi nội dung ngang
+        if (!atLeftEdge && !atRightEdge) {
+          e.preventDefault();
+          e.stopPropagation();
+          scrollable.scrollLeft += e.deltaY * 0.85;
+        }
+      }
+    }
+  };
+
   // Mở Popup Chat AI nổi tại đúng vị trí khung chữ nhật vừa khoanh
   const openInSituAiPopup = (boundingBox, focalText, focalImages = []) => {
     closeFloatingPopup();
@@ -2438,6 +2464,9 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
     const closeBtn = popup.querySelector('#btn-close-floating-popup');
     closeBtn.addEventListener('click', closeFloatingPopup);
+
+    // Lắng nghe lăn chuột để cuộn ngang mượt mà cho các khối công thức và ma trận trong popup
+    popup.addEventListener('wheel', handleHorizontalWheelScroll, { passive: false });
 
     const chatBody = popup.querySelector('#floating-popup-chat-body');
     const input = popup.querySelector('#floating-popup-input');
@@ -2756,8 +2785,12 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   if (btnSnipeMd) btnSnipeMd.addEventListener('click', startSnippingMode);
   if (btnSnipeVis) btnSnipeVis.addEventListener('click', startSnippingMode);
 
+  // Lắng nghe lăn chuột để cuộn ngang mượt mà cho các khối công thức toán học và ma trận trong toàn bộ sidebar
+  sidebar.addEventListener('wheel', handleHorizontalWheelScroll, { passive: false });
+
   // Dọn dẹp selection pill, popup và listeners khi đóng sidebar
   notepadCleanupFns.push(() => {
+    sidebar.removeEventListener('wheel', handleHorizontalWheelScroll);
     closeFloatingPopup();
     document.removeEventListener('selectionchange', onSelectionEvent);
     sidebar.removeEventListener('mouseup', onSelectionEvent);

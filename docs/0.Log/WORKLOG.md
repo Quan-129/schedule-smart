@@ -4,6 +4,31 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-17 20:40] - Triển Khai Thanh Trượt Ngang Cyberpunk Neon & Bộ Chuyển Đổi Con Lăn Chuột Sang Cuộn Ngang Cho Công Thức Toán & Ma Trận 📐🌊🔲
+
+- **🎯 Yêu cầu & Vấn đề từ người dùng**:
+  - Người dùng gửi ảnh công thức toán dài (Hồi quy LASSO $Penalty_{LASSO} = \lambda \sum |w_i| = 0.1 \times (|0.1| + |0.5| + | - 0.3|) = 0.1 \times 0.9 = 0.09...$) bị tràn ra mép viền bên phải và bị che khuất mất phần cuối, không có thanh cuộn ngang để trượt.
+  - Người dùng phản hồi: *"cần thanh trượt ngang nữa chứ nhỉ"*.
+  - Phân tích nguyên nhân:
+    1. Các khối công thức toán học (`.neural-math-block`), ma trận (`.neural-matrix-wrapper`), bảng (`.neural-table-wrapper`) và khối code (`pre`) chưa có custom scrollbars. Trên Windows/Chrome, scrollbar mặc định của hệ thống bị ẩn hoặc tiệp màu tối vào nền dẫn đến người dùng không nhìn thấy thanh cuộn ngang để kéo.
+    2. Thẻ `<code>` bên trong khối công thức chưa có thuộc tính `white-space: nowrap !important; display: block; width: max-content; min-width: 100%; margin: 0 auto;`, dẫn đến khi sidebar hẹp, công thức có thể bị bẻ dòng hoặc tràn ngang dính sát mép viền mà không tạo khoảng đệm đáy cho scrollbar.
+    3. Chuột máy tính thông thường (mouse wheel) chỉ phát sinh sự kiện lăn dọc `deltaY`. Khi rê chuột vào khối công thức tràn ngang, lăn chuột thông thường không thể trượt ngang được nếu không bấm giữ phím Shift.
+- **🛠 Triển khai kỹ thuật ([`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`markdownRenderer.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/utils/markdownRenderer.js), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Thanh Trượt Ngang Cyberpunk Neon Cao Cấp ([`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Thiết kế hệ thống scrollbar tùy biến đồng bộ cho `.neural-math-block`, `.neural-matrix-wrapper`, `.neural-table-wrapper`, `.neural-ai-bubble pre`, `.neural-notepad-rendered-content pre`, `.neural-modal-inline-preview pre`.
+     - Track nền tối `rgba(15, 23, 42, 0.85)` bo góc 4px. Thumb trượt dạng gradient Neon Cyan-Indigo (`linear-gradient(90deg, #38bdf8, #818cf8)`) kèm hiệu ứng phát sáng `box-shadow: 0 0 6px rgba(56, 189, 248, 0.5)`.
+     - Hover đổi sang gradient sáng rực `#0ea5e9` -> `#6366f1` với `box-shadow: 0 0 10px rgba(56, 189, 248, 0.9)` và con trỏ `grab` / `grabbing`.
+     - Định cấu hình `code` bên trong: `white-space: nowrap !important; display: block; width: max-content; min-width: 100%; margin: 0 auto; text-align: center;` giúp công thức ngắn luôn căn giữa thanh lịch, công thức dài tự động kích hoạt thanh trượt ngang mượt mà.
+  2. **Bộ Chuyển Đổi Con Lăn Chuột Sang Trượt Ngang Tự Động ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Xây dựng hàm `handleHorizontalWheelScroll(e)`: Tự động bắt sự kiện `wheel` trên các khối công thức toán, ma trận, bảng và code block.
+     - Khi phát hiện phần tử có `scrollWidth > clientWidth`, tự động chuyển đổi `e.deltaY` thành `scrollLeft += e.deltaY * 0.85`.
+     - Hỗ trợ chặn cuộn dọc trang khi đang trượt ngang, và tự động nhả cuộn dọc khi đã chạm biên trái/phải kịch khung.
+     - Tích hợp cho cả Sidebar chính và In-situ Floating Popup AI.
+  3. **Thuộc Tính Trợ Năng & Tooltip Trực Quan ([`markdownRenderer.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/utils/markdownRenderer.js))**:
+     - Thêm `tabindex="0"` và `title="Lăn chuột hoặc kéo thanh trượt ngang để xem toàn bộ công thức"` cho các container toán học để người dùng có thể dùng phím mũi tên trái/phải (`Left`/`Right`) trên bàn phím.
+  4. **Nâng Cấp Cache Service Worker ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Cập nhật cache lên **`v154`** (`smart-schedule-modular-v154`).
+
 ## 📅 [2026-09-17 20:33] - Đại Tu Hiển Thị Ma Trận LaTeX (\begin{bmatrix}): Tự Động Chuyển Thành Khung Ma Trận Ngoặc Vuông Chuẩn Toán Học [ ... ] 📐🔲⚡
 
 - **🎯 Yêu cầu & Vấn đề từ người dùng**:

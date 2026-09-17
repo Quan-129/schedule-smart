@@ -2010,25 +2010,49 @@ body.neural-resizing-active {
   line-height: 1.35;
   vertical-align: baseline;
   margin: 0 2px;
+  max-width: 100%;
+  overflow-x: auto;
+  vertical-align: middle;
 }
 
 .neural-math-block {
-  margin: 8px 0;
-  padding: 8px 12px;
-  border-radius: 6px;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  overflow-x: auto;
-  text-align: center;
+  position: relative;
+  margin: 10px 0;
+  padding: 10px 14px 12px 14px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45), inset 0 0 10px rgba(56, 189, 248, 0.04);
+  overflow-x: auto !important;
+  max-width: 100%;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 189, 248, 0.65) rgba(15, 23, 42, 0.9);
+  cursor: default;
+}
+
+.neural-math-block:focus-visible {
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
 }
 
 .neural-math-block code {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
   color: #38bdf8;
-  font-size: 0.95em;
+  font-size: 0.94em;
   font-weight: 600;
   background: transparent;
-  padding: 0;
+  padding: 0 4px;
+  white-space: nowrap !important;
+  display: block;
+  width: max-content;
+  min-width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  user-select: text;
 }
 
 /* Ma trận toán học hiển thị ngoặc vuông học thuật chuẩn mực */
@@ -2037,8 +2061,68 @@ body.neural-resizing-active {
   justify-content: center;
   align-items: center;
   margin: 10px 0;
-  overflow-x: auto;
+  padding-bottom: 8px;
+  overflow-x: auto !important;
   max-width: 100%;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 189, 248, 0.65) rgba(15, 23, 42, 0.9);
+}
+
+/* Thanh trượt ngang Cyberpunk Neon cao cấp */
+.neural-math-block::-webkit-scrollbar,
+.neural-matrix-wrapper::-webkit-scrollbar,
+.neural-table-wrapper::-webkit-scrollbar,
+.neural-ai-bubble pre::-webkit-scrollbar,
+.neural-notepad-rendered-content pre::-webkit-scrollbar,
+.neural-modal-inline-preview pre::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.neural-math-block::-webkit-scrollbar-track,
+.neural-matrix-wrapper::-webkit-scrollbar-track,
+.neural-table-wrapper::-webkit-scrollbar-track,
+.neural-ai-bubble pre::-webkit-scrollbar-track,
+.neural-notepad-rendered-content pre::-webkit-scrollbar-track,
+.neural-modal-inline-preview pre::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.85);
+  border-radius: 4px;
+  margin: 0 4px;
+}
+
+.neural-math-block::-webkit-scrollbar-thumb,
+.neural-matrix-wrapper::-webkit-scrollbar-thumb,
+.neural-table-wrapper::-webkit-scrollbar-thumb,
+.neural-ai-bubble pre::-webkit-scrollbar-thumb,
+.neural-notepad-rendered-content pre::-webkit-scrollbar-thumb,
+.neural-modal-inline-preview pre::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.5);
+  cursor: grab;
+}
+
+.neural-math-block::-webkit-scrollbar-thumb:hover,
+.neural-matrix-wrapper::-webkit-scrollbar-thumb:hover,
+.neural-table-wrapper::-webkit-scrollbar-thumb:hover,
+.neural-ai-bubble pre::-webkit-scrollbar-thumb:hover,
+.neural-notepad-rendered-content pre::-webkit-scrollbar-thumb:hover,
+.neural-modal-inline-preview pre::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #0ea5e9, #6366f1);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.9);
+}
+
+.neural-math-block::-webkit-scrollbar-thumb:active,
+.neural-matrix-wrapper::-webkit-scrollbar-thumb:active,
+.neural-table-wrapper::-webkit-scrollbar-thumb:active,
+.neural-ai-bubble pre::-webkit-scrollbar-thumb:active,
+.neural-notepad-rendered-content pre::-webkit-scrollbar-thumb:active,
+.neural-modal-inline-preview pre::-webkit-scrollbar-thumb:active {
+  cursor: grabbing;
+  background: #38bdf8;
 }
 
 .neural-matrix-bracket {

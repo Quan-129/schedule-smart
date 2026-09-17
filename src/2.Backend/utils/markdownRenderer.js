@@ -36,7 +36,7 @@ function renderLatexMatrix(matrixInner) {
     return `<tr>${tds}</tr>`;
   }).join('');
 
-  return `<div class="neural-matrix-wrapper"><div class="neural-matrix-bracket"><table class="neural-matrix-table"><tbody>${tableRows}</tbody></table></div></div>`;
+  return `<div class="neural-matrix-wrapper" tabindex="0" title="Lăn chuột hoặc kéo thanh trượt ngang để xem toàn bộ ma trận"><div class="neural-matrix-bracket"><table class="neural-matrix-table"><tbody>${tableRows}</tbody></table></div></div>`;
 }
 
 /**
@@ -61,7 +61,7 @@ function formatMathFormulas(text) {
       return trimmed.replace(matrixRegex, (m, inner) => renderLatexMatrix(inner));
     }
     const cleaned = prettifyLatexString(trimmed);
-    return `<div class="neural-math-block"><code>${cleaned}</code></div>`;
+    return `<div class="neural-math-block" tabindex="0" title="Lăn chuột hoặc kéo thanh trượt ngang để xem toàn bộ công thức"><code>${cleaned}</code></div>`;
   });
 
   // 4. Chuyển đổi ma trận LaTeX nếu nằm độc lập bên ngoài $$
