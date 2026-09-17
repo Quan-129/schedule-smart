@@ -2105,21 +2105,111 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     const targetContainer = isVisualTab ? canvasWrapper : (isPreviewTab ? previewContent : textarea);
 
     if (targetContainer && targetContainer !== textarea) {
-      const walker = document.createTreeWalker(
-        targetContainer,
-        NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT,
-        null,
-        false
-      );
-      let currNode;
-      while ((currNode = walker.nextNode())) {
-        if (currNode.nodeType === Node.TEXT_NODE) {
+      const handledElements = new Set();
+
+      // 1. Quét các BẢNG / MA TRẬN (TABLE) để giữ nguyên cấu trúc dòng và cột
+      const tables = targetContainer.querySelectorAll('table');
+      tables.forEach(table => {
+        const tRect = table.getBoundingClientRect();
+        const intersects = !(
+          tRect.right < rect.left ||
+          tRect.left > rect.right ||
+          tRect.bottom < rect.top ||
+          tRect.top > rect.bottom
+        );
+        if (intersects) {
+          const rowTexts = [];
+          table.querySelectorAll('tr').forEach(tr => {
+            const trRect = tr.getBoundingClientRect();
+            const trIntersects = !(
+              trRect.right < rect.left ||
+              trRect.left > rect.right ||
+              trRect.bottom < rect.top ||
+              trRect.top > rect.bottom
+            );
+            if (trIntersects) {
+              const cells = Array.from(tr.querySelectorAll('th, td')).map(c => c.textContent.trim());
+              if (cells.length > 0) {
+                rowTexts.push('| ' + cells.join(' | ') + ' |');
+              }
+            }
+          });
+          if (rowTexts.length > 0) {
+            extractedParts.push(`[Bảng / Ma trận số liệu]:\n` + rowTexts.join('\n'));
+            table.querySelectorAll('*').forEach(el => handledElements.add(el));
+            handledElements.add(table);
+          }
+        }
+      });
+
+      // 2. Quét các khối Code, Math, Pre
+      const preBlocks = targetContainer.querySelectorAll('pre, code');
+      preBlocks.forEach(pre => {
+        if (handledElements.has(pre)) return;
+        const pRect = pre.getBoundingClientRect();
+        const intersects = !(
+          pRect.right < rect.left ||
+          pRect.left > rect.right ||
+          pRect.bottom < rect.top ||
+          pRect.top > rect.bottom
+        );
+        if (intersects) {
+          const txt = pre.textContent.trim();
+          if (txt) {
+            extractedParts.push(`[Đoạn mã / Công thức]:\n` + txt);
+            pre.querySelectorAll('*').forEach(el => handledElements.add(el));
+            handledElements.add(pre);
+          }
+        }
+      });
+
+      // 3. Quét các thẻ ảnh (bao gồm cả ảnh nổi trong Visual Notes)
+      const imgs = targetContainer.querySelectorAll('img');
+      imgs.forEach(img => {
+        if (handledElements.has(img)) return;
+        const iRect = img.getBoundingClientRect();
+        const intersects = !(
+          iRect.right < rect.left ||
+          iRect.left > rect.right ||
+          iRect.bottom < rect.top ||
+          iRect.top > rect.bottom
+        );
+        if (intersects && img.src) {
+          extractedParts.push(`[Hình ảnh sơ đồ / biểu đồ: ${img.alt || 'Ảnh minh họa'}](${img.src})`);
+          handledElements.add(img);
+        }
+      });
+
+      // 4. Quét các khối văn bản (P, LI, H1-H6, BLOCKQUOTE)
+      const textBlocks = targetContainer.querySelectorAll('p, li, h1, h2, h3, h4, h5, h6, blockquote');
+      textBlocks.forEach(block => {
+        if (handledElements.has(block)) return;
+        const bRect = block.getBoundingClientRect();
+        const intersects = !(
+          bRect.right < rect.left ||
+          bRect.left > rect.right ||
+          bRect.bottom < rect.top ||
+          bRect.top > rect.bottom
+        );
+        if (intersects) {
+          const txt = block.textContent.trim();
+          if (txt) {
+            extractedParts.push(txt);
+            handledElements.add(block);
+          }
+        }
+      });
+
+      // 5. Nếu vẫn chưa quét được (ví dụ text nằm trực tiếp trong container), dùng TreeWalker hỗ trợ
+      if (extractedParts.length === 0) {
+        const walker = document.createTreeWalker(targetContainer, NodeFilter.SHOW_TEXT, null, false);
+        let currNode;
+        while ((currNode = walker.nextNode())) {
           const txt = currNode.textContent.trim();
           if (!txt) continue;
-          try {
-            const range = document.createRange();
-            range.selectNodeContents(currNode);
-            const r = range.getBoundingClientRect();
+          const parent = currNode.parentElement;
+          if (parent && !handledElements.has(parent)) {
+            const r = parent.getBoundingClientRect();
             const intersects = !(
               r.right < rect.left ||
               r.left > rect.right ||
@@ -2128,21 +2218,9 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
             );
             if (intersects) {
               extractedParts.push(txt);
+              handledElements.add(parent);
             }
-          } catch (e) {}
-        } else if (currNode.nodeName === 'IMG') {
-          try {
-            const r = currNode.getBoundingClientRect();
-            const intersects = !(
-              r.right < rect.left ||
-              r.left > rect.right ||
-              r.bottom < rect.top ||
-              r.top > rect.bottom
-            );
-            if (intersects && currNode.src) {
-              extractedParts.push(`[Hình ảnh: ${currNode.alt || 'Ghi chú'}](${currNode.src})`);
-            }
-          } catch (e) {}
+          }
         }
       }
     } else if (textarea) {
@@ -2160,7 +2238,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       }
     }
 
-    return extractedParts.join(' ').replace(/\s+/g, ' ').trim();
+    return extractedParts.join('\n\n').trim();
   };
 
   // Mở Popup Chat AI nổi tại đúng vị trí khung chữ nhật vừa khoanh
@@ -2216,14 +2294,14 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       </div>
 
       <div class="neural-ai-quick-chips">
-        <button type="button" class="neural-ai-quick-chip" data-prompt="Giải thích chi tiết đoạn trích vừa khoanh này theo bối cảnh toàn bài">
-          💡 Giải thích
+        <button type="button" class="neural-ai-quick-chip" data-prompt="Bóc tách và giải thích chi tiết ý nghĩa cụ thể của từng phần tử, chỉ số con số trong vùng vừa khoanh, không tóm tắt lan man cả bài">
+          💡 Ý nghĩa từng phần tử
         </button>
-        <button type="button" class="neural-ai-quick-chip" data-prompt="Cho ví dụ minh họa thực tế về phần vừa khoanh này">
-          📝 Cho ví dụ
+        <button type="button" class="neural-ai-quick-chip" data-prompt="Phân tích tương quan và liên hệ thực tế giữa các phần tử trong vùng này">
+          📊 Phân tích tương quan
         </button>
-        <button type="button" class="neural-ai-quick-chip" data-prompt="Tóm tắt 3 ý cốt lõi quan trọng nhất của phần này">
-          ⚡ 3 ý cốt lõi
+        <button type="button" class="neural-ai-quick-chip" data-prompt="Rút ra nhận xét cốt lõi quan trọng nhất từ các chỉ số trong vùng này">
+          ⚡ Nhận xét cốt lõi
         </button>
       </div>
 
@@ -2472,7 +2550,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
       const boundingBox = { left, top, right: left + width, bottom: top + height, width, height };
       const extracted = extractContentFromScreenRect(boundingBox);
-      const focalText = extracted || (textarea ? textarea.value.slice(0, 160) : 'Đoạn trích vừa khoanh');
+      const focalText = extracted || 'Vùng ma trận / sơ đồ số liệu vừa khoanh chọn';
 
       openInSituAiPopup(boundingBox, focalText);
     });
