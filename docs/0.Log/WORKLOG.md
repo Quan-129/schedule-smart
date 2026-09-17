@@ -4,6 +4,16 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-17 20:28] - Fix Hot Lỗi Cú Pháp Template String (Unexpected identifier 'math') & Phục Hồi Đăng Nhập Ứng Dụng 🩹🛠️
+
+- **🎯 Yêu cầu & Vấn đề từ người dùng**:
+  - Người dùng báo lỗi: `GeminiAIService.js:518 Uncaught SyntaxError: Unexpected identifier 'math' kèm không đăng nhập được`.
+  - Nguyên nhân: Trong System Prompt template literal ở dòng 518, vô tình có 3 dấu backtick (` ```math `) nằm lồng bên trong chuỗi template string bọc bằng backtick của JavaScript, khiến chuỗi bị đóng sớm và từ `math` bị hiểu thành biến JavaScript đứng ngoài, làm gãy toàn bộ khâu nạp ES Module và crash ứng dụng lúc khởi động.
+- **🛠 Triển khai kỹ thuật ([`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  - Loại bỏ hoàn toàn các dấu backtick lồng nhau trong template literal của `GeminiAIService.js`.
+  - Kiểm tra cú pháp nghiêm ngặt độc lập từng file bằng `node --check`.
+  - Nâng cấp Service Worker cache lên **`v152`** (`smart-schedule-modular-v152`) để phục hồi ngay lập tức cho người dùng.
+
 ## 📅 [2026-09-17 20:25] - Sửa Triệt Để Lỗi Phông Toán & Câu Trả Lời Bị Cắt Cụt Ngang: Ghép Đầy Đủ Content Parts & Bộ Định Dạng Math LaTeX Sang Unicode Sắc Nét 🔣📐⚡
 
 - **🎯 Yêu cầu & Vấn đề từ người dùng**:

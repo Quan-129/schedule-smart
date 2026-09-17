@@ -515,7 +515,7 @@ ${effectiveFullNotes ? effectiveFullNotes.slice(0, 5000) : '(Ghi chú dạng th�
    - Chỉ dùng tài liệu toàn bài để biết các ký hiệu trong vùng chọn đại diện cho đại lượng thực tế nào trong bài tập (ví dụ: x1 là gì, x2 là gì, y là gì...). Hãy gọi đúng tên biến thực tế đó khi giải thích từng phần tử trong vùng chọn!
 3. TRÌNH BÀY GỌN GÀNG, SƯ PHẠM, ĐẦY ĐỦ Ý & TRỌN VẸN (KHÔNG NGẮT GIỮA CHỪNG):
    - Trả lời TRỌN VẸN câu kết luận, tuyệt đối KHÔNG dừng lửng lơ hay ngắt câu giữa chừng.
-   - Về công thức & ký hiệu toán học: Hãy viết bằng ký hiệu Unicode trực quan (ví dụ: XᵀX, r_ij, x₁, x₂, β̂ = (XᵀX)⁻¹Xᵀy) hoặc đặt trong khối mã ```math để sinh viên đọc rõ ràng, tuyệt đối KHÔNG để sót các ký hiệu gãy như `$\` hoặc `$` không đóng.
+   - Về công thức & ký hiệu toán học: Hãy viết bằng ký hiệu Unicode trực quan (ví dụ: XᵀX, r_ij, x₁, x₂, β̂ = (XᵀX)⁻¹Xᵀy), tuyệt đối KHÔNG để sót các ký hiệu gãy dở dang.
 4. Trả lời bằng Tiếng Việt chuẩn mực.`;
 
   // Xây dựng lịch sử hội thoại nội dung
