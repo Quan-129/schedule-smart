@@ -2203,6 +2203,9 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
   const closeFloatingPopup = () => {
     if (activeFloatingPopup && activeFloatingPopup.parentNode) {
+      if (typeof activeFloatingPopup._cleanupHandlers === 'function') {
+        activeFloatingPopup._cleanupHandlers();
+      }
       activeFloatingPopup.parentNode.removeChild(activeFloatingPopup);
       activeFloatingPopup = null;
     }
@@ -2392,8 +2395,8 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     const popup = document.createElement('div');
     popup.className = 'neural-ai-floating-popup';
 
-    const popupWidth = 410;
-    const popupHeight = 440;
+    const popupWidth = Math.min(420, window.innerWidth - 32);
+    const popupHeight = Math.min(480, window.innerHeight - 32);
     let posX = boundingBox.left;
     let posY = boundingBox.bottom + 10;
 
@@ -2405,7 +2408,10 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     if (posY + popupHeight > window.innerHeight - 16) {
       posY = Math.max(16, boundingBox.top - popupHeight - 10);
     }
+    if (posY < 16) posY = 16;
 
+    popup.style.width = `${Math.round(popupWidth)}px`;
+    popup.style.height = `${Math.round(popupHeight)}px`;
     popup.style.left = `${Math.round(posX)}px`;
     popup.style.top = `${Math.round(posY)}px`;
 
@@ -2434,6 +2440,9 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
           </div>
         </div>
         <div class="neural-ai-drawer-actions">
+          <button type="button" class="neural-ai-drawer-btn" id="btn-maximize-floating-popup" title="Toàn màn hình / Thu nhỏ">
+            <i class="fa-solid fa-expand"></i>
+          </button>
           <button type="button" class="neural-ai-drawer-btn" id="btn-close-floating-popup" title="Đóng popup">
             <i class="fa-solid fa-xmark"></i>
           </button>
@@ -2474,6 +2483,8 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
           <i class="fa-solid fa-paper-plane"></i>
         </button>
       </div>
+
+      <div class="neural-ai-popup-resizer" title="Kéo góc để thay đổi kích thước"></div>
     `;
 
     document.body.appendChild(popup);
@@ -2481,6 +2492,188 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
     const closeBtn = popup.querySelector('#btn-close-floating-popup');
     closeBtn.addEventListener('click', closeFloatingPopup);
+
+    const maxBtn = popup.querySelector('#btn-maximize-floating-popup');
+    let isMaximized = false;
+    let savedBounds = null;
+
+    // Phóng to toàn màn hình hoặc khôi phục kích thước ban đầu
+    const toggleMaximize = () => {
+      isMaximized = !isMaximized;
+      if (isMaximized) {
+        savedBounds = {
+          left: popup.style.left,
+          top: popup.style.top,
+          width: popup.style.width,
+          height: popup.style.height
+        };
+        popup.classList.add('is-maximized');
+        if (maxBtn) {
+          maxBtn.innerHTML = '<i class="fa-solid fa-compress"></i>';
+          maxBtn.title = 'Thu nhỏ kích thước';
+        }
+      } else {
+        popup.classList.remove('is-maximized');
+        if (savedBounds) {
+          popup.style.left = savedBounds.left;
+          popup.style.top = savedBounds.top;
+          popup.style.width = savedBounds.width;
+          popup.style.height = savedBounds.height;
+        }
+        if (maxBtn) {
+          maxBtn.innerHTML = '<i class="fa-solid fa-expand"></i>';
+          maxBtn.title = 'Toàn màn hình';
+        }
+      }
+    };
+
+    if (maxBtn) {
+      maxBtn.addEventListener('click', toggleMaximize);
+    }
+
+    // --- Cầm kéo di chuyển Popup (Draggable Header) ---
+    const header = popup.querySelector('.neural-ai-drawer-header');
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let initialLeft = 0;
+    let initialTop = 0;
+
+    const onHeaderPointerDown = (e) => {
+      if (e.target.closest('button')) return;
+      if (isMaximized) return;
+
+      isDragging = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+
+      const rect = popup.getBoundingClientRect();
+      initialLeft = rect.left;
+      initialTop = rect.top;
+
+      popup.classList.add('is-dragging');
+      try {
+        header.setPointerCapture(e.pointerId);
+      } catch (_) {}
+
+      window.addEventListener('pointermove', onHeaderPointerMove);
+      window.addEventListener('pointerup', onHeaderPointerUp);
+      window.addEventListener('pointercancel', onHeaderPointerUp);
+    };
+
+    const onHeaderPointerMove = (e) => {
+      if (!isDragging) return;
+      const deltaX = e.clientX - dragStartX;
+      const deltaY = e.clientY - dragStartY;
+
+      let newLeft = initialLeft + deltaX;
+      let newTop = initialTop + deltaY;
+
+      const maxLeft = Math.max(8, window.innerWidth - popup.offsetWidth - 8);
+      const maxTop = Math.max(8, window.innerHeight - popup.offsetHeight - 8);
+
+      newLeft = Math.max(8, Math.min(newLeft, maxLeft));
+      newTop = Math.max(8, Math.min(newTop, maxTop));
+
+      popup.style.left = `${Math.round(newLeft)}px`;
+      popup.style.top = `${Math.round(newTop)}px`;
+    };
+
+    const onHeaderPointerUp = (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      popup.classList.remove('is-dragging');
+      try {
+        header.releasePointerCapture(e.pointerId);
+      } catch (_) {}
+      window.removeEventListener('pointermove', onHeaderPointerMove);
+      window.removeEventListener('pointerup', onHeaderPointerUp);
+      window.removeEventListener('pointercancel', onHeaderPointerUp);
+    };
+
+    header.addEventListener('pointerdown', onHeaderPointerDown);
+    header.addEventListener('dblclick', (e) => {
+      if (e.target.closest('button')) return;
+      toggleMaximize();
+    });
+
+    // --- Kéo góc để phóng to / thu nhỏ kích thước (Corner Resizing) ---
+    const resizer = popup.querySelector('.neural-ai-popup-resizer');
+    let isResizing = false;
+    let resizeStartX = 0;
+    let resizeStartY = 0;
+    let startWidth = 0;
+    let startHeight = 0;
+
+    const onResizerPointerDown = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (isMaximized) return;
+
+      isResizing = true;
+      resizeStartX = e.clientX;
+      resizeStartY = e.clientY;
+
+      const rect = popup.getBoundingClientRect();
+      startWidth = rect.width;
+      startHeight = rect.height;
+
+      popup.classList.add('is-resizing');
+      try {
+        resizer.setPointerCapture(e.pointerId);
+      } catch (_) {}
+
+      window.addEventListener('pointermove', onResizerPointerMove);
+      window.addEventListener('pointerup', onResizerPointerUp);
+      window.addEventListener('pointercancel', onResizerPointerUp);
+    };
+
+    const onResizerPointerMove = (e) => {
+      if (!isResizing) return;
+      const deltaX = e.clientX - resizeStartX;
+      const deltaY = e.clientY - resizeStartY;
+
+      let newWidth = startWidth + deltaX;
+      let newHeight = startHeight + deltaY;
+
+      const rect = popup.getBoundingClientRect();
+      const maxW = Math.max(340, window.innerWidth - rect.left - 12);
+      const maxH = Math.max(360, window.innerHeight - rect.top - 12);
+
+      newWidth = Math.max(320, Math.min(newWidth, maxW));
+      newHeight = Math.max(340, Math.min(newHeight, maxH));
+
+      popup.style.width = `${Math.round(newWidth)}px`;
+      popup.style.height = `${Math.round(newHeight)}px`;
+      popup.style.maxWidth = 'none';
+      popup.style.maxHeight = 'none';
+    };
+
+    const onResizerPointerUp = (e) => {
+      if (!isResizing) return;
+      isResizing = false;
+      popup.classList.remove('is-resizing');
+      try {
+        resizer.releasePointerCapture(e.pointerId);
+      } catch (_) {}
+      window.removeEventListener('pointermove', onResizerPointerMove);
+      window.removeEventListener('pointerup', onResizerPointerUp);
+      window.removeEventListener('pointercancel', onResizerPointerUp);
+    };
+
+    if (resizer) {
+      resizer.addEventListener('pointerdown', onResizerPointerDown);
+    }
+
+    // Đăng ký dọn dẹp trình lắng nghe sự kiện toàn cục khi popup đóng
+    popup._cleanupHandlers = () => {
+      window.removeEventListener('pointermove', onHeaderPointerMove);
+      window.removeEventListener('pointerup', onHeaderPointerUp);
+      window.removeEventListener('pointercancel', onHeaderPointerUp);
+      window.removeEventListener('pointermove', onResizerPointerMove);
+      window.removeEventListener('pointerup', onResizerPointerUp);
+      window.removeEventListener('pointercancel', onResizerPointerUp);
+    };
 
     // Lắng nghe lăn chuột để cuộn ngang mượt mà cho các khối công thức và ma trận trong popup
     popup.addEventListener('wheel', handleHorizontalWheelScroll, { passive: false });

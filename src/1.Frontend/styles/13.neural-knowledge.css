@@ -2525,13 +2525,16 @@ body.neural-resizing-active {
   animation: ai-pill-sparkle 2s infinite ease-in-out;
 }
 
-/* In-situ Floating AI Chat Popup (Hiện ngay tại vùng vừa kéo) */
+/* In-situ Floating AI Chat Popup (Hiện ngay tại vùng vừa kéo, hỗ trợ kéo thả & resize tự do) */
 .neural-ai-floating-popup {
   position: fixed;
   z-index: 1250;
-  width: 410px;
-  max-width: min(92vw, 440px);
-  max-height: min(78vh, 580px);
+  width: 420px;
+  height: 480px;
+  min-width: 320px;
+  min-height: 340px;
+  max-width: min(94vw, 680px);
+  max-height: min(88vh, 800px);
   background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(8, 12, 26, 0.99) 100%);
   border: 1px solid rgba(168, 85, 247, 0.5);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(168, 85, 247, 0.25);
@@ -2542,6 +2545,7 @@ body.neural-resizing-active {
   flex-direction: column;
   overflow: hidden;
   animation: ai-popup-scale-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 @keyframes ai-popup-scale-in {
@@ -2549,13 +2553,104 @@ body.neural-resizing-active {
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
+/* Khi đang kéo hoặc resize: tắt transition để chuyển động theo chuột tức thì */
+.neural-ai-floating-popup.is-dragging,
+.neural-ai-floating-popup.is-resizing {
+  transition: none !important;
+  user-select: none;
+}
+
+.neural-ai-floating-popup.is-dragging {
+  cursor: grabbing;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(168, 85, 247, 0.45);
+  border-color: rgba(168, 85, 247, 0.85);
+}
+
+.neural-ai-floating-popup.is-resizing {
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(56, 189, 248, 0.4);
+  border-color: rgba(56, 189, 248, 0.85);
+}
+
+/* Header đóng vai trò tay cầm kéo di chuyển */
 .neural-ai-floating-popup .neural-ai-drawer-header {
   background: rgba(168, 85, 247, 0.08);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  flex-shrink: 0;
 }
 
+.neural-ai-floating-popup.is-dragging .neural-ai-drawer-header {
+  cursor: grabbing;
+}
+
+.neural-ai-floating-popup.is-maximized .neural-ai-drawer-header {
+  cursor: default;
+}
+
+.neural-ai-floating-popup .neural-ai-drawer-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Thân chat co giãn linh hoạt tự động theo chiều cao popup */
 .neural-ai-floating-popup .neural-ai-chat-body {
-  max-height: 320px;
+  flex: 1 1 auto;
+  min-height: 140px;
+  max-height: none !important;
+  overflow-y: auto;
+}
+
+/* Tay nắm góc kéo để phóng to (Bottom-Right Resizer Handle) */
+.neural-ai-popup-resizer {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 22px;
+  height: 22px;
+  cursor: se-resize;
+  z-index: 25;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 3px;
+  touch-action: none;
+}
+
+.neural-ai-popup-resizer::before {
+  content: '';
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid rgba(168, 85, 247, 0.65);
+  border-bottom: 2px solid rgba(168, 85, 247, 0.65);
+  border-bottom-right-radius: 2px;
+  transition: all 0.2s ease;
+}
+
+.neural-ai-popup-resizer:hover::before,
+.neural-ai-floating-popup.is-resizing .neural-ai-popup-resizer::before {
+  border-color: #38bdf8;
+  width: 12px;
+  height: 12px;
+  filter: drop-shadow(0 0 5px #38bdf8);
+}
+
+/* Chế độ Toàn màn hình (Maximized Mode) */
+.neural-ai-floating-popup.is-maximized {
+  top: 12px !important;
+  left: 12px !important;
+  width: calc(100vw - 24px) !important;
+  height: calc(100vh - 24px) !important;
+  max-width: none !important;
+  max-height: none !important;
+  border-radius: 14px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95), 0 0 50px rgba(168, 85, 247, 0.35);
+}
+
+.neural-ai-floating-popup.is-maximized .neural-ai-popup-resizer {
+  display: none;
 }
 
 

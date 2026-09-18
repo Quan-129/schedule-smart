@@ -4,6 +4,30 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-18 10:30] - Nâng Cấp Popup AI Copilot: Cầm Kéo Di Chuyển, Kéo Góc Phóng To & Toàn Màn Hình Cực Kỳ Linh Hoạt 🚀🖱️🪟
+
+- **🎯 Yêu cầu & Vấn đề từ người dùng**:
+  - Người dùng gửi ảnh chụp popup AI Copilot ("Vùng vừa khoanh") và yêu cầu: *"tôi muốn thằng này có thể cầm kéo để di chuyển, kéo góc để phóng to, có nút toàn màn hình ở góc cho linh hoạt"*.
+  - Mục tiêu:
+    1. Cầm kéo di chuyển khắp màn hình bằng Header (không che mất vùng tài liệu/ghi chú bên dưới).
+    2. Kéo góc dưới phải để tự do thu phóng kích thước chiều rộng và chiều cao.
+    3. Thêm nút Toàn màn hình (Fullscreen / Maximize toggle) ở góc trên bên phải header để chuyển đổi linh hoạt.
+- **🛠 Triển khai kỹ thuật ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Draggable Header - Cầm Kéo Di Chuyển Popup ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Header `.neural-ai-drawer-header` đóng vai trò thanh nắm (drag handle) với cursor `grab` / `grabbing` và `touch-action: none`.
+     - Sử dụng `setPointerCapture` và lắng nghe `pointermove` / `pointerup` trên window với thuật toán clamp biên màn hình (ngăn popup trôi mất ra ngoài tầm nhìn).
+     - Hỗ trợ nhấp đúp (double-click) vào header để nhanh chóng phóng to / khôi phục kích thước giống cửa sổ hệ điều hành.
+  2. **Corner Resizer - Kéo Góc Phóng To/Thu Nhỏ Tự Do ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Bổ sung tay nắm góc `.neural-ai-popup-resizer` tại góc dưới phải với vạch chỉ thị neon tím/cyan tinh tế và con trỏ `se-resize`.
+     - Cho phép kéo rê mượt mà theo cả 2 trục X và Y, tự động giới hạn `min-width: 320px`, `min-height: 340px` và không vượt quá viewport.
+     - Tối ưu CSS: Cho `.neural-ai-chat-body` có `flex: 1 1 auto; max-height: none !important;` giúp phần thân hội thoại tự động co giãn lấp đầy chiều cao khi phóng to.
+  3. **Maximize / Fullscreen Toggle - Toàn Màn Hình Linh Hoạt ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Thêm nút `#btn-maximize-floating-popup` bên cạnh nút đóng, chuyển đổi biểu tượng giữa `<i class="fa-solid fa-expand"></i>` và `<i class="fa-solid fa-compress"></i>`.
+     - Class `.is-maximized` tự động lấp đầy 100% viewport (`calc(100vw - 24px)`, `calc(100vh - 24px)`) và lưu vết tọa độ / kích thước gốc để khôi phục nguyên trạng khi thu nhỏ lại.
+  4. **Dọn dẹp tài nguyên & Bumping Cache**:
+     - Cơ chế `_cleanupHandlers` tự giải phóng mọi listener toàn cục khi popup đóng.
+     - Tăng phiên bản cache Service Worker lên **`v157`** (`smart-schedule-modular-v157`).
+
 ## 📅 [2026-09-17 23:26] - Sửa Triệt Để Lỗi Vỡ Layout & Tràn Viền Nút "Khoanh Hỏi AI" Trên Toolbar Ghi Chú 🎨📐✨
 
 - **🎯 Yêu cầu & Vấn đề từ người dùng**:
