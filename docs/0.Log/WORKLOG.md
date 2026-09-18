@@ -4,6 +4,37 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-18 16:45] - Tái Cấu Trúc AI Copilot Thành In-Situ Floating Popup Nổi Đặt Cạnh Nút Khoanh Hỏi AI 🪄✨💬
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng yêu cầu: *"tính năng ai compilot này tôi muôn nằm cạnh khoanh ai và cũng hiện popup luôn cũng có những chức năng tương tự và kèm chức năng hiện tại"*.
+  - Mục tiêu cốt lõi:
+    1. **Bố cục thanh công cụ Toolbar**: Đặt nút `AI Copilot` (icon phép thuật ✨ màu tím neon) nằm ngay cạnh nút `Khoanh hỏi AI` (icon ⛶ màu cyan) trên cả 2 thanh công cụ (Toolbar Markdown và Toolbar Ghi chú tự do).
+    2. **Chuyển đổi giao diện sang Floating Popup**: Khi nhấp `AI Copilot`, thay vì mở ngăn kéo cố định ở đáy che khuất bài ghi chú, ứng dụng mở ngay một Floating Popup nổi tự do tại góc trên bên phải hoặc ngay dưới nút bấm.
+    3. **Kế thừa 100% tính năng tương tác nổi**:
+       - Cầm thanh tiêu đề (header) kéo để di chuyển tự do khắp màn hình (`draggable`).
+       - Kéo góc dưới phải để phóng to / thu nhỏ linh hoạt (`corner resizer`).
+       - Nút phóng to toàn màn hình (`maximize / restore`) hoặc nhấp đúp header.
+       - Nút Ghim/Lưu phiên chat (`#btn-pin-floating-popup`) tạo biểu tượng ghim nhỏ đè lên ghi chú, kéo thả được và tự động trôi theo bài khi cuộn (`roll`).
+       - Thu phóng độc lập chữ & ảnh (`Ctrl +`, `Ctrl -`, `Ctrl 0`, `Ctrl + Wheel`, nút zoom).
+    4. **Kèm trọn vẹn chức năng đọc hiểu bài học của AI Copilot**:
+       - Đọc hiểu toàn bài ghi chú (`Toàn bộ bài ghi chú`), tự động nhận diện đoạn trích nếu người dùng bôi đen chữ trước.
+       - Thanh tiêu điểm (Focal Context Bar) có nút xoay tròn reset `#btn-floating-clear-focal` chuyển lại toàn bài.
+       - Bộ Quick Action Chips thông minh: 💡 *Giải thích chi tiết*, 📝 *Cho ví dụ thực tế*, ⚡ *3 ý cốt lõi*, 🎯 *3 câu trắc nghiệm*, ⚠️ *Bẫy thi & Sai lầm*.
+       - Hỏi đáp với Gemini 2.5 Flash, tự động kèm ảnh bài học (Multimodal Vision), nút Sao chép & Chèn vào ghi chú.
+- **🛠 Triển khai kỹ thuật ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Thêm Style Nút AI Copilot & Pin ([`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Định nghĩa `.neural-btn-copilot` và `.neural-np-tool-btn.neural-btn-copilot` với gradient tím pastel/neon `linear-gradient(135deg, rgba(168, 85, 247, 0.35) 0%, rgba(129, 140, 248, 0.25) 100%)`, viền `rgba(192, 132, 252, 0.5)`.
+     - Thêm `.neural-ai-chat-pin.is-copilot-pin` mang sắc tím huyền ảo đặc trưng của Copilot.
+  2. **Tích Hợp Vào Toolbar & Nâng Cấp Popup ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Bổ sung nút `#btn-copilot-md` cạnh `#btn-snipe-ai-md` và nút `#btn-copilot-vis` cạnh `#btn-snipe-ai-vis`.
+     - Ẩn ngăn kéo đáy cũ `#neural-ai-copilot-drawer` (`display: none !important;`).
+     - Nâng cấp hàm `openInSituAiPopup` hỗ trợ tham số `mode = 'snipe' | 'copilot'`.
+     - Ở chế độ `copilot`: hiển thị badge `fa-wand-magic-sparkles`, subtitle theo ngữ cảnh (`Đọc hiểu toàn bài` / `Đọc hiểu tiêu điểm`), focal bar kèm nút `#btn-floating-clear-focal` để reset, nạp 5 chip gợi ý của Copilot, quét ảnh bài ghi chú (Multimodal Vision) và chào đón thân thiện.
+     - Đồng bộ `selectionPill` (Hỏi AI khi bôi đen) và `#btn-toggle-ai-copilot` mở Floating Popup in-situ.
+  3. **Nâng Cấp Service Worker**:
+     - Cập nhật cache Service Worker lên **`smart-schedule-modular-v163`**.
+
 ## 📅 [2026-09-18 13:15] - Nâng Cấp Phóng To Toàn Diện Kiểu Microsoft Word: Scale Đồng Bộ Cả Chữ, Ảnh & Bảng Biểu 📄🖼️✨
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:

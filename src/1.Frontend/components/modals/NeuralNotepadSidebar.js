@@ -263,6 +263,10 @@ function renderNotepadTemplate(node) {
           <i class="fa-solid fa-crop-simple"></i>
           <span>Khoanh hỏi AI</span>
         </button>
+        <button type="button" class="neural-np-tool-btn neural-btn-copilot" id="btn-copilot-md" title="Mở Trợ lý AI Copilot đọc hiểu toàn bài ghi chú">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>AI Copilot</span>
+        </button>
       </div>
 
       <div class="neural-notepad-save-indicator" id="neural-notepad-save-status">
@@ -344,6 +348,10 @@ function renderNotepadTemplate(node) {
             <i class="fa-solid fa-crop-simple"></i>
             <span>Khoanh hỏi AI</span>
           </button>
+          <button type="button" class="neural-np-tool-btn neural-btn-copilot" id="btn-copilot-vis" title="Mở Trợ lý AI Copilot đọc hiểu toàn bài ghi chú">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>AI Copilot</span>
+          </button>
         </div>
 
         <!-- Canvas Wrapper chứa Text Editor nền & Lớp ảnh nổi đè lên -->
@@ -378,8 +386,8 @@ function renderNotepadTemplate(node) {
       </div>
     </div>
 
-    <!-- 5. Contextual AI Copilot Drawer (Hỏi đáp ngữ cảnh thông minh) -->
-    <div class="neural-ai-copilot-drawer" id="neural-ai-copilot-drawer">
+    <!-- 5. Contextual AI Copilot Drawer (Fallback - Chuyển sang In-situ Floating Popup) -->
+    <div class="neural-ai-copilot-drawer" id="neural-ai-copilot-drawer" style="display: none !important;">
       <div class="neural-ai-drawer-header" id="neural-ai-drawer-header" title="Nhấp để thu nhỏ / mở rộng">
         <div class="neural-ai-drawer-title-group">
           <div class="neural-ai-drawer-badge"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
@@ -1738,6 +1746,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   const quickChips = sidebar.querySelectorAll('.neural-ai-quick-chip');
   const btnToggleAiCopilot = sidebar.querySelector('#btn-toggle-ai-copilot');
   const drawerHeader = sidebar.querySelector('#neural-ai-drawer-header');
+  let handleOpenAiCopilotPopup = null;
 
   // ========================================================================
   // 12.1. ĐIỀU KHIỂN CỠ CHỮ ĐỘC LẬP (INDEPENDENT ZOOM CONTROLLER)
@@ -2148,13 +2157,20 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   selectionPill.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    openAiCopilot(currentFocalText);
+    if (typeof handleOpenAiCopilotPopup === 'function') {
+      handleOpenAiCopilotPopup(selectionPill, currentFocalText);
+    } else {
+      openAiCopilot(currentFocalText);
+    }
+    hideSelectionPill();
   });
 
   // Nút AI Copilot trên Header Tabs
   if (btnToggleAiCopilot) {
     btnToggleAiCopilot.addEventListener('click', () => {
-      if (aiDrawer && aiDrawer.classList.contains('active')) {
+      if (typeof handleOpenAiCopilotPopup === 'function') {
+        handleOpenAiCopilotPopup(btnToggleAiCopilot);
+      } else if (aiDrawer && aiDrawer.classList.contains('active')) {
         aiDrawer.classList.toggle('minimized');
       } else {
         openAiCopilot();
@@ -2699,29 +2715,41 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     return aiMsg;
   };
 
-  // Mở Popup Chat AI nổi tại đúng vị trí khung chữ nhật vừa khoanh (hoặc mở lại từ icon ghim pin)
-  const openInSituAiPopup = (boundingBox, focalText, focalImages = [], existingPin = null) => {
+  // Mở Popup Chat AI nổi tại đúng vị trí khung chữ nhật vừa khoanh (hoặc mở lại từ icon ghim pin, hoặc mở chế độ AI Copilot toàn bài)
+  const openInSituAiPopup = (boundingBox, focalText = '', focalImages = [], existingPin = null, mode = 'snipe') => {
     closeFloatingPopup();
-    currentFocalText = focalText;
+    if (existingPin) {
+      mode = existingPin.mode || (existingPin.focalImages && existingPin.focalImages.length > 0 ? 'snipe' : 'copilot');
+    }
+    currentFocalText = focalText || '';
     let currentPinId = existingPin ? existingPin.id : null;
 
     const popup = document.createElement('div');
-    popup.className = 'neural-ai-floating-popup';
+    popup.className = `neural-ai-floating-popup ${mode === 'copilot' ? 'is-copilot-mode' : ''}`;
 
-    const popupWidth = Math.min(420, window.innerWidth - 32);
-    const popupHeight = Math.min(480, window.innerHeight - 32);
-    let posX = boundingBox.left;
-    let posY = boundingBox.bottom + 10;
+    const popupWidth = Math.min(430, window.innerWidth - 32);
+    const popupHeight = Math.min(500, window.innerHeight - 32);
 
-    if (posX + popupWidth > window.innerWidth - 16) {
-      posX = window.innerWidth - popupWidth - 16;
+    let posX = 16;
+    let posY = 75;
+
+    if (boundingBox) {
+      posX = boundingBox.left;
+      posY = boundingBox.bottom + 10;
+      if (posX + popupWidth > window.innerWidth - 16) {
+        posX = window.innerWidth - popupWidth - 16;
+      }
+      if (posX < 16) posX = 16;
+
+      if (posY + popupHeight > window.innerHeight - 16) {
+        posY = Math.max(16, boundingBox.top - popupHeight - 10);
+      }
+      if (posY < 16) posY = 16;
+    } else {
+      // Vị trí mặc định thông minh ở góc trên bên phải khung nhìn
+      posX = Math.max(16, window.innerWidth - popupWidth - 24);
+      posY = 75;
     }
-    if (posX < 16) posX = 16;
-
-    if (posY + popupHeight > window.innerHeight - 16) {
-      posY = Math.max(16, boundingBox.top - popupHeight - 10);
-    }
-    if (posY < 16) posY = 16;
 
     popup.style.width = `${Math.round(popupWidth)}px`;
     popup.style.height = `${Math.round(popupHeight)}px`;
@@ -2733,22 +2761,125 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     const thumbHtml = hasFocalImages
       ? `<img src="${focalImages[0].dataUrl}" class="neural-ai-focal-thumb" alt="Ảnh khoanh" />`
       : '';
-    const tagHtml = hasFocalImages
-      ? `<span class="neural-ai-focal-tag" style="background: rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.5); color: #38bdf8;"><i class="fa-solid fa-eye"></i> Thị giác AI</span>`
-      : `<span class="neural-ai-focal-tag">🎯 Đã khoanh</span>`;
 
-    const welcomeMsg = hasFocalImages
-      ? '✨ Mình đã **nhìn thấy hình ảnh/bảng biểu** trong vùng bạn vừa khoanh! Sẵn sàng bóc tách chi tiết từng con số, ma trận, công thức hoặc biểu đồ.'
-      : `✨ Mình đã nắm nội dung vùng bạn vừa khoanh trong bài <strong>${escapeHtml(node.label || 'ghi chú')}</strong>. Bạn muốn mình giải đáp thế nào?`;
+    // Xác định Badge Icon & Style
+    const badgeHtml = mode === 'copilot'
+      ? `<div class="neural-ai-drawer-badge" style="background: rgba(168, 85, 247, 0.28); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.5);"><i class="fa-solid fa-wand-magic-sparkles"></i></div>`
+      : `<div class="neural-ai-drawer-badge"><i class="fa-solid fa-crop-simple"></i></div>`;
 
-    const subTitleText = existingPin ? 'Phiên chat đã ghim' : 'Vùng vừa khoanh';
+    // Xác định Subtitle
+    let subTitleText = 'Vùng vừa khoanh';
+    if (existingPin) {
+      subTitleText = 'Phiên chat đã ghim';
+    } else if (mode === 'copilot') {
+      subTitleText = focalText ? 'Đọc hiểu tiêu điểm' : 'Đọc hiểu toàn bài';
+    }
+
     const pinBtnClass = existingPin ? 'is-pinned' : '';
     const pinBtnTitle = existingPin ? 'Đã ghim vào bài ghi chú - Nhấp để cập nhật' : 'Ghim / Lưu phiên chat này vào bài ghi chú';
+
+    // Xác định Focal Bar HTML
+    let focalBarHtml = '';
+    if (mode === 'copilot') {
+      if (focalText) {
+        focalBarHtml = `
+          <div class="neural-ai-focal-bar">
+            <div class="neural-ai-focal-chip" id="floating-focal-chip" title="${escapeHtml(focalText)}">
+              <span class="neural-ai-focal-tag" style="background: rgba(168, 85, 247, 0.25); color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">
+                <i class="fa-solid fa-highlighter"></i> 🎯 Đoạn trích
+              </span>
+              <span class="neural-ai-focal-quote" id="floating-focal-quote">"${escapeHtml(displaySnippet)}"</span>
+            </div>
+            <button type="button" class="neural-ai-drawer-btn" id="btn-floating-clear-focal" title="Chọn lại toàn bộ bài ghi chú">
+              <i class="fa-solid fa-arrows-rotate"></i>
+            </button>
+          </div>
+        `;
+      } else {
+        focalBarHtml = `
+          <div class="neural-ai-focal-bar">
+            <div class="neural-ai-focal-chip" id="floating-focal-chip" title="AI đang đọc hiểu toàn bộ bài ghi chú ${escapeHtml(node.label || '')}">
+              <span class="neural-ai-focal-tag" style="background: rgba(168, 85, 247, 0.25); color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> 🎯 Toàn bài
+              </span>
+              <span class="neural-ai-focal-quote" id="floating-focal-quote">Toàn bộ bài ghi chú</span>
+            </div>
+          </div>
+        `;
+      }
+    } else {
+      const tagHtml = hasFocalImages
+        ? `<span class="neural-ai-focal-tag" style="background: rgba(56, 189, 248, 0.2); border-color: rgba(56, 189, 248, 0.5); color: #38bdf8;"><i class="fa-solid fa-eye"></i> Thị giác AI</span>`
+        : `<span class="neural-ai-focal-tag">🎯 Đã khoanh</span>`;
+      focalBarHtml = `
+        <div class="neural-ai-focal-bar">
+          <div class="neural-ai-focal-chip" title="${escapeHtml(focalText)}">
+            ${thumbHtml}
+            ${tagHtml}
+            <span class="neural-ai-focal-quote">"${escapeHtml(displaySnippet)}"</span>
+          </div>
+        </div>
+      `;
+    }
+
+    // Xác định Quick Chips HTML
+    let quickChipsHtml = '';
+    if (mode === 'copilot') {
+      quickChipsHtml = `
+        <div class="neural-ai-quick-chips">
+          <button type="button" class="neural-ai-quick-chip" data-prompt="Giải thích chi tiết nội dung này theo bối cảnh toàn bài ghi chú">
+            <i class="fa-regular fa-lightbulb"></i> Giải thích chi tiết
+          </button>
+          <button type="button" class="neural-ai-quick-chip" data-prompt="Hãy cho ví dụ minh họa thực tế dễ hiểu về phần này">
+            <i class="fa-solid fa-pen-fancy"></i> Cho ví dụ
+          </button>
+          <button type="button" class="neural-ai-quick-chip" data-prompt="Tóm tắt 3 quy tắc và bản chất cốt lõi quan trọng nhất">
+            <i class="fa-solid fa-bolt"></i> 3 ý cốt lõi
+          </button>
+          <button type="button" class="neural-ai-quick-chip" data-prompt="Tạo 3 câu hỏi trắc nghiệm ôn tập trọng tâm kèm đáp án và giải thích chi tiết">
+            <i class="fa-solid fa-bullseye"></i> 3 câu trắc nghiệm
+          </button>
+          <button type="button" class="neural-ai-quick-chip" data-prompt="Chỉ ra các bẫy thi và sai lầm thường gặp mà sinh viên hay mắc ở phần này">
+            <i class="fa-solid fa-triangle-exclamation"></i> Bẫy thi &amp; Sai lầm
+          </button>
+        </div>
+      `;
+    } else {
+      quickChipsHtml = `
+        <div class="neural-ai-quick-chips">
+          <button type="button" class="neural-ai-quick-chip" data-prompt="Bóc tách và giải thích chi tiết ý nghĩa cụ thể của từng phần tử, chỉ số con số trong vùng vừa khoanh, không tóm tắt lan man cả bài">
+            💡 Ý nghĩa từng phần tử
+          </button>
+          <button type="button" class="neural-ai-quick-chip" data-prompt="Phân tích tương quan và liên hệ thực tế giữa các phần tử trong vùng này">
+            📊 Phân tích tương quan
+          </button>
+          <button type="button" class="neural-ai-quick-chip" data-prompt="Rút ra nhận xét cốt lõi quan trọng nhất từ các chỉ số trong vùng này">
+            ⚡ Nhận xét cốt lõi
+          </button>
+        </div>
+      `;
+    }
+
+    // Lời chào mở đầu
+    let welcomeMsg = '';
+    if (mode === 'copilot') {
+      welcomeMsg = focalText
+        ? `✨ Mình là <strong>AI Copilot</strong>. Mình đang tập trung vào đoạn trích bạn vừa chọn trong bài <strong>${escapeHtml(node.label || 'ghi chú')}</strong>. Bạn muốn mình giải thích sâu, cho ví dụ hay tạo bài tập trắc nghiệm?`
+        : `👋 Chào bạn! Mình là <strong>AI Copilot</strong> đồng hành cùng bài học <strong>${escapeHtml(node.label || 'này')}</strong>. Mình đã nạp trọn vẹn ngữ cảnh toàn bài, sẵn sàng giải đáp mọi thắc mắc hoặc hỗ trợ bạn ôn luyện!`;
+    } else {
+      welcomeMsg = hasFocalImages
+        ? '✨ Mình đã **nhìn thấy hình ảnh/bảng biểu** trong vùng bạn vừa khoanh! Sẵn sàng bóc tách chi tiết từng con số, ma trận, công thức hoặc biểu đồ.'
+        : `✨ Mình đã nắm nội dung vùng bạn vừa khoanh trong bài <strong>${escapeHtml(node.label || 'ghi chú')}</strong>. Bạn muốn mình giải đáp thế nào?`;
+    }
+
+    const inputPlaceholder = mode === 'copilot'
+      ? 'Hỏi bất kỳ điều gì về bài ghi chú này (Enter để gửi)...'
+      : 'Hỏi bất kỳ điều gì về vùng này (Enter)...';
 
     popup.innerHTML = `
       <div class="neural-ai-drawer-header">
         <div class="neural-ai-drawer-title-group">
-          <div class="neural-ai-drawer-badge"><i class="fa-solid fa-crop-simple"></i></div>
+          ${badgeHtml}
           <div>
             <span class="neural-ai-drawer-title">
               AI Copilot
@@ -2772,25 +2903,8 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
         </div>
       </div>
 
-      <div class="neural-ai-focal-bar">
-        <div class="neural-ai-focal-chip" title="${escapeHtml(focalText)}">
-          ${thumbHtml}
-          ${tagHtml}
-          <span class="neural-ai-focal-quote">"${escapeHtml(displaySnippet)}"</span>
-        </div>
-      </div>
-
-      <div class="neural-ai-quick-chips">
-        <button type="button" class="neural-ai-quick-chip" data-prompt="Bóc tách và giải thích chi tiết ý nghĩa cụ thể của từng phần tử, chỉ số con số trong vùng vừa khoanh, không tóm tắt lan man cả bài">
-          💡 Ý nghĩa từng phần tử
-        </button>
-        <button type="button" class="neural-ai-quick-chip" data-prompt="Phân tích tương quan và liên hệ thực tế giữa các phần tử trong vùng này">
-          📊 Phân tích tương quan
-        </button>
-        <button type="button" class="neural-ai-quick-chip" data-prompt="Rút ra nhận xét cốt lõi quan trọng nhất từ các chỉ số trong vùng này">
-          ⚡ Nhận xét cốt lõi
-        </button>
-      </div>
+      ${focalBarHtml}
+      ${quickChipsHtml}
 
       <div class="neural-ai-chat-body" id="floating-popup-chat-body">
         <div class="neural-ai-msg model">
@@ -2801,7 +2915,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       </div>
 
       <div class="neural-ai-input-row">
-        <input type="text" class="neural-ai-input" id="floating-popup-input" placeholder="Hỏi bất kỳ điều gì về vùng này (Enter)..." />
+        <input type="text" class="neural-ai-input" id="floating-popup-input" placeholder="${inputPlaceholder}" />
         <button type="button" class="neural-ai-send-btn" id="btn-floating-send" title="Gửi câu hỏi">
           <i class="fa-solid fa-paper-plane"></i>
         </button>
@@ -3011,6 +3125,30 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     const btnPin = popup.querySelector('#btn-pin-floating-popup');
     const btnZoomPopup = popup.querySelector('#btn-zoom-floating-popup');
     const subtitleEl = popup.querySelector('#floating-popup-subtitle');
+    const btnFloatingClearFocal = popup.querySelector('#btn-floating-clear-focal');
+
+    // Kích hoạt tính năng xoay tròn Reset tiêu điểm sang Toàn bộ bài ghi chú
+    if (btnFloatingClearFocal) {
+      btnFloatingClearFocal.addEventListener('click', () => {
+        focalText = '';
+        currentFocalText = '';
+        const chipEl = popup.querySelector('#floating-focal-chip');
+        if (chipEl) {
+          chipEl.title = `AI đang đọc hiểu toàn bộ bài ghi chú ${node.label || ''}`;
+          chipEl.innerHTML = `
+            <span class="neural-ai-focal-tag" style="background: rgba(168, 85, 247, 0.25); color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> 🎯 Toàn bài
+            </span>
+            <span class="neural-ai-focal-quote" id="floating-focal-quote">Toàn bộ bài ghi chú</span>
+          `;
+        }
+        if (subtitleEl) {
+          subtitleEl.textContent = 'Đọc hiểu toàn bài';
+        }
+        btnFloatingClearFocal.style.display = 'none';
+        showToast('✨ Đã chuyển sang đọc hiểu toàn bộ bài ghi chú!');
+      });
+    }
 
     // Kích hoạt tính năng phóng to/thu nhỏ cỡ chữ và phím tắt cho Floating Popup
     attachAiChatInteractions(popup, btnZoomPopup);
@@ -3056,6 +3194,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
       if (targetPin) {
         targetPin.chatHistory = [...floatingHistory];
+        targetPin.mode = mode;
         targetPin.focalText = focalText || targetPin.focalText;
         targetPin.focalImages = focalImages && focalImages.length > 0 ? focalImages : targetPin.focalImages;
         targetPin.updatedAt = Date.now();
@@ -3080,7 +3219,8 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
         targetPin = {
           id: currentPinId,
-          title: displaySnippet || (floatingHistory[0]?.text ? (floatingHistory[0].text.slice(0, 40) + '...') : 'Hỏi đáp AI'),
+          mode: mode,
+          title: displaySnippet || (floatingHistory[0]?.text ? (floatingHistory[0].text.slice(0, 40) + '...') : (mode === 'copilot' ? 'AI Copilot' : 'Hỏi đáp AI')),
           focalText: focalText || '',
           focalImages: focalImages || [],
           chatHistory: [...floatingHistory],
@@ -3125,7 +3265,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       const loadingEl = document.createElement('div');
       loadingEl.className = 'neural-ai-loading';
       loadingEl.innerHTML = `
-        <span>${hasFocalImages ? 'Gemini đang quan sát hình ảnh và bóc tách dữ liệu' : 'Gemini đang phân tích toàn bài ghi chú'}</span>
+        <span>${hasFocalImages ? 'Gemini đang quan sát hình ảnh và bóc tách dữ liệu' : 'Gemini đang phân tích ngữ cảnh bài ghi chú'}</span>
         <div class="neural-ai-loading-dots">
           <div class="neural-ai-loading-dot"></div>
           <div class="neural-ai-loading-dot"></div>
@@ -3143,13 +3283,25 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
         const allNodes = getSubjectKnowledgeNodes(subjectCode);
 
+        // Tự động thu thập hình ảnh bài ghi chú nếu bài có ảnh (Multimodal Vision)
+        let requestImages = Array.isArray(focalImages) && focalImages.length > 0 ? [...focalImages] : [];
+        if (requestImages.length === 0) {
+          const noteImgs = Array.from(sidebar.querySelectorAll('.visual-pane img, .preview-pane img, #visual-note-canvas-wrapper img'));
+          if (noteImgs.length > 0) {
+            for (const imgEl of noteImgs.slice(0, 2)) {
+              const imgData = await extractImageBase64WithCrop(imgEl, null);
+              if (imgData) requestImages.push(imgData);
+            }
+          }
+        }
+
         const res = await askContextualNoteQuestion({
           subjectCode,
           targetNode: node,
           allNodes,
           fullContext: fullNoteText,
-          focalText: focalText,
-          focalImages: focalImages,
+          focalText: focalText || '',
+          focalImages: requestImages,
           userQuestion: question,
           chatHistory: floatingHistory
         });
@@ -3222,7 +3374,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
       pins.forEach(pin => {
         const pinEl = document.createElement('div');
-        pinEl.className = 'neural-ai-chat-pin';
+        pinEl.className = `neural-ai-chat-pin ${pin.mode === 'copilot' ? 'is-copilot-pin' : ''}`;
         pinEl.dataset.pinId = pin.id;
         pinEl.style.left = `${pin.x || 20}px`;
         pinEl.style.top = `${pin.y || 20}px`;
@@ -3321,7 +3473,8 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
               pinEl.getBoundingClientRect(),
               pin.focalText || '',
               pin.focalImages || [],
-              pin
+              pin,
+              pin.mode || 'snipe'
             );
           }
         };
@@ -3546,9 +3699,42 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     });
   };
 
+  // Helper mở AI Copilot In-situ Floating Popup đọc hiểu toàn bài / đoạn trích
+  handleOpenAiCopilotPopup = (triggerBtn = null, forcedText = '') => {
+    let selectedSnippet = (forcedText || '').trim();
+    if (!selectedSnippet) {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+        selectedSnippet = sel.toString().trim();
+      }
+    }
+
+    let boundingBox = null;
+    if (triggerBtn && typeof triggerBtn.getBoundingClientRect === 'function') {
+      const btnRect = triggerBtn.getBoundingClientRect();
+      boundingBox = {
+        left: btnRect.left,
+        top: btnRect.top,
+        right: btnRect.right,
+        bottom: btnRect.bottom,
+        width: btnRect.width,
+        height: btnRect.height
+      };
+    }
+
+    openInSituAiPopup(boundingBox, selectedSnippet, [], null, 'copilot');
+  };
+
+  const btnCopilotMd = sidebar.querySelector('#btn-copilot-md');
+  const btnCopilotVis = sidebar.querySelector('#btn-copilot-vis');
+
   // Gắn sự kiện nút Khoanh hỏi AI trên Markdown toolbar & Visual toolbar
   if (btnSnipeMd) btnSnipeMd.addEventListener('click', startSnippingMode);
   if (btnSnipeVis) btnSnipeVis.addEventListener('click', startSnippingMode);
+
+  // Gắn sự kiện nút AI Copilot trên Markdown toolbar & Visual toolbar
+  if (btnCopilotMd) btnCopilotMd.addEventListener('click', () => handleOpenAiCopilotPopup(btnCopilotMd));
+  if (btnCopilotVis) btnCopilotVis.addEventListener('click', () => handleOpenAiCopilotPopup(btnCopilotVis));
 
   // Hiển thị các biểu tượng Ghim Phiên Chat AI (Floating Draggable Pins) đã lưu lên bài ghi chú
   renderAiChatPins();
