@@ -3,6 +3,29 @@
 > **Dự án**: Lịch Học Thông Minh & Chiếc Cặp Google Drive  
 > **Mục tiêu**: Lưu trữ tự động các góc nhìn tiếp thị, điểm độc đáo (USP), viral hooks và kịch bản truyền thông từ các tính năng kỹ thuật.
 
+## 💎 ENTRY 22: [2026-09-18] - "Ném Cả Thư Mục Ảnh Vào Vở Ghi Chú Chỉ Bằng 1 Cú Kéo Thả": Tải Hàng Loạt Ảnh Bài Giảng & Tự Động Xếp Tầng Siêu Mượt 🖼️🚀📥✨
+
+### 📌 Phân Loại & Tags:
+`#BatchImageUpload` `#DragAndDropNotes` `#SmartNotepad` `#EdTechWorkflow` `#MultiImagePaste` `#ProductivityBooster`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Tải Hàng Loạt Ảnh Bài Giảng 1 Chạm (Massive Batch Upload)**:
+  * Không còn cảnh bấm chọn từng tấm ảnh một cách ức chế. Giờ đây bạn có thể chọn cùng lúc 10-20 bức ảnh chụp bảng hoặc slide bài giảng từ máy tính, hệ thống tự động nạp toàn bộ chỉ trong tích tắc!
+- **Kéo Thả Trực Quan Như Ứng Dụng Chuyên Nghiệp (Native Drag-and-Drop)**:
+  * Đang mở thư mục ảnh trên máy tính? Chỉ cần gắp cả tệp ảnh kéo và thả thẳng vào khung ghi chú Notepad, hệ thống lập tức chớp sáng viền neon và tiếp nhận ngay!
+- **Thuật Toán Tự Xếp Tầng Thông Minh (Auto-Cascade Layout)**:
+  * Các ảnh tải lên được tính toán kích thước tự động, xếp so le nối tiếp nhau từ trên xuống dưới theo thứ tự bài tập (Câu 1, Câu 2, Câu 3...). Không bao giờ bị đè chồng lấn lên nhau.
+  * Tự động giãn dòng nhường chỗ trong khung soạn thảo văn bản, cuộn mượt mà đến ảnh đầu tiên để bạn kiểm tra ngay.
+- **Tối Ưu Nén WebP 95% & Đồng Bộ Đám Mây**:
+  * Ảnh dung lượng lớn 5MB - 10MB được nén thông minh sang WebP chỉ còn vài chục KB mà vẫn giữ nguyên độ sắc nét từng nét phấn chữ viết, tự động tải ngầm lên Google Cloud / Firebase an toàn vĩnh viễn.
+
+### 2. 🎣 Viral Hooks Cho TikTok / Reels / Shorts:
+- **Hook 1 (Cứu cánh sinh viên lười)**: *"Chụp 10 trang slide bài tập trên lớp mà lười chép lại? Kéo thả cả nắm ảnh vào đây trong 1 giây, tự xếp ngay ngắn thành cuốn giáo trình cực phẩm!"*
+- **Hook 2 (Trải nghiệm mượt mà)**: *"Web ghi chú học tập mà làm như Canva hay Figma: Cho kéo thả hàng chục ảnh cùng lúc từ máy tính, tự động nén nhẹ tênh không lo giật lag!"*
+- **Hook 3 (Năng suất học tập)**: *"Dán 1 ảnh thì bình thường rồi, thử copy 5 ảnh từ slide PowerPoint dán 1 phát (Ctrl+V) xem... nhận trọn vẹn cả 5 không sót một tấm!"*
+
+---
+
 ## 💎 ENTRY 21: [2026-09-18] - "Xóa Node Mọi Lúc Mọi Nơi": Bộ Tứ Thao Tác Xóa Nhanh Chuẩn Phần Mềm Thiết Kế Triệu Đô 🗑️⚡✨
 
 ### 📌 Phân Loại & Tags:

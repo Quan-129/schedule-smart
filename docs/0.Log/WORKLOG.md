@@ -4,6 +4,36 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-18 20:30] - Nâng Cấp Tải Ảnh Hàng Loạt Từ Máy Tính, Kéo Thả Drag-and-Drop & Dán Nhiều Ảnh (Batch Image Upload & Multi-Paste Suite) 🖼️📥⚡
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng yêu cầu: *"ngoài paste ảnh nhanh, thâm có thể tải ảnh lên từ máy tính nữa có thể tài hàng loạt"* (Ngoài việc dán ảnh nhanh bằng Ctrl+V, thêm tính năng tải ảnh lên từ máy tính và hỗ trợ tải hàng loạt nhiều ảnh cùng lúc).
+  - Khảo sát thực trạng trước đây:
+    * Nút tải ảnh trên visual toolbar trước đây ghi nhãn là "Dán ảnh (Ctrl+V)" và input file bị thiếu thuộc tính `multiple`, chỉ cho phép chọn 1 ảnh duy nhất tại một thời điểm khiến người dùng hiểu nhầm là phím tắt chứ không phải nút tải từ máy tính.
+    * Logic xử lý dán ảnh `handleImageFile` chỉ nhận 1 ảnh và đặt vào cùng 1 tọa độ Y cố định; nếu dán nhiều ảnh liên tiếp, các ảnh sẽ bị đè chồng khít lên nhau che khuất lẫn nhau.
+    * Chưa hỗ trợ kéo thả (Drag & Drop) file ảnh trực tiếp từ thư mục máy tính (File Explorer/Desktop) vào khung ghi chú.
+    * Tab Markdown editor thiếu nút chọn tải ảnh trực tiếp từ máy tính.
+  - Giải pháp nâng cấp toàn diện:
+    1. **Bộ chọn tệp hàng loạt (`<input type="file" multiple>` trên cả 2 tab)**:
+       - Tab Ghi Chú Trực Quan (Visual): Đổi tên nút thành "Tải ảnh từ máy (Hàng loạt)" với icon `fa-folder-open`, hỗ trợ chọn cùng lúc hàng chục ảnh từ máy tính.
+       - Tab Markdown: Bổ sung nút "Tải ảnh từ máy" (`#lbl-upload-md-img`) trên toolbar markdown, tự động nén WebP và chèn cú pháp markdown `![tên](dataUrl)` ngay vị trí con trỏ văn bản.
+    2. **Hỗ trợ kéo thả trực quan (Native Drag-and-Drop File Injection)**:
+       - Bắt các sự kiện `dragover`, `dragleave`, `drop` trên toàn bộ khung Notepad Sidebar.
+       - Người dùng chỉ cần kéo cả tệp ảnh từ desktop/folder thả vào khung ghi chú là nạp ngay lập tức với hiệu ứng viền sáng nháy phản hồi.
+    3. **Dán hàng loạt ảnh từ Clipboard (Multi-Image Clipboard Paste)**:
+       - Vòng lặp quét toàn bộ các items trong clipboard `e.clipboardData.items`. Dù người dùng copy 5 ảnh cùng lúc và bấm Ctrl+V, hệ thống tiếp nhận và nạp đủ cả 5 ảnh.
+    4. **Thuật toán tự động xếp tầng ảnh so le & chèn khoảng trống (Auto-Cascade Layout Algorithm)**:
+       - Khi nạp N ảnh cùng lúc, hệ thống tính toán chiều cao từng ảnh kèm padding `height + 24px`, tự động xếp so le lần lượt từ trên xuống dưới theo thứ tự tự nhiên của bài giảng/đề bài.
+       - Tự động chèn khoảng trống (gap spacer) trong Visual text editor để chữ và ảnh không bị đè lên nhau.
+       - Tự động cuộn màn hình tới ảnh đầu tiên được nạp để người dùng xem ngay.
+       - Nén thông minh WebP chất lượng cao giảm 90-95% dung lượng giúp tải mượt mà.
+       - Chạy nền tải ảnh lên Firebase Cloud Storage để đồng bộ vĩnh viễn trên đám mây.
+- **🛠 Triển khai kỹ thuật ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  - Cập nhật template HTML: thêm `#lbl-upload-md-img`, `#md-file-input` (accept="image/*" multiple), cập nhật `#lbl-upload-vis-img`, `#vis-file-input` (multiple).
+  - Viết hàm `handleMultipleVisualImages(files)` & `handleMarkdownImageUpload(files)`.
+  - Lắng nghe sự kiện `change` trên cả 2 input file, `paste` clipboard đa tệp, và `drop` kéo thả file từ máy tính.
+  - Nâng Service Worker Cache lên `smart-schedule-modular-v169`.
+
 ## 📅 [2026-09-18 20:25] - Bổ Sung Toàn Diện Tác Vụ Xóa Node Tri Thức (Multi-Touchpoint Node Deletion Suite) 🗑️🌿✨
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:
