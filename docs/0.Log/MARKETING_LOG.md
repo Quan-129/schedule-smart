@@ -3,6 +3,24 @@
 > **Dự án**: Lịch Học Thông Minh & Chiếc Cặp Google Drive  
 > **Mục tiêu**: Lưu trữ tự động các góc nhìn tiếp thị, điểm độc đáo (USP), viral hooks và kịch bản truyền thông từ các tính năng kỹ thuật.
 
+## 💎 ENTRY 24: [2026-09-18] - "Nói Không Với Mã Rác Base64": Đưa Ảnh Thẳng Vào Bảng Trực Quan & Tự Động Giải Cứu Ghi Chú Cũ 🖼️🪄🧼✨
+
+### 📌 Phân Loại & Tags:
+`#ZeroPollutionNotes` `#VisualFirst` `#AutoRescueEngine` `#SmartNoteTaking` `#SeamlessUX`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Tuyệt Đối Không Làm Ô Nhiễm Mã Văn Bản (Zero Code Pollution)**:
+  * Không bao giờ có chuyện dán ảnh mà lại lòi ra một chuỗi mã ký tự base64 loằng ngoằng hàng chục nghìn chữ phá nát văn bản!
+  * Mọi thao tác tải ảnh, dán ảnh hay kéo thả đều tự động chuyển sang tab "Ghi chú" (Visual Note) và biến thành một tấm ảnh thực sự sắc nét, có thể di chuyển, phóng to, thu nhỏ tùy ý.
+- **Cỗ Máy Tự Động Giải Cứu (Auto-Rescue Machine)**:
+  * Nếu người dùng từng bị dán nhầm chuỗi mã Base64 khổng lồ trong các lần thử nghiệm trước, hệ thống tự động nhận diện, trích xuất tấm ảnh ra bảng trực quan và dọn sạch 100% mã rác trong tích tắc khi vừa mở lại bài ghi chú!
+
+### 2. 🎣 Viral Hooks Cho TikTok / Reels / Shorts:
+- **Hook 1 (Trải nghiệm người dùng)**: *"Bạn từng phát điên khi dán ảnh vào web ghi chú mà nó lại nhảy ra cả nghìn dòng chữ mã loằng ngoằng? Hãy xem ứng dụng này xử lý mượt mà thế nào!"*
+- **Hook 2 (Tự động thông minh)**: *"Hệ thống tự động phát hiện mã rác trong ghi chú cũ và biến nó thành tấm ảnh trực quan tuyệt đẹp chỉ sau 1 cú mở tab!"*
+
+---
+
 ## 💎 ENTRY 23: [2026-09-18] - "Đập Đi Xây Lại Sơ Đồ Tri Thức Trong 1 Nốt Nhạc": Quyền Xóa Cả Node Gốc & Khởi Tạo Từ Con Số Không 🌿🗑️⚡✨
 
 ### 📌 Phân Loại & Tags:

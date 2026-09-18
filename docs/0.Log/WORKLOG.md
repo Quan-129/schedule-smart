@@ -4,6 +4,28 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-18 20:50] - Khắc Phục Lỗi Hiển Thị Chuỗi Base64 & Tự Động Giải Cứu Ghi Chú Sang Visual Notes (Base64 Pollution Fix & Visual Image Routing) 🖼️🛡️✨
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng phản hồi kèm ảnh chụp màn hình: *"tải ảnh lên bị lỗi này"*.
+  - Thực trạng khảo sát:
+    * Khi người dùng tải ảnh từ máy tính (hoặc paste/kéo thả) khi đang ở tab Soạn thảo Markdown (`edit`), hàm `handleMarkdownImageUpload` cũ đã chèn cú pháp markdown kèm chuỗi Data URL Base64 nén `![tên](data:image/webp;base64,UklGRqb0...)` trực tiếp vào `<textarea>`.
+    * Chuỗi Base64 dài hàng chục nghìn ký tự khiến textarea bị ngập rác mã code không đọc được, browser bật gạch chân đỏ kiểm tra chính tả chi chít và không thể render ảnh trực tiếp bên trong thẻ textarea thuần text.
+    * Người dùng muốn ảnh xuất hiện trực quan như một bức ảnh thực sự để xem và học tập, chứ không phải một mớ mã Base64 loằng ngoằng làm hỏng ghi chú.
+  - Giải pháp triệt để:
+    1. **Quy chuẩn hiển thị: Mọi thao tác tải ảnh, kéo thả, dán ảnh đều chuyển trực tiếp về Visual Notes**:
+       - Bất kể người dùng đang ở tab nào (Markdown hay Visual), khi bấm nút "Tải ảnh", phím tắt `Ctrl + V` dán ảnh, hoặc kéo thả ảnh vào sidebar: Hệ thống tự động chuyển sang tab "Ghi chú" (`switchViewTab('visual')`) và nạp vào `currentImages` bằng `handleMultipleVisualImages`.
+       - Ảnh được hiển thị tức thì dưới dạng thẻ ảnh trực quan (Visual Card) có thể kéo thả, phóng to, thu nhỏ, xóa bỏ mà KHÔNG BAO GIỜ làm rác mã văn bản Markdown.
+    2. **Đổi Tab Mặc Định Thông Minh**:
+       - Với node chưa có ghi chú, mặc định mở ngay tab "Ghi chú" trực quan (`visual`) để sẵn sàng cho việc dán và tải ảnh học tập.
+    3. **Cơ chế Tự Động Giải Cứu (Auto-Rescue Engine)**:
+       - Tự động quét và phát hiện các chuỗi Base64 khổng lồ dạng `![...](data:image/...;base64,...)` đã lỡ dán vào textarea trước đó.
+       - Tự động trích xuất các tấm ảnh này chuyển thành thẻ ảnh trong tab Ghi Chú, đồng thời xóa sạch chuỗi mã rác khỏi textarea Markdown để trả lại không gian ghi chú văn bản trong trẻo, sạch đẹp cho người dùng!
+- **🛠 Triển khai kỹ thuật ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  - Tích hợp bộ quét Regex Base64 Auto-Rescue khi mở sidebar.
+  - Cập nhật các sự kiện `paste`, `drop`, `change` trên cả 2 input file luôn định tuyến về Visual Canvas.
+  - Nâng Service Worker Cache lên `smart-schedule-modular-v171`.
+
 ## 📅 [2026-09-18 20:45] - Mở Khóa Quyền Xóa Cả Node Gốc & Tái Thiết Sơ Đồ Trống (Full Root Node Deletion & Empty-State Architecture) 🌿🗑️✨
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:

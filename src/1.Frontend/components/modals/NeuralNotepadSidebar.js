@@ -180,11 +180,11 @@ function renderNotepadTemplate(node) {
     (typeof visualNotes === 'string' && visualNotes.trim().length > 0)
   );
 
-  let defaultTab = 'edit';
-  if (hasNotes) {
-    defaultTab = 'preview';
-  } else if (hasVisualNotes) {
+  let defaultTab = 'visual';
+  if (hasVisualNotes) {
     defaultTab = 'visual';
+  } else if (hasNotes) {
+    defaultTab = 'preview';
   }
 
   return `
@@ -1344,54 +1344,15 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     if (file) handleMultipleVisualImages([file]);
   };
 
-  // 2. Nạp ảnh hàng loạt vào Markdown Editor
+  // 2. Chuyển tiếp tải ảnh vào Visual Note Canvas (trực quan, hiển thị dạng thẻ ảnh, không làm rác mã Markdown)
   const handleMarkdownImageUpload = async (files) => {
-    if (!files) return;
-    const fileArray = Array.from(files).filter(f => f && f.type && f.type.startsWith('image/'));
-    if (fileArray.length === 0) return;
-
-    if (saveStatus) {
-      saveStatus.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang tối ưu ${fileArray.length} ảnh...`;
-    }
-
-    const startPos = textarea.selectionStart || textarea.value.length;
-    const endPos = textarea.selectionEnd || textarea.value.length;
-    const currentText = textarea.value;
-
-    let insertedMarkdown = '';
-
-    for (let i = 0; i < fileArray.length; i++) {
-      const file = fileArray[i];
-      try {
-        const compressed = await compressImage(file, 1280, 1280, 0.82);
-        const imgName = file.name ? file.name.replace(/\.[^/.]+$/, '') : `ảnh_${Date.now()}_${i + 1}`;
-        insertedMarkdown += `\n\n![${imgName}](${compressed.dataUrl})\n`;
-
-        // Upload Cloud nền nếu có
-        uploadNoteImageToStorage(compressed.blob, 'md_note').then(cloudUrl => {
-          if (cloudUrl) {
-            textarea.value = textarea.value.replace(compressed.dataUrl, cloudUrl);
-            updateLivePreview();
-            saveAllNotes();
-          }
-        }).catch(() => {});
-      } catch (err) {
-        console.warn('Lỗi nén ảnh markdown:', err);
-      }
-    }
-
-    if (insertedMarkdown) {
-      textarea.value = currentText.substring(0, startPos) + insertedMarkdown + currentText.substring(endPos);
-      updateLivePreview();
-      pushHistory(textarea.value, startPos + insertedMarkdown.length, startPos + insertedMarkdown.length);
-      saveAllNotes();
-      showToast(`Đã chèn thành công ${fileArray.length} ảnh vào ghi chú! 🖼️`, 'success');
-    }
+    if (!files || files.length === 0) return;
+    switchViewTab('visual');
+    await handleMultipleVisualImages(files);
   };
 
-  // Lắng nghe Ctrl + V dán ảnh từ Clipboard (Hỗ trợ dán cả đơn lẻ lẫn hàng loạt ảnh)
+  // Lắng nghe Ctrl + V dán ảnh từ Clipboard (Luôn nạp trực quan vào tab Ghi Chú để hiển thị ảnh đẹp mắt)
   sidebar.addEventListener('paste', (e) => {
-    const isVisualActive = visualPane && !visualPane.classList.contains('hidden');
     const items = (e.clipboardData || window.clipboardData)?.items;
     if (items) {
       const imgBlobs = [];
@@ -1403,11 +1364,8 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       }
       if (imgBlobs.length > 0) {
         e.preventDefault();
-        if (isVisualActive) {
-          handleMultipleVisualImages(imgBlobs);
-        } else {
-          handleMarkdownImageUpload(imgBlobs);
-        }
+        switchViewTab('visual');
+        handleMultipleVisualImages(imgBlobs);
       }
     }
   });
@@ -1423,12 +1381,13 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     });
   }
 
-  // Chọn ảnh hàng loạt từ máy tính trên Markdown Toolbar
+  // Chọn ảnh hàng loạt từ máy tính trên Markdown Toolbar (Tự chuyển sang tab Ghi Chú để người dùng xem ảnh ngay)
   const mdFileInput = sidebar.querySelector('#md-file-input');
   if (mdFileInput) {
     mdFileInput.addEventListener('change', (e) => {
       if (e.target.files && e.target.files.length > 0) {
-        handleMarkdownImageUpload(e.target.files);
+        switchViewTab('visual');
+        handleMultipleVisualImages(e.target.files);
         e.target.value = '';
       }
     });
@@ -1455,12 +1414,8 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       const droppedImgs = Array.from(e.dataTransfer.files).filter(f => f.type && f.type.startsWith('image/'));
       if (droppedImgs.length > 0) {
         e.preventDefault();
-        const isVisualActive = visualPane && !visualPane.classList.contains('hidden');
-        if (isVisualActive) {
-          handleMultipleVisualImages(droppedImgs);
-        } else {
-          handleMarkdownImageUpload(droppedImgs);
-        }
+        switchViewTab('visual');
+        handleMultipleVisualImages(droppedImgs);
       }
     }
   };
@@ -1712,6 +1667,45 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       pushHistory(textarea.value, textarea.selectionStart, textarea.selectionEnd);
     }, 450);
   });
+
+  // ========================================================================
+  // TỰ ĐỘNG GIẢI CỨU (AUTO-RESCUE) NẾU GHI CHÚ BỊ DÁN NHẦM CHUỖI BASE64 KHỔNG LỒ
+  // ========================================================================
+  try {
+    const base64ImgRegex = /!\[([^\]]*)\]\s*\((data:image\/[a-zA-Z0-9+.-]+;base64,[a-zA-Z0-9+/=\s]+?)\)/g;
+    let rescuedCount = 0;
+    let match;
+    const initialText = textarea ? textarea.value : (node.notes || '');
+
+    while ((match = base64ImgRegex.exec(initialText)) !== null) {
+      const [fullMatch, altText, rawDataUrl] = match;
+      const cleanDataUrl = rawDataUrl.replace(/\s+/g, '');
+      if (!currentImages.some(img => img.src === cleanDataUrl)) {
+        currentImages.push({
+          id: `img_rescued_${Date.now()}_${rescuedCount}`,
+          src: cleanDataUrl,
+          x: 30,
+          y: currentImages.length * 240 + 40,
+          width: 320,
+          height: 220
+        });
+        rescuedCount++;
+      }
+    }
+
+    if (rescuedCount > 0) {
+      const cleanedText = initialText.replace(base64ImgRegex, '').trim();
+      if (textarea) textarea.value = cleanedText;
+      updateLivePreview();
+      renderVisualImages();
+      updateCanvasWrapperHeight();
+      saveAllNotes();
+      switchViewTab('visual');
+      showToast(`Đã tự động chuyển đổi ${rescuedCount} ảnh sang tab Ghi Chú và dọn sạch mã rác! ✨`, 'success');
+    }
+  } catch (rescueErr) {
+    console.warn('Lỗi khi auto-rescue ảnh base64:', rescueErr);
+  }
 
   // ========================================================================
   // FLOATING UNHIGHLIGHT BADGE (HOVER ĐỂ HIỆN DẤU BỎ HIGHLIGHT)
