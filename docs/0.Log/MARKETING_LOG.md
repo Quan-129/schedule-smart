@@ -3,6 +3,24 @@
 > **Dự án**: Lịch Học Thông Minh & Chiếc Cặp Google Drive  
 > **Mục tiêu**: Lưu trữ tự động các góc nhìn tiếp thị, điểm độc đáo (USP), viral hooks và kịch bản truyền thông từ các tính năng kỹ thuật.
 
+## 💎 ENTRY 20: [2026-09-18] - "Ghi Chú Toàn Ảnh? AI Vẫn Đọc Vanh Vách Từng Đề Bài": Nạp Trọn Đề Bài 10 Câu Hỏi Dạng Ảnh Từ Các Node Con 🖼️👁️📚✨
+
+### 📌 Phân Loại & Tags:
+`#MultimodalHierarchy` `#ImageToQuestion` `#SmartStudy` `#VisualNotesAI` `#ZeroTextRequired` `#EdTechMagic`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Không Cần Gõ Chữ - Chỉ Cần Chụp & Dán Ảnh (Zero-Typing Note-Taking)**: Sinh viên đi học chụp slide bài giảng hoặc bài tập trên bảng rồi dán thẳng (Ctrl+V) vào các node con (Câu 1, Câu 2, Câu 3...). Không cần mất công ngồi gõ lại từng con chữ hay công thức toán học dài dòng!
+- **Đọc Xuyên Tầng Lên Đến 16 Hình Ảnh Cùng Lúc**: Khi sinh viên mở AI Copilot tại Node Cha để hỏi: *"Hãy viết lại đề bài 5 câu hỏi và giải chi tiết"*, hệ thống tự động quét sạch toàn bộ ảnh dán trong các node con, nạp đồng thời tới 16 hình ảnh chất lượng cao vào Google Gemini 2.5 Flash Vision.
+- **Gắn Nhãn Chuẩn Xác Từng Tấm Ảnh**: Mỗi ảnh được gán thẻ định danh chuẩn mực (*[Dữ liệu thị giác #1 - Câu 1]*, *[Dữ liệu thị giác #2 - Câu 2]*...), giúp AI biết chính xác tấm ảnh nào là đề bài của câu nào để giải thích và trích xuất không trượt phát nào!
+- **Chấm Dứt Hoàn Toàn Tình Trạng "AI Từ Chối Do Chưa Có Văn Bản"**: Thuật toán ra chỉ thị sư phạm thép: Nếu node không có chữ gõ, đề bài chính là nội dung trên ảnh, bắt buộc AI phải nhìn từng pixel để đọc đề bài.
+
+### 2. 🎣 Viral Hooks Cho TikTok / Reels / Shorts:
+- **Hook 1 (Cứu tinh lười gõ chữ)**: *"Đi học chỉ kịp chụp ảnh bài giảng dán vào vở mà không kịp chép chữ? Đừng lo, con AI này tự đọc ảnh của 5 bài tập nhỏ để giải đáp trọn vẹn từ A đến Z!"*
+- **Hook 2 (Thị giác đỉnh cao)**: *"Khi bạn dán 5 cái ảnh đề bài vào sơ đồ nơ-ron và bảo AI: 'Viết lại đề bài 5 câu cho tôi'... và cái kết khiến cả lớp ngỡ ngàng vì chính xác từng dấu phẩy!"*
+- **Hook 3 (Năng suất học tập)**: *"Bí kíp biến đống ảnh chụp bài giảng lộn xộn thành một bộ đề thi có lời giải chi tiết chỉ với 1 câu hỏi tại Node Cha!"*
+
+---
+
 ## 💎 ENTRY 19: [2026-09-18] - "AI Copilot Biết Nhìn Xuống Nhánh Con": Khi Hỏi Node Cha, AI Tự Đọc Hết Cả Đàn Con Để Lấy Ví Dụ Minh Họa Chuẩn Chỉ 🌿🧠🏛️✨
 
 ### 📌 Phân Loại & Tags:

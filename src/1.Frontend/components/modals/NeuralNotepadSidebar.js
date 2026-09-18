@@ -2466,6 +2466,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
         fullContext: fullNoteText,
         focalText: currentFocalText || fullNoteText.slice(0, 160),
         focalImages: docImages,
+        activeImages: currentImages,
         userQuestion: question,
         chatHistory: aiChatHistory
       });
@@ -3423,6 +3424,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
           fullContext: fullNoteText,
           focalText: focalText || '',
           focalImages: requestImages,
+          activeImages: currentImages,
           userQuestion: question,
           chatHistory: floatingHistory
         });

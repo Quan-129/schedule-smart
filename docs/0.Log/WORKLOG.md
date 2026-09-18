@@ -4,6 +4,34 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-18 19:35] - Khắc Phục Triệt Để Lỗi Đọc Ảnh Đề Bài Dán Ở Ghi Chú Node Con (Multimodal Vision Hierarchy Pipeline) 🖼️👁️🌿✨
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng phản hồi kết quả AI trả lời: *"Câu 1, Câu 2, Câu 3, Câu 4 hiện chưa có ghi chú văn bản riêng nào được cung cấp. Do đó, tôi không thể viết lại đề bài cụ thể của các câu này... cỏ vẻ nó chưa đọc được câu hỏi bằng ảnh tôi dán ở phần ghi chú"*.
+  - Nguyên nhân gốc rễ (Root Cause Analysis):
+    1. **Sai vị trí lưu trữ ảnh trong State**: Khi người dùng dán ảnh (Ctrl+V) vào Visual Note Editor, ảnh được lưu trữ trong mảng đối tượng `node.visualNotes.images` (chứ không nằm trong chuỗi `visualNotes.html`). Hàm trích xuất cũ chỉ quét regex thẻ `<img>` trong HTML nên hoàn toàn bỏ sót toàn bộ ảnh dán!
+    2. **Bỏ sót ảnh Markdown**: Nếu người dùng chèn ảnh dạng `![alt](url)` hoặc thẻ `<img src>` trong `node.notes`, thuật toán cũ cũng không trích xuất.
+    3. **Giới hạn số lượng ảnh quá chặt (`< 3` ảnh)**: Với bộ 5 câu hỏi (Câu 1 đến Câu 5), việc giới hạn 3 ảnh khiến các câu 3, 4, 5 bị loại bỏ.
+    4. **Thiếu nhãn nhận diện từng ảnh**: Gemini nhận ảnh mà không biết ảnh nào thuộc Câu 1, ảnh nào thuộc Câu 2.
+    5. **Thông báo văn bản rỗng**: Do node con chỉ có ảnh mà không có chữ gõ, `extractNodeText` trả về rỗng, dẫn đến thông báo `*(Chưa có ghi chú văn bản riêng)*`, khiến AI ngộ nhận là không có thông tin đề bài.
+  - Giải pháp & Trải nghiệm hoàn thiện:
+    1. **Hàm Chuyển Đổi Nguồn Ảnh Toàn Diện (`convertImageSourceToBase64`)**: Hỗ trợ chuyển đổi tự động cả Data URL Base64 (`data:image/...`) lẫn URL từ xa (`https://...` Firebase Storage) sang `{ mimeType, base64 }` an toàn, hỗ trợ cả Browser và Node.js.
+    2. **Bộ Quét Ảnh Toàn Năng Cho Node (`extractAllImageSourcesFromNode`)**: Quét triệt để 4 nguồn ảnh trong một Node:
+       - Mảng ảnh dán `node.visualNotes.images`
+       - Ảnh đang soạn thảo trong editor `activeImages` (`currentImages`)
+       - Thẻ ảnh trong `node.visualNotes.html`
+       - Ảnh Markdown và HTML trong `node.notes`
+    3. **Đánh Số Thứ Tự & Gắn Nhãn Nguồn Gốc Từng Tấm Ảnh**:
+       - Mỗi tấm ảnh gửi sang Gemini đều kèm nhãn rõ ràng: `[DỮ LIỆU THỊ GIÁC #1 - ĐÍNH KÈM TỪ: "Câu 1"]`, `[DỮ LIỆU THỊ GIÁC #2 - ĐÍNH KÈM TỪ: "Câu 2"]`...
+       - Trong đoạn văn bản mô tả node con, ghi rõ: *"Node này có X ảnh chứa ĐỀ BÀI... BẠN BẮT BUỘC PHẢI NHÌN VÀO ẢNH để đọc đề bài và câu hỏi!"*
+    4. **Nâng Giới Hạn Lên 16 Ảnh**: Đảm bảo nạp đầy đủ toàn bộ ảnh bài tập của 5 - 10 câu hỏi cùng lúc cho Gemini 2.5 Flash Vision.
+    5. **Chỉ Dẫn Nghiêm Ngặt Chống Từ Chối Đọc Đề Bài**: Cảnh báo trong System Prompt: *"NẾU MỘT NODE CON CHƯA CÓ GHI CHÚ CHỮ GÕ NHƯNG CÓ ẢNH ĐÍNH KÈM: ĐỀ BÀI CHÍNH LÀ NỘI DUNG ĐƯỢC CHỤP LẠI TRONG ẢNH! TUYỆT ĐỐI KHÔNG trả lời rằng chưa có ghi chú văn bản nên không thể viết lại đề bài, hãy NHÌN THẲNG VÀO ẢNH!"*
+- **🛠 Triển khai kỹ thuật ([`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js), [`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  - Viết mới `convertImageSourceToBase64` và `extractAllImageSourcesFromNode` trong `GeminiAIService.js`.
+  - Nâng cấp `collectNodeHierarchyContext` thành async để quét và chuyển đổi toàn bộ ảnh của node cha và các node con gần nhất.
+  - Nâng cấp `askContextualNoteQuestion` để nạp `activeImages: currentImages` và mở rộng `effectiveFocalImages` lên tối đa 16 ảnh.
+  - Cập nhật phiên bản Service Worker lên `smart-schedule-modular-v167`.
+
 ## 📅 [2026-09-18 19:25] - AI Copilot Đọc Toàn Bộ Ngữ Cảnh Của Node Con Gần Nhất & Chính Nó Khi Hỏi Đáp Tại Node Cha 🌿🧠🏛️✨
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:

@@ -150,20 +150,146 @@ export function traceNodeAncestryPath(allNodes, targetNodeOrId) {
 }
 
 /**
- * Thu thập toàn diện cấu trúc ngữ cảnh của một Node: Bao gồm phả hệ tổ tiên, chính nó và toàn bộ các node con gần nhất
+ * Chuyển đổi một nguồn ảnh (Data URL Base64 hoặc HTTP/HTTPS/Blob URL) thành đối tượng { mimeType, base64 }
+ * Tương thích cả Browser lẫn môi trường Node.js
+ * @param {string} src
+ * @returns {Promise<{ mimeType: string, base64: string } | null>}
+ */
+export async function convertImageSourceToBase64(src) {
+  if (!src || typeof src !== 'string') return null;
+  const trimmed = src.trim();
+
+  // 1. Nếu đã là Data URL Base64
+  if (trimmed.startsWith('data:image/')) {
+    const parts = trimmed.split(',');
+    if (parts.length < 2) return null;
+    const mimeMatch = parts[0].match(/:(.*?);/);
+    const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+    const base64 = parts[1].trim();
+    return base64 ? { mimeType, base64 } : null;
+  }
+
+  // 2. Nếu là URL từ xa (HTTP/HTTPS) hoặc Blob URL
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('blob:')) {
+    try {
+      if (typeof fetch === 'function') {
+        const res = await fetch(trimmed, { mode: 'cors' });
+        if (!res.ok) return null;
+        const blob = await res.blob();
+        const mimeType = blob.type || 'image/jpeg';
+
+        if (typeof FileReader !== 'undefined') {
+          return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const resUrl = reader.result;
+              if (typeof resUrl === 'string' && resUrl.startsWith('data:image/')) {
+                const parts = resUrl.split(',');
+                resolve(parts[1] ? { mimeType: (parts[0].match(/:(.*?);/)?.[1] || mimeType), base64: parts[1].trim() } : null);
+              } else {
+                resolve(null);
+              }
+            };
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        } else if (typeof blob.arrayBuffer === 'function') {
+          const buffer = await blob.arrayBuffer();
+          if (typeof Buffer !== 'undefined') {
+            return {
+              mimeType,
+              base64: Buffer.from(buffer).toString('base64')
+            };
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('[convertImageSourceToBase64] Không thể tải ảnh từ URL:', trimmed, err);
+      return null;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Trích xuất toàn bộ nguồn ảnh từ một Node (visualNotes.images, visualNotes.html, notes markdown/html)
+ * @param {Object} node
+ * @param {Array<Object>} [extraActiveImages=[]]
+ * @returns {Array<{ src: string, source: string, label: string }>}
+ */
+export function extractAllImageSourcesFromNode(node, extraActiveImages = []) {
+  if (!node) return [];
+  const sources = [];
+  const seenSrc = new Set();
+
+  const addSrc = (src, source) => {
+    if (!src || typeof src !== 'string') return;
+    const clean = src.trim();
+    if (!clean) return;
+    if (seenSrc.has(clean)) return;
+    seenSrc.add(clean);
+    sources.push({ src: clean, source, label: node.label || 'Ghi chú' });
+  };
+
+  // 1. Từ visualNotes.images (mảng ảnh dán trong visual editor)
+  if (node.visualNotes && typeof node.visualNotes === 'object') {
+    if (Array.isArray(node.visualNotes.images)) {
+      node.visualNotes.images.forEach(img => {
+        if (img && img.src) addSrc(img.src, 'visualNotes.images');
+      });
+    }
+  }
+
+  // 2. Từ extraActiveImages (ảnh đang có trong editor chưa kịp lưu)
+  if (Array.isArray(extraActiveImages)) {
+    extraActiveImages.forEach(img => {
+      if (img && img.src) addSrc(img.src, 'activeEditor.images');
+    });
+  }
+
+  // 3. Từ visualNotes.html (thẻ <img src="...">)
+  if (node.visualNotes && typeof node.visualNotes === 'object' && typeof node.visualNotes.html === 'string') {
+    const imgTagMatches = node.visualNotes.html.matchAll(/<img[^>]+src=["']([^"']+)["']/gi);
+    for (const match of imgTagMatches) {
+      if (match[1]) addSrc(match[1], 'visualNotes.html');
+    }
+  }
+
+  // 4. Từ node.notes (Markdown images ![alt](url) và thẻ <img>)
+  if (typeof node.notes === 'string' && node.notes.trim()) {
+    // Markdown syntax ![...](url)
+    const mdMatches = node.notes.matchAll(/!\[[^\]]*\]\((https?:\/\/[^\s\)]+|data:image\/[^\s\)]+)\)/gi);
+    for (const match of mdMatches) {
+      if (match[1]) addSrc(match[1], 'notes.markdown');
+    }
+    // HTML <img> in markdown
+    const htmlMatches = node.notes.matchAll(/<img[^>]+src=["']([^"']+)["']/gi);
+    for (const match of htmlMatches) {
+      if (match[1]) addSrc(match[1], 'notes.html');
+    }
+  }
+
+  return sources;
+}
+
+/**
+ * Thu thập toàn diện cấu trúc ngữ cảnh của một Node: Bao gồm phả hệ tổ tiên, chính nó, toàn bộ các node con gần nhất
+ * và ĐẶC BIỆT LÀ TOÀN BỘ HÌNH ẢNH ĐỀ BÀI/GHI CHÚ (Multimodal Vision Hierarchical Context)
  * @param {Array<Object>} allNodes - Toàn bộ danh sách node trong môn học
  * @param {string|Object} targetNodeOrId - Node hiện tại hoặc ID của node
  * @param {string} [activeText=''] - Văn bản đang soạn thảo trực tiếp của node hiện tại (nếu có)
- * @returns {{
+ * @param {Array<Object>} [activeImages=[]] - Danh sách ảnh đang soạn thảo trong visual editor (nếu có)
+ * @returns {Promise<{
  *   targetNode: Object,
  *   isParentNode: boolean,
  *   directChildren: Array<Object>,
  *   breadcrumbStr: string,
  *   comprehensiveNotes: string,
- *   childImages: Array<Object>
- * }}
+ *   allVisualImages: Array<Object>
+ * }>}
  */
-export function collectNodeHierarchyContext(allNodes, targetNodeOrId, activeText = '') {
+export async function collectNodeHierarchyContext(allNodes, targetNodeOrId, activeText = '', activeImages = []) {
   const nodes = Array.isArray(allNodes) ? allNodes : [];
   const targetId = (typeof targetNodeOrId === 'object' && targetNodeOrId !== null) ? targetNodeOrId.id : targetNodeOrId;
   const target = nodes.find(n => n.id === targetId) || (typeof targetNodeOrId === 'object' ? targetNodeOrId : { id: 'target', label: String(targetNodeOrId || 'Khái niệm') });
@@ -178,43 +304,83 @@ export function collectNodeHierarchyContext(allNodes, targetNodeOrId, activeText
   const directChildren = nodes.filter(n => n && n.parentId === target.id && n.id !== target.id);
   const isParentNode = directChildren.length > 0;
 
-  // 4. Xây dựng các khối nội dung tổng hợp
+  // 4. Thu thập toàn bộ hình ảnh thị giác (Multimodal Vision) từ Node Cha và các Node Con
+  const allVisualImages = [];
+  const seenBase64 = new Set();
+
+  // 4.1. Lấy ảnh của chính Node Hiện Tại (Node Cha)
+  const targetImgSources = extractAllImageSourcesFromNode(target, activeImages);
+  for (const srcObj of targetImgSources) {
+    const conv = await convertImageSourceToBase64(srcObj.src);
+    if (conv && conv.base64 && !seenBase64.has(conv.base64)) {
+      seenBase64.add(conv.base64);
+      allVisualImages.push({
+        mimeType: conv.mimeType,
+        base64: conv.base64,
+        nodeLabel: target.label || 'Node Hiện Tại',
+        nodeId: target.id,
+        isSelf: true
+      });
+    }
+  }
+
+  // 4.2. Xây dựng các khối nội dung tổng hợp
   const blocks = [];
 
   if (ancestry.breadcrumbStr) {
     blocks.push(`🧭 [VỊ TRÍ PHẢ HỆ TRI THỨC MÔN HỌC]: ${ancestry.breadcrumbStr}`);
   }
 
-  // Khối chính của node này
+  const selfImageCount = allVisualImages.filter(img => img.isSelf).length;
+  const selfImgNotice = selfImageCount > 0
+    ? `\n🖼️ [ĐÍNH KÈM ${selfImageCount} HÌNH ẢNH CỦA CHÍNH NODE NÀY]: Đã nạp vào dữ liệu thị giác đính kèm bên dưới.`
+    : '';
+
   blocks.push(`📌 [NODE HIỆN TẠI (ĐANG HỎI ĐÁP)]: "${target.label || 'Chính nó'}"
-${selfText || '*(Node này chưa có ghi chú văn bản riêng, trọng tâm kiến thức chi tiết nằm tại các node con gần nhất bên dưới)*'}`);
+${selfText || '*(Node này chưa có ghi chú văn bản riêng, trọng tâm kiến thức chi tiết nằm tại các node con gần nhất bên dưới)*'}${selfImgNotice}`);
 
-  // Khối các node con gần nhất nếu có
-  const childImages = [];
+  // 4.3. Duyệt qua từng node con gần nhất để lấy văn bản và ảnh đề bài
   if (isParentNode) {
-    const childBlocks = directChildren.map((child, idx) => {
-      const childText = extractNodeText(child);
+    const childBlocks = [];
 
-      // Thu thập ảnh từ visualNotes của node con nếu có
-      if (child.visualNotes && typeof child.visualNotes === 'object' && child.visualNotes.html) {
-        const matches = child.visualNotes.html.match(/<img[^>]+src=["'](data:image\/[^"']+)["']/g);
-        if (matches) {
-          matches.slice(0, 2).forEach(tag => {
-            const src = tag.match(/src=["'](data:image\/[^"']+)["']/)?.[1];
-            if (src) {
-              const mime = src.split(';')[0].replace('data:', '') || 'image/jpeg';
-              childImages.push({ mimeType: mime, base64: src, label: child.label });
-            }
-          });
+    for (let idx = 0; idx < directChildren.length; idx++) {
+      const child = directChildren[idx];
+      const childText = extractNodeText(child);
+      const childImgSources = extractAllImageSourcesFromNode(child);
+      const childImgs = [];
+
+      for (const srcObj of childImgSources) {
+        const conv = await convertImageSourceToBase64(srcObj.src);
+        if (conv && conv.base64 && !seenBase64.has(conv.base64)) {
+          seenBase64.add(conv.base64);
+          const imgItem = {
+            mimeType: conv.mimeType,
+            base64: conv.base64,
+            nodeLabel: child.label || `Node Con ${idx + 1}`,
+            nodeId: child.id,
+            isChild: true
+          };
+          childImgs.push(imgItem);
+          allVisualImages.push(imgItem);
         }
       }
 
-      return `🌿 [NODE CON GẦN NHẤT ${idx + 1}: "${child.label || 'Nhánh con'}"]
-${childText || '*(Chưa có ghi chú văn bản riêng)*'}`;
-    });
+      let childDesc = childText;
+      if (childImgs.length > 0) {
+        const imgNotice = `🖼️ [DỮ LIỆU ĐỀ BÀI / HÌNH ẢNH CỦA "${child.label}"]:
+Node con này có ${childImgs.length} hình ảnh chứa ĐỀ BÀI, CÂU HỎI hoặc BÀI TẬP VÍ DỤ. Toàn bộ hình ảnh này đã được nạp trực tiếp vào dữ liệu thị giác đính kèm (được gắn nhãn: "${child.label}").
+BẠN BẮT BUỘC PHẢI "NHÌN VÀ QUAN SÁT TỪNG CON CHỮ TRÊN HÌNH ẢNH NÀY" để đọc toàn bộ đề bài, phương trình, yêu cầu và số liệu của ${child.label}!`;
+        childDesc = childDesc ? `${childDesc}\n\n${imgNotice}` : imgNotice;
+      } else if (!childDesc) {
+        childDesc = '*(Node con này chưa có văn bản riêng hay hình ảnh đính kèm)*';
+      }
+
+      childBlocks.push(`🌿 [NODE CON GẦN NHẤT ${idx + 1}: "${child.label || 'Nhánh con'}"]
+${childDesc}`);
+    }
 
     blocks.push(`📂 [TOÀN BỘ NGỮ CẢNH CỦA CÁC NODE CON GẦN NHẤT THUỘC "${target.label}" (${directChildren.length} nhánh kiến thức)]:
-Dưới đây là TOÀN BỘ NGỮ CẢNH CHI TIẾT của các node con gần nhất trực thuộc node cha này. Bạn PHẢI đọc và đối chiếu toàn bộ các node con này để trả lời đầy đủ, liên hệ ví dụ thực tế và giải thích bản chất câu hỏi của sinh viên:
+Dưới đây là TOÀN BỘ NGỮ CẢNH CHI TIẾT của các node con gần nhất trực thuộc node cha này (bao gồm cả ghi chú văn bản và các đề bài dạng hình ảnh đính kèm). Bạn BẮT BUỘC PHẢI đọc cả văn bản và nhìn từng tấm ảnh đính kèm của từng node con để trả lời đầy đủ, viết lại đề bài chính xác và giải thích bản chất câu hỏi của sinh viên:
 
 ${childBlocks.join('\n\n')}`);
   }
@@ -225,7 +391,7 @@ ${childBlocks.join('\n\n')}`);
     directChildren,
     breadcrumbStr: ancestry.breadcrumbStr,
     comprehensiveNotes: blocks.join('\n\n'),
-    childImages
+    allVisualImages
   };
 }
 
@@ -532,24 +698,33 @@ export async function askContextualNoteQuestion({
   fullContext = '',
   focalText = '',
   focalImages = [],
+  activeImages = [],
   userQuestion = '',
   chatHistory = []
 }) {
   const apiKey = getGeminiApiKey();
 
-  // Phân tích toàn diện phân cấp tri thức nơ-ron (chính nó, tổ tiên và toàn bộ node con gần nhất)
+  // Phân tích toàn diện phân cấp tri thức nơ-ron (chính nó, tổ tiên, toàn bộ node con gần nhất và ảnh đính kèm)
   const nodes = Array.isArray(allNodes) ? allNodes : [];
   const node = targetNode || { label: 'Ghi chú học tập' };
-  const hierarchy = collectNodeHierarchyContext(nodes, node, fullContext);
+  const hierarchy = await collectNodeHierarchyContext(nodes, node, fullContext, activeImages);
   const targetLabel = node.label || 'Khái niệm';
   const breadcrumb = hierarchy.breadcrumbStr || targetLabel;
 
-  // Gộp thêm ảnh từ visualNotes của node con nếu phía gọi chưa có đủ ảnh
-  const effectiveFocalImages = [...focalImages];
-  if (effectiveFocalImages.length < 3 && hierarchy.childImages && hierarchy.childImages.length > 0) {
-    for (const cImg of hierarchy.childImages) {
-      if (effectiveFocalImages.length >= 3) break;
-      effectiveFocalImages.push(cImg);
+  // Gộp thêm ảnh: Ưu tiên ảnh vùng khoanh (focalImages), sau đó nạp toàn bộ ảnh từ các node con và node cha
+  // Mở rộng giới hạn lên 16 ảnh để nạp đủ toàn bộ ảnh đề bài của Câu 1, Câu 2, Câu 3, Câu 4, Câu 5...
+  const MAX_AI_IMAGES = 16;
+  const effectiveFocalImages = [...(Array.isArray(focalImages) ? focalImages : [])];
+  const seenBase64 = new Set(effectiveFocalImages.map(img => img.base64 ? img.base64.slice(0, 100) : ''));
+
+  if (Array.isArray(hierarchy.allVisualImages)) {
+    for (const vImg of hierarchy.allVisualImages) {
+      if (effectiveFocalImages.length >= MAX_AI_IMAGES) break;
+      const sig = vImg.base64 ? vImg.base64.slice(0, 100) : '';
+      if (sig && !seenBase64.has(sig)) {
+        seenBase64.add(sig);
+        effectiveFocalImages.push(vImg);
+      }
     }
   }
 
@@ -568,12 +743,13 @@ export async function askContextualNoteQuestion({
   // Hướng dẫn Multimodal Vision nếu có ảnh đính kèm
   const hasImages = Array.isArray(effectiveFocalImages) && effectiveFocalImages.length > 0;
   const imageVisionGuide = hasImages ? `
-🖼️ DỮ LIỆU THỊ GIÁC TRỰC TIẾP ĐƯỢC ĐÍNH KÈM (MULTIMODAL VISION):
-- Hệ thống đã gửi kèm trực tiếp ${effectiveFocalImages.length} hình ảnh (ảnh chụp slide bài giảng, ảnh ma trận tương quan, biểu đồ đồ thị, bảng số liệu hoặc bài viết tay) từ bài ghi chú hoặc từ vùng sinh viên vừa khoanh chọn.
-- BẮT BUỘC BẠN PHẢI "NHÌN VÀ QUAN SÁT TRỰC TIẾP TỪNG PIXEL TRÊN HÌNH ẢNH":
-  * Đọc chính xác từng con số, ký hiệu ma trận hàng - cột, hệ số tương quan, phương trình toán học trên ảnh.
-  * Nếu ghi chú chỉ toàn ảnh (không có chữ gõ văn bản), bạn hoàn toàn dựa vào nội dung trong ảnh và câu hỏi của sinh viên để bóc tách và giải thích cặn kẽ, đầy đủ 100%.
-  * Không đoán mò, hãy đọc đúng con số hiển thị trên ảnh.` : '';
+🖼️ DỮ LIỆU THỊ GIÁC ĐƯỢC ĐÍNH KÈM (MULTIMODAL VISION - CÓ ${effectiveFocalImages.length} HÌNH ẢNH):
+- Hệ thống đã gửi kèm trực tiếp ${effectiveFocalImages.length} hình ảnh (bao gồm ảnh chụp đề bài câu hỏi, bài tập, slide bài giảng, ma trận số liệu, đồ thị hoặc bài viết tay) từ bài ghi chú của chính node này và các node con gần nhất.
+- BẮT BUỘC BẠN PHẢI "NHÌN VÀ QUAN SÁT TRỰC TIẾP TỪNG PIXEL TRÊN HÌNH ẢNH ĐỂ ĐỌC ĐỀ BÀI & CÂU HỎI":
+  * Mỗi hình ảnh đều được đánh số thứ tự và gắn kèm nhãn nguồn gốc cụ thể (ví dụ: [DỮ LIỆU THỊ GIÁC #1 - ĐÍNH KÈM TỪ: "Câu 1"], [DỮ LIỆU THỊ GIÁC #2 - ĐÍNH KÈM TỪ: "Câu 2"]...).
+  * NẾU MỘT NODE CON CHƯA CÓ GHI CHÚ CHỮ GÕ NHƯNG CÓ ẢNH ĐÍNH KÈM: ĐỀ BÀI CHÍNH LÀ NỘI DUNG ĐƯỢC CHỤP LẠI TRONG ẢNH!
+  * Bạn PHẢI đọc chính xác từng câu chữ, phương trình, số liệu trên ảnh để viết lại đề bài hoặc giải bài một cách đầy đủ 100%.
+  * TUYỆT ĐỐI KHÔNG trả lời rằng "chưa có ghi chú văn bản nên không thể viết lại đề bài", hãy NHÌN THẲNG VÀO CÁC TẤM ẢNH ĐƯỢC GỬI KÈM để đọc đề bài!` : '';
 
   // Chỉ dẫn ngữ cảnh Node Cha và Node Con Gần Nhất
   const parentNodeNotice = hierarchy.isParentNode ? `
@@ -581,7 +757,8 @@ export async function askContextualNoteQuestion({
 - Sinh viên đang đặt câu hỏi tại Node Cha: "${targetLabel}".
 - Danh sách các Node con gần nhất: ${hierarchy.directChildren.map((c, i) => `"${c.label}"`).join(', ')}.
 - BẮT BUỘC BẠN PHẢI ĐỌC TOÀN BỘ NGỮ CẢNH CỦA CHÍNH NODE NÀY VÀ TẤT CẢ CÁC NODE CON GẦN NHẤT DƯỚI ĐÂY:
-  * Khi câu hỏi yêu cầu giải thích, cho ví dụ minh họa thực tế, tính toán hoặc bóc tách bài toán: Hãy khai thác triệt để các ví dụ, số liệu, trường hợp điển hình, công thức và bản chất đã được ghi chép trong các node con gần nhất để làm sáng tỏ, giúp câu trả lời sinh động, bám sát đúng bài học của sinh viên.` : '';
+  * Đọc cả phần văn bản ghi chú và quan sát toàn bộ các hình ảnh đề bài đính kèm của từng node con.
+  * Khi câu hỏi yêu cầu giải thích, viết lại đề bài, cho ví dụ minh họa thực tế, tính toán hoặc bóc tách bài toán: Hãy khai thác triệt để các hình ảnh đề bài, ví dụ, số liệu, trường hợp điển hình, công thức và bản chất đã được ghi chép trong các node con gần nhất để làm sáng tỏ, giúp câu trả lời sinh động, bám sát đúng bài học của sinh viên.` : '';
 
   // Xây dựng System Prompt sư phạm cao cấp: TIÊU ĐIỂM HÓA CHUYÊN SÂU
   const systemInstruction = `Bạn là Trợ lý Học tập & Cố vấn Nghiên cứu AI Chuyên Sâu cấp Đại học.
@@ -605,12 +782,13 @@ ${effectiveFullNotes ? effectiveFullNotes.slice(0, 16000) : '(Ghi chú dạng th
    - TUYỆT ĐỐI KHÔNG mở đầu bằng việc giới thiệu, tóm tắt cả chương hay bài học đang làm gì.
    - TUYỆT ĐỐI KHÔNG nói lan man những điều chung chung ngoài vùng chọn.
    - Trả lời TRỰC DIỆN, BÓC TÁCH TỪNG PHẦN TỬ:
+     * Nếu là Đề bài dạng ảnh: Đọc rõ từng câu hỏi, dữ kiện và phương trình trên ảnh của từng node con tương ứng.
      * Nếu là Ma trận (ví dụ: Ma trận tương quan): Giải thích ngay ý nghĩa cụ thể của từng phần tử hàng-cột $r_{ij}$, đường chéo chính (tự tương quan = 1), các hệ số tương quan giữa từng cặp biến (âm/dương, mạnh/yếu), và biến nào tương quan mạnh nhất đến biến phụ thuộc.
      * Nếu là Công thức: Phân tích trực tiếp từng biến số, tham số, dấu phép toán và ý nghĩa thực tiễn.
      * Nếu là Bảng số liệu hoặc Biểu đồ trên ảnh: Đọc và nhận xét trực tiếp các giá trị đột biến, xu hướng hoặc tương quan cụ thể.
 2. SỬ DỤNG NGỮ CẢNH CỦA CHÍNH NODE VÀ CÁC NODE CON GẦN NHẤT MỘT CÁCH THẨM THẤU:
    - Dùng tài liệu toàn bài và các node con gần nhất để biết các ký hiệu trong vùng chọn đại diện cho đại lượng thực tế nào trong bài tập (ví dụ: x1 là gì, x2 là gì, y là gì...). Hãy gọi đúng tên biến thực tế đó khi giải thích từng phần tử trong vùng chọn!
-   - Nếu sinh viên hỏi về ví dụ thực tế hoặc bài toán minh họa: BẮT BUỘC ưu tiên sử dụng ví dụ, dữ liệu và trường hợp đã được ghi chép trong các node con gần nhất của node này.
+   - Nếu sinh viên hỏi về đề bài, ví dụ thực tế hoặc bài toán minh họa: BẮT BUỘC ưu tiên sử dụng đề bài trong các hình ảnh và nội dung đã được ghi chép trong các node con gần nhất của node này.
 3. TRÌNH BÀY GỌN GÀNG, SƯ PHẠM, ĐẦY ĐỦ Ý & TRỌN VẸN (KHÔNG NGẮT GIỮA CHỪNG):
    - Trả lời TRỌN VẸN câu kết luận, tuyệt đối KHÔNG dừng lửng lơ hay ngắt câu giữa chừng.
    - Về Ma trận: Hãy biểu diễn rõ ràng từng hàng và từng cột (hoặc Bảng Markdown, hoặc cú pháp LaTeX đầy đủ chuẩn xác \\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix} với dấu xuống dòng \\\\ rõ ràng giữa các hàng).
@@ -626,10 +804,14 @@ ${effectiveFullNotes ? effectiveFullNotes.slice(0, 16000) : '(Ghi chú dạng th
   // Chuẩn bị parts cho turn đầu tiên (bao gồm Text Prompt + Multimodal Image Parts)
   const initialParts = [{ text: initialUserPrompt }];
   if (hasImages) {
-    effectiveFocalImages.forEach(img => {
+    effectiveFocalImages.forEach((img, idx) => {
       if (img && img.base64) {
         const cleanBase64 = img.base64.replace(/^data:[^;]+;base64,/, '').trim();
         if (cleanBase64) {
+          const imgLabel = img.nodeLabel || img.label || `Ảnh ${idx + 1}`;
+          initialParts.push({
+            text: `🖼️ [DỮ LIỆU THỊ GIÁC #${idx + 1} - ĐÍNH KÈM TỪ: "${imgLabel}"]:`
+          });
           initialParts.push({
             inlineData: {
               mimeType: img.mimeType || 'image/jpeg',
