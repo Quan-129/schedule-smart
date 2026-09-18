@@ -4,6 +4,28 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-18 12:50] - Khắc Phục Lỗi Cố Định Icon Khi Cuộn: Đè Lên Ghi Chú & Cuộn Mượt Mà Theo Nội Dung (Roll Sync) 📜✨📌
+
+- **🎯 Yêu cầu & Vấn đề từ người dùng**:
+  - Người dùng phản hồi: *"nó phải đè lên ở ghi chú chứ nó đang bị cô định dù roll kìa"*.
+  - Phân tích nguyên nhân:
+    1. Trước đó, layer `.neural-ai-pins-layer` được đặt ở khung cha `#neural-notepad-body-container` (khung tĩnh có `overflow: hidden;` không bao giờ cuộn).
+    2. Khi người dùng cuộn (roll) nội dung bài học trong `#neural-notepad-preview-content` hoặc `#visual-note-canvas-wrapper`, nội dung bài trôi lên trôi xuống nhưng icon pin lại đứng im cố định trên màn hình, bị trật khỏi vị trí công thức hay đoạn văn bản được ghim.
+    3. Tọa độ khởi tạo của pin chưa cộng `scrollTop` và `scrollLeft` của container nội dung cuộn.
+- **🛠 Triển khai kỹ thuật ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Định Tuyến DOM Vào Trực Tiếp Container Cuộn ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Loại bỏ layer tĩnh ở khung cha.
+     - Nhúng `#neural-ai-preview-pins-layer` trực tiếp vào bên trong `.neural-notepad-rendered-content` (nội dung Preview) và `#neural-ai-visual-pins-layer` vào `#visual-note-canvas-wrapper` (Visual Canvas).
+     - Thiết lập `.neural-notepad-rendered-content` có `position: relative;` trong [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css) để các icon pin có `position: absolute;` neo chặt theo ngữ cảnh cuộn của bài ghi chú.
+  2. **Tự Động Cuộn Đồng Bộ Theo Từng Pixel (Scroll/Roll Sync)**:
+     - Khi người dùng lăn chuột cuộn (roll) bài học, trình duyệt tự động di chuyển các icon pin cùng với các đoạn văn bản, bảng biểu, ma trận và công thức toán học với tỷ lệ 1:1, không còn hiện tượng đứng im trơ trọi.
+  3. **Tính Toán Tọa Độ Cuộn Chính Xác ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Thuật toán `handlePinSession` tự động tính `initY = boundingBox.top - scrollRect.top + scrollTop` và `initX = boundingBox.right - scrollRect.left + scrollLeft + 8`, giúp pin đặt chính xác ngay cạnh vùng vừa khoanh dù đang cuộn ở bất kỳ độ sâu nào của bài.
+     - Thuật toán kéo thả (Draggable) tính toán giới hạn trong toàn bộ chiều dài nội dung `scrollContainer.scrollHeight`, cho phép cầm kéo pin đến bất kỳ vị trí nào trong toàn bài.
+  4. **Bảo Toàn Layer & Nâng Cấp Service Worker**:
+     - `updateLivePreview` và `switchViewTab` tự động cập nhật nội dung và gọi `renderAiChatPins()` mà không làm mất layer pin.
+     - Tăng cache Service Worker lên **`smart-schedule-modular-v159`**.
+
 ## 📅 [2026-09-18 11:15] - Tích Hợp Lưu & Ghim Phiên Chat AI Nổi (Floating Draggable Pins) Trên Bài Ghi Chú 📌✨💬
 
 - **🎯 Yêu cầu & Vấn đề từ người dùng**:

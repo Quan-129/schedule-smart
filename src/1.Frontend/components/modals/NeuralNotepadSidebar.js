@@ -269,9 +269,6 @@ function renderNotepadTemplate(node) {
 
     <!-- Body Container: 3 Panes (Edit, Preview, Visual) -->
     <div class="neural-notepad-body" id="neural-notepad-body-container" data-view-mode="${defaultTab}">
-      <!-- Layer Ghim Phiên Chat AI Nổi (Chat Pins) -->
-      <div class="neural-ai-pins-layer" id="neural-ai-pins-layer"></div>
-
       <!-- 1. Textarea Soạn thảo Markdown -->
       <div class="neural-np-pane ${defaultTab === 'edit' ? '' : 'hidden'}" id="neural-np-edit-pane">
         <textarea 
@@ -284,7 +281,10 @@ function renderNotepadTemplate(node) {
       <!-- 2. Bảng Notepad Đã Gen Ra (Rich Preview) -->
       <div class="neural-np-pane ${defaultTab === 'preview' ? '' : 'hidden'}" id="neural-np-preview-pane">
         <div class="neural-notepad-rendered-content" id="neural-notepad-preview-content">
-          ${renderedHtml}
+          <div class="neural-rendered-markdown-body" id="neural-rendered-markdown-body">
+            ${renderedHtml}
+          </div>
+          <div class="neural-ai-pins-layer" id="neural-ai-preview-pins-layer"></div>
         </div>
         <button type="button" class="btn-quick-switch-to-edit" id="btn-quick-switch-to-edit" title="Chuyển sang soạn thảo">
           <i class="fa-solid fa-pen-to-square"></i> Sửa nội dung
@@ -351,6 +351,7 @@ function renderNotepadTemplate(node) {
           >${initialVisualHtml}</div>
 
           <div class="visual-images-layer" id="visual-images-layer"></div>
+          <div class="neural-ai-pins-layer" id="neural-ai-visual-pins-layer"></div>
         </div>
       </div>
 
@@ -802,12 +803,14 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     });
 
     if (tab === 'preview') {
-      previewContent.innerHTML = renderMarkdownToHtml(textarea.value);
+      const mdBody = previewContent.querySelector('#neural-rendered-markdown-body') || previewContent;
+      mdBody.innerHTML = renderMarkdownToHtml(textarea.value);
       if (mdToolbar) mdToolbar.style.display = 'flex';
       editPane.classList.add('hidden');
       if (visualPane) visualPane.classList.add('hidden');
       if (quizPane) quizPane.classList.add('hidden');
       previewPane.classList.remove('hidden');
+      renderAiChatPins();
     } else if (tab === 'visual') {
       if (mdToolbar) mdToolbar.style.display = 'none';
       editPane.classList.add('hidden');
@@ -816,6 +819,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       if (visualPane) visualPane.classList.remove('hidden');
       if (visualEditor) visualEditor.focus();
       setTimeout(updateCanvasWrapperHeight, 60);
+      renderAiChatPins();
     } else if (tab === 'quiz') {
       if (mdToolbar) mdToolbar.style.display = 'none';
       editPane.classList.add('hidden');
@@ -848,7 +852,9 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
   const updateLivePreview = () => {
     if (previewContent) {
-      previewContent.innerHTML = renderMarkdownToHtml(textarea.value);
+      const mdBody = previewContent.querySelector('#neural-rendered-markdown-body') || previewContent;
+      mdBody.innerHTML = renderMarkdownToHtml(textarea.value);
+      renderAiChatPins();
     }
   };
 
@@ -2759,8 +2765,12 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
         node.aiChatPins = [];
       }
 
-      const bodyContainer = sidebar.querySelector('#neural-notepad-body-container');
-      const bodyRect = bodyContainer ? bodyContainer.getBoundingClientRect() : { left: 0, top: 0, width: 600, height: 600 };
+      // Xác định container cuộn thực tế của nội dung bài ghi chú (Preview hoặc Visual)
+      const isVisualMode = visualPane && !visualPane.classList.contains('hidden');
+      const activeScrollContainer = isVisualMode ? canvasWrapper : previewContent;
+      const scrollRect = activeScrollContainer ? activeScrollContainer.getBoundingClientRect() : { left: 0, top: 0, width: 600, height: 600 };
+      const scrollLeft = activeScrollContainer ? (activeScrollContainer.scrollLeft || 0) : 0;
+      const scrollTop = activeScrollContainer ? (activeScrollContainer.scrollTop || 0) : 0;
 
       let targetPin = node.aiChatPins.find(p => p.id === currentPinId);
 
@@ -2773,14 +2783,19 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       } else {
         currentPinId = 'aipin_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
         let initX = 20;
-        let initY = 30;
+        let initY = scrollTop + 30;
 
-        if (boundingBox && bodyContainer) {
-          initX = Math.max(12, Math.min(bodyContainer.clientWidth - 56, boundingBox.right - bodyRect.left + 10));
-          initY = Math.max(12, Math.min(bodyContainer.clientHeight - 56, boundingBox.top - bodyRect.top));
-        } else if (bodyContainer) {
-          initX = Math.max(12, bodyContainer.clientWidth - 56);
-          initY = 30;
+        if (boundingBox && activeScrollContainer) {
+          // Tính toán vị trí chính xác trong nội dung cuộn (bao gồm độ cuộn scrollTop / scrollLeft)
+          initX = boundingBox.right - scrollRect.left + scrollLeft + 8;
+          initY = boundingBox.top - scrollRect.top + scrollTop;
+
+          if (initX + 44 > activeScrollContainer.clientWidth) {
+            initX = Math.max(8, boundingBox.left - scrollRect.left + scrollLeft - 44);
+          }
+        } else if (activeScrollContainer) {
+          initX = Math.max(8, activeScrollContainer.clientWidth - 56);
+          initY = scrollTop + 30;
         }
 
         targetPin = {
@@ -2913,136 +2928,149 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   };
 
   /**
-   * Render các biểu tượng Ghim Phiên Chat AI (Floating Draggable Pins) trực tiếp lên bài ghi chú
+   * Render các biểu tượng Ghim Phiên Chat AI (Floating Draggable Pins) trực tiếp lên nội dung bài ghi chú
+   * Các icon được nhúng trực tiếp vào container cuộn (previewContent & canvasWrapper) để cuộn đồng bộ mượt mà khi lăn chuột (roll)
    */
   const renderAiChatPins = () => {
-    const pinsLayer = sidebar.querySelector('#neural-ai-pins-layer');
-    if (!pinsLayer) return;
-    pinsLayer.innerHTML = '';
-
     const pins = Array.isArray(node.aiChatPins) ? node.aiChatPins : [];
+    const layers = sidebar.querySelectorAll('.neural-ai-pins-layer');
+    if (layers.length === 0) return;
 
-    pins.forEach(pin => {
-      const pinEl = document.createElement('div');
-      pinEl.className = 'neural-ai-chat-pin';
-      pinEl.dataset.pinId = pin.id;
-      pinEl.style.left = `${pin.x || 20}px`;
-      pinEl.style.top = `${pin.y || 20}px`;
+    layers.forEach(layer => {
+      layer.innerHTML = '';
+      const scroller = layer.closest('#neural-notepad-preview-content, #visual-note-canvas-wrapper') || layer.parentElement;
 
-      const qCount = pin.chatHistory ? Math.max(1, Math.floor(pin.chatHistory.length / 2)) : 1;
-      pinEl.title = `💬 ${pin.title || 'Phiên hỏi đáp AI'}\n• Nhấp để mở lại phiên chat\n• Cầm kéo để di chuyển vị trí`;
+      pins.forEach(pin => {
+        const pinEl = document.createElement('div');
+        pinEl.className = 'neural-ai-chat-pin';
+        pinEl.dataset.pinId = pin.id;
+        pinEl.style.left = `${pin.x || 20}px`;
+        pinEl.style.top = `${pin.y || 20}px`;
 
-      pinEl.innerHTML = `
-        <div class="neural-ai-chat-pin-inner">
-          <i class="fa-solid fa-wand-magic-sparkles"></i>
-        </div>
-        <span class="neural-ai-chat-pin-badge">${qCount}</span>
-        <button type="button" class="neural-ai-chat-pin-del" title="Gỡ ghim phiên chat này">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      `;
+        const qCount = pin.chatHistory ? Math.max(1, Math.floor(pin.chatHistory.length / 2)) : 1;
+        pinEl.title = `💬 ${pin.title || 'Phiên hỏi đáp AI'}\n• Nhấp để mở lại phiên chat\n• Cầm kéo để di chuyển vị trí\n• Cuộn trang (roll) sẽ trôi theo bài`;
 
-      // Bộ xử lý Cầm kéo di chuyển (Draggable) & Click mở lại popup
-      let isPinDragging = false;
-      let hasPinMoved = false;
-      let pinStartX = 0;
-      let pinStartY = 0;
-      let pinInitialLeft = 0;
-      let pinInitialTop = 0;
+        pinEl.innerHTML = `
+          <div class="neural-ai-chat-pin-inner">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+          </div>
+          <span class="neural-ai-chat-pin-badge">${qCount}</span>
+          <button type="button" class="neural-ai-chat-pin-del" title="Gỡ ghim phiên chat này">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        `;
 
-      const onPinPointerDown = (e) => {
-        if (e.target.closest('.neural-ai-chat-pin-del')) return;
+        // Bộ xử lý Cầm kéo di chuyển (Draggable) & Click mở lại popup
+        let isPinDragging = false;
+        let hasPinMoved = false;
+        let pinStartX = 0;
+        let pinStartY = 0;
+        let pinInitialLeft = 0;
+        let pinInitialTop = 0;
 
-        isPinDragging = true;
-        hasPinMoved = false;
-        pinStartX = e.clientX;
-        pinStartY = e.clientY;
-        pinInitialLeft = pinEl.offsetLeft;
-        pinInitialTop = pinEl.offsetTop;
+        const onPinPointerDown = (e) => {
+          if (e.target.closest('.neural-ai-chat-pin-del')) return;
 
-        pinEl.classList.add('is-dragging');
-        try {
-          pinEl.setPointerCapture(e.pointerId);
-        } catch (_) {}
+          isPinDragging = true;
+          hasPinMoved = false;
+          pinStartX = e.clientX;
+          pinStartY = e.clientY;
+          pinInitialLeft = pinEl.offsetLeft;
+          pinInitialTop = pinEl.offsetTop;
 
-        window.addEventListener('pointermove', onPinPointerMove);
-        window.addEventListener('pointerup', onPinPointerUp);
-        window.addEventListener('pointercancel', onPinPointerUp);
-      };
+          pinEl.classList.add('is-dragging');
+          try {
+            pinEl.setPointerCapture(e.pointerId);
+          } catch (_) {}
 
-      const onPinPointerMove = (e) => {
-        if (!isPinDragging) return;
-        const dx = e.clientX - pinStartX;
-        const dy = e.clientY - pinStartY;
+          window.addEventListener('pointermove', onPinPointerMove);
+          window.addEventListener('pointerup', onPinPointerUp);
+          window.addEventListener('pointercancel', onPinPointerUp);
+        };
 
-        if (Math.hypot(dx, dy) > 4) {
-          hasPinMoved = true;
-        }
+        const onPinPointerMove = (e) => {
+          if (!isPinDragging) return;
+          const dx = e.clientX - pinStartX;
+          const dy = e.clientY - pinStartY;
 
-        const bodyContainer = sidebar.querySelector('#neural-notepad-body-container');
-        if (!bodyContainer) return;
-
-        const maxX = Math.max(4, bodyContainer.clientWidth - pinEl.offsetWidth - 4);
-        const maxY = Math.max(4, bodyContainer.clientHeight - pinEl.offsetHeight - 4);
-
-        let newLeft = Math.max(4, Math.min(pinInitialLeft + dx, maxX));
-        let newTop = Math.max(4, Math.min(pinInitialTop + dy, maxY));
-
-        pinEl.style.left = `${Math.round(newLeft)}px`;
-        pinEl.style.top = `${Math.round(newTop)}px`;
-      };
-
-      const onPinPointerUp = (e) => {
-        if (!isPinDragging) return;
-        isPinDragging = false;
-        pinEl.classList.remove('is-dragging');
-        try {
-          pinEl.releasePointerCapture(e.pointerId);
-        } catch (_) {}
-
-        window.removeEventListener('pointermove', onPinPointerMove);
-        window.removeEventListener('pointerup', onPinPointerUp);
-        window.removeEventListener('pointercancel', onPinPointerUp);
-
-        if (hasPinMoved) {
-          pin.x = Math.round(pinEl.offsetLeft);
-          pin.y = Math.round(pinEl.offsetTop);
-          saveAllNotes();
-        } else {
-          // Người dùng chỉ click nhẹ -> Mở lại popup phiên chat
-          openInSituAiPopup(
-            pinEl.getBoundingClientRect(),
-            pin.focalText || '',
-            pin.focalImages || [],
-            pin
-          );
-        }
-      };
-
-      pinEl.addEventListener('pointerdown', onPinPointerDown);
-
-      // Nút xóa ghim
-      const delBtn = pinEl.querySelector('.neural-ai-chat-pin-del');
-      if (delBtn) {
-        delBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          e.preventDefault();
-          node.aiChatPins = (node.aiChatPins || []).filter(p => p.id !== pin.id);
-          saveAllNotes();
-          pinEl.remove();
-          showToast('Đã gỡ ghim phiên chat!');
-          if (activeFloatingPopup && currentPinId === pin.id) {
-            currentPinId = null;
-            const bPin = activeFloatingPopup.querySelector('#btn-pin-floating-popup');
-            if (bPin) {
-              bPin.classList.remove('is-pinned');
-              bPin.title = 'Ghim / Lưu phiên chat này vào bài ghi chú';
-            }
+          if (Math.hypot(dx, dy) > 4) {
+            hasPinMoved = true;
           }
-        });
-      }
 
-      pinsLayer.appendChild(pinEl);
+          if (!scroller) return;
+
+          const maxW = Math.max(scroller.clientWidth - 46, (scroller.scrollWidth || 0) - 46);
+          const maxH = Math.max(scroller.clientHeight - 46, (scroller.scrollHeight || 0) - 46);
+
+          let newLeft = Math.max(4, Math.min(pinInitialLeft + dx, maxW));
+          let newTop = Math.max(4, Math.min(pinInitialTop + dy, maxH));
+
+          pinEl.style.left = `${Math.round(newLeft)}px`;
+          pinEl.style.top = `${Math.round(newTop)}px`;
+        };
+
+        const onPinPointerUp = (e) => {
+          if (!isPinDragging) return;
+          isPinDragging = false;
+          pinEl.classList.remove('is-dragging');
+          try {
+            pinEl.releasePointerCapture(e.pointerId);
+          } catch (_) {}
+
+          window.removeEventListener('pointermove', onPinPointerMove);
+          window.removeEventListener('pointerup', onPinPointerUp);
+          window.removeEventListener('pointercancel', onPinPointerUp);
+
+          if (hasPinMoved) {
+            pin.x = Math.round(pinEl.offsetLeft);
+            pin.y = Math.round(pinEl.offsetTop);
+            saveAllNotes();
+            // Cập nhật vị trí sang các layer song song nếu có
+            layers.forEach(otherLayer => {
+              if (otherLayer !== layer) {
+                const otherPin = otherLayer.querySelector(`[data-pin-id="${pin.id}"]`);
+                if (otherPin) {
+                  otherPin.style.left = `${pin.x}px`;
+                  otherPin.style.top = `${pin.y}px`;
+                }
+              }
+            });
+          } else {
+            // Người dùng chỉ click nhẹ -> Mở lại popup phiên chat
+            openInSituAiPopup(
+              pinEl.getBoundingClientRect(),
+              pin.focalText || '',
+              pin.focalImages || [],
+              pin
+            );
+          }
+        };
+
+        pinEl.addEventListener('pointerdown', onPinPointerDown);
+
+        // Nút xóa ghim
+        const delBtn = pinEl.querySelector('.neural-ai-chat-pin-del');
+        if (delBtn) {
+          delBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            node.aiChatPins = (node.aiChatPins || []).filter(p => p.id !== pin.id);
+            saveAllNotes();
+            renderAiChatPins();
+            showToast('Đã gỡ ghim phiên chat!');
+            if (activeFloatingPopup && currentPinId === pin.id) {
+              currentPinId = null;
+              const bPin = activeFloatingPopup.querySelector('#btn-pin-floating-popup');
+              if (bPin) {
+                bPin.classList.remove('is-pinned');
+                bPin.title = 'Ghim / Lưu phiên chat này vào bài ghi chú';
+              }
+            }
+          });
+        }
+
+        layer.appendChild(pinEl);
+      });
     });
   };
 

@@ -1154,6 +1154,7 @@ body.neural-resizing-active {
   line-height: 1.7;
   box-sizing: border-box;
   background: radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.03) 0%, transparent 60%);
+  position: relative;
 }
 
 .neural-notepad-rendered-content p {
@@ -2661,13 +2662,17 @@ body.neural-resizing-active {
   filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.6));
 }
 
-/* Layer chứa các icon pin trong notepad body */
+/* Layer chứa các icon pin trong nội dung cuộn của bài ghi chú (Tự động cuộn theo bài khi roll) */
 .neural-ai-pins-layer {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
   pointer-events: none;
-  z-index: 85;
-  overflow: hidden;
+  z-index: 45;
+  overflow: visible;
 }
 
 /* Icon nhỏ ghim phiên chat AI trên bài ghi chú */
@@ -2676,9 +2681,9 @@ body.neural-resizing-active {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.92) 0%, rgba(99, 102, 241, 0.9) 50%, rgba(56, 189, 248, 0.92) 100%);
-  border: 1.5px solid rgba(255, 255, 255, 0.65);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5), 0 0 14px rgba(168, 85, 247, 0.5);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.95) 0%, rgba(99, 102, 241, 0.92) 50%, rgba(56, 189, 248, 0.95) 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5), 0 0 14px rgba(168, 85, 247, 0.6);
   cursor: grab;
   pointer-events: auto;
   user-select: none;
@@ -2688,6 +2693,7 @@ body.neural-resizing-active {
   justify-content: center;
   transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease;
   animation: ai-pin-pop-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 50;
 }
 
 @keyframes ai-pin-pop-in {
