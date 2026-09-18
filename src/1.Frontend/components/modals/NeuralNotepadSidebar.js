@@ -385,6 +385,9 @@ function renderNotepadTemplate(node) {
           </div>
         </div>
         <div class="neural-ai-drawer-actions">
+          <button type="button" class="neural-ai-drawer-btn" id="btn-zoom-ai-drawer" title="Cỡ chữ (Ctrl + để phóng to, Ctrl - để thu nhỏ, Ctrl 0 để đặt lại)">
+            <i class="fa-solid fa-text-height"></i>
+          </button>
           <button type="button" class="neural-ai-drawer-btn" id="btn-minimize-ai-drawer" title="Thu nhỏ / Mở rộng">
             <i class="fa-solid fa-minus"></i>
           </button>
@@ -1718,6 +1721,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   const aiDrawer = sidebar.querySelector('#neural-ai-copilot-drawer');
   const btnCloseAiDrawer = sidebar.querySelector('#btn-close-ai-drawer');
   const btnMinimizeAiDrawer = sidebar.querySelector('#btn-minimize-ai-drawer');
+  const btnZoomAiDrawer = sidebar.querySelector('#btn-zoom-ai-drawer');
   const btnClearFocal = sidebar.querySelector('#btn-clear-focal');
   const focalQuoteEl = sidebar.querySelector('#neural-ai-focal-quote');
   const aiChatBody = sidebar.querySelector('#neural-ai-chat-body');
@@ -1726,6 +1730,162 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   const quickChips = sidebar.querySelectorAll('.neural-ai-quick-chip');
   const btnToggleAiCopilot = sidebar.querySelector('#btn-toggle-ai-copilot');
   const drawerHeader = sidebar.querySelector('#neural-ai-drawer-header');
+
+  // ========================================================================
+  // 12.1. AI CHAT TEXT ZOOM CONTROLLER (Ctrl + / Ctrl - / Ctrl 0 & Ctrl+Wheel)
+  // ========================================================================
+  const AI_CHAT_ZOOM_STORAGE_KEY = 'smart_schedule_ai_chat_zoom';
+  let activeHoveredAiChat = null;
+
+  const getStoredAiChatZoom = () => {
+    try {
+      const val = parseFloat(localStorage.getItem(AI_CHAT_ZOOM_STORAGE_KEY));
+      if (!isNaN(val) && val >= 0.7 && val <= 2.2) {
+        return val;
+      }
+    } catch (_) {}
+    return 1.0;
+  };
+
+  const setStoredAiChatZoom = (zoom) => {
+    try {
+      localStorage.setItem(AI_CHAT_ZOOM_STORAGE_KEY, zoom.toFixed(2));
+    } catch (_) {}
+  };
+
+  const showAiChatZoomBadge = (chatEl, zoom) => {
+    if (!chatEl) return;
+    let badge = chatEl.querySelector('.neural-ai-zoom-badge');
+    if (!badge) {
+      badge = document.createElement('div');
+      badge.className = 'neural-ai-zoom-badge';
+      chatEl.appendChild(badge);
+    }
+    const pct = Math.round(zoom * 100);
+    badge.innerHTML = `<i class="fa-solid fa-magnifying-glass"></i> Cỡ chữ: <strong>${pct}%</strong>`;
+    badge.classList.add('is-visible');
+
+    if (chatEl._zoomBadgeTimer) clearTimeout(chatEl._zoomBadgeTimer);
+    chatEl._zoomBadgeTimer = setTimeout(() => {
+      badge.classList.remove('is-visible');
+    }, 1200);
+  };
+
+  const applyAiChatZoom = (chatEl, newZoom, showBadge = true) => {
+    if (!chatEl) return;
+    const clamped = Math.min(2.2, Math.max(0.7, Math.round(newZoom * 100) / 100));
+    chatEl.style.setProperty('--ai-chat-zoom', clamped);
+    setStoredAiChatZoom(clamped);
+    if (showBadge) {
+      showAiChatZoomBadge(chatEl, clamped);
+    }
+  };
+
+  const getActiveAiChatContainer = (eTarget) => {
+    const activeEl = document.activeElement;
+    let chat = (eTarget && eTarget.closest) ? eTarget.closest('.neural-ai-floating-popup, #neural-ai-copilot-drawer') : null;
+    if (!chat && activeEl && activeEl.closest) {
+      chat = activeEl.closest('.neural-ai-floating-popup, #neural-ai-copilot-drawer');
+    }
+    if (!chat && activeHoveredAiChat && document.body.contains(activeHoveredAiChat)) {
+      chat = activeHoveredAiChat;
+    }
+    if (!chat) {
+      const floating = document.querySelector('.neural-ai-floating-popup');
+      if (floating) chat = floating;
+    }
+    if (!chat) {
+      const drawer = document.querySelector('#neural-ai-copilot-drawer.active');
+      if (drawer) chat = drawer;
+    }
+    return chat;
+  };
+
+  const handleAiChatZoomKeydown = (e) => {
+    if (!(e.ctrlKey || e.metaKey)) return;
+
+    const isZoomIn = e.key === '+' || e.key === '=' || e.code === 'Equal' || e.code === 'NumpadAdd';
+    const isZoomOut = e.key === '-' || e.key === '_' || e.code === 'Minus' || e.code === 'NumpadSubtract';
+    const isZoomReset = e.key === '0' || e.code === 'Digit0' || e.code === 'Numpad0';
+
+    if (!isZoomIn && !isZoomOut && !isZoomReset) return;
+
+    const chatContainer = getActiveAiChatContainer(e.target);
+    if (!chatContainer) return;
+
+    // Ngăn chặn trình duyệt zoom toàn bộ trang web
+    e.preventDefault();
+    e.stopPropagation();
+
+    const currentZoom = parseFloat(chatContainer.style.getPropertyValue('--ai-chat-zoom')) || getStoredAiChatZoom();
+    let nextZoom = currentZoom;
+
+    if (isZoomIn) {
+      nextZoom = Math.min(2.2, Math.round((currentZoom + 0.1) * 10) / 10);
+    } else if (isZoomOut) {
+      nextZoom = Math.max(0.7, Math.round((currentZoom - 0.1) * 10) / 10);
+    } else if (isZoomReset) {
+      nextZoom = 1.0;
+    }
+
+    applyAiChatZoom(chatContainer, nextZoom, true);
+  };
+
+  const attachAiChatInteractions = (chatContainer, zoomBtn) => {
+    if (!chatContainer) return;
+
+    // Áp dụng cỡ chữ đã lưu từ bộ nhớ
+    const initialZoom = getStoredAiChatZoom();
+    chatContainer.style.setProperty('--ai-chat-zoom', initialZoom);
+
+    // Theo dõi hover để xác định khung chat đang trỏ chuột
+    if (!chatContainer._hasHoverTracker) {
+      chatContainer._hasHoverTracker = true;
+      chatContainer.addEventListener('pointerenter', () => {
+        activeHoveredAiChat = chatContainer;
+      });
+      chatContainer.addEventListener('pointerleave', () => {
+        if (activeHoveredAiChat === chatContainer) {
+          activeHoveredAiChat = null;
+        }
+      });
+    }
+
+    // Hỗ trợ Ctrl + lăn chuột để phóng to/thu nhỏ tức thì
+    if (!chatContainer._hasWheelZoomAttached) {
+      chatContainer._hasWheelZoomAttached = true;
+      chatContainer.addEventListener('wheel', (e) => {
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          const currentZoom = parseFloat(chatContainer.style.getPropertyValue('--ai-chat-zoom')) || getStoredAiChatZoom();
+          const delta = e.deltaY < 0 ? 0.08 : -0.08;
+          const nextZoom = Math.min(2.2, Math.max(0.7, Math.round((currentZoom + delta) * 100) / 100));
+          applyAiChatZoom(chatContainer, nextZoom, true);
+        }
+      }, { passive: false });
+    }
+
+    // Nút chuyển đổi nhanh cỡ chữ trên header (Click: 100% -> 115% -> 130% -> 150% -> 100%)
+    if (zoomBtn) {
+      zoomBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const currentZoom = parseFloat(chatContainer.style.getPropertyValue('--ai-chat-zoom')) || getStoredAiChatZoom();
+        let nextZoom = 1.0;
+        if (currentZoom < 1.1) nextZoom = 1.15;
+        else if (currentZoom < 1.25) nextZoom = 1.3;
+        else if (currentZoom < 1.45) nextZoom = 1.5;
+        else nextZoom = 1.0;
+        applyAiChatZoom(chatContainer, nextZoom, true);
+      });
+    }
+  };
+
+  // Khởi tạo tương tác cỡ chữ cho AI Copilot Drawer
+  attachAiChatInteractions(aiDrawer, btnZoomAiDrawer);
+
+  // Đăng ký phím tắt toàn cục bắt ở capture phase
+  window.addEventListener('keydown', handleAiChatZoomKeydown, { capture: true });
 
   // Khởi tạo Floating Selection Pill gắn vào document.body để không bao giờ bị cắt xén (overflow clip)
   const selectionPill = document.createElement('button');
@@ -2213,6 +2373,9 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
   const closeFloatingPopup = () => {
     if (activeFloatingPopup && activeFloatingPopup.parentNode) {
+      if (activeHoveredAiChat === activeFloatingPopup) {
+        activeHoveredAiChat = null;
+      }
       if (typeof activeFloatingPopup._cleanupHandlers === 'function') {
         activeFloatingPopup._cleanupHandlers();
       }
@@ -2487,6 +2650,9 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
           </div>
         </div>
         <div class="neural-ai-drawer-actions">
+          <button type="button" class="neural-ai-drawer-btn" id="btn-zoom-floating-popup" title="Cỡ chữ (Ctrl + để phóng to, Ctrl - để thu nhỏ, Ctrl 0 để đặt lại)">
+            <i class="fa-solid fa-text-height"></i>
+          </button>
           <button type="button" class="neural-ai-drawer-btn ${pinBtnClass}" id="btn-pin-floating-popup" title="${pinBtnTitle}">
             <i class="fa-solid fa-thumbtack"></i>
           </button>
@@ -2717,6 +2883,9 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
     // Đăng ký dọn dẹp trình lắng nghe sự kiện toàn cục khi popup đóng
     popup._cleanupHandlers = () => {
+      if (activeHoveredAiChat === popup) {
+        activeHoveredAiChat = null;
+      }
       window.removeEventListener('pointermove', onHeaderPointerMove);
       window.removeEventListener('pointerup', onHeaderPointerUp);
       window.removeEventListener('pointercancel', onHeaderPointerUp);
@@ -2733,7 +2902,11 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     const sendBtn = popup.querySelector('#btn-floating-send');
     const chips = popup.querySelectorAll('.neural-ai-quick-chip');
     const btnPin = popup.querySelector('#btn-pin-floating-popup');
+    const btnZoomPopup = popup.querySelector('#btn-zoom-floating-popup');
     const subtitleEl = popup.querySelector('#floating-popup-subtitle');
+
+    // Kích hoạt tính năng phóng to/thu nhỏ cỡ chữ và phím tắt cho Floating Popup
+    attachAiChatInteractions(popup, btnZoomPopup);
 
     let floatingHistory = existingPin && Array.isArray(existingPin.chatHistory) ? [...existingPin.chatHistory] : [];
     let isFloatingGenerating = false;
@@ -3278,6 +3451,8 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
   // Dọn dẹp selection pill, popup và listeners khi đóng sidebar
   notepadCleanupFns.push(() => {
+    window.removeEventListener('keydown', handleAiChatZoomKeydown, { capture: true });
+    activeHoveredAiChat = null;
     sidebar.removeEventListener('wheel', handleHorizontalWheelScroll);
     closeFloatingPopup();
     document.removeEventListener('selectionchange', onSelectionEvent);

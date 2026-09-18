@@ -4,6 +4,47 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-18 13:00] - Điều Khiển Cỡ Chữ Trong Khung Chat AI: Phím Tắt Ctrl + / Ctrl - / Ctrl 0 & Ctrl+Wheel 🔍✨🔤
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng yêu cầu: *"khi đang bấm ở khung chat nào ta có thể crl + để to text trong đó"*.
+  - Mục tiêu:
+    1. Khi đang focus hoặc tương tác trong bất kỳ khung chat AI nào (In-situ Floating AI Chat Popup hoặc AI Copilot Drawer), nhấn `Ctrl +` (hoặc `Ctrl =`, Numpad `+`) sẽ phóng to kích thước văn bản bên trong khung chat đó.
+    2. Hỗ trợ phím tắt thu nhỏ `Ctrl -` và khôi phục mặc định `Ctrl 0`.
+    3. Hỗ trợ thao tác kết hợp `Ctrl + Lăn chuột (Wheel)` để tăng giảm cỡ chữ nhanh chóng và mượt mà.
+    4. **Cực kỳ quan trọng**: Phải chặn triệt để hành vi zoom toàn bộ trang web của trình duyệt (`e.preventDefault()`), chỉ cho phép nội dung văn bản bên trong khung chat đó phóng to/thu nhỏ.
+    5. Hiển thị phản hồi thị giác trực quan qua badge thông báo phần trăm cỡ chữ (`Cỡ chữ: 120%`) và nút bấm trực quan trên header.
+    6. Tự động ghi nhớ mức phóng to yêu thích vào `localStorage` cho các phiên làm việc tiếp theo.
+- **🛠 Triển khai kỹ thuật ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Hệ Thống Biến CSS Linh Hoạt & Co Giãn Đồng Bộ ([`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Định nghĩa biến CSS `--ai-chat-zoom: 1;` cho cả `.neural-ai-copilot-drawer` và `.neural-ai-floating-popup`.
+     - Cập nhật toàn bộ các phần tử nội dung bên trong chat co giãn đồng bộ theo `calc(... * var(--ai-chat-zoom, 1))`:
+       * Bong bóng tin nhắn `.neural-ai-bubble` (p, h1-h4, code, pre, ul, ol, li).
+       * Ô nhập câu hỏi `.neural-ai-input`.
+       * Thanh ngữ cảnh `.neural-ai-focal-chip`, `.neural-ai-focal-tag`.
+       * Các nút gợi ý câu hỏi nhanh `.neural-ai-quick-chip` và nút thao tác `.neural-ai-action-btn`.
+  2. **Bộ Điều Khiển Phím Tắt & Nhận Diện Ngữ Cảnh Chuẩn Xác ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Lắng nghe `keydown` trên `window` ở Capture Phase (`{ capture: true }`).
+     - Hàm `getActiveAiChatContainer(eTarget)` nhận diện chính xác khung chat mục tiêu:
+       * Ưu tiên phần tử đang focus (`document.activeElement.closest(...)`).
+       * Đến khung chat đang được con trỏ chuột hover (`activeHoveredAiChat`).
+       * Đến In-situ Floating Popup nếu đang hiển thị.
+       * Đến AI Drawer nếu đang active.
+     - Khi phát hiện `(e.ctrlKey || e.metaKey)` cùng các phím:
+       * Phóng to (`+`, `=`, `Equal`, `NumpadAdd`): Tăng `+10%` (tối đa `220%`).
+       * Thu nhỏ (`-`, `_`, `Minus`, `NumpadSubtract`): Giảm `-10%` (tối thiểu `70%`).
+       * Đặt lại (`0`, `Digit0`, `Numpad0`): Trở về `100%`.
+     - Tự động gọi `e.preventDefault()` và `e.stopPropagation()`, ngăn chặn hoàn toàn việc trình duyệt phóng to giao diện toàn trang web.
+  3. **Hỗ Trợ Ctrl + Wheel & Nút Bấm Trên Header**:
+     - Gắn sự kiện `wheel` với `e.ctrlKey`: lăn lên phóng to, lăn xuống thu nhỏ bước nhảy ~8%.
+     - Thêm nút chuyển đổi cỡ chữ `#btn-zoom-floating-popup` và `#btn-zoom-ai-drawer` trên Header với icon `<i class="fa-solid fa-text-height"></i>`, click để luân chuyển nhanh (100% -> 115% -> 130% -> 150% -> 100%).
+  4. **Badge Phản Hồi Trực Quan & Lưu Trữ Cấu Hình**:
+     - Thêm badge `.neural-ai-zoom-badge` hiển thị `Cỡ chữ: XX%` hiệu ứng neon tím mờ dần sau 1.2s.
+     - Lưu cấu hình vào `localStorage.setItem('smart_schedule_ai_chat_zoom', ...)`, ghi nhớ cỡ chữ khi mở phiên chat tiếp theo.
+     - Dọn dẹp listener triệt để trong `notepadCleanupFns` và `popup._cleanupHandlers`.
+  5. **Nâng Cấp Service Worker**:
+     - Cập nhật cache Service Worker lên **`smart-schedule-modular-v160`**.
+
 ## 📅 [2026-09-18 12:50] - Khắc Phục Lỗi Cố Định Icon Khi Cuộn: Đè Lên Ghi Chú & Cuộn Mượt Mà Theo Nội Dung (Roll Sync) 📜✨📌
 
 - **🎯 Yêu cầu & Vấn đề từ người dùng**:
