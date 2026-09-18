@@ -5,6 +5,24 @@
 
 ---
 
+## 💎 ENTRY 17: [2026-09-18] - "Phím Tắt Ctrl + Thần Thánh Cho AI Chat": Phóng To Cỡ Chữ Cực Đã Mà Không Lo Trình Duyệt Bị Vỡ Giao Diện 🔍🔤✨
+
+### 📌 Phân Loại & Tags:
+`#UXPerfection` `#AIChatZoom` `#SmartSchedule` `#ProductivityShortcuts` `#CyberpunkUI` `#Accessibility`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Phóng To Cỡ Chữ Tùy Biến Cho Từng Khung Chat**: Thường khi đọc công thức toán học phức tạp, đoạn code nhỏ xíu hay giải thích dài từ AI, người dùng rất muốn chữ to hơn. Nhưng nếu bấm `Ctrl +` ở các web khác, toàn bộ trang web (thanh menu, lịch học, nút bấm) sẽ bị phóng to toét loè và vỡ khung. Tại Smart Schedule: Phím `Ctrl +` được "cá nhân hóa" riêng cho từng khung chat AI!
+- **Chặn Hoàn Toàn Trình Duyệt Zoom Toàn Trang (`Zero Layout Shift`)**: Nhờ cơ chế Capture Phase và biến CSS động `--ai-chat-zoom`, toàn bộ trang web bên ngoài vẫn giữ nguyên 100% sắc nét, chỉ có văn bản, công thức và code trong khung chat bạn đang thao tác được phóng to từ 100% lên tới 220%!
+- **Đa Dạng Thao Tác Cực Tiện**:
+  * `Ctrl +` hoặc `Ctrl =`: Phóng to +10% mỗi lần bấm.
+  * `Ctrl -`: Thu nhỏ -10% mỗi lần bấm.
+  * `Ctrl 0`: Khôi phục chuẩn 100%.
+  * `Ctrl + Lăn chuột (Wheel)`: Giữ Ctrl và cuộn chuột mượt mà như trong phần mềm thiết kế chuyên nghiệp.
+  * Nút `T` trên Header: Chạm 1 chạm để luân chuyển các cỡ chữ nhanh (100% -> 115% -> 130% -> 150%).
+- **Badge Phản Hồi Neon Tinh Tế & Ghi Nhớ Tự Động**: Hiển thị badge neon tím `Cỡ chữ: 120%` và lưu vào `localStorage`, lần sau mở chat là chữ tự động to đúng ý bạn.
+
+---
+
 ## 💎 ENTRY 16: [2026-09-17] - "Chỉ Cần Khoanh Chuột - AI Đọc Trọn Mọi Con Số Trên Ảnh": Multimodal Vision Copilot Thấu Suốt Ma Trận, Slide & Bài Viết Tay ⛶👁️⚡
 
 ### 📌 Phân Loại & Tags:
