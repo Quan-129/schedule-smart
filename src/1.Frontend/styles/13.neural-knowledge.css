@@ -2439,6 +2439,18 @@ body.neural-resizing-active {
   padding-left: 4px;
 }
 
+.neural-ai-msg-actions.user-actions {
+  justify-content: flex-end;
+  padding-left: 0;
+  padding-right: 4px;
+  opacity: 0.65;
+  transition: opacity 0.15s ease;
+}
+
+.neural-ai-msg.user:hover .neural-ai-msg-actions.user-actions {
+  opacity: 1;
+}
+
 .neural-ai-action-btn {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -2468,6 +2480,79 @@ body.neural-resizing-active {
   background: rgba(56, 189, 248, 0.2);
   border-color: #38bdf8;
   color: #ffffff;
+}
+
+.neural-ai-action-btn.delete-btn {
+  color: #94a3b8;
+}
+
+.neural-ai-action-btn.delete-btn:hover {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+/* Nút xóa nhanh (Quick Delete) ở góc bong bóng khi rê chuột */
+.neural-ai-quick-delete {
+  position: absolute;
+  top: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: all 0.15s ease;
+  z-index: 5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.neural-ai-msg.user .neural-ai-quick-delete {
+  left: -28px;
+}
+
+.neural-ai-msg.model .neural-ai-quick-delete {
+  right: -28px;
+}
+
+.neural-ai-msg:hover .neural-ai-quick-delete {
+  opacity: 0.85;
+  transform: scale(1);
+}
+
+.neural-ai-quick-delete:hover {
+  opacity: 1 !important;
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #fca5a5;
+  transform: scale(1.1) !important;
+}
+
+/* Hiệu ứng xóa mượt mà khi người dùng xóa lời thoại */
+.neural-ai-msg.is-deleting {
+  opacity: 0 !important;
+  transform: scale(0.92) translateY(-6px) !important;
+  max-height: 0 !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Nút xóa toàn bộ cuộc trò chuyện trên thanh header */
+.neural-ai-drawer-btn.danger-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
 }
 
 /* Loading Indicator */

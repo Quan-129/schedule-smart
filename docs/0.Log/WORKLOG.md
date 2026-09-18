@@ -4,6 +4,26 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-18 19:15] - Bổ Sung Tùy Chọn Xóa Từng Lời Thoại Người Dùng & Bot (Granular Message Deletion & Chat Cleaner) 🗑️💬✨
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng yêu cầu: *"thêm tùy chọn để có thể xóa bớt thoại của mình hoặc của bot để đoạn chat gọn gàng hơn"*.
+  - Mục tiêu cốt lõi:
+    1. **Xóa linh hoạt từng lời thoại**: Cho phép người dùng dễ dàng loại bỏ các câu hỏi thừa, câu trả lời dài hoặc không cần thiết của cả hai phía (User & Bot) nhằm giữ cho khung chat luôn cô đọng, sắc bén và tập trung.
+    2. **Hai cách thức thao tác trực quan**:
+       - *Thanh hành động (Action Bar)*: Hàng nút tác vụ dưới mỗi bong bóng có nút `Xóa` (`.delete-btn` kèm icon thùng rác, hover đổi màu đỏ cảnh báo tinh tế). Phía câu hỏi của User được bổ sung thêm cả nút `Sao chép` và `Xóa`.
+       - *Nút Xóa nhanh (Quick Delete)*: Icon tròn nhỏ `×` xuất hiện ở góc trên bong bóng khi người dùng rê chuột (hover), cho phép xóa tức thì với 1 cú nhấp chuột.
+    3. **Hiệu ứng xóa mượt mà (Smooth Micro-Animation)**: Áp dụng class `.is-deleting` thu nhỏ tỷ lệ (`scale(0.92)`), trượt lên nhẹ và mờ dần trong 180ms trước khi gỡ khỏi DOM.
+    4. **Nút "Làm sạch toàn bộ cuộc trò chuyện" (Clear All)**: Đặt icon thùng rác `#btn-clear-floating-chat` trên thanh Header của Floating Popup để xóa sạch toàn bộ lịch sử trò chuyện khi muốn làm mới bài học (kèm xác nhận an toàn).
+    5. **Tự động đồng bộ hóa dữ liệu (State Synchronization)**:
+       - Tự động lọc bỏ lời thoại bị xóa khỏi mảng ngữ cảnh hội thoại `floatingHistory` / `aiChatHistory` (đảm bảo các lượt hỏi đáp tiếp theo gửi sang Gemini API không bị nhiễu bởi tin nhắn đã xóa).
+       - Tự động cập nhật ngay vào phiên chat đã ghim (`node.aiChatPins`) và lưu vào `LocalStorage`.
+       - Tự động khôi phục lại lời chào mở đầu nếu đã xóa hết tin nhắn trong khung chat.
+- **🛠 Triển khai kỹ thuật ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  - Tái cấu trúc bộ sinh bong bóng chat thành 2 helper dùng chung: `appendUserBubbleToBody` và `appendAiBubbleToBody` gắn kèm định danh ID duy nhất (`msgId`), xử lý sự kiện Sao chép, Chèn ghi chú và Xóa thoại.
+  - Thêm CSS `.neural-ai-msg.is-deleting`, `.neural-ai-msg-actions.user-actions`, `.neural-ai-quick-delete`, `.neural-ai-drawer-btn.danger-btn`.
+  - Nâng cấp phiên bản Service Worker cache lên `smart-schedule-modular-v165`.
+
 ## 📅 [2026-09-18 17:25] - Khắc Phục Triệt Để Lỗi Bố Cục & Hiển Thị Công Thức Ma Trận LaTeX Toán Học (Token Placeholder Engine) 📐🔢✨
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:

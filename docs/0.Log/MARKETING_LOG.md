@@ -3,6 +3,25 @@
 > **Dự án**: Lịch Học Thông Minh & Chiếc Cặp Google Drive  
 > **Mục tiêu**: Lưu trữ tự động các góc nhìn tiếp thị, điểm độc đáo (USP), viral hooks và kịch bản truyền thông từ các tính năng kỹ thuật.
 
+## 💎 ENTRY 18: [2026-09-18] - "Thanh Lọc Lời Thoại AI Chỉ Với 1 Click": Chat Bao Nhiêu Lượt Vẫn Luôn Gọn Gàng, Sạch Mắt Và Đỉnh Cao Trực Giác 🗑️💬✨
+
+### 📌 Phân Loại & Tags:
+`#GranularChatDeletion` `#AICopilot` `#CleanChatUI` `#SmartSchedule` `#ProductivityHacks` `#MinimalistUX`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Xóa Từng Lời Thoại Cực Kỳ Tinh Tế (Cả User & Bot)**: Khi hỏi đáp chuyên sâu về bài học, có những câu hỏi thử nghiệm, câu hỏi sai hoặc lời giải thích quá dài làm cuộn mỏi tay. Tính năng mới cho phép bạn "tỉa gọt" đúng từng bong bóng thoại không mong muốn chỉ bằng 1 cú click!
+- **Đồng Bộ Ngữ Cảnh Tức Thì (Context Cleanliness)**: Khi bạn xóa 1 câu hỏi thừa, hệ thống tự động loại bỏ nó khỏi bộ nhớ hội thoại nhiều lượt gửi đến Gemini API. Trợ lý AI sẽ không bị "lạc đề" hay xao nhãng bởi những câu hỏi cũ đã bị xóa!
+- **Thao Tác Siêu Nhanh & Đa Dạng**:
+  * *Nút Xóa Nhanh (Quick Delete `×`)*: Chỉ cần rê chuột vào bất kỳ bong bóng nào, một nút nhỏ xinh sẽ xuất hiện ngay góc để xóa tức thì mà không cần tìm kiếm.
+  * *Thanh Hành Động Dưới Bong Bóng*: Nút "Xóa" rõ ràng kèm icon thùng rác, hover đổi màu đỏ neon cảnh báo trực quan.
+  * *Nút Làm Sạch Toàn Bộ*: 1 click dọn sạch toàn bộ cuộc trò chuyện để bắt đầu chủ đề mới tinh tươm.
+- **Hiệu Ứng Micro-Animation Chuyên Nghiệp**: Lời thoại biến mất mượt mà với hiệu ứng thu nhỏ và mờ dần (`scale(0.92) fade-out`), mang lại cảm giác nhẹ nhàng, thỏa mãn thị giác.
+
+### 2. 🎣 Viral Hooks Cho TikTok / Reels / Shorts:
+- **Hook 1 (Nỗi đau)**: *"Chat với AI ôn thi mà hỏi 1 hồi tin nhắn dài cả mét, lướt tìm lại công thức muốn gãy ngón tay? Đây là cách mình dọn sạch khung chat trong 1 nốt nhạc..."*
+- **Hook 2 (Tính năng ẩn)**: *"Tính năng mà ứng dụng ghi chú nào cũng nên học tập: Xóa từng câu hỏi dở hơi mà không làm mất các câu trả lời xịn sò!"*
+- **Hook 3 (Thị giác)**: *"Nhìn hiệu ứng xóa lời thoại trượt mượt thế này ai mà không mê cơ chứ! Gọn gàng, sạch sẽ chuẩn bài học sinh gương mẫu!"*
+
 ---
 
 ## 💎 ENTRY 17: [2026-09-18] - "Phím Tắt Ctrl + Thần Thánh Cho AI Chat": Phóng To Cỡ Chữ Cực Đã Mà Không Lo Trình Duyệt Bị Vỡ Giao Diện 🔍🔤✨
