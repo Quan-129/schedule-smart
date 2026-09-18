@@ -253,6 +253,9 @@ function renderNotepadTemplate(node) {
         <button type="button" class="neural-np-tool-btn highlight" id="btn-fmt-highlight" title="Tô sáng dạ quang (==văn bản==)">
           <i class="fa-solid fa-highlighter"></i> HL
         </button>
+        <button type="button" class="neural-np-tool-btn" id="btn-zoom-notepad-md" title="Cỡ chữ ghi chú (Ctrl + để phóng to, Ctrl - để thu nhỏ, Ctrl 0 để đặt lại)">
+          <i class="fa-solid fa-text-height"></i>
+        </button>
 
         <div class="neural-np-tool-divider"></div>
 
@@ -310,6 +313,9 @@ function renderNotepadTemplate(node) {
           </button>
           <button type="button" class="neural-np-tool-btn highlight" id="btn-vis-highlight" title="Tô sáng dạ quang">
             <i class="fa-solid fa-highlighter"></i> HL
+          </button>
+          <button type="button" class="neural-np-tool-btn" id="btn-zoom-notepad-vis" title="Cỡ chữ ghi chú (Ctrl + để phóng to, Ctrl - để thu nhỏ, Ctrl 0 để đặt lại)">
+            <i class="fa-solid fa-text-height"></i>
           </button>
           <div class="neural-np-tool-divider"></div>
           <select class="visual-font-size-select" id="vis-font-size" title="Thay đổi cỡ chữ">
@@ -1732,17 +1738,23 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   const drawerHeader = sidebar.querySelector('#neural-ai-drawer-header');
 
   // ========================================================================
-  // 12.1. AI CHAT TEXT ZOOM CONTROLLER (Ctrl + / Ctrl - / Ctrl 0 & Ctrl+Wheel)
+  // 12.1. ĐIỀU KHIỂN CỠ CHỮ ĐỘC LẬP (INDEPENDENT ZOOM CONTROLLER)
+  //       - Độc lập từng Khung Chat AI (In-situ Popup / Copilot Drawer)
+  //       - Độc lập Khung Ghi Chú bên phải (Notepad Textarea / Preview / Visual)
+  //       - Canvas Mindmap / Lịch học bên ngoài: Rê lăn bình thường, không can thiệp
   // ========================================================================
   const AI_CHAT_ZOOM_STORAGE_KEY = 'smart_schedule_ai_chat_zoom';
-  let activeHoveredAiChat = null;
+  const NOTEPAD_ZOOM_STORAGE_KEY = 'smart_schedule_notepad_zoom';
 
+  let activeHoveredAiChat = null;
+  let activeHoveredNotepadBody = null;
+  const notepadBodyEl = sidebar.querySelector('#neural-notepad-body-container');
+
+  // --- 1. Helpers cho AI Chat Zoom ---
   const getStoredAiChatZoom = () => {
     try {
       const val = parseFloat(localStorage.getItem(AI_CHAT_ZOOM_STORAGE_KEY));
-      if (!isNaN(val) && val >= 0.7 && val <= 2.2) {
-        return val;
-      }
+      if (!isNaN(val) && val >= 0.7 && val <= 2.2) return val;
     } catch (_) {}
     return 1.0;
   };
@@ -1776,65 +1788,13 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     const clamped = Math.min(2.2, Math.max(0.7, Math.round(newZoom * 100) / 100));
     chatEl.style.setProperty('--ai-chat-zoom', clamped);
     setStoredAiChatZoom(clamped);
-    if (showBadge) {
-      showAiChatZoomBadge(chatEl, clamped);
-    }
-  };
-
-  const getActiveAiChatContainer = (eTarget) => {
-    const activeEl = document.activeElement;
-    let chat = (eTarget && eTarget.closest) ? eTarget.closest('.neural-ai-floating-popup, #neural-ai-copilot-drawer') : null;
-    if (!chat && activeEl && activeEl.closest) {
-      chat = activeEl.closest('.neural-ai-floating-popup, #neural-ai-copilot-drawer');
-    }
-    if (!chat && activeHoveredAiChat && document.body.contains(activeHoveredAiChat)) {
-      chat = activeHoveredAiChat;
-    }
-    if (!chat) {
-      const floating = document.querySelector('.neural-ai-floating-popup');
-      if (floating) chat = floating;
-    }
-    if (!chat) {
-      const drawer = document.querySelector('#neural-ai-copilot-drawer.active');
-      if (drawer) chat = drawer;
-    }
-    return chat;
-  };
-
-  const handleAiChatZoomKeydown = (e) => {
-    if (!(e.ctrlKey || e.metaKey)) return;
-
-    const isZoomIn = e.key === '+' || e.key === '=' || e.code === 'Equal' || e.code === 'NumpadAdd';
-    const isZoomOut = e.key === '-' || e.key === '_' || e.code === 'Minus' || e.code === 'NumpadSubtract';
-    const isZoomReset = e.key === '0' || e.code === 'Digit0' || e.code === 'Numpad0';
-
-    if (!isZoomIn && !isZoomOut && !isZoomReset) return;
-
-    const chatContainer = getActiveAiChatContainer(e.target);
-    if (!chatContainer) return;
-
-    // Ngăn chặn trình duyệt zoom toàn bộ trang web
-    e.preventDefault();
-    e.stopPropagation();
-
-    const currentZoom = parseFloat(chatContainer.style.getPropertyValue('--ai-chat-zoom')) || getStoredAiChatZoom();
-    let nextZoom = currentZoom;
-
-    if (isZoomIn) {
-      nextZoom = Math.min(2.2, Math.round((currentZoom + 0.1) * 10) / 10);
-    } else if (isZoomOut) {
-      nextZoom = Math.max(0.7, Math.round((currentZoom - 0.1) * 10) / 10);
-    } else if (isZoomReset) {
-      nextZoom = 1.0;
-    }
-
-    applyAiChatZoom(chatContainer, nextZoom, true);
+    if (showBadge) showAiChatZoomBadge(chatEl, clamped);
   };
 
   const attachAiChatInteractions = (chatContainer, zoomBtn) => {
     if (!chatContainer) return;
 
-    // Áp dụng cỡ chữ đã lưu từ bộ nhớ
+    // Áp dụng cỡ chữ đã lưu từ bộ nhớ cho khung chat
     const initialZoom = getStoredAiChatZoom();
     chatContainer.style.setProperty('--ai-chat-zoom', initialZoom);
 
@@ -1851,7 +1811,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       });
     }
 
-    // Hỗ trợ Ctrl + lăn chuột để phóng to/thu nhỏ tức thì
+    // Hỗ trợ Ctrl + lăn chuột để phóng to/thu nhỏ tức thì trong khung chat
     if (!chatContainer._hasWheelZoomAttached) {
       chatContainer._hasWheelZoomAttached = true;
       chatContainer.addEventListener('wheel', (e) => {
@@ -1866,7 +1826,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       }, { passive: false });
     }
 
-    // Nút chuyển đổi nhanh cỡ chữ trên header (Click: 100% -> 115% -> 130% -> 150% -> 100%)
+    // Nút chuyển đổi nhanh cỡ chữ trên header chat (Click: 100% -> 115% -> 130% -> 150% -> 100%)
     if (zoomBtn) {
       zoomBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1881,11 +1841,156 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     }
   };
 
+  // --- 2. Helpers cho Khung Ghi Chú bên phải (Notepad Body) ---
+  const getStoredNotepadZoom = () => {
+    try {
+      const val = parseFloat(localStorage.getItem(NOTEPAD_ZOOM_STORAGE_KEY));
+      if (!isNaN(val) && val >= 0.7 && val <= 2.2) return val;
+    } catch (_) {}
+    return 1.0;
+  };
+
+  const setStoredNotepadZoom = (zoom) => {
+    try {
+      localStorage.setItem(NOTEPAD_ZOOM_STORAGE_KEY, zoom.toFixed(2));
+    } catch (_) {}
+  };
+
+  const showNotepadZoomBadge = (containerEl, zoom) => {
+    if (!containerEl) return;
+    let badge = containerEl.querySelector('.neural-notepad-zoom-badge');
+    if (!badge) {
+      badge = document.createElement('div');
+      badge.className = 'neural-notepad-zoom-badge';
+      containerEl.appendChild(badge);
+    }
+    const pct = Math.round(zoom * 100);
+    badge.innerHTML = `<i class="fa-solid fa-text-height"></i> Cỡ chữ ghi chú: <strong>${pct}%</strong>`;
+    badge.classList.add('is-visible');
+
+    if (containerEl._zoomBadgeTimer) clearTimeout(containerEl._zoomBadgeTimer);
+    containerEl._zoomBadgeTimer = setTimeout(() => {
+      badge.classList.remove('is-visible');
+    }, 1200);
+  };
+
+  const applyNotepadZoom = (containerEl, newZoom, showBadge = true) => {
+    if (!containerEl) return;
+    const clamped = Math.min(2.2, Math.max(0.7, Math.round(newZoom * 100) / 100));
+    containerEl.style.setProperty('--notepad-zoom', clamped);
+    setStoredNotepadZoom(clamped);
+    if (showBadge) showNotepadZoomBadge(containerEl, clamped);
+  };
+
+  // Áp dụng cỡ chữ ghi chú khởi đầu từ bộ nhớ
+  if (notepadBodyEl) {
+    notepadBodyEl.style.setProperty('--notepad-zoom', getStoredNotepadZoom());
+
+    // Theo dõi hover trên Khung Ghi Chú
+    notepadBodyEl.addEventListener('pointerenter', () => {
+      activeHoveredNotepadBody = notepadBodyEl;
+    });
+    notepadBodyEl.addEventListener('pointerleave', () => {
+      if (activeHoveredNotepadBody === notepadBodyEl) {
+        activeHoveredNotepadBody = null;
+      }
+    });
+
+    // Hỗ trợ Ctrl + Lăn chuột (Wheel) độc lập trong Khung Ghi Chú bên phải
+    notepadBodyEl.addEventListener('wheel', (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        const currentZoom = parseFloat(notepadBodyEl.style.getPropertyValue('--notepad-zoom')) || getStoredNotepadZoom();
+        const delta = e.deltaY < 0 ? 0.08 : -0.08;
+        const nextZoom = Math.min(2.2, Math.max(0.7, Math.round((currentZoom + delta) * 100) / 100));
+        applyNotepadZoom(notepadBodyEl, nextZoom, true);
+      }
+    }, { passive: false });
+  }
+
+  // Nút đổi nhanh cỡ chữ trên Toolbar Markdown & Toolbar Visual
+  const onZoomNotepadBtnClick = (e) => {
+    e.stopPropagation();
+    if (!notepadBodyEl) return;
+    const currentZoom = parseFloat(notepadBodyEl.style.getPropertyValue('--notepad-zoom')) || getStoredNotepadZoom();
+    let nextZoom = 1.0;
+    if (currentZoom < 1.1) nextZoom = 1.15;
+    else if (currentZoom < 1.25) nextZoom = 1.3;
+    else if (currentZoom < 1.45) nextZoom = 1.5;
+    else nextZoom = 1.0;
+    applyNotepadZoom(notepadBodyEl, nextZoom, true);
+  };
+
+  const btnZoomNotepadMd = sidebar.querySelector('#btn-zoom-notepad-md');
+  const btnZoomNotepadVis = sidebar.querySelector('#btn-zoom-notepad-vis');
+  if (btnZoomNotepadMd) btnZoomNotepadMd.addEventListener('click', onZoomNotepadBtnClick);
+  if (btnZoomNotepadVis) btnZoomNotepadVis.addEventListener('click', onZoomNotepadBtnClick);
+
+  // --- 3. Lắng nghe phím tắt Ctrl + / Ctrl - / Ctrl 0 độc lập theo từng khung ---
+  const handleIndependentZoomKeydown = (e) => {
+    if (!(e.ctrlKey || e.metaKey)) return;
+
+    const isZoomIn = e.key === '+' || e.key === '=' || e.code === 'Equal' || e.code === 'NumpadAdd';
+    const isZoomOut = e.key === '-' || e.key === '_' || e.code === 'Minus' || e.code === 'NumpadSubtract';
+    const isZoomReset = e.key === '0' || e.code === 'Digit0' || e.code === 'Numpad0';
+
+    if (!isZoomIn && !isZoomOut && !isZoomReset) return;
+
+    const activeEl = document.activeElement;
+    const target = e.target;
+
+    // A. KIỂM TRA NGỮ CẢNH KHUNG CHAT AI (Nếu đang gõ hoặc trỏ chuột trong khung chat AI nào thì CHỈ ZOOM khung chat đó)
+    let chatContainer = (target && target.closest) ? target.closest('.neural-ai-floating-popup, #neural-ai-copilot-drawer') : null;
+    if (!chatContainer && activeEl && activeEl.closest) {
+      chatContainer = activeEl.closest('.neural-ai-floating-popup, #neural-ai-copilot-drawer');
+    }
+    if (!chatContainer && activeHoveredAiChat && document.body.contains(activeHoveredAiChat)) {
+      chatContainer = activeHoveredAiChat;
+    }
+
+    if (chatContainer) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const currentZoom = parseFloat(chatContainer.style.getPropertyValue('--ai-chat-zoom')) || getStoredAiChatZoom();
+      let nextZoom = currentZoom;
+      if (isZoomIn) nextZoom = Math.min(2.2, Math.round((currentZoom + 0.1) * 10) / 10);
+      else if (isZoomOut) nextZoom = Math.max(0.7, Math.round((currentZoom - 0.1) * 10) / 10);
+      else if (isZoomReset) nextZoom = 1.0;
+
+      applyAiChatZoom(chatContainer, nextZoom, true);
+      return;
+    }
+
+    // B. KIỂM TRA NGỮ CẢNH KHUNG GHI CHÚ BÊN PHẢI (Nếu đang gõ hoặc trỏ chuột trong Khung Ghi Chú thì CHỈ ZOOM khung ghi chú)
+    const isInsideNotepad = (target && target.closest && target.closest('#neural-notepad-body-container, #neural-notepad-sidebar, .neural-notepad-sidebar, .neural-notepad-body, #neural-notepad-toolbar, #neural-visual-toolbar'))
+      || (activeEl && activeEl.closest && activeEl.closest('#neural-notepad-textarea, #visual-rich-editor, #neural-notepad-body-container, #neural-notepad-sidebar'))
+      || (activeHoveredNotepadBody && document.body.contains(activeHoveredNotepadBody));
+
+    if (isInsideNotepad && notepadBodyEl) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const currentZoom = parseFloat(notepadBodyEl.style.getPropertyValue('--notepad-zoom')) || getStoredNotepadZoom();
+      let nextZoom = currentZoom;
+      if (isZoomIn) nextZoom = Math.min(2.2, Math.round((currentZoom + 0.1) * 10) / 10);
+      else if (isZoomOut) nextZoom = Math.max(0.7, Math.round((currentZoom - 0.1) * 10) / 10);
+      else if (isZoomReset) nextZoom = 1.0;
+
+      applyNotepadZoom(notepadBodyEl, nextZoom, true);
+      return;
+    }
+
+    // C. BÊN NGOÀI (Bản đồ Mindmap, Canvas, Lịch học,...):
+    // Tuyệt đối không can thiệp, để người dùng rê lăn chuột tự nhiên trên canvas mindmap!
+  };
+
   // Khởi tạo tương tác cỡ chữ cho AI Copilot Drawer
   attachAiChatInteractions(aiDrawer, btnZoomAiDrawer);
 
   // Đăng ký phím tắt toàn cục bắt ở capture phase
-  window.addEventListener('keydown', handleAiChatZoomKeydown, { capture: true });
+  window.addEventListener('keydown', handleIndependentZoomKeydown, { capture: true });
 
   // Khởi tạo Floating Selection Pill gắn vào document.body để không bao giờ bị cắt xén (overflow clip)
   const selectionPill = document.createElement('button');
@@ -3451,8 +3556,9 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
   // Dọn dẹp selection pill, popup và listeners khi đóng sidebar
   notepadCleanupFns.push(() => {
-    window.removeEventListener('keydown', handleAiChatZoomKeydown, { capture: true });
+    window.removeEventListener('keydown', handleIndependentZoomKeydown, { capture: true });
     activeHoveredAiChat = null;
+    activeHoveredNotepadBody = null;
     sidebar.removeEventListener('wheel', handleHorizontalWheelScroll);
     closeFloatingPopup();
     document.removeEventListener('selectionchange', onSelectionEvent);

@@ -4,6 +4,36 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-18 13:10] - Mở Rộng Điều Khiển Cỡ Chữ Độc Lập Cho Khung Ghi Chú Bên Phải (Notepad Body Independent Zoom) 📝🔤✨
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng yêu cầu: *"tương tự đối với khung note bên phải, không có chế dộ toàn bộ nhé ví dụ crt + tất cả là không được độc lập từng cái thôi cái map bên ngoài thì rê lăn là ổn rồi"*.
+  - Mục tiêu cốt lõi:
+    1. **Hoàn toàn độc lập từng khung (Zero Global Zoom)**: Đang focus hoặc trỏ chuột ở khung nào thì CHỈ khung đó to chữ! Tuyệt đối không phóng to toàn bộ hay tác động chéo lẫn nhau.
+    2. **Khung Ghi Chú Bên Phải (Notepad Body)**:
+       - Hỗ trợ `Ctrl +` (phóng to +10%, tối đa 220%), `Ctrl -` (thu nhỏ -10%, tối thiểu 70%), `Ctrl 0` (đặt lại 100%).
+       - Hỗ trợ `Ctrl + Wheel` (lăn chuột) độc lập bên trong vùng ghi chú.
+       - Áp dụng mượt mà đồng bộ trên cả 3 chế độ: **Textarea Soạn thảo Markdown**, **Bảng Rich Preview** và **Visual Canvas Editor**.
+    3. **Bản đồ Tư Duy (Mindmap Canvas) Bên Ngoài**: Rê chuột lăn cuộn (zoom canvas) hoàn toàn bình thường, hệ thống không can thiệp phím tắt ngoài vùng.
+    4. **Nút Bấm Trực Quan & Badge Phản Hồi**:
+       - Bổ sung nút `#btn-zoom-notepad-md` và `#btn-zoom-notepad-vis` trên cả hai Toolbar Markdown và Visual Toolbar.
+       - Hiển thị badge `.neural-notepad-zoom-badge` báo phần trăm cỡ chữ ghi chú và lưu độc lập vào `localStorage.getItem('smart_schedule_notepad_zoom')`.
+- **🛠 Triển khai kỹ thuật ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Biến CSS `--notepad-zoom` Độc Lập ([`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Gán `--notepad-zoom: 1;` cho `.neural-notepad-body` và `#neural-notepad-body-container`.
+     - Cập nhật tỷ lệ kích thước chữ mượt mà cho:
+       * `.neural-notepad-textarea`: `calc(0.88rem * var(--notepad-zoom, 1))`.
+       * `.neural-notepad-rendered-content`: `calc(0.95rem * var(--notepad-zoom, 1))` cùng các thẻ tiêu đề (h2-h4), code, pre.
+       * `.visual-rich-editor`: `calc(0.95rem * var(--notepad-zoom, 1))`.
+     - Thêm style cho badge `.neural-notepad-zoom-badge` với màu tím neon Indigo thanh lịch.
+  2. **Bộ Nhận Diện Ngữ Cảnh Tách Biệt 3 Tầng ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Tầng A (Khung Chat AI): Kiểm tra nếu target/focus/hover thuộc `.neural-ai-floating-popup` hoặc `#neural-ai-copilot-drawer` ➔ CHỈ zoom khung chat AI đó!
+     - Tầng B (Khung Ghi Chú bên phải): Kiểm tra nếu target/focus/hover thuộc `#neural-notepad-body-container`, `#neural-notepad-textarea`, `#visual-rich-editor`, toolbar ➔ CHỈ zoom khung ghi chú đó!
+     - Tầng C (Bên ngoài): Bỏ qua hoàn toàn, không `preventDefault()`, bảo toàn cử chỉ lăn chuột zoom canvas mindmap.
+  3. **Lưu Trữ Riêng Biệt & Nâng Cấp Service Worker**:
+     - Quản lý riêng 2 key: `smart_schedule_ai_chat_zoom` và `smart_schedule_notepad_zoom`.
+     - Cập nhật cache Service Worker lên **`smart-schedule-modular-v161`**.
+
 ## 📅 [2026-09-18 13:00] - Điều Khiển Cỡ Chữ Trong Khung Chat AI: Phím Tắt Ctrl + / Ctrl - / Ctrl 0 & Ctrl+Wheel 🔍✨🔤
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:
