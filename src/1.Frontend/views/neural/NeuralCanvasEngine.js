@@ -157,6 +157,7 @@ export class NeuralCanvasEngine {
     this.onNodeAddChild = onNodeAddChild;
     this.onOpenNotepad = onOpenNotepad;
     this.onOpenQuiz = onOpenQuiz;
+    this.onContextMenuRequest = null;
     this.targetQuizCount = typeof targetQuizCount === 'number' && targetQuizCount > 0 ? targetQuizCount : 3;
 
     // Viewport transform
@@ -913,11 +914,26 @@ export class NeuralCanvasEngine {
       }
     };
 
+    this.onContextMenuBound = (e) => {
+      e.preventDefault();
+      const rect = this.canvas.getBoundingClientRect();
+      const sx = e.clientX - rect.left;
+      const sy = e.clientY - rect.top;
+      const clickedNode = this.findNodeAt(sx, sy);
+      if (clickedNode) {
+        this.selectedNodeId = clickedNode.id;
+      }
+      if (this.onContextMenuRequest) {
+        this.onContextMenuRequest(clickedNode, e.clientX, e.clientY);
+      }
+    };
+
     this.canvas.addEventListener('mousedown', this.onMouseDownBound);
     window.addEventListener('mousemove', this.onMouseMoveBound);
     window.addEventListener('mouseup', this.onMouseUpBound);
     this.canvas.addEventListener('wheel', this.onWheelBound, { passive: false });
     this.canvas.addEventListener('dblclick', this.onDblClickBound);
+    this.canvas.addEventListener('contextmenu', this.onContextMenuBound);
     window.addEventListener('resize', this.onResizeBound);
     window.addEventListener('keydown', this.onKeyDownBound);
   }
@@ -928,6 +944,9 @@ export class NeuralCanvasEngine {
     window.removeEventListener('mouseup', this.onMouseUpBound);
     this.canvas.removeEventListener('wheel', this.onWheelBound);
     this.canvas.removeEventListener('dblclick', this.onDblClickBound);
+    if (this.onContextMenuBound) {
+      this.canvas.removeEventListener('contextmenu', this.onContextMenuBound);
+    }
     window.removeEventListener('resize', this.onResizeBound);
     window.removeEventListener('keydown', this.onKeyDownBound);
   }

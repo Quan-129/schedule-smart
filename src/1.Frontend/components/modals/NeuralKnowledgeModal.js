@@ -1,12 +1,13 @@
 // ==========================================================================
 // 1. IMPORTS
 // ==========================================================================
-import { state, getSubjectKnowledgeNodes, addNeuralNode, getSubjectTargetQuizCount, setSubjectTargetQuizCount } from '../../../3.Database/state.js';
+import { state, getSubjectKnowledgeNodes, addNeuralNode, deleteNeuralNode, getSubjectTargetQuizCount, setSubjectTargetQuizCount } from '../../../3.Database/state.js';
 import { escapeHtml } from '../../../4.Security/sanitizer.js';
-import { NeuralCanvasEngine } from '../../views/neural/NeuralCanvasEngine.js';
+import { NeuralCanvasEngine, getDescendantCount } from '../../views/neural/NeuralCanvasEngine.js';
 import { openEditNeuralNodeModal } from './EditNeuralNodeModal.js';
 import { openNeuralNotepadSidebar, closeNeuralNotepadSidebar } from './NeuralNotepadSidebar.js';
 import { openNeuralQuizModal } from './NeuralQuizModal.js';
+import { showToast } from '../Toast.js';
 
 // ==========================================================================
 // 2. TEMPLATES
@@ -104,6 +105,12 @@ function renderNeuralModalShell(subject) {
       <button type="button" class="neural-tool-btn" id="btn-neural-open-notepad" title="Mở Bảng Notepad Markdown (50% bên phải)">
         <i class="fa-solid fa-file-pen"></i>
         <span class="btn-text-full">Ghi Chú</span>
+      </button>
+
+      <button type="button" class="neural-tool-btn danger-tool" id="btn-neural-delete-node" title="Xóa nhánh đang chọn (hoặc bấm phím Delete trên bàn phím)">
+        <i class="fa-solid fa-trash-can"></i>
+        <span class="btn-text-full">Xóa Nhánh</span>
+        <span class="btn-text-short">Xóa</span>
       </button>
     </div>
 
@@ -337,11 +344,157 @@ export function openNeuralKnowledgeModal(subjectCode) {
     );
   });
 
-  // Đóng bằng phím Escape
+  // ========================================================================
+  // XÓA NHÁNH KIẾN THỨC (DELETE NODE) & CONTEXT MENU CHUỘT PHẢI
+  // ========================================================================
+  const deleteNodeBtn = overlay.querySelector('#btn-neural-delete-node');
+  const handleDeleteSelectedNode = () => {
+    const selectedId = activeCanvasEngine?.selectedNodeId;
+    if (!selectedId) {
+      showToast('Vui lòng nhấp chọn nhánh bạn muốn xóa trên sơ đồ!', 'warning');
+      return;
+    }
+    const currentNodes = getSubjectKnowledgeNodes(subjectCode);
+    const targetNode = currentNodes.find(n => n.id === selectedId);
+    if (!targetNode) return;
+
+    if (targetNode.parentId === null) {
+      showToast('Không thể xóa Node Gốc của môn học!', 'warning');
+      return;
+    }
+
+    const childCount = getDescendantCount(selectedId, currentNodes);
+    const confirmMsg = childCount > 0
+      ? `Xóa nhánh "${targetNode.label}" sẽ đồng thời xóa ${childCount} nhánh con trực thuộc.\n\nBạn có chắc chắn muốn xóa không?`
+      : `Bạn có chắc chắn muốn xóa nhánh "${targetNode.label}" không?`;
+
+    if (window.confirm(confirmMsg)) {
+      deleteNeuralNode(subjectCode, selectedId);
+      activeCanvasEngine.selectedNodeId = null;
+      activeCanvasEngine.updateNodes(getSubjectKnowledgeNodes(subjectCode));
+      closeNeuralNotepadSidebar();
+      showToast(`Đã xóa nhánh "${targetNode.label}" thành công! 🗑️`, 'success');
+    }
+  };
+
+  if (deleteNodeBtn) {
+    deleteNodeBtn.addEventListener('click', handleDeleteSelectedNode);
+  }
+
+  // Context Menu Chuột Phải trên Canvas
+  let currentContextMenuEl = null;
+  const closeContextMenu = () => {
+    if (currentContextMenuEl && currentContextMenuEl.parentNode) {
+      currentContextMenuEl.parentNode.removeChild(currentContextMenuEl);
+      currentContextMenuEl = null;
+    }
+  };
+
+  activeCanvasEngine.onContextMenuRequest = (clickedNode, clientX, clientY) => {
+    closeContextMenu();
+    if (!clickedNode) return;
+
+    const menu = document.createElement('div');
+    menu.className = 'neural-canvas-context-menu';
+    menu.style.left = `${Math.min(clientX, window.innerWidth - 200)}px`;
+    menu.style.top = `${Math.min(clientY, window.innerHeight - 230)}px`;
+
+    const isRoot = (clickedNode.parentId === null);
+
+    menu.innerHTML = `
+      <div style="padding: 4px 10px 6px; font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.06); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        ${escapeHtml(clickedNode.label || 'Nhánh')}
+      </div>
+      <button type="button" class="neural-context-menu-item" id="ctx-open-notes">
+        <i class="fa-solid fa-file-pen"></i> Mở ghi chú
+      </button>
+      <button type="button" class="neural-context-menu-item" id="ctx-edit-node">
+        <i class="fa-solid fa-pen-to-square"></i> Sửa thông tin
+      </button>
+      <button type="button" class="neural-context-menu-item" id="ctx-open-quiz">
+        <i class="fa-solid fa-bullseye"></i> Thử thách Quiz
+      </button>
+      <button type="button" class="neural-context-menu-item" id="ctx-add-child">
+        <i class="fa-solid fa-plus"></i> Thêm nhánh con
+      </button>
+      ${!isRoot ? `
+      <div class="neural-context-menu-divider"></div>
+      <button type="button" class="neural-context-menu-item danger" id="ctx-delete-node">
+        <i class="fa-solid fa-trash-can"></i> Xóa nhánh này
+      </button>
+      ` : ''}
+    `;
+
+    document.body.appendChild(menu);
+    currentContextMenuEl = menu;
+
+    menu.querySelector('#ctx-open-notes')?.addEventListener('click', () => {
+      closeContextMenu();
+      openNeuralNotepadSidebar(overlay, subjectCode, clickedNode, () => {
+        activeCanvasEngine.updateNodes(getSubjectKnowledgeNodes(subjectCode));
+      });
+    });
+
+    menu.querySelector('#ctx-edit-node')?.addEventListener('click', () => {
+      closeContextMenu();
+      openEditNeuralNodeModal(subjectCode, clickedNode, () => {
+        activeCanvasEngine.updateNodes(getSubjectKnowledgeNodes(subjectCode));
+      }, () => {
+        activeCanvasEngine.updateNodes(getSubjectKnowledgeNodes(subjectCode));
+      });
+    });
+
+    menu.querySelector('#ctx-open-quiz')?.addEventListener('click', () => {
+      closeContextMenu();
+      openNeuralQuizModal(overlay, subjectCode, clickedNode, () => {
+        activeCanvasEngine.updateNodes(getSubjectKnowledgeNodes(subjectCode));
+      });
+    });
+
+    menu.querySelector('#ctx-add-child')?.addEventListener('click', () => {
+      closeContextMenu();
+      activeCanvasEngine.selectedNodeId = clickedNode.id;
+      addNodeBtn.click();
+    });
+
+    menu.querySelector('#ctx-delete-node')?.addEventListener('click', () => {
+      closeContextMenu();
+      activeCanvasEngine.selectedNodeId = clickedNode.id;
+      handleDeleteSelectedNode();
+    });
+  };
+
+  const onWindowPointerDown = (e) => {
+    if (currentContextMenuEl && !currentContextMenuEl.contains(e.target)) {
+      closeContextMenu();
+    }
+  };
+  window.addEventListener('pointerdown', onWindowPointerDown);
+  window.addEventListener('wheel', closeContextMenu, { passive: true });
+
+  // Đóng bằng phím Escape, xóa node bằng phím Delete / Backspace
   const onKeyDown = (e) => {
     if (e.key === 'Escape') {
+      closeContextMenu();
       closeNeuralKnowledgeModal();
       window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('pointerdown', onWindowPointerDown);
+      window.removeEventListener('wheel', closeContextMenu);
+      return;
+    }
+
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+      const activeEl = document.activeElement;
+      const isTyping = activeEl && (
+        activeEl.tagName === 'INPUT' || 
+        activeEl.tagName === 'TEXTAREA' || 
+        activeEl.isContentEditable ||
+        activeEl.closest('#neural-notepad-sidebar-panel')
+      );
+      if (!isTyping && activeCanvasEngine && activeCanvasEngine.selectedNodeId) {
+        e.preventDefault();
+        handleDeleteSelectedNode();
+      }
     }
   };
   window.addEventListener('keydown', onKeyDown);
@@ -351,6 +504,10 @@ export function openNeuralKnowledgeModal(subjectCode) {
  * Đóng Modal Toàn Cảnh
  */
 export function closeNeuralKnowledgeModal() {
+  const oldCtx = document.querySelector('.neural-canvas-context-menu');
+  if (oldCtx && oldCtx.parentNode) {
+    oldCtx.parentNode.removeChild(oldCtx);
+  }
   closeNeuralNotepadSidebar();
   if (activeCanvasEngine) {
     activeCanvasEngine.stop();

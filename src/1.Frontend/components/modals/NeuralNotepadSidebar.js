@@ -2,7 +2,7 @@
 // 1. IMPORTS
 // ==========================================================================
 import { escapeHtml } from '../../../4.Security/sanitizer.js';
-import { updateNeuralNode, deleteNeuralNodeQuiz, getSubjectKnowledgeNodes } from '../../../3.Database/state.js';
+import { updateNeuralNode, deleteNeuralNode, deleteNeuralNodeQuiz, getSubjectKnowledgeNodes } from '../../../3.Database/state.js';
 import { renderMarkdownToHtml } from '../../../2.Backend/utils/markdownRenderer.js';
 import { openNeuralQuizModal } from './NeuralQuizModal.js';
 import { compressImage } from '../../../2.Backend/utils/imageCompressor.js';
@@ -223,6 +223,11 @@ function renderNotepadTemplate(node) {
             <i class="fa-solid fa-wand-magic-sparkles"></i> AI Copilot
           </button>
         </div>
+        ${node.parentId !== null ? `
+        <button type="button" class="neural-delete-node-btn" id="btn-delete-node-from-sidebar" title="Xóa node kiến thức này">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
+        ` : ''}
         <button type="button" class="neural-close-btn" id="btn-close-neural-notepad" title="Đóng bảng ghi chú">
           <i class="fa-solid fa-xmark"></i>
         </button>
@@ -3882,6 +3887,29 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       selectionPill.parentNode.removeChild(selectionPill);
     }
   });
+
+  // Xóa node này từ Sidebar
+  const btnDeleteNode = sidebar.querySelector('#btn-delete-node-from-sidebar');
+  if (btnDeleteNode) {
+    btnDeleteNode.addEventListener('click', () => {
+      if (node.parentId === null) {
+        showToast('Không thể xóa Node Gốc của môn học!', 'warning');
+        return;
+      }
+      const allNodes = getSubjectKnowledgeNodes(subjectCode);
+      const childCount = allNodes.filter(n => n && n.parentId === node.id && n.id !== node.id).length;
+      const confirmMsg = childCount > 0
+        ? `Xóa node "${node.label}" sẽ đồng thời xóa ${childCount} nhánh con trực thuộc.\n\nBạn có chắc chắn muốn xóa không?`
+        : `Bạn có chắc chắn muốn xóa node "${node.label}" không?`;
+
+      if (window.confirm(confirmMsg)) {
+        deleteNeuralNode(subjectCode, node.id);
+        showToast(`Đã xóa node "${node.label}" thành công! 🗑️`, 'success');
+        closeNeuralNotepadSidebar();
+        if (onSavedCallback) onSavedCallback(node.id, null, true);
+      }
+    });
+  }
 
   // Đóng bảng ghi chú
   sidebar.querySelector('#btn-close-neural-notepad').addEventListener('click', closeNeuralNotepadSidebar);

@@ -3,6 +3,28 @@
 > **Dự án**: Lịch Học Thông Minh & Chiếc Cặp Google Drive  
 > **Mục tiêu**: Lưu trữ tự động các góc nhìn tiếp thị, điểm độc đáo (USP), viral hooks và kịch bản truyền thông từ các tính năng kỹ thuật.
 
+## 💎 ENTRY 21: [2026-09-18] - "Xóa Node Mọi Lúc Mọi Nơi": Bộ Tứ Thao Tác Xóa Nhanh Chuẩn Phần Mềm Thiết Kế Triệu Đô 🗑️⚡✨
+
+### 📌 Phân Loại & Tags:
+`#NodeDeletion` `#MindmapUX` `#ProductivityShortcuts` `#CyberpunkContextMenu` `#IntuitiveInteraction`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Bộ Tứ Điểm Chạm Xóa Cực Nhanh (Quad-Action Deletion Flow)**:
+  * *Cách 1 - Phím Tắt Thần Tốc*: Chọn node trên canvas, bấm phím `Delete` hoặc `Backspace` là xong ngay, mượt như trên Figma hay Miro!
+  * *Cách 2 - Nút Xóa Trên Toolbar*: Icon thùng rác đỏ neon nổi bật trên thanh công cụ canvas, nhấp 1 phát là xóa gọn kèm cảnh báo an toàn.
+  * *Cách 3 - Chuột Phải Mở Menu Ma Thuật (Context Menu)*: Nhấp chuột phải vào bất kỳ node nào trên màn hình, menu glassmorphism lung linh mở ra ngay lập tức với đầy đủ thao tác: Mở ghi chú, Sửa, Thử thách Quiz, Thêm con và Xóa cành!
+  * *Cách 4 - Nút Xóa Ngay Trong Bảng Ghi Chú*: Đang đọc hay sửa bài ghi chú bên phải mà muốn xóa node? Không cần quay lại canvas, nút thùng rác nhỏ xinh trên thanh Header sẽ giúp bạn xóa và đóng tab tức thì.
+- **Bảo Vệ Toàn Vẹn Cấu Trúc An Toàn Tuyệt Đối**:
+  * Tự động bảo vệ Node Gốc môn học không bao giờ bị xóa nhầm.
+  * Thông báo đếm chính xác số lượng nhánh con cháu sẽ bị xóa cùng để người dùng không lo mất dữ liệu bài học quý giá.
+
+### 2. 🎣 Viral Hooks Cho TikTok / Reels / Shorts:
+- **Hook 1 (So sánh UX)**: *"Ứng dụng sơ đồ tư duy bình thường muốn xóa node phải mò mẫm 3-4 bước... Còn ứng dụng này bạn chỉ cần bấm nút Delete hoặc click chuột phải là bay màu ngay lập tức!"*
+- **Hook 2 (Thỏa mãn thị giác)**: *"Nhìn menu chuột phải hiệu ứng kính mờ Cyberpunk này xem, dùng web mà mượt như app desktop 1000$!"*
+- **Hook 3 (Năng suất)**: *"4 cách xóa nhánh thừa siêu tốc giúp bạn dọn dẹp sơ đồ tư duy môn học gọn gàng chỉ trong 5 giây!"*
+
+---
+
 ## 💎 ENTRY 20: [2026-09-18] - "Ghi Chú Toàn Ảnh? AI Vẫn Đọc Vanh Vách Từng Đề Bài": Nạp Trọn Đề Bài 10 Câu Hỏi Dạng Ảnh Từ Các Node Con 🖼️👁️📚✨
 
 ### 📌 Phân Loại & Tags:

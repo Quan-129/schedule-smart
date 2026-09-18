@@ -4,6 +4,39 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-18 20:25] - Bổ Sung Toàn Diện Tác Vụ Xóa Node Tri Thức (Multi-Touchpoint Node Deletion Suite) 🗑️🌿✨
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng phản ánh: *"ủa hình như chưa có tác vụ xóa node"*.
+  - Thực trạng khảo sát trải nghiệm:
+    * Trước đây, cách duy nhất để xóa một node là nhấp đúp vào node trên canvas để mở popup `EditNeuralNodeModal`, trong đó có nút xóa nhỏ ở góc.
+    * Khi người dùng thao tác bình thường trên màn hình sơ đồ tư duy hoặc trong bảng ghi chú Sidebar:
+      1. Thanh công cụ Toolbar canvas không có nút "Xóa Nhánh".
+      2. Khi click chọn 1 node và bấm phím `Delete` hoặc `Backspace` trên bàn phím: Hệ thống hoàn toàn không phản hồi.
+      3. Trong thanh header của Notepad Sidebar: Không có nút xóa node đang đọc.
+      4. Khi nhấp chuột phải (`contextmenu`) vào node trên canvas: Không có menu thao tác nhanh nào xuất hiện.
+  - Giải pháp triển khai đa điểm chạm trực giác (Multi-Touchpoint UX):
+    1. **Nút "Xóa Nhánh" trên Toolbar Canvas (`#btn-neural-delete-node`)**:
+       - Bổ sung nút bấm màu đỏ cảnh báo tinh tế (`danger-tool`), có icon thùng rác `fa-trash-can` và nhãn "Xóa Nhánh".
+       - Xử lý thông minh: Nếu chưa chọn node -> nhắc chọn node; nếu chọn Node Gốc -> chặn xóa và thông báo an toàn; nếu node có con -> cảnh báo số lượng nhánh con bị xóa kèm và yêu cầu xác nhận.
+    2. **Phím tắt `Delete` & `Backspace` trên Bàn Phím**:
+       - Lắng nghe sự kiện bàn phím toàn cục trên modal sơ đồ: Khi người dùng đang chọn 1 node và bấm `Delete` hoặc `Backspace` (tự động bỏ qua nếu đang gõ chữ trong input, textarea hay notepad), hệ thống kích hoạt ngay luồng xóa an toàn.
+    3. **Nút "Xóa Node Này" trong Header Bảng Ghi Chú Sidebar (`#btn-delete-node-from-sidebar`)**:
+       - Đặt nút thùng rác đỏ neon ngay cạnh nút đóng Sidebar. Người dùng đang xem hay soạn ghi chú của node có thể xóa tức thì với 1 cú nhấp (kèm xác nhận an toàn, tự động đóng sidebar và làm mới canvas).
+    4. **Context Menu Chuột Phải Đẳng Cấp Cyberpunk Glassmorphism trên Canvas**:
+       - Bắt sự kiện `contextmenu` trên canvas. Khi nhấp chuột phải vào bất kỳ node nào:
+         * 📝 Mở ghi chú
+         * ✏️ Sửa thông tin & Đổi tên
+         * 🎯 Thử thách Quiz
+         * ➕ Thêm nhánh con
+         * 🗑️ Xóa nhánh này (kèm cảnh báo)
+       - Tự động đóng êm ái khi click ra ngoài hoặc bấm `Escape`.
+- **🛠 Triển khai kỹ thuật ([`NeuralKnowledgeModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralKnowledgeModal.js), [`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  - Gắn `contextmenu` event trong `NeuralCanvasEngine.js` và chuyển tiếp qua `onContextMenuRequest`.
+  - Tích hợp hàm `handleDeleteSelectedNode` kết hợp `getDescendantCount` và `deleteNeuralNode` trong `NeuralKnowledgeModal.js`.
+  - Bổ sung nút `#btn-delete-node-from-sidebar` trong `NeuralNotepadSidebar.js`.
+  - Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v168`.
+
 ## 📅 [2026-09-18 19:35] - Khắc Phục Triệt Để Lỗi Đọc Ảnh Đề Bài Dán Ở Ghi Chú Node Con (Multimodal Vision Hierarchy Pipeline) 🖼️👁️🌿✨
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:
