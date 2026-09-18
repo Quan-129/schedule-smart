@@ -4,6 +4,30 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-18 11:15] - Tích Hợp Lưu & Ghim Phiên Chat AI Nổi (Floating Draggable Pins) Trên Bài Ghi Chú 📌✨💬
+
+- **🎯 Yêu cầu & Vấn đề từ người dùng**:
+  - Người dùng yêu cầu: *"tôi muốn thêm chức năng có thể lưu hộp thoại chat tại phiên đó lưu nó sẽ có icon nhỏ hiện ở ghi chú có thể cầm nắm kéo để di chuyển"*.
+  - Mục tiêu:
+    1. Trong popup AI Copilot, bổ sung khả năng lưu và ghim phiên trò chuyện hiện tại (gồm toàn bộ câu hỏi, câu trả lời, vùng trích xuất).
+    2. Xuất hiện icon nhỏ biểu trưng cho phiên chat trên bài ghi chú.
+    3. Icon nhỏ này có thể cầm nắm kéo để di chuyển (draggable) tự do đến bất kỳ tọa độ nào trên bài ghi chú và ghi nhớ vĩnh viễn vị trí.
+    4. Nhấp vào icon nhỏ mở lại toàn bộ cuộc hội thoại trước đó để đọc lại, copy, chèn vào ghi chú hoặc tiếp tục hỏi đáp.
+- **🛠 Triển khai kỹ thuật ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Nút Ghim Phiên Chat Trong Floating Popup ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Thêm nút `#btn-pin-floating-popup` trên header popup với icon chiếc ghim `<i class="fa-solid fa-thumbtack"></i>`.
+     - Tự động lưu hoặc cập nhật đối tượng `pin` vào mảng `node.aiChatPins` với đầy đủ lịch sử `chatHistory`, tọa độ `x, y`, tiêu đề `title`, và thời gian.
+     - Khi người dùng gửi thêm câu hỏi mới trong phiên đã ghim, hệ thống tự động đồng bộ hóa thời gian thực vào pin mà không cần bấm lưu lại.
+  2. **Hệ Thống Icon Nhỏ Trên Ghi Chú (Floating Pins Layer) ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Thêm container `#neural-ai-pins-layer` với `pointer-events: none` bên trong `#neural-notepad-body-container` (xuyên suốt cả 3 tab Đã Gen Ra, Soạn Thảo và Ghi Chú Tự Do).
+     - Mỗi ghim `.neural-ai-chat-pin` mang thiết kế Cyberpunk neon tròn 38px, viền kính glassmorphism, hiệu ứng glow tím/cyan, huy hiệu số tin nhắn và nút gỡ ghim `✕` khi rê chuột qua.
+     - Thuật toán kéo thả con trỏ (`pointerdown`, `pointermove`, `pointerup` kèm `setPointerCapture`): Phân biệt chuẩn xác giữa thao tác click (< 5px) và kéo di chuyển (>= 5px).
+     - Tự động kẹp biên khung ghi chú (boundary clamping) và cập nhật tọa độ mới vào `node.aiChatPins` lưu vĩnh viễn qua `saveAllNotes()`.
+  3. **Tái Hiện Cuộc Trò Chuyện & Phục Hồi Dữ Liệu ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Nhấp vào icon ghim lập tức mở lại popup AI Copilot tại tọa độ của pin, nạp lại toàn bộ tin nhắn hỏi - đáp cũ với đầy đủ nút Sao chép, Chèn vào ghi chú và khung nhập tiếp câu hỏi.
+  4. **Nâng Cấp Cache Service Worker ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Tăng phiên bản cache Service Worker lên **`smart-schedule-modular-v158`**.
+
 ## 📅 [2026-09-18 10:30] - Nâng Cấp Popup AI Copilot: Cầm Kéo Di Chuyển, Kéo Góc Phóng To & Toàn Màn Hình Cực Kỳ Linh Hoạt 🚀🖱️🪟
 
 - **🎯 Yêu cầu & Vấn đề từ người dùng**:

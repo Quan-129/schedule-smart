@@ -269,6 +269,9 @@ function renderNotepadTemplate(node) {
 
     <!-- Body Container: 3 Panes (Edit, Preview, Visual) -->
     <div class="neural-notepad-body" id="neural-notepad-body-container" data-view-mode="${defaultTab}">
+      <!-- Layer Ghim Phiên Chat AI Nổi (Chat Pins) -->
+      <div class="neural-ai-pins-layer" id="neural-ai-pins-layer"></div>
+
       <!-- 1. Textarea Soạn thảo Markdown -->
       <div class="neural-np-pane ${defaultTab === 'edit' ? '' : 'hidden'}" id="neural-np-edit-pane">
         <textarea 
@@ -1509,7 +1512,8 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
     updateNeuralNode(subjectCode, node.id, { 
       notes: newNotes,
-      visualNotes: newVisualNotes
+      visualNotes: newVisualNotes,
+      aiChatPins: node.aiChatPins || []
     });
     node.notes = newNotes;
     node.visualNotes = newVisualNotes;
@@ -2387,10 +2391,43 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     }
   };
 
-  // Mở Popup Chat AI nổi tại đúng vị trí khung chữ nhật vừa khoanh
-  const openInSituAiPopup = (boundingBox, focalText, focalImages = []) => {
+  // Helper gắn bong bóng trả lời của AI kèm các nút Sao chép & Chèn vào ghi chú
+  const appendAiBubbleToBody = (chatBodyEl, answerText) => {
+    const aiMsg = document.createElement('div');
+    aiMsg.className = 'neural-ai-msg model';
+    aiMsg.innerHTML = `
+      <div class="neural-ai-bubble">
+        ${renderMarkdownToHtml(answerText)}
+      </div>
+      <div class="neural-ai-msg-actions">
+        <button type="button" class="neural-ai-action-btn copy-btn" title="Sao chép">
+          <i class="fa-regular fa-copy"></i> Sao chép
+        </button>
+        <button type="button" class="neural-ai-action-btn insert-btn" title="Chèn vào bài ghi chú">
+          <i class="fa-solid fa-file-circle-plus"></i> Chèn vào ghi chú
+        </button>
+      </div>
+    `;
+
+    aiMsg.querySelector('.copy-btn').addEventListener('click', () => {
+      navigator.clipboard.writeText(answerText).then(() => {
+        showToast('Đã sao chép câu trả lời!');
+      });
+    });
+
+    aiMsg.querySelector('.insert-btn').addEventListener('click', () => {
+      insertAiAnswerIntoNote(answerText);
+    });
+
+    chatBodyEl.appendChild(aiMsg);
+    return aiMsg;
+  };
+
+  // Mở Popup Chat AI nổi tại đúng vị trí khung chữ nhật vừa khoanh (hoặc mở lại từ icon ghim pin)
+  const openInSituAiPopup = (boundingBox, focalText, focalImages = [], existingPin = null) => {
     closeFloatingPopup();
     currentFocalText = focalText;
+    let currentPinId = existingPin ? existingPin.id : null;
 
     const popup = document.createElement('div');
     popup.className = 'neural-ai-floating-popup';
@@ -2428,6 +2465,10 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       ? '✨ Mình đã **nhìn thấy hình ảnh/bảng biểu** trong vùng bạn vừa khoanh! Sẵn sàng bóc tách chi tiết từng con số, ma trận, công thức hoặc biểu đồ.'
       : `✨ Mình đã nắm nội dung vùng bạn vừa khoanh trong bài <strong>${escapeHtml(node.label || 'ghi chú')}</strong>. Bạn muốn mình giải đáp thế nào?`;
 
+    const subTitleText = existingPin ? 'Phiên chat đã ghim' : 'Vùng vừa khoanh';
+    const pinBtnClass = existingPin ? 'is-pinned' : '';
+    const pinBtnTitle = existingPin ? 'Đã ghim vào bài ghi chú - Nhấp để cập nhật' : 'Ghim / Lưu phiên chat này vào bài ghi chú';
+
     popup.innerHTML = `
       <div class="neural-ai-drawer-header">
         <div class="neural-ai-drawer-title-group">
@@ -2435,11 +2476,14 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
           <div>
             <span class="neural-ai-drawer-title">
               AI Copilot
-              <span class="neural-ai-drawer-sub">Vùng vừa khoanh</span>
+              <span class="neural-ai-drawer-sub" id="floating-popup-subtitle">${subTitleText}</span>
             </span>
           </div>
         </div>
         <div class="neural-ai-drawer-actions">
+          <button type="button" class="neural-ai-drawer-btn ${pinBtnClass}" id="btn-pin-floating-popup" title="${pinBtnTitle}">
+            <i class="fa-solid fa-thumbtack"></i>
+          </button>
           <button type="button" class="neural-ai-drawer-btn" id="btn-maximize-floating-popup" title="Toàn màn hình / Thu nhỏ">
             <i class="fa-solid fa-expand"></i>
           </button>
@@ -2682,9 +2726,93 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     const input = popup.querySelector('#floating-popup-input');
     const sendBtn = popup.querySelector('#btn-floating-send');
     const chips = popup.querySelectorAll('.neural-ai-quick-chip');
+    const btnPin = popup.querySelector('#btn-pin-floating-popup');
+    const subtitleEl = popup.querySelector('#floating-popup-subtitle');
 
-    let floatingHistory = [];
+    let floatingHistory = existingPin && Array.isArray(existingPin.chatHistory) ? [...existingPin.chatHistory] : [];
     let isFloatingGenerating = false;
+
+    // Nếu mở lại từ một pin đã có lịch sử hỏi đáp, render lại toàn bộ các bong bóng tin nhắn
+    if (existingPin && floatingHistory.length > 0) {
+      chatBody.innerHTML = '';
+      floatingHistory.forEach(item => {
+        if (item.role === 'user') {
+          const userMsg = document.createElement('div');
+          userMsg.className = 'neural-ai-msg user';
+          userMsg.innerHTML = `<div class="neural-ai-bubble">${escapeHtml(item.text)}</div>`;
+          chatBody.appendChild(userMsg);
+        } else if (item.role === 'model') {
+          appendAiBubbleToBody(chatBody, item.text);
+        }
+      });
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    // --- Xử lý Lưu & Ghim phiên chat vào bài ghi chú ---
+    const handlePinSession = () => {
+      if (floatingHistory.length === 0) {
+        showToast('⚠️ Bạn chưa có câu hỏi nào để lưu. Hãy gửi câu hỏi trước nhé!');
+        return;
+      }
+
+      if (!Array.isArray(node.aiChatPins)) {
+        node.aiChatPins = [];
+      }
+
+      const bodyContainer = sidebar.querySelector('#neural-notepad-body-container');
+      const bodyRect = bodyContainer ? bodyContainer.getBoundingClientRect() : { left: 0, top: 0, width: 600, height: 600 };
+
+      let targetPin = node.aiChatPins.find(p => p.id === currentPinId);
+
+      if (targetPin) {
+        targetPin.chatHistory = [...floatingHistory];
+        targetPin.focalText = focalText || targetPin.focalText;
+        targetPin.focalImages = focalImages && focalImages.length > 0 ? focalImages : targetPin.focalImages;
+        targetPin.updatedAt = Date.now();
+        showToast('📌 Đã cập nhật phiên chat đã ghim!');
+      } else {
+        currentPinId = 'aipin_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+        let initX = 20;
+        let initY = 30;
+
+        if (boundingBox && bodyContainer) {
+          initX = Math.max(12, Math.min(bodyContainer.clientWidth - 56, boundingBox.right - bodyRect.left + 10));
+          initY = Math.max(12, Math.min(bodyContainer.clientHeight - 56, boundingBox.top - bodyRect.top));
+        } else if (bodyContainer) {
+          initX = Math.max(12, bodyContainer.clientWidth - 56);
+          initY = 30;
+        }
+
+        targetPin = {
+          id: currentPinId,
+          title: displaySnippet || (floatingHistory[0]?.text ? (floatingHistory[0].text.slice(0, 40) + '...') : 'Hỏi đáp AI'),
+          focalText: focalText || '',
+          focalImages: focalImages || [],
+          chatHistory: [...floatingHistory],
+          x: Math.round(initX),
+          y: Math.round(initY),
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        };
+        node.aiChatPins.push(targetPin);
+        showToast('✨ Đã ghim phiên chat vào ghi chú! Bạn có thể cầm kéo icon đến bất cứ đâu.');
+      }
+
+      if (btnPin) {
+        btnPin.classList.add('is-pinned');
+        btnPin.title = 'Đã ghim vào bài ghi chú - Nhấp để cập nhật';
+      }
+      if (subtitleEl) {
+        subtitleEl.textContent = 'Phiên chat đã ghim';
+      }
+
+      saveAllNotes();
+      renderAiChatPins();
+    };
+
+    if (btnPin) {
+      btnPin.addEventListener('click', handlePinSession);
+    }
 
     const sendFloatingQuestion = async (customPrompt = '') => {
       const question = (customPrompt || input.value).trim();
@@ -2733,39 +2861,24 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
         if (loadingEl.parentNode) loadingEl.remove();
 
-        const aiMsg = document.createElement('div');
-        aiMsg.className = 'neural-ai-msg model';
-        aiMsg.innerHTML = `
-          <div class="neural-ai-bubble">
-            ${renderMarkdownToHtml(res.text)}
-          </div>
-          <div class="neural-ai-msg-actions">
-            <button type="button" class="neural-ai-action-btn copy-btn" title="Sao chép">
-              <i class="fa-regular fa-copy"></i> Sao chép
-            </button>
-            <button type="button" class="neural-ai-action-btn insert-btn" title="Chèn vào bài ghi chú">
-              <i class="fa-solid fa-file-circle-plus"></i> Chèn vào ghi chú
-            </button>
-          </div>
-        `;
-
-        aiMsg.querySelector('.copy-btn').addEventListener('click', () => {
-          navigator.clipboard.writeText(res.text).then(() => {
-            showToast('Đã sao chép câu trả lời!');
-          });
-        });
-
-        aiMsg.querySelector('.insert-btn').addEventListener('click', () => {
-          insertAiAnswerIntoNote(res.text);
-        });
-
-        chatBody.appendChild(aiMsg);
+        appendAiBubbleToBody(chatBody, res.text);
         chatBody.scrollTop = chatBody.scrollHeight;
 
         floatingHistory.push(
           { role: 'user', text: question },
           { role: 'model', text: res.text }
         );
+
+        // Nếu phiên này đã được ghim trước đó, tự động đồng bộ ngay vào pin trong localStorage!
+        if (currentPinId && Array.isArray(node.aiChatPins)) {
+          const pinned = node.aiChatPins.find(p => p.id === currentPinId);
+          if (pinned) {
+            pinned.chatHistory = [...floatingHistory];
+            pinned.updatedAt = Date.now();
+            saveAllNotes();
+            renderAiChatPins();
+          }
+        }
       } catch (err) {
         if (loadingEl.parentNode) loadingEl.remove();
         const errEl = document.createElement('div');
@@ -2797,6 +2910,140 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     });
 
     setTimeout(() => input.focus(), 150);
+  };
+
+  /**
+   * Render các biểu tượng Ghim Phiên Chat AI (Floating Draggable Pins) trực tiếp lên bài ghi chú
+   */
+  const renderAiChatPins = () => {
+    const pinsLayer = sidebar.querySelector('#neural-ai-pins-layer');
+    if (!pinsLayer) return;
+    pinsLayer.innerHTML = '';
+
+    const pins = Array.isArray(node.aiChatPins) ? node.aiChatPins : [];
+
+    pins.forEach(pin => {
+      const pinEl = document.createElement('div');
+      pinEl.className = 'neural-ai-chat-pin';
+      pinEl.dataset.pinId = pin.id;
+      pinEl.style.left = `${pin.x || 20}px`;
+      pinEl.style.top = `${pin.y || 20}px`;
+
+      const qCount = pin.chatHistory ? Math.max(1, Math.floor(pin.chatHistory.length / 2)) : 1;
+      pinEl.title = `💬 ${pin.title || 'Phiên hỏi đáp AI'}\n• Nhấp để mở lại phiên chat\n• Cầm kéo để di chuyển vị trí`;
+
+      pinEl.innerHTML = `
+        <div class="neural-ai-chat-pin-inner">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+        <span class="neural-ai-chat-pin-badge">${qCount}</span>
+        <button type="button" class="neural-ai-chat-pin-del" title="Gỡ ghim phiên chat này">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      `;
+
+      // Bộ xử lý Cầm kéo di chuyển (Draggable) & Click mở lại popup
+      let isPinDragging = false;
+      let hasPinMoved = false;
+      let pinStartX = 0;
+      let pinStartY = 0;
+      let pinInitialLeft = 0;
+      let pinInitialTop = 0;
+
+      const onPinPointerDown = (e) => {
+        if (e.target.closest('.neural-ai-chat-pin-del')) return;
+
+        isPinDragging = true;
+        hasPinMoved = false;
+        pinStartX = e.clientX;
+        pinStartY = e.clientY;
+        pinInitialLeft = pinEl.offsetLeft;
+        pinInitialTop = pinEl.offsetTop;
+
+        pinEl.classList.add('is-dragging');
+        try {
+          pinEl.setPointerCapture(e.pointerId);
+        } catch (_) {}
+
+        window.addEventListener('pointermove', onPinPointerMove);
+        window.addEventListener('pointerup', onPinPointerUp);
+        window.addEventListener('pointercancel', onPinPointerUp);
+      };
+
+      const onPinPointerMove = (e) => {
+        if (!isPinDragging) return;
+        const dx = e.clientX - pinStartX;
+        const dy = e.clientY - pinStartY;
+
+        if (Math.hypot(dx, dy) > 4) {
+          hasPinMoved = true;
+        }
+
+        const bodyContainer = sidebar.querySelector('#neural-notepad-body-container');
+        if (!bodyContainer) return;
+
+        const maxX = Math.max(4, bodyContainer.clientWidth - pinEl.offsetWidth - 4);
+        const maxY = Math.max(4, bodyContainer.clientHeight - pinEl.offsetHeight - 4);
+
+        let newLeft = Math.max(4, Math.min(pinInitialLeft + dx, maxX));
+        let newTop = Math.max(4, Math.min(pinInitialTop + dy, maxY));
+
+        pinEl.style.left = `${Math.round(newLeft)}px`;
+        pinEl.style.top = `${Math.round(newTop)}px`;
+      };
+
+      const onPinPointerUp = (e) => {
+        if (!isPinDragging) return;
+        isPinDragging = false;
+        pinEl.classList.remove('is-dragging');
+        try {
+          pinEl.releasePointerCapture(e.pointerId);
+        } catch (_) {}
+
+        window.removeEventListener('pointermove', onPinPointerMove);
+        window.removeEventListener('pointerup', onPinPointerUp);
+        window.removeEventListener('pointercancel', onPinPointerUp);
+
+        if (hasPinMoved) {
+          pin.x = Math.round(pinEl.offsetLeft);
+          pin.y = Math.round(pinEl.offsetTop);
+          saveAllNotes();
+        } else {
+          // Người dùng chỉ click nhẹ -> Mở lại popup phiên chat
+          openInSituAiPopup(
+            pinEl.getBoundingClientRect(),
+            pin.focalText || '',
+            pin.focalImages || [],
+            pin
+          );
+        }
+      };
+
+      pinEl.addEventListener('pointerdown', onPinPointerDown);
+
+      // Nút xóa ghim
+      const delBtn = pinEl.querySelector('.neural-ai-chat-pin-del');
+      if (delBtn) {
+        delBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          node.aiChatPins = (node.aiChatPins || []).filter(p => p.id !== pin.id);
+          saveAllNotes();
+          pinEl.remove();
+          showToast('Đã gỡ ghim phiên chat!');
+          if (activeFloatingPopup && currentPinId === pin.id) {
+            currentPinId = null;
+            const bPin = activeFloatingPopup.querySelector('#btn-pin-floating-popup');
+            if (bPin) {
+              bPin.classList.remove('is-pinned');
+              bPin.title = 'Ghim / Lưu phiên chat này vào bài ghi chú';
+            }
+          }
+        });
+      }
+
+      pinsLayer.appendChild(pinEl);
+    });
   };
 
   // Khởi động Chế độ Khoanh vùng 1 lần (One-shot Snipping Mode)
@@ -2994,6 +3241,9 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   // Gắn sự kiện nút Khoanh hỏi AI trên Markdown toolbar & Visual toolbar
   if (btnSnipeMd) btnSnipeMd.addEventListener('click', startSnippingMode);
   if (btnSnipeVis) btnSnipeVis.addEventListener('click', startSnippingMode);
+
+  // Hiển thị các biểu tượng Ghim Phiên Chat AI (Floating Draggable Pins) đã lưu lên bài ghi chú
+  renderAiChatPins();
 
   // Lắng nghe lăn chuột để cuộn ngang mượt mà cho các khối công thức toán học và ma trận trong toàn bộ sidebar
   sidebar.addEventListener('wheel', handleHorizontalWheelScroll, { passive: false });
