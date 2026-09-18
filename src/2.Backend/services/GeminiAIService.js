@@ -149,6 +149,86 @@ export function traceNodeAncestryPath(allNodes, targetNodeOrId) {
   };
 }
 
+/**
+ * Thu thập toàn diện cấu trúc ngữ cảnh của một Node: Bao gồm phả hệ tổ tiên, chính nó và toàn bộ các node con gần nhất
+ * @param {Array<Object>} allNodes - Toàn bộ danh sách node trong môn học
+ * @param {string|Object} targetNodeOrId - Node hiện tại hoặc ID của node
+ * @param {string} [activeText=''] - Văn bản đang soạn thảo trực tiếp của node hiện tại (nếu có)
+ * @returns {{
+ *   targetNode: Object,
+ *   isParentNode: boolean,
+ *   directChildren: Array<Object>,
+ *   breadcrumbStr: string,
+ *   comprehensiveNotes: string,
+ *   childImages: Array<Object>
+ * }}
+ */
+export function collectNodeHierarchyContext(allNodes, targetNodeOrId, activeText = '') {
+  const nodes = Array.isArray(allNodes) ? allNodes : [];
+  const targetId = (typeof targetNodeOrId === 'object' && targetNodeOrId !== null) ? targetNodeOrId.id : targetNodeOrId;
+  const target = nodes.find(n => n.id === targetId) || (typeof targetNodeOrId === 'object' ? targetNodeOrId : { id: 'target', label: String(targetNodeOrId || 'Khái niệm') });
+
+  // 1. Phả hệ tổ tiên (Ancestry path)
+  const ancestry = traceNodeAncestryPath(nodes, target);
+
+  // 2. Nội dung của chính node này
+  const selfText = (activeText || extractNodeText(target) || '').trim();
+
+  // 3. Tìm các node con gần nhất (Direct Children)
+  const directChildren = nodes.filter(n => n && n.parentId === target.id && n.id !== target.id);
+  const isParentNode = directChildren.length > 0;
+
+  // 4. Xây dựng các khối nội dung tổng hợp
+  const blocks = [];
+
+  if (ancestry.breadcrumbStr) {
+    blocks.push(`🧭 [VỊ TRÍ PHẢ HỆ TRI THỨC MÔN HỌC]: ${ancestry.breadcrumbStr}`);
+  }
+
+  // Khối chính của node này
+  blocks.push(`📌 [NODE HIỆN TẠI (ĐANG HỎI ĐÁP)]: "${target.label || 'Chính nó'}"
+${selfText || '*(Node này chưa có ghi chú văn bản riêng, trọng tâm kiến thức chi tiết nằm tại các node con gần nhất bên dưới)*'}`);
+
+  // Khối các node con gần nhất nếu có
+  const childImages = [];
+  if (isParentNode) {
+    const childBlocks = directChildren.map((child, idx) => {
+      const childText = extractNodeText(child);
+
+      // Thu thập ảnh từ visualNotes của node con nếu có
+      if (child.visualNotes && typeof child.visualNotes === 'object' && child.visualNotes.html) {
+        const matches = child.visualNotes.html.match(/<img[^>]+src=["'](data:image\/[^"']+)["']/g);
+        if (matches) {
+          matches.slice(0, 2).forEach(tag => {
+            const src = tag.match(/src=["'](data:image\/[^"']+)["']/)?.[1];
+            if (src) {
+              const mime = src.split(';')[0].replace('data:', '') || 'image/jpeg';
+              childImages.push({ mimeType: mime, base64: src, label: child.label });
+            }
+          });
+        }
+      }
+
+      return `🌿 [NODE CON GẦN NHẤT ${idx + 1}: "${child.label || 'Nhánh con'}"]
+${childText || '*(Chưa có ghi chú văn bản riêng)*'}`;
+    });
+
+    blocks.push(`📂 [TOÀN BỘ NGỮ CẢNH CỦA CÁC NODE CON GẦN NHẤT THUỘC "${target.label}" (${directChildren.length} nhánh kiến thức)]:
+Dưới đây là TOÀN BỘ NGỮ CẢNH CHI TIẾT của các node con gần nhất trực thuộc node cha này. Bạn PHẢI đọc và đối chiếu toàn bộ các node con này để trả lời đầy đủ, liên hệ ví dụ thực tế và giải thích bản chất câu hỏi của sinh viên:
+
+${childBlocks.join('\n\n')}`);
+  }
+
+  return {
+    targetNode: target,
+    isParentNode,
+    directChildren,
+    breadcrumbStr: ancestry.breadcrumbStr,
+    comprehensiveNotes: blocks.join('\n\n'),
+    childImages
+  };
+}
+
 // ==========================================================================
 // 3. AI GENERATION ENGINE (VỚI HIERARCHICAL CONTEXT BACKTRACKING)
 // ==========================================================================
@@ -457,15 +537,24 @@ export async function askContextualNoteQuestion({
 }) {
   const apiKey = getGeminiApiKey();
 
-  // Truy vết phả hệ nơ-ron từ Root đến Node hiện tại
+  // Phân tích toàn diện phân cấp tri thức nơ-ron (chính nó, tổ tiên và toàn bộ node con gần nhất)
   const nodes = Array.isArray(allNodes) ? allNodes : [];
   const node = targetNode || { label: 'Ghi chú học tập' };
-  const ancestry = traceNodeAncestryPath(nodes, node);
+  const hierarchy = collectNodeHierarchyContext(nodes, node, fullContext);
   const targetLabel = node.label || 'Khái niệm';
-  const breadcrumb = ancestry.breadcrumbStr || targetLabel;
+  const breadcrumb = hierarchy.breadcrumbStr || targetLabel;
 
-  // Tổng hợp toàn cảnh ghi chú
-  const effectiveFullNotes = (fullContext || ancestry.cumulativeNotes || extractNodeText(node) || '').trim();
+  // Gộp thêm ảnh từ visualNotes của node con nếu phía gọi chưa có đủ ảnh
+  const effectiveFocalImages = [...focalImages];
+  if (effectiveFocalImages.length < 3 && hierarchy.childImages && hierarchy.childImages.length > 0) {
+    for (const cImg of hierarchy.childImages) {
+      if (effectiveFocalImages.length >= 3) break;
+      effectiveFocalImages.push(cImg);
+    }
+  }
+
+  // Tổng hợp toàn cảnh ghi chú (kết hợp cả chính nó và toàn bộ các node con gần nhất)
+  const effectiveFullNotes = (hierarchy.comprehensiveNotes || fullContext || extractNodeText(node) || '').trim();
 
   // Nếu chưa cấu hình API Key, thông báo hướng dẫn người dùng
   if (!apiKey) {
@@ -477,18 +566,26 @@ export async function askContextualNoteQuestion({
   }
 
   // Hướng dẫn Multimodal Vision nếu có ảnh đính kèm
-  const hasImages = Array.isArray(focalImages) && focalImages.length > 0;
+  const hasImages = Array.isArray(effectiveFocalImages) && effectiveFocalImages.length > 0;
   const imageVisionGuide = hasImages ? `
 🖼️ DỮ LIỆU THỊ GIÁC TRỰC TIẾP ĐƯỢC ĐÍNH KÈM (MULTIMODAL VISION):
-- Hệ thống đã gửi kèm trực tiếp ${focalImages.length} hình ảnh (ảnh chụp slide bài giảng, ảnh ma trận tương quan, biểu đồ đồ thị, bảng số liệu hoặc bài viết tay) từ bài ghi chú hoặc từ vùng sinh viên vừa khoanh chọn.
+- Hệ thống đã gửi kèm trực tiếp ${effectiveFocalImages.length} hình ảnh (ảnh chụp slide bài giảng, ảnh ma trận tương quan, biểu đồ đồ thị, bảng số liệu hoặc bài viết tay) từ bài ghi chú hoặc từ vùng sinh viên vừa khoanh chọn.
 - BẮT BUỘC BẠN PHẢI "NHÌN VÀ QUAN SÁT TRỰC TIẾP TỪNG PIXEL TRÊN HÌNH ẢNH":
   * Đọc chính xác từng con số, ký hiệu ma trận hàng - cột, hệ số tương quan, phương trình toán học trên ảnh.
   * Nếu ghi chú chỉ toàn ảnh (không có chữ gõ văn bản), bạn hoàn toàn dựa vào nội dung trong ảnh và câu hỏi của sinh viên để bóc tách và giải thích cặn kẽ, đầy đủ 100%.
   * Không đoán mò, hãy đọc đúng con số hiển thị trên ảnh.` : '';
 
+  // Chỉ dẫn ngữ cảnh Node Cha và Node Con Gần Nhất
+  const parentNodeNotice = hierarchy.isParentNode ? `
+🏛️ BẠN ĐANG PHẢN HỒI CHO MỘT NODE CHA TRONG SƠ ĐỒ TRI THỨC (CÓ ${hierarchy.directChildren.length} NODE CON GẦN NHẤT):
+- Sinh viên đang đặt câu hỏi tại Node Cha: "${targetLabel}".
+- Danh sách các Node con gần nhất: ${hierarchy.directChildren.map((c, i) => `"${c.label}"`).join(', ')}.
+- BẮT BUỘC BẠN PHẢI ĐỌC TOÀN BỘ NGỮ CẢNH CỦA CHÍNH NODE NÀY VÀ TẤT CẢ CÁC NODE CON GẦN NHẤT DƯỚI ĐÂY:
+  * Khi câu hỏi yêu cầu giải thích, cho ví dụ minh họa thực tế, tính toán hoặc bóc tách bài toán: Hãy khai thác triệt để các ví dụ, số liệu, trường hợp điển hình, công thức và bản chất đã được ghi chép trong các node con gần nhất để làm sáng tỏ, giúp câu trả lời sinh động, bám sát đúng bài học của sinh viên.` : '';
+
   // Xây dựng System Prompt sư phạm cao cấp: TIÊU ĐIỂM HÓA CHUYÊN SÂU
   const systemInstruction = `Bạn là Trợ lý Học tập & Cố vấn Nghiên cứu AI Chuyên Sâu cấp Đại học.
-
+${parentNodeNotice}
 🎯 TIÊU ĐIỂM BẮT BUỘC PHẢN HỒI (VÙNG MÀ SINH VIÊN VỪA KHOANH CHỌN ĐỂ HỎI):
 """
 ${focalText ? focalText.slice(0, 3000) : (hasImages ? '(Sinh viên khoanh chọn vùng hình ảnh / bảng biểu, hãy quan sát trực tiếp dữ liệu ảnh đính kèm)' : '(Không trích xuất được văn bản trực tiếp, hãy dựa vào câu hỏi sinh viên)')}
@@ -498,9 +595,9 @@ ${imageVisionGuide}
 ❓ CÂU HỎI TRỌNG TÂM CỦA SINH VIÊN:
 "${userQuestion.trim() || 'Giải thích chi tiết ý nghĩa cụ thể của từng phần tử / con số trong vùng được chọn này.'}"
 
-📖 TÀI LIỆU TOÀN BÀI ĐỂ TRA CỨU PHỤ (CHỈ DÙNG ĐỂ ĐỐI CHIẾU KÝ HIỆU, TÊN BIẾN - TUYỆT ĐỐI KHÔNG TÓM TẮT TOÀN BỘ TÀI LIỆU NÀY):
+📖 TOÀN BỘ NGỮ CẢNH CỦA CHÍNH NODE NÀY VÀ CÁC NODE CON GẦN NHẤT ĐỂ ĐỐI CHIẾU, TÍNH TOÁN & LẤY VÍ DỤ MINH HỌA:
 """
-${effectiveFullNotes ? effectiveFullNotes.slice(0, 5000) : '(Ghi chú dạng thị giác / hình ảnh trực tiếp)'}
+${effectiveFullNotes ? effectiveFullNotes.slice(0, 16000) : '(Ghi chú dạng thị giác / hình ảnh trực tiếp)'}
 """
 
 ⚡ QUY TẮC PHẢN HỒI BẮT BUỘC (ANTI-GENERIC & LASER-FOCUSED):
@@ -511,11 +608,12 @@ ${effectiveFullNotes ? effectiveFullNotes.slice(0, 5000) : '(Ghi chú dạng th�
      * Nếu là Ma trận (ví dụ: Ma trận tương quan): Giải thích ngay ý nghĩa cụ thể của từng phần tử hàng-cột $r_{ij}$, đường chéo chính (tự tương quan = 1), các hệ số tương quan giữa từng cặp biến (âm/dương, mạnh/yếu), và biến nào tương quan mạnh nhất đến biến phụ thuộc.
      * Nếu là Công thức: Phân tích trực tiếp từng biến số, tham số, dấu phép toán và ý nghĩa thực tiễn.
      * Nếu là Bảng số liệu hoặc Biểu đồ trên ảnh: Đọc và nhận xét trực tiếp các giá trị đột biến, xu hướng hoặc tương quan cụ thể.
-2. SỬ DỤNG NGỮ CẢNH TOÀN BÀI MỘT CÁCH THẨM THẤU (SUBTLE CONTEXT INTEGRATION):
-   - Chỉ dùng tài liệu toàn bài để biết các ký hiệu trong vùng chọn đại diện cho đại lượng thực tế nào trong bài tập (ví dụ: x1 là gì, x2 là gì, y là gì...). Hãy gọi đúng tên biến thực tế đó khi giải thích từng phần tử trong vùng chọn!
+2. SỬ DỤNG NGỮ CẢNH CỦA CHÍNH NODE VÀ CÁC NODE CON GẦN NHẤT MỘT CÁCH THẨM THẤU:
+   - Dùng tài liệu toàn bài và các node con gần nhất để biết các ký hiệu trong vùng chọn đại diện cho đại lượng thực tế nào trong bài tập (ví dụ: x1 là gì, x2 là gì, y là gì...). Hãy gọi đúng tên biến thực tế đó khi giải thích từng phần tử trong vùng chọn!
+   - Nếu sinh viên hỏi về ví dụ thực tế hoặc bài toán minh họa: BẮT BUỘC ưu tiên sử dụng ví dụ, dữ liệu và trường hợp đã được ghi chép trong các node con gần nhất của node này.
 3. TRÌNH BÀY GỌN GÀNG, SƯ PHẠM, ĐẦY ĐỦ Ý & TRỌN VẸN (KHÔNG NGẮT GIỮA CHỪNG):
    - Trả lời TRỌN VẸN câu kết luận, tuyệt đối KHÔNG dừng lửng lơ hay ngắt câu giữa chừng.
-   - Về Ma trận: Hãy biểu diễn rõ ràng từng hàng và từng cột (hoặc Bảng Markdown, hoặc cú pháp LaTeX đầy đủ chuẩn xác \begin{bmatrix} a & b \\ c & d \end{bmatrix} với dấu xuống dòng \\ rõ ràng giữa các hàng).
+   - Về Ma trận: Hãy biểu diễn rõ ràng từng hàng và từng cột (hoặc Bảng Markdown, hoặc cú pháp LaTeX đầy đủ chuẩn xác \\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix} với dấu xuống dòng \\\\ rõ ràng giữa các hàng).
    - Về công thức & ký hiệu toán học: Hãy viết bằng ký hiệu Unicode trực quan (ví dụ: XᵀX, r_ij, x₁, x₂, β̂ = (XᵀX)⁻¹Xᵀy), tuyệt đối KHÔNG để sót các ký hiệu gãy dở dang.
 4. Trả lời bằng Tiếng Việt chuẩn mực.`;
 
@@ -528,7 +626,7 @@ ${effectiveFullNotes ? effectiveFullNotes.slice(0, 5000) : '(Ghi chú dạng th�
   // Chuẩn bị parts cho turn đầu tiên (bao gồm Text Prompt + Multimodal Image Parts)
   const initialParts = [{ text: initialUserPrompt }];
   if (hasImages) {
-    focalImages.forEach(img => {
+    effectiveFocalImages.forEach(img => {
       if (img && img.base64) {
         const cleanBase64 = img.base64.replace(/^data:[^;]+;base64,/, '').trim();
         if (cleanBase64) {

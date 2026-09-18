@@ -3,6 +3,27 @@
 > **Dự án**: Lịch Học Thông Minh & Chiếc Cặp Google Drive  
 > **Mục tiêu**: Lưu trữ tự động các góc nhìn tiếp thị, điểm độc đáo (USP), viral hooks và kịch bản truyền thông từ các tính năng kỹ thuật.
 
+## 💎 ENTRY 19: [2026-09-18] - "AI Copilot Biết Nhìn Xuống Nhánh Con": Khi Hỏi Node Cha, AI Tự Đọc Hết Cả Đàn Con Để Lấy Ví Dụ Minh Họa Chuẩn Chỉ 🌿🧠🏛️✨
+
+### 📌 Phân Loại & Tags:
+`#HierarchicalContext` `#AICopilot` `#NeuralMindmap` `#SmartStudy` `#EdTechInnovation` `#DeepContextLearning`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Phản Hồi Đẳng Cấp Nhờ Đọc Hiểu Phân Cấp Tri Thức (Hierarchical Context Synthesis)**:
+  * Trong các ứng dụng sơ đồ tư duy hay ghi chú thông thường, AI chỉ biết đúng 1 khối chữ của node bạn đang bấm vào.
+  * Với Smart Schedule: Khi bạn đứng ở Node Cha (ví dụ: *"Phân tách tuyến tính & Perceptron"*), AI Copilot tự động "nhìn xuống" tất cả các Node Con trực tiếp gần nhất (*"Bài toán cổng logic XOR"*, *"Hàm kích hoạt Sigmoid"*, *"Ma trận trọng số W"*).
+  * AI hấp thụ toàn bộ lý thuyết của cha + toàn bộ ví dụ minh họa, bài toán thực tế, công thức và hình ảnh của các con để trả lời.
+- **Không Còn Câu Trả Lời Chung Chung Hay Bịa Ví Dụ**: Khi bạn hỏi *"Giải thích bản chất và cho ví dụ thực tế môn này"*, AI không lấy ví dụ vu vơ trên mạng mà lấy đúng số liệu, bài tập và ví dụ thực tế đã ghi chép trong các node con gần nhất của bạn.
+- **Multimodal Vision Xuyên Tầng**: Nếu các node con có đính kèm ảnh slide bài giảng hoặc ma trận số liệu, AI tự động nạp hình ảnh vào Gemini 2.5 Flash Vision để đọc từng pixel và đối chiếu.
+- **Ngữ Cảnh Mở Rộng 16,000 Ký Tự**: Đảm bảo bao trọn toàn bộ kiến thức của cả cụm nhánh môn học mà không bị rơi rụng chi tiết.
+
+### 2. 🎣 Viral Hooks Cho TikTok / Reels / Shorts:
+- **Hook 1 (So sánh)**: *"AI thông thường chỉ đọc đúng 1 dòng bạn ghi... Còn con AI này khi hỏi ở chương lớn, nó tự lục tung ghi chú ở từng bài nhỏ bên dưới để lôi ví dụ thực tế ra giải thích cho bạn!"*
+- **Hook 2 (Ôn thi bách khoa)**: *"Học sơ đồ tư duy nơ-ron thế này bảo sao điểm GPA không chạm nóc 4.0: Bấm vào Node Cha hỏi 1 câu, AI tổng hợp toàn bộ bài tập của 5 node con gần nhất trả lời nét căng!"*
+- **Hook 3 (Trực quan)**: *"Mẹo dùng AI ôn thi đại học không bị lan man: Tận dụng cơ chế phả hệ cây tri thức, AI tự đọc cả cha lẫn con để liên hệ kiến thức siêu đỉnh!"*
+
+---
+
 ## 💎 ENTRY 18: [2026-09-18] - "Thanh Lọc Lời Thoại AI Chỉ Với 1 Click": Chat Bao Nhiêu Lượt Vẫn Luôn Gọn Gàng, Sạch Mắt Và Đỉnh Cao Trực Giác 🗑️💬✨
 
 ### 📌 Phân Loại & Tags:

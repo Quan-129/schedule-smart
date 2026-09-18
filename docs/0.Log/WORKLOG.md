@@ -4,6 +4,32 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-18 19:25] - AI Copilot Đọc Toàn Bộ Ngữ Cảnh Của Node Con Gần Nhất & Chính Nó Khi Hỏi Đáp Tại Node Cha 🌿🧠🏛️✨
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng yêu cầu: *"à tại node cha nó phải đọc toàn bộ ngữ cảnh của node con gần nhất và của chính nó để trả lời nhé"*.
+  - Thực trạng trước đây:
+    * Trước đây trợ lý AI chỉ truy vết ngược lên trên (tổ tiên: Con ➔ Cha ➔ Gốc) để lấy định nghĩa tổng quát, hoặc chỉ đọc duy nhất nội dung của node hiện tại.
+    * Khi người dùng mở AI Copilot tại một Node Cha (ví dụ: Node chương lớn, khái niệm bao quát như "Phân tách tuyến tính & Perceptron", "Hồi quy tuyến tính", "Cấu trúc dữ liệu & Giải thuật"): AI không biết được các ví dụ minh họa cụ thể, bài toán thực tế, công thức chi tiết, ma trận số liệu hay hình ảnh slide được sinh viên ghi chép ở các Node Con trực tiếp (Direct Children).
+    * Kết quả: Câu trả lời của AI tại Node Cha có xu hướng mang tính lý thuyết chung chung, không tận dụng được kho tài liệu chi tiết mà sinh viên đã cất công ghi chép ở các nhánh con.
+  - Giải pháp & Trải nghiệm hoàn thiện:
+    1. **Thuật toán Phân tích Cấu trúc Phân cấp Hai Chiều (`collectNodeHierarchyContext`)**:
+       - Tự động nhận diện xem Node hiện tại có phải là Node Cha hay không thông qua việc lọc tất cả các node con gần nhất (`nodes.filter(n => n && n.parentId === target.id && n.id !== target.id)`).
+       - Tổng hợp trọn vẹn 3 tầng ngữ cảnh:
+         * **Tầng 1 - Vị trí phả hệ**: Chuỗi breadcrumb tri thức từ Gốc đến Node hiện tại.
+         * **Tầng 2 - Nội dung Node Hiện Tại**: Văn bản ghi chú Markdown & Visual Notes của chính node này (bao gồm cả nội dung đang gõ trực tiếp trong Editor).
+         * **Tầng 3 - Toàn bộ Ngữ Cảnh Các Node Con Gần Nhất**: Duyệt qua từng node con trực tiếp, trích xuất toàn văn ghi chú lý thuyết, ví dụ thực tế, công thức và bảng biểu.
+    2. **Đồng bộ hóa Dữ liệu Thị giác (Multimodal Vision Con Trực Tiếp)**:
+       - Tự động trích xuất các hình ảnh (slide bài giảng, đồ thị, ma trận) từ thuộc tính `visualNotes` của các node con gần nhất và đính kèm vào dữ liệu hình ảnh gửi tới Google Gemini 2.5 Flash Vision.
+    3. **Chỉ dẫn Sư phạm Chuyên biệt trong System Prompt (`parentNodeNotice`)**:
+       - Thông báo tường minh cho Gemini: *"Bạn đang phản hồi cho một Node Cha trong sơ đồ tri thức (có N node con gần nhất)"*.
+       - Chỉ thị bắt buộc Gemini phải đọc toàn bộ ngữ cảnh của chính node và các node con gần nhất: Khi giải thích, chứng minh hoặc đưa ví dụ minh họa, AI BẮT BUỘC phải khai thác trực tiếp các số liệu, ví dụ thực tế và bài toán đã được lưu trong các node con gần nhất thay vì bịa ra ví dụ xa lạ.
+    4. **Mở rộng Ngữ cảnh lên 16,000 Ký tự**: Tận dụng triệt để Context Window của Gemini 2.5 Flash để chứa đầy đủ toàn bộ văn bản của node cha và hàng loạt node con gần nhất mà không lo bị cắt ngắn.
+- **🛠 Triển khai kỹ thuật ([`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js), [`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  - Xây dựng hàm `collectNodeHierarchyContext(allNodes, targetNodeOrId, activeText)` trong `GeminiAIService.js`.
+  - Nâng cấp `askContextualNoteQuestion` để tự động tổng hợp `hierarchy`, tích hợp ảnh node con vào `effectiveFocalImages`, mở rộng `effectiveFullNotes.slice(0, 16000)` và tiêm `parentNodeNotice` vào System Instruction.
+  - Cập nhật bộ nhớ đệm Service Worker lên `smart-schedule-modular-v166`.
+
 ## 📅 [2026-09-18 19:15] - Bổ Sung Tùy Chọn Xóa Từng Lời Thoại Người Dùng & Bot (Granular Message Deletion & Chat Cleaner) 🗑️💬✨
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:
