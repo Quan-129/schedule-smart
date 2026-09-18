@@ -969,8 +969,9 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
         card.classList.add('dragging');
 
         const onPointerMove = (moveEvt) => {
-          const dx = moveEvt.clientX - startX;
-          const dy = moveEvt.clientY - startY;
+          const zoom = parseFloat(notepadBodyEl?.style?.getPropertyValue('--notepad-zoom')) || 1.0;
+          const dx = (moveEvt.clientX - startX) / zoom;
+          const dy = (moveEvt.clientY - startY) / zoom;
           if (Math.hypot(dx, dy) > 3) {
             isDragged = true;
           }
@@ -1021,7 +1022,8 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
           let isResized = false;
 
           const onResizeMove = (moveEvt) => {
-            const dx = moveEvt.clientX - startX;
+            const zoom = parseFloat(notepadBodyEl?.style?.getPropertyValue('--notepad-zoom')) || 1.0;
+            const dx = (moveEvt.clientX - startX) / zoom;
             if (Math.abs(dx) > 2) {
               isResized = true;
             }

@@ -1161,7 +1161,7 @@ body.neural-resizing-active {
 }
 
 
-/* Textarea Soạn Thảo */
+/* Textarea Soạn Thảo (Scale kiểu Microsoft Word) */
 .neural-notepad-textarea {
   width: 100%;
   height: 100%;
@@ -1172,10 +1172,11 @@ body.neural-resizing-active {
   resize: none;
   color: #f8fafc;
   font-family: 'JetBrains Mono', monospace;
-  font-size: calc(0.88rem * var(--notepad-zoom, 1));
+  font-size: 0.88rem;
   line-height: 1.65;
   box-sizing: border-box;
-  transition: font-size 0.15s ease;
+  zoom: var(--notepad-zoom, 1);
+  transition: zoom 0.15s ease;
 }
 
 .neural-notepad-textarea::placeholder {
@@ -1184,7 +1185,7 @@ body.neural-resizing-active {
   font-family: 'Outfit', sans-serif;
 }
 
-/* Bảng Notepad Đã Gen Ra (Rich Preview) */
+/* Bảng Notepad Đã Gen Ra (Rich Preview - Scale đồng bộ cả chữ, ảnh và bảng kiểu Microsoft Word) */
 .neural-notepad-rendered-content {
   width: 100%;
   height: 100%;
@@ -1192,12 +1193,24 @@ body.neural-resizing-active {
   overflow-y: auto;
   color: #e2e8f0;
   font-family: 'Outfit', sans-serif;
-  font-size: calc(0.95rem * var(--notepad-zoom, 1));
+  font-size: 0.95rem;
   line-height: 1.7;
   box-sizing: border-box;
   background: radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.03) 0%, transparent 60%);
   position: relative;
-  transition: font-size 0.15s ease;
+  zoom: var(--notepad-zoom, 1);
+  transform-origin: top left;
+  transition: zoom 0.15s ease;
+}
+
+.neural-notepad-rendered-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 8px 0;
+  display: inline-block;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  transition: box-shadow 0.2s ease;
 }
 
 .neural-notepad-rendered-content p {
@@ -1206,7 +1219,7 @@ body.neural-resizing-active {
 }
 
 .neural-notepad-rendered-content h2 {
-  font-size: calc(1.35rem * var(--notepad-zoom, 1));
+  font-size: 1.35rem;
   font-weight: 700;
   color: #ffffff;
   margin: 16px 0 10px 0;
@@ -1215,14 +1228,14 @@ body.neural-resizing-active {
 }
 
 .neural-notepad-rendered-content h3 {
-  font-size: calc(1.15rem * var(--notepad-zoom, 1));
+  font-size: 1.15rem;
   font-weight: 600;
   color: #f1f5f9;
   margin: 14px 0 8px 0;
 }
 
 .neural-notepad-rendered-content h4 {
-  font-size: calc(1rem * var(--notepad-zoom, 1));
+  font-size: 1rem;
   font-weight: 600;
   color: #cbd5e1;
   margin: 10px 0 6px 0;
@@ -1234,11 +1247,11 @@ body.neural-resizing-active {
 }
 
 .neural-notepad-rendered-content code {
-  font-size: calc(0.88rem * var(--notepad-zoom, 1));
+  font-size: 0.88rem;
 }
 
 .neural-notepad-rendered-content pre {
-  font-size: calc(0.9rem * var(--notepad-zoom, 1));
+  font-size: 0.9rem;
 }
 
 /* 4 Định Dạng Văn Bản Chính */
@@ -1607,13 +1620,16 @@ body.neural-resizing-active {
   border-color: #6366f1;
 }
 
-/* Content Area: Vùng soạn thảo Rich-Text nền */
+/* Content Area: Vùng soạn thảo Rich-Text nền (Scale kiểu Microsoft Word đồng bộ cả chữ và ảnh dán) */
 .visual-note-canvas-wrapper {
   position: relative;
   flex: 1;
   min-height: 600px;
   padding: 20px 24px 160px 24px;
   box-sizing: border-box;
+  zoom: var(--notepad-zoom, 1);
+  transform-origin: top left;
+  transition: zoom 0.15s ease;
 }
 
 .visual-rich-editor {
@@ -1621,13 +1637,12 @@ body.neural-resizing-active {
   min-height: 400px;
   color: #e2e8f0;
   font-family: 'Outfit', sans-serif;
-  font-size: calc(0.95rem * var(--notepad-zoom, 1));
+  font-size: 0.95rem;
   line-height: 1.75;
   outline: none;
   position: relative;
   z-index: 1;
   word-break: break-word;
-  transition: font-size 0.15s ease;
 }
 
 .visual-rich-editor[contenteditable="true"]:empty:before {
@@ -2102,10 +2117,20 @@ body.neural-resizing-active {
 .neural-ai-bubble {
   padding: 10px 14px;
   border-radius: 12px;
-  font-size: calc(0.85rem * var(--ai-chat-zoom, 1));
+  font-size: 0.85rem;
   line-height: 1.6;
   word-break: break-word;
-  transition: font-size 0.15s ease;
+  zoom: var(--ai-chat-zoom, 1);
+  transition: zoom 0.15s ease;
+}
+
+.neural-ai-bubble img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 6px 0;
+  display: block;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
 .neural-ai-msg.user .neural-ai-bubble {

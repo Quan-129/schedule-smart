@@ -4,6 +4,26 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-18 13:15] - Nâng Cấp Phóng To Toàn Diện Kiểu Microsoft Word: Scale Đồng Bộ Cả Chữ, Ảnh & Bảng Biểu 📄🖼️✨
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng phản hồi: *"nó đang bị to mỗi chữ, nếu cả chứ và ảnh thì sao, scale kiểu trong word ấy"*.
+  - Phân tích vấn đề:
+    1. Trước đó, tính năng chỉ tăng `font-size` của văn bản. Khi phóng to lên 130% - 150%, chữ to đùng trong khi hình ảnh (ảnh Markdown, ảnh dán trong Visual Note, ảnh AI) vẫn giữ nguyên kích thước pixel cũ, làm mất cân đối bố cục.
+    2. Trong Microsoft Word hay Google Docs, khi phóng to trang (Page Zoom), **toàn bộ nội dung tài liệu (cả chữ, hình ảnh, bảng biểu, ma trận toán học, khối code, khoảng cách lề)** đều được scale đồng bộ theo đúng tỷ lệ 1:1, giữ nguyên vẹn tương quan thiết kế.
+- **🛠 Triển khai kỹ thuật ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  1. **Áp Dụng Thuộc Tính CSS `zoom` Đẳng Cấp Word ([`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Đưa kích thước `font-size` về chuẩn tĩnh tự nhiên (`0.95rem`, `0.88rem`,...).
+     - Áp dụng `zoom: var(--notepad-zoom, 1);` cho:
+       * **Markdown Soạn Thảo**: `.neural-notepad-textarea` (scale chữ, con trỏ caret, padding).
+       * **Markdown Rich Preview**: `.neural-notepad-rendered-content` (scale đồng bộ văn bản, các thẻ `<img>`, bảng biểu `<table>`, khối công thức toán học LaTeX, khối mã code `<pre>`). Thêm style `max-width: 100%; height: auto; border-radius: 8px;` cho ảnh preview.
+       * **Visual Note Canvas**: `.visual-note-canvas-wrapper` (scale đồng bộ cả text nền `.visual-rich-editor` lẫn toàn bộ các thẻ card hình ảnh nổi dán trên văn bản `.visual-floating-img-card`).
+     - Áp dụng `zoom: var(--ai-chat-zoom, 1);` cho `.neural-ai-bubble` và `.neural-ai-input` trong Khung Chat AI (scale đồng bộ cả chữ và ảnh đính kèm/sơ đồ của AI).
+  2. **Tối Ưu Thao Tác Kéo Thả & Co Giãn Ảnh ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Trong thuật toán `onPointerMove` và `onResizeMove` của thẻ ảnh Visual Note, tự động chia delta pixel cho `zoomFactor` (`dx = (clientX - startX) / zoom`), giúp con trỏ chuột bám dính 100% vào tâm và 4 góc của ảnh ở mọi mức zoom từ 70% đến 220%.
+  3. **Nâng Cấp Service Worker**:
+     - Cập nhật cache Service Worker lên **`smart-schedule-modular-v162`**.
+
 ## 📅 [2026-09-18 13:10] - Mở Rộng Điều Khiển Cỡ Chữ Độc Lập Cho Khung Ghi Chú Bên Phải (Notepad Body Independent Zoom) 📝🔤✨
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:
