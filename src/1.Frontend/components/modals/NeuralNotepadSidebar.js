@@ -4021,19 +4021,24 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   const btnDeleteNode = sidebar.querySelector('#btn-delete-node-from-sidebar');
   if (btnDeleteNode) {
     btnDeleteNode.addEventListener('click', () => {
-      if (node.parentId === null) {
-        showToast('Không thể xóa Node Gốc của môn học!', 'warning');
-        return;
-      }
+      const isRoot = node.parentId === null;
       const allNodes = getSubjectKnowledgeNodes(subjectCode);
       const childCount = allNodes.filter(n => n && n.parentId === node.id && n.id !== node.id).length;
-      const confirmMsg = childCount > 0
-        ? `Xóa node "${node.label}" sẽ đồng thời xóa ${childCount} nhánh con trực thuộc.\n\nBạn có chắc chắn muốn xóa không?`
-        : `Bạn có chắc chắn muốn xóa node "${node.label}" không?`;
+
+      let confirmMsg = '';
+      if (isRoot) {
+        confirmMsg = childCount > 0
+          ? `⚠️ BẠN ĐANG XÓA NODE GỐC CỦA MÔN HỌC!\n\nThao tác này sẽ xóa toàn bộ sơ đồ tri thức gồm Node Gốc "${node.label}" và ${childCount} nhánh con trực thuộc.\n\nBạn có chắc chắn muốn xóa toàn bộ không?`
+          : `⚠️ Bạn có chắc chắn muốn xóa Node Gốc "${node.label}" không?`;
+      } else {
+        confirmMsg = childCount > 0
+          ? `Xóa node "${node.label}" sẽ đồng thời xóa ${childCount} nhánh con trực thuộc.\n\nBạn có chắc chắn muốn xóa không?`
+          : `Bạn có chắc chắn muốn xóa node "${node.label}" không?`;
+      }
 
       if (window.confirm(confirmMsg)) {
         deleteNeuralNode(subjectCode, node.id);
-        showToast(`Đã xóa node "${node.label}" thành công! 🗑️`, 'success');
+        showToast(isRoot ? `Đã xóa Node Gốc "${node.label}" thành công! 🗑️` : `Đã xóa node "${node.label}" thành công! 🗑️`, 'success');
         closeNeuralNotepadSidebar();
         if (onSavedCallback) onSavedCallback(node.id, null, true);
       }

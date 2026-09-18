@@ -563,7 +563,7 @@ export function getSubjectKnowledgeNodes(subjectCode) {
   const subject = (state.driveSubjects || []).find(s => s.code === subjectCode);
   if (!subject) return [];
 
-  if (!Array.isArray(subject.knowledgeNodes) || subject.knowledgeNodes.length === 0) {
+  if (!Array.isArray(subject.knowledgeNodes)) {
     const rootId = 'node_root_' + Date.now();
     const defaultColor = subject.color || '#6366f1';
 
@@ -646,17 +646,21 @@ export function addNeuralNode(subjectCode, parentId, nodeData = {}) {
     subject.knowledgeNodes = [];
   }
 
-  const newNodeId = 'node_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+  const isFirstNode = subject.knowledgeNodes.length === 0;
+  const newNodeId = isFirstNode
+    ? 'node_root_' + Date.now()
+    : 'node_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+
   const newNode = {
     id: newNodeId,
-    parentId: parentId || null,
-    label: (nodeData.label || 'Nhánh mới').trim(),
+    parentId: isFirstNode ? null : (parentId || null),
+    label: (nodeData.label || (isFirstNode ? (subject.name || subject.code || 'Node Gốc') : 'Nhánh mới')).trim(),
     url: (nodeData.url || '').trim(),
     color: nodeData.color || subject.color || '#6366f1',
-    status: nodeData.status || 'todo', // 'todo' | 'learning' | 'completed'
+    status: nodeData.status || (isFirstNode ? 'completed' : 'todo'), // 'todo' | 'learning' | 'completed'
     x: typeof nodeData.x === 'number' ? nodeData.x : 0,
     y: typeof nodeData.y === 'number' ? nodeData.y : 0,
-    notes: (nodeData.notes || '').trim()
+    notes: (nodeData.notes || (isFirstNode ? 'Node gốc môn học' : '')).trim()
   };
 
   subject.knowledgeNodes.push(newNode);
@@ -803,8 +807,7 @@ export function deleteNeuralNode(subjectCode, nodeId) {
   if (!subject || !Array.isArray(subject.knowledgeNodes)) return false;
 
   const targetNode = subject.knowledgeNodes.find(n => n.id === nodeId);
-  if (!targetNode || targetNode.parentId === null) {
-    // Không thể xóa Node Gốc (Root)
+  if (!targetNode) {
     return false;
   }
 

@@ -317,6 +317,12 @@ export class NeuralCanvasEngine {
     // 1. Lưới nền tĩnh đã được xử lý bằng CSS hardware-acceleration trên .neural-canvas-container
     this.drawBackgroundGrid(ctx);
 
+    // Nếu sơ đồ chưa có nhánh nào (hoặc vừa xóa Node Gốc)
+    if (!this.nodes || this.nodes.length === 0) {
+      this.drawEmptyState(ctx);
+      return;
+    }
+
     // 2. Visible nodes only (ẩn các nhánh con của node bị collapsed)
     const visibleNodes = this.getVisibleNodes();
 
@@ -349,6 +355,47 @@ export class NeuralCanvasEngine {
   drawBackgroundGrid(ctx) {
     // Tối ưu hóa hiệu năng: Lưới chấm tĩnh được đảm nhiệm bằng CSS hardware-acceleration
     // trên .neural-canvas-container, triệt tiêu 100,000+ lệnh vẽ arc/fill mỗi giây giúp quạt máy tính êm ru!
+  }
+
+  /**
+   * Vẽ trạng thái rỗng khi sơ đồ chưa có nhánh nào
+   */
+  drawEmptyState(ctx) {
+    ctx.save();
+    const cx = this.width / 2;
+    const cy = this.height / 2;
+
+    // Vòng tròn phát sáng nhịp đập ở tâm
+    const pulseRadius = 52 + Math.sin(this.pulsePhase * Math.PI * 2) * 5;
+    ctx.beginPath();
+    ctx.arc(cx, cy, pulseRadius, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(99, 102, 241, 0.08)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(99, 102, 241, 0.4)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 6]);
+    ctx.stroke();
+
+    // Điểm mút tâm sáng
+    ctx.beginPath();
+    ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+    ctx.fillStyle = '#818cf8';
+    ctx.shadowColor = '#6366f1';
+    ctx.shadowBlur = 16;
+    ctx.fill();
+
+    // Thông điệp hướng dẫn
+    ctx.shadowBlur = 0;
+    ctx.font = "bold 16px 'Outfit', sans-serif";
+    ctx.fillStyle = '#f8fafc';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Sơ đồ tri thức đang trống 🌱', cx, cy + 82);
+
+    ctx.font = "13px 'Outfit', sans-serif";
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillText('Bấm nút "+ Thêm Nhánh" trên thanh công cụ để tạo Node Gốc mới', cx, cy + 107);
+    ctx.restore();
   }
 
   drawConnections(ctx, visibleNodes = this.nodes) {
@@ -1267,6 +1314,7 @@ export class NeuralCanvasEngine {
 
     // 1. Xác định node gốc (root)
     const root = this.nodes.find(n => n.parentId === null) || this.nodes[0];
+    if (!root) return;
     const nodeMap = new Map(this.nodes.map(n => [n.id, n]));
 
     // 2. Xây dựng cây phân cấp (childrenMap)

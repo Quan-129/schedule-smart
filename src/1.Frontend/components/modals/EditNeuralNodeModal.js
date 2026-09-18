@@ -101,11 +101,9 @@ function renderEditModalTemplate(node) {
       </div>
 
       <div class="neural-editor-footer">
-        ${!isRoot ? `
-          <button type="button" class="neural-btn-danger" id="btn-delete-neural-node" data-step="1">
-            <i class="fa-solid fa-trash-can"></i> Xóa nhánh này
-          </button>
-        ` : `<div></div>`}
+        <button type="button" class="neural-btn-danger" id="btn-delete-neural-node" data-step="1">
+          <i class="fa-solid fa-trash-can"></i> ${isRoot ? 'Xóa Node Gốc' : 'Xóa nhánh này'}
+        </button>
         <button type="button" class="neural-btn-save" id="btn-save-neural-node">
           <i class="fa-solid fa-check"></i> Lưu Thay Đổi
         </button>
@@ -245,8 +243,9 @@ export function openEditNeuralNodeModal(subjectCode, node, onSavedCallback, onDe
       if (step === '1') {
         deleteBtn.setAttribute('data-step', '2');
         deleteBtn.style.background = 'rgba(239, 68, 68, 0.35)';
-        deleteBtn.style.borderColor = '#ef4444';
-        deleteBtn.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Nhấn lần nữa để xóa';
+        deleteBtn.innerHTML = isRoot
+          ? '<i class="fa-solid fa-triangle-exclamation"></i> Nhấn lần nữa để xóa toàn bộ sơ đồ'
+          : '<i class="fa-solid fa-triangle-exclamation"></i> Nhấn lần nữa để xóa';
       } else {
         deleteNeuralNode(subjectCode, node.id);
         closeEditNeuralNodeModal();

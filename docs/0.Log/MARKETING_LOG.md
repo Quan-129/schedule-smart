@@ -3,6 +3,28 @@
 > **Dự án**: Lịch Học Thông Minh & Chiếc Cặp Google Drive  
 > **Mục tiêu**: Lưu trữ tự động các góc nhìn tiếp thị, điểm độc đáo (USP), viral hooks và kịch bản truyền thông từ các tính năng kỹ thuật.
 
+## 💎 ENTRY 23: [2026-09-18] - "Đập Đi Xây Lại Sơ Đồ Tri Thức Trong 1 Nốt Nhạc": Quyền Xóa Cả Node Gốc & Khởi Tạo Từ Con Số Không 🌿🗑️⚡✨
+
+### 📌 Phân Loại & Tags:
+`#FullControl` `#RootNodeDeletion` `#MindmapFreedom` `#EmptyStateDesign` `#UXEmpowerment` `#CleanSlate`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Tự Do Không Giới Hạn (Total Creative Freedom)**:
+  * Không còn cảnh bị trói buộc bởi cấu trúc mặc định hay bắt buộc phải giữ lại Node Gốc! Người dùng giờ đây có toàn quyền xóa sạch từ gốc rễ, kể cả Node Gốc của môn học để tái cấu trúc theo tư duy của riêng mình.
+- **Bảo Vệ Đa Tầng Chống Bấm Nhầm (Fail-Safe Confirmation)**:
+  * Khi bấm xóa Node Gốc, hệ thống lập tức hiển thị cảnh báo đỏ rực: *"⚠️ BẠN ĐANG XÓA NODE GỐC CỦA MÔN HỌC! Thao tác này sẽ xóa toàn bộ sơ đồ tri thức gồm Node Gốc và X nhánh con trực thuộc"*, giúp người dùng kiểm soát an toàn tuyệt đối.
+- **Trải Nghiệm Trạng Thái Trống Cyberpunk (Stunning Empty-State Canvas)**:
+  * Khi toàn bộ sơ đồ được dọn sạch, canvas chuyển sang chế độ chờ huyền ảo với vòng sáng nhịp đập neon và hướng dẫn rõ ràng: *"Sơ đồ tri thức đang trống 🌱 - Bấm nút '+ Thêm Nhánh' để tạo Node Gốc mới"*.
+- **Tái Sinh Cây Tri Thức Tức Thì (Instant Rebirth)**:
+  * Bấm "+ Thêm Nhánh", hệ thống tự động nhận diện và tái sinh ngay một Node Gốc hoàn toàn mới tại vị trí trung tâm, giúp người dùng bắt đầu hành trình sáng tạo mới ngay lập tức!
+
+### 2. 🎣 Viral Hooks Cho TikTok / Reels / Shorts:
+- **Hook 1 (Tự do sáng tạo)**: *"Ứng dụng sơ đồ tư duy bình thường ép bạn dùng node gốc có sẵn? Web này cho bạn đập đi xây lại từ gốc chỉ với 1 cú click!"*
+- **Hook 2 (Thẩm mỹ & Hiệu ứng)**: *"Nhìn hiệu ứng canvas Cyberpunk khi xóa sạch sơ đồ nè, nhìn nhịp thở ánh sáng chill dã man!"*
+- **Hook 3 (Năng suất học tập)**: *"Lỡ vẽ sơ đồ ôn thi bị lộn xộn? Xóa sạch cả gốc trong 1 giây để AI gợi ý lại từ đầu chuẩn bài hơn!"*
+
+---
+
 ## 💎 ENTRY 22: [2026-09-18] - "Ném Cả Thư Mục Ảnh Vào Vở Ghi Chú Chỉ Bằng 1 Cú Kéo Thả": Tải Hàng Loạt Ảnh Bài Giảng & Tự Động Xếp Tầng Siêu Mượt 🖼️🚀📥✨
 
 ### 📌 Phân Loại & Tags:

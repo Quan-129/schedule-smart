@@ -4,6 +4,32 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-18 20:45] - Mở Khóa Quyền Xóa Cả Node Gốc & Tái Thiết Sơ Đồ Trống (Full Root Node Deletion & Empty-State Architecture) 🌿🗑️✨
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng yêu cầu: *"cho phép xóa cả node gốc đi chứ"*.
+  - Trước đây hệ thống chặn hoàn toàn việc xóa Node Gốc (`node.parentId === null`) ở mọi nơi (Toolbar, Notepad sidebar, Context menu, Popup sửa node) và hiển thị cảnh báo "Không thể xóa Node Gốc của môn học!".
+  - Điều này hạn chế người dùng khi họ muốn:
+    1. Đập đi xây lại toàn bộ cây tri thức từ đầu.
+    2. Đổi hoàn toàn cấu trúc hoặc không muốn dùng sơ đồ mặc định ban đầu.
+    3. Tự tạo một Node Gốc hoàn toàn mới theo ý thích mà không bị gò bó bởi tên môn học gốc.
+  - Giải pháp triển khai toàn diện & an toàn:
+    1. **Mở khóa xóa Node Gốc trên tất cả các điểm chạm**:
+       - *Nút "Xóa Nhánh" trên Toolbar Canvas*: Khi chọn Node Gốc và bấm xóa, hệ thống cảnh báo rõ ràng: *"⚠️ BẠN ĐANG XÓA NODE GỐC CỦA MÔN HỌC! Thao tác này sẽ xóa toàn bộ sơ đồ tri thức gồm Node Gốc và X nhánh con trực thuộc. Bạn có chắc chắn muốn xóa toàn bộ không?"*. Khi xác nhận, xóa đệ quy Node Gốc cùng toàn bộ con cháu!
+       - *Phím tắt `Delete` & `Backspace`*: Hoạt động tương thích cho cả Node Gốc khi đang được chọn trên canvas.
+       - *Nút Thùng Rác trong Header Notepad Sidebar*: Cho phép xóa Node Gốc trực tiếp khi đang mở ghi chú của Node Gốc.
+       - *Context Menu Chuột Phải*: Hiển thị mục màu đỏ *"🗑️ Xóa Node Gốc (Toàn bộ)"*.
+       - *Popup Sửa Node (`EditNeuralNodeModal.js`)*: Hiển thị nút "Xóa Node Gốc" với cơ chế xác nhận 2 bước chống bấm nhầm.
+    2. **Xử lý trạng thái sơ đồ rỗng (Empty-State Engine) & Tái tạo Node Gốc mới**:
+       - Cập nhật `getSubjectKnowledgeNodes`: Phân biệt giữa "môn học chưa từng khởi tạo" (`undefined`) và "người dùng đã chủ động xóa sạch sơ đồ" (`[]`). Hệ thống không tự ý nạp lại 4 node mẫu demo phiền toái.
+       - Trên Canvas: Khi `nodes.length === 0`, hiển thị giao diện Cyberpunk rỗng tuyệt đẹp với vòng sáng nhịp đập và lời nhắn: *"Sơ đồ tri thức đang trống 🌱 - Bấm nút '+ Thêm Nhánh' trên thanh công cụ để tạo Node Gốc mới"*.
+       - Khi bấm "+ Thêm Nhánh" lúc sơ đồ rỗng: Hệ thống tự động thiết lập node mới làm **Node Gốc Mới** (`parentId: null`, tọa độ `(0, 0)`, trạng thái `completed`), cho phép người dùng bắt đầu nhánh mới tự do 100%!
+- **🛠 Triển khai kỹ thuật ([`state.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/state.js), [`NeuralKnowledgeModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralKnowledgeModal.js), [`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`EditNeuralNodeModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/EditNeuralNodeModal.js), [`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  - Gỡ bỏ điều kiện chặn `targetNode.parentId === null` trong `deleteNeuralNode`.
+  - Cập nhật `addNeuralNode`: Tự động khởi tạo `newNode` làm Root Node khi `subject.knowledgeNodes.length === 0`.
+  - Bổ sung `drawEmptyState` và null-check `root` trong `NeuralCanvasEngine.js`.
+  - Nâng Service Worker Cache lên `smart-schedule-modular-v170`.
+
 ## 📅 [2026-09-18 20:30] - Nâng Cấp Tải Ảnh Hàng Loạt Từ Máy Tính, Kéo Thả Drag-and-Drop & Dán Nhiều Ảnh (Batch Image Upload & Multi-Paste Suite) 🖼️📥⚡
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:

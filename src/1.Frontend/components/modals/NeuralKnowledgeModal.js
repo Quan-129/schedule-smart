@@ -295,6 +295,10 @@ export function openNeuralKnowledgeModal(subjectCode) {
   if (openNotepadBtn) {
     openNotepadBtn.addEventListener('click', () => {
       const currentNodes = getSubjectKnowledgeNodes(subjectCode);
+      if (!currentNodes || currentNodes.length === 0) {
+        showToast('Sơ đồ hiện tại đang trống. Hãy thêm nhánh để mở ghi chú!', 'info');
+        return;
+      }
       const targetId = activeCanvasEngine.selectedNodeId || currentNodes.find(n => n.parentId === null)?.id || currentNodes[0]?.id;
       const targetNode = currentNodes.find(n => n.id === targetId);
       if (targetNode) {
@@ -305,26 +309,34 @@ export function openNeuralKnowledgeModal(subjectCode) {
     });
   }
 
-  // Thêm nhánh con mới
+  // Thêm nhánh con mới (hoặc tạo Node Gốc mới nếu sơ đồ đang trống)
   const addNodeBtn = overlay.querySelector('#btn-neural-add-node');
   addNodeBtn.addEventListener('click', () => {
     const currentNodes = getSubjectKnowledgeNodes(subjectCode);
-    const parentId = activeCanvasEngine.selectedNodeId || currentNodes.find(n => n.parentId === null)?.id || currentNodes[0]?.id;
-    const parent = currentNodes.find(n => n.id === parentId) || { x: 0, y: 0 };
+    const isFirstNode = !currentNodes || currentNodes.length === 0;
 
-    // Tính toán tọa độ phân nhánh đẹp mắt quanh parent
-    const angle = Math.random() * Math.PI * 2;
-    const distance = 160 + Math.random() * 60;
-    const newX = Math.round((parent.x || 0) + Math.cos(angle) * distance);
-    const newY = Math.round((parent.y || 0) + Math.sin(angle) * distance);
+    let parentId = null;
+    let newX = 0;
+    let newY = 0;
+
+    if (!isFirstNode) {
+      parentId = activeCanvasEngine.selectedNodeId || currentNodes.find(n => n.parentId === null)?.id || currentNodes[0]?.id || null;
+      const parent = currentNodes.find(n => n.id === parentId) || { x: 0, y: 0 };
+      // Tính toán tọa độ phân nhánh đẹp mắt quanh parent
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 160 + Math.random() * 60;
+      newX = Math.round((parent.x || 0) + Math.cos(angle) * distance);
+      newY = Math.round((parent.y || 0) + Math.sin(angle) * distance);
+    }
 
     const newNode = addNeuralNode(subjectCode, parentId, {
-      label: 'Nhánh kiến thức mới',
-      url: '',
+      label: isFirstNode ? (subject.name || subject.code || 'Node Gốc Mới') : 'Nhánh kiến thức mới',
+      url: isFirstNode ? (subject.link || '') : '',
       color: subject.color || '#6366f1',
-      status: 'todo',
+      status: isFirstNode ? 'completed' : 'todo',
       x: newX,
-      y: newY
+      y: newY,
+      notes: isFirstNode ? 'Node gốc môn học' : ''
     });
 
     const refreshed = getSubjectKnowledgeNodes(subjectCode);
@@ -345,35 +357,46 @@ export function openNeuralKnowledgeModal(subjectCode) {
   });
 
   // ========================================================================
-  // XÓA NHÁNH KIẾN THỨC (DELETE NODE) & CONTEXT MENU CHUỘT PHẢI
+  // XÓA NHÁNH KIẾN THỨC (DELETE NODE / ROOT NODE) & CONTEXT MENU CHUỘT PHẢI
   // ========================================================================
   const deleteNodeBtn = overlay.querySelector('#btn-neural-delete-node');
   const handleDeleteSelectedNode = () => {
     const selectedId = activeCanvasEngine?.selectedNodeId;
+    const currentNodes = getSubjectKnowledgeNodes(subjectCode);
+
+    if (!currentNodes || currentNodes.length === 0) {
+      showToast('Sơ đồ hiện tại đang trống, không có nhánh nào để xóa!', 'info');
+      return;
+    }
+
     if (!selectedId) {
       showToast('Vui lòng nhấp chọn nhánh bạn muốn xóa trên sơ đồ!', 'warning');
       return;
     }
-    const currentNodes = getSubjectKnowledgeNodes(subjectCode);
+
     const targetNode = currentNodes.find(n => n.id === selectedId);
     if (!targetNode) return;
 
-    if (targetNode.parentId === null) {
-      showToast('Không thể xóa Node Gốc của môn học!', 'warning');
-      return;
-    }
-
+    const isRoot = targetNode.parentId === null;
     const childCount = getDescendantCount(selectedId, currentNodes);
-    const confirmMsg = childCount > 0
-      ? `Xóa nhánh "${targetNode.label}" sẽ đồng thời xóa ${childCount} nhánh con trực thuộc.\n\nBạn có chắc chắn muốn xóa không?`
-      : `Bạn có chắc chắn muốn xóa nhánh "${targetNode.label}" không?`;
+
+    let confirmMsg = '';
+    if (isRoot) {
+      confirmMsg = childCount > 0
+        ? `⚠️ BẠN ĐANG XÓA NODE GỐC CỦA MÔN HỌC!\n\nThao tác này sẽ xóa toàn bộ sơ đồ tri thức gồm Node Gốc "${targetNode.label}" và ${childCount} nhánh con trực thuộc.\n\nBạn có chắc chắn muốn xóa toàn bộ không?`
+        : `⚠️ Bạn có chắc chắn muốn xóa Node Gốc "${targetNode.label}" không?`;
+    } else {
+      confirmMsg = childCount > 0
+        ? `Xóa nhánh "${targetNode.label}" sẽ đồng thời xóa ${childCount} nhánh con trực thuộc.\n\nBạn có chắc chắn muốn xóa không?`
+        : `Bạn có chắc chắn muốn xóa nhánh "${targetNode.label}" không?`;
+    }
 
     if (window.confirm(confirmMsg)) {
       deleteNeuralNode(subjectCode, selectedId);
       activeCanvasEngine.selectedNodeId = null;
       activeCanvasEngine.updateNodes(getSubjectKnowledgeNodes(subjectCode));
       closeNeuralNotepadSidebar();
-      showToast(`Đã xóa nhánh "${targetNode.label}" thành công! 🗑️`, 'success');
+      showToast(isRoot ? `Đã xóa Node Gốc "${targetNode.label}" thành công! 🗑️` : `Đã xóa nhánh "${targetNode.label}" thành công! 🗑️`, 'success');
     }
   };
 
@@ -403,7 +426,7 @@ export function openNeuralKnowledgeModal(subjectCode) {
 
     menu.innerHTML = `
       <div style="padding: 4px 10px 6px; font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.06); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-        ${escapeHtml(clickedNode.label || 'Nhánh')}
+        ${escapeHtml(clickedNode.label || 'Nhánh')} ${isRoot ? '(Gốc)' : ''}
       </div>
       <button type="button" class="neural-context-menu-item" id="ctx-open-notes">
         <i class="fa-solid fa-file-pen"></i> Mở ghi chú
@@ -417,12 +440,10 @@ export function openNeuralKnowledgeModal(subjectCode) {
       <button type="button" class="neural-context-menu-item" id="ctx-add-child">
         <i class="fa-solid fa-plus"></i> Thêm nhánh con
       </button>
-      ${!isRoot ? `
       <div class="neural-context-menu-divider"></div>
       <button type="button" class="neural-context-menu-item danger" id="ctx-delete-node">
-        <i class="fa-solid fa-trash-can"></i> Xóa nhánh này
+        <i class="fa-solid fa-trash-can"></i> ${isRoot ? 'Xóa Node Gốc (Toàn bộ)' : 'Xóa nhánh này'}
       </button>
-      ` : ''}
     `;
 
     document.body.appendChild(menu);
