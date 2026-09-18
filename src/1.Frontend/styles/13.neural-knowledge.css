@@ -2323,9 +2323,40 @@ body.neural-resizing-active {
   background: #38bdf8;
 }
 
+/* Biểu thức toán học kết hợp tiền tố và ma trận cân đối trên một hàng ngang */
+.neural-math-expression {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+  vertical-align: middle;
+  margin: 0 auto;
+  max-width: 100%;
+}
+
+.neural-math-prefix {
+  font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #38bdf8;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.neural-math-inline-matrix {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  vertical-align: middle;
+  margin: 2px 6px;
+}
+
 .neural-matrix-bracket {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 8px 16px;
   border-left: 2px solid #38bdf8;
   border-right: 2px solid #38bdf8;
@@ -2354,19 +2385,41 @@ body.neural-resizing-active {
   background: linear-gradient(to right, #38bdf8 10px, transparent 10px, transparent calc(100% - 10px), #38bdf8 calc(100% - 10px));
 }
 
-.neural-matrix-table {
-  border-collapse: collapse;
-  margin: 0 auto;
+.neural-matrix-table,
+.neural-notepad-rendered-content .neural-matrix-table,
+.neural-ai-bubble .neural-matrix-table,
+.neural-modal-inline-preview .neural-matrix-table {
+  border-collapse: collapse !important;
+  margin: 0 auto !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  width: auto !important;
+  border-radius: 0 !important;
 }
 
-.neural-matrix-cell {
-  padding: 4px 14px;
-  text-align: center;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: #38bdf8;
-  white-space: nowrap;
+.neural-matrix-table tr,
+.neural-notepad-rendered-content .neural-matrix-table tr,
+.neural-ai-bubble .neural-matrix-table tr,
+.neural-modal-inline-preview .neural-matrix-table tr {
+  border: none !important;
+  background: transparent !important;
+}
+
+.neural-matrix-cell,
+.neural-notepad-rendered-content .neural-matrix-cell,
+.neural-ai-bubble .neural-matrix-cell,
+.neural-modal-inline-preview .neural-matrix-cell {
+  padding: 4px 14px !important;
+  text-align: center !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 0.92rem !important;
+  font-weight: 600 !important;
+  color: #38bdf8 !important;
+  white-space: nowrap !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .neural-ai-bubble blockquote {

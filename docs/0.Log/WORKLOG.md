@@ -4,6 +4,31 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-18 17:25] - Khắc Phục Triệt Để Lỗi Bố Cục & Hiển Thị Công Thức Ma Trận LaTeX Toán Học (Token Placeholder Engine) 📐🔢✨
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng phản ánh lỗi: *"đang bị lỗi hiển thị công thức này"* kèm ảnh chụp màn hình hiển thị công thức ma trận toán học bị méo mó nghiêm trọng:
+    1. Vế trái `x =` bị ngắt dòng rớt lên trên đỉnh khối viền xanh, ma trận ngoặc vuông `[ ]` bị đẩy xuống dòng dưới thay vì nằm cân đối trên cùng một hàng ngang.
+    2. Bên trong cặp ngoặc vuông `[ ]`, các ô dữ liệu (`Số lượt truy cập / Thời gian trên trang` và `1.0 / 0.5`) bị bọc nhầm bởi hộp card bo tròn màu đen/xám mờ có viền thừa kỳ dị.
+    3. Dòng bullet dưới bị mất ký tự `x`, chỉ còn dấu `=` trơ trọi (`o Vậy, =`), dấu ngoặc vuông rớt xuống dưới.
+- **🔍 Phân tích nguyên nhân gốc rễ (Root Cause Analysis)**:
+  - **Xung đột bộ bọc Bảng GFM (`.neural-table-wrapper`)**: Dòng regex `html.replace(/<table(?:\s+[^>]*)?>/gi, '<div class="neural-table-wrapper"><table>')` đã bọc nhầm toàn bộ bảng ma trận `<table class="neural-matrix-table">`, khiến CSS của bảng dữ liệu (background card xám mờ, viền 1px, border-radius 10px) đè lên ruột ma trận.
+  - **Lỗi nuốt dấu dollar đóng & thứ tự gom Token Placeholder**:
+    - Dòng dọn dẹp cũ `rawMarkdown.replace(/(?<!\$)\$\s*\\?\s*$/g, '')` đã xóa nhầm dấu `$` đóng ở cuối chuỗi của công thức inline hoàn chỉnh `$x = \begin{bmatrix}...\end{bmatrix}$`.
+    - Thiếu cơ chế đếm số lượng dấu `$` đơn lẻ khiến công thức bị xé đôi, rớt lại tiền tố `x =` hoặc `=` ở ngoài và đẩy ma trận thành khối block riêng.
+  - **Thiếu container Flexbox cân đối hàng ngang**: Mã cũ chuyển `\begin{bmatrix}...\end{bmatrix}` thành block riêng mà không gom vế tiền tố toán học (`x =`, `\mathbf{x} =`, `A =`), làm vế trái và ma trận bị tách rời trục dọc.
+- **🛠 Triển khai kỹ thuật ([`markdownRenderer.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/utils/markdownRenderer.js), [`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  - **Token Placeholder Engine & Bộ nhận diện Ma trận Đa Tầng**:
+    - Áp dụng cơ chế kiểm tra chẵn/lẻ số lượng dấu `$` đơn lẻ trước khi dọn dẹp, đảm bảo tuyệt đối không xóa nhầm dấu `$` đóng hợp lệ.
+    - Nhận diện toàn diện: gom `$$ ... $$` (block), `$ ... $` (inline, hỗ trợ cả ma trận lồng bên trong câu), và ma trận độc lập (tự động gom cả tiền tố `x =`, `\mathbf{x} =`, `$x$ =`, `= ` đi kèm trên cùng dòng).
+    - Bộ lọc bọc bảng GFM thông minh: chỉ bọc `<table(?!\s+class="neural-matrix-table")>`, loại trừ tuyệt đối bảng ma trận.
+  - **Kiến trúc Bố cục Toán học Flexbox Cân Bằng**:
+    - Thêm `.neural-math-expression` (`display: inline-flex; align-items: center; justify-content: center; gap: 12px;`) giúp vế trái và ma trận luôn nằm trên cùng một hàng ngang cân đối, dấu `=` nằm chính giữa trục dọc cặp ngoặc vuông.
+    - Thêm `.neural-math-inline-matrix` hỗ trợ ma trận nhúng trong danh sách gạch đầu dòng (`<li>`) mượt mà không ngắt dòng.
+    - Mở rộng hàm `prettifyLatexString`: hỗ trợ toàn diện các lệnh phông chữ ma trận (`\mathbf`, `\boldsymbol`, `\bm`, `\textbf`, `\bold`, `\rm`, `\mathrm`, `\mathit`, `\mathsf`), vector/dấu (`\vec`, `\hat`, `\bar`, `\tilde`, `\dot`, `\ddot`), chỉ số dưới dạng linh hoạt (`_\{?([0-9])\}?`, `_\{?([nmijk])\}?`), ký hiệu toán học (`\approx`, `\equiv`, `\le`, `\ge`, `\times`, `\cdot`, `\div`, `\pm`, `\mp`, v.v.).
+    - Hoàn thiện khôi phục placeholder trong chế độ dự phòng `fallbackRender`.
+    - Nâng cấp phiên bản Service Worker cache lên `smart-schedule-modular-v164`.
+
 ## 📅 [2026-09-18 16:45] - Tái Cấu Trúc AI Copilot Thành In-Situ Floating Popup Nổi Đặt Cạnh Nút Khoanh Hỏi AI 🪄✨💬
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:
