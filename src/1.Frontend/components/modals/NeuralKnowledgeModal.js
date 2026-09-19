@@ -611,6 +611,7 @@ export function openNeuralKnowledgeModal(subjectCode) {
     menu.style.top = `${Math.min(clientY, window.innerHeight - 260)}px`;
 
     const isRoot = (clickedNode.parentId === null);
+    const isExercise = (clickedNode.nodeType === 'exercise' || clickedNode.nodeType === 'exercise_topic');
 
     menu.innerHTML = `
       <div style="padding: 4px 10px 6px; font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.06); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
@@ -622,9 +623,11 @@ export function openNeuralKnowledgeModal(subjectCode) {
       <button type="button" class="neural-context-menu-item" id="ctx-edit-node">
         <i class="fa-solid fa-pen-to-square"></i> Sửa thông tin
       </button>
-      <button type="button" class="neural-context-menu-item" id="ctx-open-quiz">
-        <i class="fa-solid fa-bullseye"></i> Thử thách Quiz
+      ${isExercise ? `
+      <button type="button" class="neural-context-menu-item" id="ctx-open-quiz" style="color: #f59e0b;">
+        <i class="fa-solid fa-bullseye" style="color: #f59e0b;"></i> Thử thách Quiz
       </button>
+      ` : ''}
       <button type="button" class="neural-context-menu-item" id="ctx-add-child">
         <i class="fa-solid fa-plus"></i> Thêm nhánh kiến thức
       </button>

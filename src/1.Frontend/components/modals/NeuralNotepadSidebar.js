@@ -225,9 +225,11 @@ function renderNotepadTemplate(node) {
           <button type="button" class="neural-np-tab ${defaultTab === 'visual' ? 'active' : ''}" data-tab="visual" title="Ghi chú tự do & chèn ảnh nổi đè lên">
             <i class="fa-solid fa-paintbrush"></i> Ghi chú
           </button>
+          ${isExerciseNode ? `
           <button type="button" class="neural-np-tab" data-tab="quiz" title="Ngân hàng câu hỏi trắc nghiệm đã lưu">
             <i class="fa-solid fa-bullseye"></i> Trắc nghiệm (${(node.quizzes || []).length})
           </button>
+          ` : ''}
         </div>
         ${node.parentId !== null ? `
         <button type="button" class="neural-delete-node-btn" id="btn-delete-node-from-sidebar" title="Xóa node kiến thức này">
@@ -403,7 +405,8 @@ function renderNotepadTemplate(node) {
         </div>
       </div>
 
-      <!-- 4. Pane Ngân Hàng Câu Hỏi Trắc Nghiệm Đã Lưu (Quiz Vault) -->
+      <!-- 4. Pane Ngân Hàng Câu Hỏi Trắc Nghiệm Đã Lưu (Quiz Vault - Chỉ hiển thị cho Node Bài tập) -->
+      ${isExerciseNode ? `
       <div class="neural-np-pane hidden" id="neural-np-quiz-pane">
         <div class="quiz-vault-header-row" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding: 4px 2px;">
           <div style="font-size: 0.85rem; font-weight: 700; color: #f59e0b; display: flex; align-items: center; gap: 6px;">
@@ -418,6 +421,7 @@ function renderNotepadTemplate(node) {
           <!-- Sẽ được fill bằng JavaScript -->
         </div>
       </div>
+      ` : ''}
     </div>
 
     <!-- 5. Contextual AI Copilot Drawer (Fallback - Chuyển sang In-situ Floating Popup) -->

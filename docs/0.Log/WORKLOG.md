@@ -4,6 +4,19 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-19 10:05] - Phân Định Rạch Ròi: Lược Bỏ Chức Năng Trắc Nghiệm Khỏi Node Kiến Thức, Dành Riêng Cho Node Bài Tập & Ôn Luyện (Knowledge Node Simplification & Dedicated Exercise Isolation) 📘🎯✨
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng yêu cầu: *"thế bỏ chức năng trắc nghiệm trong phần node kiến thức đi"*.
+  - Định vị kiến trúc & trải nghiệm (UX Philosophy):
+    * Sau khi đã xây dựng hệ thống **Node Bài Tập & Ôn Luyện (Exercise Nodes)** chuyên biệt có AI bóc tách đa chuyên đề, việc giữ lại tab Trắc nghiệm trên các **Node Kiến Thức (Knowledge Nodes)** thông thường là dư thừa, làm phân tán sự tập trung và gây lẫn lộn luồng trải nghiệm.
+    * Node Kiến Thức chuẩn (ví dụ: Chương 1, Khái niệm, Định lý...) nên tập trung 100% vào việc ghi chép và lưu trữ tri thức: gồm 3 tab thuần túy `Đã Gen Ra`, `Soạn thảo`, và `Ghi chú`.
+    * Toàn bộ tính năng liên quan đến trắc nghiệm (Tab Trắc nghiệm, Kho câu hỏi Quiz Vault, Menu Thử thách Quiz) chỉ hiển thị khi người dùng mở các **Node Bài Tập & Ôn Luyện** (`nodeType: 'exercise' | 'exercise_topic'`).
+  - Giải pháp triển khai:
+    * [`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js): Chỉ render thẻ Tab `Trắc nghiệm` (`.neural-np-tab[data-tab="quiz"]`) và Pane Kho câu hỏi (`#neural-np-quiz-pane`) khi `isExerciseNode === true`. Với các node kiến thức thông thường, tab trắc nghiệm hoàn toàn biến mất, trả lại không gian tối giản, tinh gọn.
+    * [`NeuralKnowledgeModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralKnowledgeModal.js): Trong Menu chuột phải (Context Menu), nút "Thử thách Quiz" (`#ctx-open-quiz`) cũng chỉ hiển thị cho các node bài tập, không hiển thị trên node kiến thức thường.
+    * [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v178`.
+
 ## 📅 [2026-09-19 10:00] - Điều Hướng Nút "Làm Bài Test" Trực Tiếp Sang Tab Kho Câu Hỏi Trắc Nghiệm Trong Sidebar (Direct Navigation to In-Situ Quiz Vault) 🎯📑✨
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:
