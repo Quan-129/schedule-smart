@@ -4,6 +4,30 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-19 09:50] - Tương Tác Chọn Đáp Án Trực Tiếp, Tự Động Chấm Đúng/Sai & Tự Động Mở Khóa Bóc Tách Bẫy Trong Kho Câu Hỏi Trắc Nghiệm (Interactive In-Situ Quiz Vault & Auto-Reveal Solution) 🎯✅❌💡
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng phản ánh: *"phải cho tôi chọn rồi hiện phần phải thích chứ hiện tại chỉ bấm giait thích luôn chứ chưa chọn để check đúng sai được"*.
+  - Nhận diện vấn đề:
+    * Trước đây, các câu hỏi trong tab Trắc nghiệm (`#neural-np-quiz-pane`) của Notepad Sidebar hiển thị 4 phương án A, B, C, D dưới dạng text tĩnh (`<div>`), người học không thể click chọn đáp án để tự kiểm tra kiến thức.
+    * Người học chỉ có thể bấm vào thẻ `<details>` để xem giải thích, làm mất đi tính tương tác Active Recall và cảm giác thử thách.
+    * Phát hiện thêm lỗi hiển thị `Đáp án đúng: undefined` do một số câu hỏi từ bộ gen 5 câu mẫu chỉ chứa trường `answer` thay vì `correctIndex`.
+  - Giải pháp triển khai:
+    * Chuyển đổi toàn bộ các lựa chọn thành các nút bấm tương tác cao cấp (`.quiz-vault-option-btn`), có hiệu ứng hover mượt mà.
+    * Khi click vào phương án:
+      - Tự động kiểm tra Đúng / Sai với đáp án chuẩn.
+      - Phương án đúng sáng màu xanh ngọc lục bảo (`#10b981`) kèm icon tích xanh.
+      - Phương án sai (nếu chọn nhầm) đổi sang màu đỏ (`#ef4444`) kèm icon X, đồng thời tự động đánh dấu phương án đúng màu xanh để người học đối chiếu.
+      - Hiển thị Banner phản hồi tức thì (`.quiz-vault-feedback-banner`) kèm nút **"Làm lại"** (`.quiz-vault-btn-retry`) để thử thách lại nếu muốn.
+      - **TỰ ĐỘNG MỞ KHÓA** khung Bóc Tách Bẫy Tư Duy & Giải Thích (`details.open = true`) với viền sáng theo kết quả Đúng/Sai.
+    * Khắc phục triệt để lỗi `Đáp án đúng: undefined` bằng cơ chế chuẩn hóa `resolvedCorrectIdx` trên toàn bộ hệ thống (`GeminiAIService.js`, `NeuralNotepadSidebar.js`, `NeuralQuizModal.js`).
+- **🛠 Triển khai kỹ thuật**:
+  - [`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js): Tái cấu trúc hàm `renderQuizVaultList`, bổ sung bộ lắng nghe sự kiện chọn đáp án và reset.
+  - [`14.neural-quiz.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/14.neural-quiz.css): Thêm CSS tokens và hiệu ứng cho `.quiz-vault-options-list`, `.quiz-vault-option-btn`, `.selected-correct`, `.selected-wrong`, `.quiz-vault-feedback-banner`, `.quiz-vault-details`.
+  - [`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js): Đảm bảo `generate5TopicPracticeQuizzes` và `generateFallback5Quizzes` trả về chuẩn cả `correctIndex` lẫn `answer`.
+  - [`NeuralQuizModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralQuizModal.js): Fallback `correctIndex` an toàn, ngăn ngừa triệt để giá trị `undefined`.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng cache Service Worker lên `smart-schedule-modular-v175`.
+
 ## 📅 [2026-09-19 09:40] - Phân Nhánh Node Bài Tập & Ôn Luyện: AI Tự Động Đọc Toàn Bộ Ngữ Cảnh, Bóc Tách Chủ Đề, Tạo Mẹo Thi Trắc Nghiệm & Bộ 5 Câu Hỏi Mẫu Chuẩn Đích Danh (AI-Powered Exercise Decomposition & 5-Quiz Generator) 🎯📋🤖✨
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:

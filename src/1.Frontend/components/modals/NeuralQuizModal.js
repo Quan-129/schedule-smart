@@ -289,7 +289,11 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
   };
 
   const handleSelectAnswer = (selectedIdx, quiz, optionBtns) => {
-    const isCorrect = (selectedIdx === quiz.correctIndex);
+    const resolvedCorrectIdx = typeof quiz.correctIndex === 'number'
+      ? quiz.correctIndex
+      : (typeof quiz.answer === 'number' ? quiz.answer : 0);
+    quiz.correctIndex = resolvedCorrectIdx;
+    const isCorrect = (selectedIdx === resolvedCorrectIdx);
     const analysisBox = overlay.querySelector('#neural-quiz-analysis-container');
 
     let progressInfo = null;
@@ -302,7 +306,7 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
 
     optionBtns.forEach((b, idx) => {
       b.disabled = true;
-      if (idx === quiz.correctIndex) {
+      if (idx === resolvedCorrectIdx) {
         b.classList.add('correct');
       } else if (idx === selectedIdx && !isCorrect) {
         b.classList.add('wrong');

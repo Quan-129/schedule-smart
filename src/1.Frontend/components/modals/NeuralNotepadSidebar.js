@@ -770,14 +770,20 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     }
 
     quizVaultContainer.innerHTML = quizzes.map((q, qIdx) => {
+      const correctIdx = typeof q.correctIndex === 'number'
+        ? q.correctIndex
+        : (typeof q.answer === 'number' ? q.answer : 0);
+      const correctLetter = ['A', 'B', 'C', 'D'][correctIdx] || 'A';
+
       const optionsHtml = (q.options || []).map((opt, oIdx) => {
         const prefix = ['A', 'B', 'C', 'D'][oIdx] || '';
         const cleanOpt = opt.replace(/^[A-D]\.\s*/i, '');
         return `
-          <div style="font-size: 0.84rem; padding: 6px 10px; border-radius: 6px; background: rgba(255,255,255,0.025); margin-bottom: 4px; display: flex; gap: 8px;">
-            <strong style="color: #f59e0b;">${prefix}.</strong>
-            <span style="color: #cbd5e1;">${escapeHtml(cleanOpt)}</span>
-          </div>
+          <button type="button" class="quiz-vault-option-btn" data-quiz-id="${q.id}" data-opt-idx="${oIdx}">
+            <span class="quiz-vault-opt-prefix">${prefix}.</span>
+            <span class="quiz-vault-opt-text">${escapeHtml(cleanOpt)}</span>
+            <span class="quiz-vault-opt-indicator"></span>
+          </button>
         `;
       }).join('');
 
@@ -794,32 +800,132 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
           <div class="quiz-vault-item-title">${escapeHtml(q.question)}</div>
 
-          <div style="margin: 6px 0;">
+          <div class="quiz-vault-options-list" data-quiz-id="${q.id}">
             ${optionsHtml}
           </div>
 
-          <details style="margin-top: 6px; font-size: 0.82rem; background: rgba(0,0,0,0.25); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
-            <summary style="cursor: pointer; font-weight: 600; color: #818cf8; user-select: none;">
-              <i class="fa-solid fa-lightbulb"></i> Xem đáp án &amp; Bóc tách bẫy tư duy
+          <!-- Banner phản hồi Đúng / Sai sau khi chọn -->
+          <div class="quiz-vault-feedback-banner" id="quiz-feedback-${q.id}">
+            <span class="quiz-vault-feedback-text" style="font-weight: 600;"></span>
+            <button type="button" class="quiz-vault-btn-retry" data-quiz-id="${q.id}" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; border-radius: 6px; padding: 3px 8px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+              <i class="fa-solid fa-rotate-right"></i> Làm lại
+            </button>
+          </div>
+
+          <details class="quiz-vault-details" id="quiz-details-${q.id}">
+            <summary>
+              <span><i class="fa-solid fa-lightbulb"></i> Xem đáp án &amp; Bóc tách bẫy tư duy</span>
+              <span style="font-size: 0.72rem; color: #64748b; font-weight: 400;">(chọn đáp án để tự chấm)</span>
             </summary>
-            <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 8px;">
-              <div style="color: #10b981;">
-                <strong>Đáp án đúng:</strong> ${['A', 'B', 'C', 'D'][q.correctIndex]}
+            <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+              <div style="color: #10b981; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>Đáp án đúng: <strong style="font-size: 0.95rem; color: #34d399;">${correctLetter}</strong></span>
               </div>
-              <div style="color: #cbd5e1;">
-                <strong>💡 Giải thích:</strong> ${escapeHtml(q.explanation || '')}
+              <div style="color: #cbd5e1; line-height: 1.45;">
+                <strong style="color: #93c5fd;">💡 Giải thích:</strong> ${escapeHtml(q.explanation || q.explain || 'Đáp án chính xác theo tài liệu bài học.')}
               </div>
-              <div style="background: rgba(245, 158, 11, 0.08); border-left: 3px solid #f59e0b; padding: 6px 10px; border-radius: 0 6px 6px 0; color: #fef3c7;">
-                <strong style="color: #f59e0b;">⚠️ Bẫy thường gặp:</strong> ${escapeHtml(q.trap || '')}
-              </div>
-              <div style="background: rgba(16, 185, 129, 0.08); border-left: 3px solid #10b981; padding: 6px 10px; border-radius: 0 6px 6px 0; color: #d1fae5;">
-                <strong style="color: #10b981;">💎 Bản chất cốt lõi:</strong> ${escapeHtml(q.rule || '')}
-              </div>
+              ${(q.trap || q.trapAnalysis) ? `
+                <div style="background: rgba(245, 158, 11, 0.08); border-left: 3px solid #f59e0b; padding: 6px 10px; border-radius: 0 6px 6px 0; color: #fef3c7; line-height: 1.45;">
+                  <strong style="color: #f59e0b;">⚠️ Bẫy thường gặp:</strong> ${escapeHtml(q.trap || q.trapAnalysis)}
+                </div>
+              ` : ''}
+              ${(q.rule || q.coreRule) ? `
+                <div style="background: rgba(16, 185, 129, 0.08); border-left: 3px solid #10b981; padding: 6px 10px; border-radius: 0 6px 6px 0; color: #d1fae5; line-height: 1.45;">
+                  <strong style="color: #10b981;">💎 Bản chất cốt lõi:</strong> ${escapeHtml(q.rule || q.coreRule)}
+                </div>
+              ` : ''}
             </div>
           </details>
         </div>
       `;
     }).join('');
+
+    // Gắn sự kiện chọn đáp án để tự động chấm Đúng / Sai và tự mở giải thích
+    quizVaultContainer.querySelectorAll('.quiz-vault-option-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const qId = btn.dataset.quizId;
+        const selectedIdx = parseInt(btn.dataset.optIdx, 10);
+        const card = btn.closest('.quiz-vault-item-card');
+        if (!card) return;
+
+        const currentQuiz = quizzes.find(item => item.id === qId);
+        if (!currentQuiz) return;
+
+        const correctIdx = typeof currentQuiz.correctIndex === 'number'
+          ? currentQuiz.correctIndex
+          : (typeof currentQuiz.answer === 'number' ? currentQuiz.answer : 0);
+        const correctLetter = ['A', 'B', 'C', 'D'][correctIdx] || 'A';
+        const isCorrect = (selectedIdx === correctIdx);
+
+        // Đánh dấu nút đúng / sai
+        const allOptionBtns = card.querySelectorAll('.quiz-vault-option-btn');
+        allOptionBtns.forEach(b => {
+          const bIdx = parseInt(b.dataset.optIdx, 10);
+          b.classList.remove('selected-correct', 'selected-wrong');
+          const indicator = b.querySelector('.quiz-vault-opt-indicator');
+          if (indicator) indicator.innerHTML = '';
+
+          if (bIdx === correctIdx) {
+            b.classList.add('selected-correct');
+            if (indicator) indicator.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #10b981;"></i>';
+          } else if (bIdx === selectedIdx && !isCorrect) {
+            b.classList.add('selected-wrong');
+            if (indicator) indicator.innerHTML = '<i class="fa-solid fa-circle-xmark" style="color: #ef4444;"></i>';
+          }
+        });
+
+        // Cập nhật banner thông báo
+        const feedbackBanner = card.querySelector(`#quiz-feedback-${qId}`);
+        if (feedbackBanner) {
+          feedbackBanner.style.display = 'flex';
+          const textEl = feedbackBanner.querySelector('.quiz-vault-feedback-text');
+          if (isCorrect) {
+            feedbackBanner.style.background = 'rgba(16, 185, 129, 0.12)';
+            feedbackBanner.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+            feedbackBanner.style.color = '#34d399';
+            if (textEl) textEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> <strong>Chính xác!</strong> Bạn đã chọn đúng phương án ' + correctLetter + '.';
+          } else {
+            feedbackBanner.style.background = 'rgba(239, 68, 68, 0.12)';
+            feedbackBanner.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+            feedbackBanner.style.color = '#f87171';
+            if (textEl) textEl.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> <strong>Chưa chính xác!</strong> Đáp án đúng là ' + correctLetter + '. Hãy xem bóc tách bẫy bên dưới.';
+          }
+        }
+
+        // TỰ ĐỘNG MỞ PHẦN GIẢI THÍCH & BÓC TÁCH BẪY TƯ DUY!
+        const detailsElem = card.querySelector(`#quiz-details-${qId}`);
+        if (detailsElem) {
+          detailsElem.open = true;
+          detailsElem.style.borderColor = isCorrect ? 'rgba(16, 185, 129, 0.35)' : 'rgba(239, 68, 68, 0.35)';
+        }
+      });
+    });
+
+    // Gắn sự kiện nút Làm lại (Reset)
+    quizVaultContainer.querySelectorAll('.quiz-vault-btn-retry').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const qId = btn.dataset.quizId;
+        const card = btn.closest('.quiz-vault-item-card');
+        if (!card) return;
+
+        const allOptionBtns = card.querySelectorAll('.quiz-vault-option-btn');
+        allOptionBtns.forEach(b => {
+          b.classList.remove('selected-correct', 'selected-wrong');
+          const indicator = b.querySelector('.quiz-vault-opt-indicator');
+          if (indicator) indicator.innerHTML = '';
+        });
+
+        const feedbackBanner = card.querySelector(`#quiz-feedback-${qId}`);
+        if (feedbackBanner) feedbackBanner.style.display = 'none';
+
+        const detailsElem = card.querySelector(`#quiz-details-${qId}`);
+        if (detailsElem) {
+          detailsElem.open = false;
+          detailsElem.style.borderColor = 'rgba(255, 255, 255, 0.07)';
+        }
+      });
+    });
 
     // Gắn sự kiện nút xóa câu
     quizVaultContainer.querySelectorAll('[data-action="delete-quiz"]').forEach(btn => {

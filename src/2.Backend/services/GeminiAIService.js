@@ -1159,17 +1159,21 @@ Trả về duy nhất một chuỗi JSON hợp lệ theo format:
 
         const parsed = JSON.parse(cleaned);
         if (Array.isArray(parsed.quizzes) && parsed.quizzes.length > 0) {
-          return parsed.quizzes.map((q, idx) => ({
-            id: `practice_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 6)}`,
-            question: q.question,
-            options: q.options,
-            answer: typeof q.answer === 'number' ? q.answer : 0,
-            explanation: q.explanation || 'Đáp án chính xác theo tài liệu bài học.',
-            trap: q.trap || 'Cẩn thận với các phương án gây nhiễu câu chữ.',
-            rule: q.rule || 'Bản chất cốt lõi của chuyên đề.',
-            topicName: topicName,
-            createdAt: new Date().toISOString()
-          }));
+          return parsed.quizzes.map((q, idx) => {
+            const resolvedIdx = typeof q.correctIndex === 'number' ? q.correctIndex : (typeof q.answer === 'number' ? q.answer : 0);
+            return {
+              id: `practice_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 6)}`,
+              question: q.question,
+              options: q.options,
+              correctIndex: resolvedIdx,
+              answer: resolvedIdx,
+              explanation: q.explanation || 'Đáp án chính xác theo tài liệu bài học.',
+              trap: q.trap || 'Cẩn thận với các phương án gây nhiễu câu chữ.',
+              rule: q.rule || 'Bản chất cốt lõi của chuyên đề.',
+              topicName: topicName,
+              createdAt: new Date().toISOString()
+            };
+          });
         }
       } catch (e) {
         console.warn(`Lỗi gen 5 câu hỏi với model ${model}:`, e);
@@ -1192,6 +1196,7 @@ function generateFallback5Quizzes(topicName) {
         `C. Luôn không thay đổi trong mọi điều kiện bài toán`,
         `D. Hoàn toàn độc lập và không liên quan đến các chuyên đề khác`
       ],
+      correctIndex: 0,
       answer: 0,
       explanation: `Phương án A phản ánh đúng vai trò then chốt của ${topicName} trong hệ thống kiến thức môn học.`,
       trap: `Các phương án B, C, D sử dụng các từ tuyệt đối hoặc đánh giá thấp vai trò của chuyên đề.`,
@@ -1208,6 +1213,7 @@ function generateFallback5Quizzes(topicName) {
         `C. Chọn ngẫu nhiên một phương pháp thuận tay`,
         `D. Bỏ qua các ràng buộc biên để đơn giản hóa`
       ],
+      correctIndex: 1,
       answer: 1,
       explanation: `Bước xác định giả định và dữ liệu đầu vào là điều kiện tiên quyết để chọn phương pháp giải đúng đắn.`,
       trap: `Sinh viên thường vội vàng tính toán mà bỏ qua các điều kiện biên hoặc ràng buộc đầu vào.`,
@@ -1224,6 +1230,7 @@ function generateFallback5Quizzes(topicName) {
         `C. Sử dụng phương pháp loại trừ đáp án vô lý`,
         `D. Kiểm tra lại kết quả với các ví dụ đơn giản`
       ],
+      correctIndex: 1,
       answer: 1,
       explanation: `Sự nhầm lẫn giữa mặt định tính và định lượng là cái bẫy đề thi ưa thích của giảng viên.`,
       trap: `Đề thi hay dùng từ vựng giống nhau nhưng thay đổi bản chất định lượng thành định tính.`,
@@ -1240,6 +1247,7 @@ function generateFallback5Quizzes(topicName) {
         `C. Không liên kết với khâu nào trong quy trình`,
         `D. Chỉ liên kết khi dự án đã gặp sự cố lớn`
       ],
+      correctIndex: 0,
       answer: 0,
       explanation: `Chuyên đề này đóng vai trò then chốt trong việc kiểm soát rủi ro và chất lượng tổng thể.`,
       trap: `Phương án D chỉ mô tả phần ngọn khi có sự cố, không phải quy trình phòng ngừa chủ động.`,
@@ -1256,6 +1264,7 @@ function generateFallback5Quizzes(topicName) {
         `C. Phương án liên hệ với thực tế quản trị`,
         `D. Phương án có giải thích cơ sở khoa học`
       ],
+      correctIndex: 0,
       answer: 0,
       explanation: `Trong các môn khoa học và quản lý, hiếm khi có sự tuyệt đối 100%. Các phương án khẳng định tuyệt đối thường là đáp án nhiễu.`,
       trap: `Sinh viên hay bị lôi cuốn bởi câu chữ mang tính khẳng định mạnh mẽ.`,

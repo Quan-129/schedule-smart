@@ -496,6 +496,118 @@
   background: rgba(239, 68, 68, 0.12);
 }
 
+/* Danh sách lựa chọn tương tác trong Quiz Vault */
+.quiz-vault-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 6px 0;
+}
+
+.quiz-vault-option-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.quiz-vault-option-btn:hover {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #f8fafc;
+  transform: translateX(3px);
+}
+
+.quiz-vault-opt-prefix {
+  font-weight: 700;
+  color: #f59e0b;
+  font-family: 'JetBrains Mono', monospace;
+  min-width: 18px;
+}
+
+.quiz-vault-opt-text {
+  flex: 1;
+}
+
+.quiz-vault-opt-indicator {
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  margin-left: auto;
+}
+
+/* Khi đã chọn: Chính xác */
+.quiz-vault-option-btn.selected-correct {
+  background: rgba(16, 185, 129, 0.16) !important;
+  border-color: #10b981 !important;
+  color: #f0fdf4 !important;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.22);
+}
+
+.quiz-vault-option-btn.selected-correct .quiz-vault-opt-prefix {
+  color: #10b981 !important;
+}
+
+/* Khi đã chọn: Sai */
+.quiz-vault-option-btn.selected-wrong {
+  background: rgba(239, 68, 68, 0.16) !important;
+  border-color: #ef4444 !important;
+  color: #fef2f2 !important;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.2);
+}
+
+.quiz-vault-option-btn.selected-wrong .quiz-vault-opt-prefix {
+  color: #ef4444 !important;
+}
+
+/* Banner phản hồi Đúng/Sai */
+.quiz-vault-feedback-banner {
+  display: none;
+  margin-top: 8px;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  animation: fadeIn 0.2s ease;
+}
+
+.quiz-vault-details {
+  margin-top: 8px;
+  font-size: 0.82rem;
+  background: rgba(0, 0, 0, 0.28);
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  transition: all 0.25s ease;
+}
+
+.quiz-vault-details summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #818cf8;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.quiz-vault-details summary:hover {
+  color: #a5b4fc;
+}
+
 /* 9. API Key Settings Dialog */
 .neural-quiz-key-dialog {
   position: absolute;
