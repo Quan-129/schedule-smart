@@ -4,6 +4,21 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-19 10:00] - Điều Hướng Nút "Làm Bài Test" Trực Tiếp Sang Tab Kho Câu Hỏi Trắc Nghiệm Trong Sidebar (Direct Navigation to In-Situ Quiz Vault) 🎯📑✨
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng gửi 2 ảnh chụp màn hình kèm yêu cầu: *"bấm thằng 1 nó phải chuyển trang qua thằng 2 này chứ"*.
+  - Nhận diện hành vi UX:
+    * "Thằng 1": Nút **`▶ Làm Bài Test (10)`** nằm trong khối Hero Action Box của tab Xem trước / Ôn luyện.
+    * "Thằng 2": Tab **"Kho Câu Hỏi Trắc Nghiệm Của Khái Niệm"** (`data-tab="quiz"`) ngay trong Notepad Sidebar với danh sách các câu hỏi trắc nghiệm tương tác đã sinh.
+    * Trước đó, nút `btnTakeTest` kích hoạt hộp thoại nổi toàn màn hình `NeuralQuizModal`. Tuy nhiên, với cải tiến giao diện tương tác chọn đáp án và tự động chấm Đúng/Sai trực tiếp đã xây dựng ở tab Trắc nghiệm của Sidebar, người dùng mong muốn bấm nút này thì chuyển ngay sang tab Trắc nghiệm (`quiz`) trong cùng Sidebar để làm bài nhanh gọn, liền mạch và không bị ngắt quãng trải nghiệm.
+  - Giải pháp triển khai:
+    * Cập nhật sự kiện click của `#btn-hero-take-test` gọi thẳng `switchViewTab('quiz')` và cuộn mượt mà lên đầu danh sách câu hỏi trắc nghiệm.
+    * Người học bấm nút là lập tức chuyển sang giao diện Kho câu hỏi với đầy đủ các câu hỏi tương tác A, B, C, D để bấm làm bài test ngay.
+- **🛠 Triển khai kỹ thuật**:
+  - [`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js): Chuyển đổi bộ lắng nghe sự kiện của `btnTakeTest` sang `switchViewTab('quiz')`.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v177`.
+
 ## 📅 [2026-09-19 09:55] - Khắc Phục Lỗi Quota Rate Limit Google AI: Ưu Tiên Gemini 2.0/1.5 Flash, Tự Động Thử Chuỗi Model & Chuẩn Hóa Thông Báo Quota (Gemini Model Fallback & Quota Auto-Recovery) 🔄⚡🤖
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:

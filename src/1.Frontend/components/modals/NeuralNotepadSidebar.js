@@ -991,11 +991,10 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
   if (btnTakeTest) {
     btnTakeTest.addEventListener('click', () => {
-      openNeuralQuizModal(parentContainer, subjectCode, node, () => {
-        updateQuizTabBadge();
-        renderQuizVaultList();
-        if (onSavedCallback) onSavedCallback(node.id, textarea.value);
-      });
+      switchViewTab('quiz');
+      if (quizPane) {
+        quizPane.scrollTop = 0;
+      }
     });
   }
 
