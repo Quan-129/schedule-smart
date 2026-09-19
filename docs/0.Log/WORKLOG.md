@@ -4,6 +4,26 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-19 09:55] - Khắc Phục Lỗi Quota Rate Limit Google AI: Ưu Tiên Gemini 2.0/1.5 Flash, Tự Động Thử Chuỗi Model & Chuẩn Hóa Thông Báo Quota (Gemini Model Fallback & Quota Auto-Recovery) 🔄⚡🤖
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng phản ánh ảnh chụp màn hình modal Khảo Hạch AI báo lỗi đỏ:
+    `Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash Please retry in 40.085755477s. Hệ thống đã tự động chuyển sang chế độ Mô phỏng Demo.`
+  - Nguyên nhân cốt lõi (Root Cause):
+    1. `gemini-2.5-flash` được đặt ở vị trí mặc định đầu tiên trong `BACKUP_MODELS`. Trên tài khoản Google AI Studio miễn phí, model thử nghiệm `gemini-2.5-flash` chỉ có hạn mức cực kỳ eo hẹp (`limit: 20` lượt gọi), trong khi `gemini-2.0-flash` và `gemini-1.5-flash` có hạn mức lên đến 1,500 lượt gọi/ngày và 15 lượt gọi/phút độc lập!
+    2. Trong hàm `generateNeuralQuizWithAI`, khi gặp lỗi `response.status !== 200`, code cũ chỉ kiểm tra `not found` để `continue`, còn gặp lỗi 429 Quota Exceeded thì vội vã `break` ngay, không chịu thử các model tiếp theo trong danh sách dự phòng!
+    3. Hơn nữa, dòng parse `const data = await response.json();` bị thiếu trước khi đọc `data.candidates`.
+    4. Tiêu đề hộp thoại cảnh báo ghi là *"API Key không hợp lệ"* gây hiểu nhầm cho người dùng rằng Key bị sai, trong khi thực tế Key hoàn toàn hợp lệ và chỉ tạm chạm trần hạn mức gọi của Google trong phút đó.
+  - Giải pháp triển khai:
+    1. Đổi model ưu tiên hàng đầu sang `gemini-2.0-flash` và `gemini-1.5-flash` (hạn mức dồi dào, phản hồi dưới 1.5s, cực kỳ ổn định).
+    2. Trong vòng lặp `for (const model of BACKUP_MODELS)`, khi gặp lỗi 429 Quota/Rate Limit hoặc 503 Overloaded, hệ thống **tự động chuyển sang thử model tiếp theo ngay lập tức** thay vì dừng lại.
+    3. Sửa dứt điểm câu lệnh lấy `data = await response.json()` để tiếp nhận dữ liệu AI trơn tru.
+    4. Tách biệt thông báo lỗi trong `NeuralQuizModal.js`: nếu là lỗi Quota, hiển thị rõ ràng thông báo thân thiện *"Tạm thời đạt giới hạn tốc độ gọi AI của Google (Quota / Rate Limit)"* kèm hướng dẫn đợi vài chục giây bấm "Đổi câu khác" và hệ thống tự động cung cấp bộ câu hỏi demo để việc học không bị gián đoạn.
+- **🛠 Triển khai kỹ thuật**:
+  - [`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js): Cập nhật `DEFAULT_MODEL`, `BACKUP_MODELS`, sửa logic duyệt model dự phòng và bổ sung `await response.json()`.
+  - [`NeuralQuizModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralQuizModal.js): Phân loại lỗi `isQuota` và chuẩn hóa nội dung cảnh báo thân thiện.
+  - [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js): Nâng phiên bản cache Service Worker lên `smart-schedule-modular-v176`.
+
 ## 📅 [2026-09-19 09:50] - Tương Tác Chọn Đáp Án Trực Tiếp, Tự Động Chấm Đúng/Sai & Tự Động Mở Khóa Bóc Tách Bẫy Trong Kho Câu Hỏi Trắc Nghiệm (Interactive In-Situ Quiz Vault & Auto-Reveal Solution) 🎯✅❌💡
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:

@@ -2,8 +2,13 @@
 // 1. IMPORTS & CONFIG
 // ==========================================================================
 const STORAGE_KEY_GEMINI = 'smart_schedule_gemini_api_key';
-const DEFAULT_MODEL = 'gemini-2.5-flash';
-const BACKUP_MODELS = ['gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.0-flash'];
+const DEFAULT_MODEL = 'gemini-2.0-flash';
+const BACKUP_MODELS = [
+  'gemini-2.0-flash',
+  'gemini-1.5-flash',
+  'gemini-2.5-flash',
+  'gemini-1.5-flash-8b'
+];
 
 // ==========================================================================
 // 2. API KEY MANAGEMENT
@@ -508,13 +513,18 @@ Cấu trúc JSON bắt buộc:
         const errData = await response.json().catch(() => ({}));
         lastErrMsg = errData.error?.message || `HTTP ${response.status}`;
         console.warn(`Gemini Model ${model} Error:`, lastErrMsg);
-        // Nếu lỗi là model not found -> thử model tiếp theo trong danh sách
-        if (lastErrMsg.includes('not found') || lastErrMsg.includes('NOT_FOUND')) {
-          continue;
+
+        // Nếu API key sai định dạng/invalid -> dừng ngay
+        if (lastErrMsg.includes('API key not valid') || lastErrMsg.includes('API_KEY_INVALID')) {
+          break;
         }
-        break;
+
+        // Với tất cả các lỗi khác (429 Quota/Rate limit, 404 Model not found, 503 Overloaded...)
+        // -> Tự động thử model tiếp theo trong BACKUP_MODELS!
+        continue;
       }
 
+      const data = await response.json();
       const rawQuizParts = data.candidates?.[0]?.content?.parts;
       const candidateText = Array.isArray(rawQuizParts)
         ? rawQuizParts.map(p => p.text || '').join('')

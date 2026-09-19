@@ -224,17 +224,31 @@ export async function openNeuralQuizModal(parentContainer, subjectCode, node, on
       `;
     }).join('');
 
-    // Cảnh báo nếu API Key bị từ chối
-    const apiWarningHtml = quiz.apiError ? `
-      <div class="neural-quiz-api-alert">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <div class="neural-quiz-api-alert-text">
-          <div class="neural-quiz-api-alert-title">API Key không hợp lệ hoặc lỗi kết nối:</div>
-          <div class="neural-quiz-api-alert-desc">${escapeHtml(quiz.apiError)}</div>
-          <div class="neural-quiz-api-alert-sub">Hệ thống đã tự động chuyển sang chế độ <strong>Mô phỏng Demo</strong>. Bấm nút "Nhập API Key" bên dưới để kiểm tra lại Key của bạn.</div>
+    // Cảnh báo nếu API Key bị từ chối hoặc hết quota
+    let apiWarningHtml = '';
+    if (quiz.apiError) {
+      const isQuota = quiz.apiError.includes('Quota exceeded') ||
+                      quiz.apiError.includes('RESOURCE_EXHAUSTED') ||
+                      quiz.apiError.includes('rate-limit') ||
+                      quiz.apiError.includes('429');
+      const title = isQuota 
+        ? 'Tạm thời đạt giới hạn tốc độ gọi AI của Google (Quota / Rate Limit):' 
+        : 'API Key không hợp lệ hoặc lỗi kết nối:';
+      const sub = isQuota
+        ? 'Tài khoản Google AI Studio miễn phí đang bị giới hạn số lượt gọi trong phút này. Hệ thống tự động chuyển sang <strong>Mô phỏng Demo</strong> để bạn không bị gián đoạn ôn tập. Bạn có thể đợi vài chục giây rồi bấm "Đổi câu khác" để thử lại.'
+        : 'Hệ thống đã tự động chuyển sang chế độ <strong>Mô phỏng Demo</strong>. Bấm nút "Nhập API Key" bên dưới để kiểm tra lại Key của bạn.';
+
+      apiWarningHtml = `
+        <div class="neural-quiz-api-alert">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <div class="neural-quiz-api-alert-text">
+            <div class="neural-quiz-api-alert-title">${title}</div>
+            <div class="neural-quiz-api-alert-desc">${escapeHtml(quiz.apiError)}</div>
+            <div class="neural-quiz-api-alert-sub">${sub}</div>
+          </div>
         </div>
-      </div>
-    ` : '';
+      `;
+    }
 
     const ancestryTagHtml = (quiz.ancestryDepth && quiz.ancestryDepth > 1) ? `
       <span class="neural-quiz-ancestry-tag" title="Đã nạp ngữ cảnh xuyên suốt ${quiz.ancestryDepth} tầng nơ-ron: ${escapeHtml(quiz.ancestryBreadcrumb || '')}">
