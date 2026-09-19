@@ -3400,44 +3400,76 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
         node.aiChatPins = [];
       }
 
-      // Xác định container cuộn thực tế của nội dung bài ghi chú (Preview hoặc Visual)
+      // Nếu người dùng đang ở tab Soạn thảo (Edit - không có layer ghim) hoặc Trắc nghiệm (Quiz), tự động chuyển sang tab Xem trước (Preview)
+      if (editPane && !editPane.classList.contains('hidden') && typeof switchViewTab === 'function') {
+        switchViewTab('preview');
+      } else if (quizPane && !quizPane.classList.contains('hidden') && typeof switchViewTab === 'function') {
+        switchViewTab('preview');
+      }
+
+      // Xác định chế độ: Toàn bài (Whole-note) vs Đoạn trích / Khoanh vùng (Snippet / Snipe)
+      const isWholeNote = mode === 'copilot' || !focalText || focalText.trim() === '';
+
+      // Xác định container cuộn và layer thực tế của nội dung bài ghi chú (Preview hoặc Visual)
       const isVisualMode = visualPane && !visualPane.classList.contains('hidden');
-      const activeScrollContainer = isVisualMode ? canvasWrapper : previewContent;
-      const scrollRect = activeScrollContainer ? activeScrollContainer.getBoundingClientRect() : { left: 0, top: 0, width: 600, height: 600 };
-      const scrollLeft = activeScrollContainer ? (activeScrollContainer.scrollLeft || 0) : 0;
-      const scrollTop = activeScrollContainer ? (activeScrollContainer.scrollTop || 0) : 0;
+      const activeScrollContainer = isVisualMode ? visualPane : previewContent;
+      const activeLayerContainer = isVisualMode ? canvasWrapper : previewContent;
+
+      const scrollRect = activeLayerContainer ? activeLayerContainer.getBoundingClientRect() : { left: 0, top: 0, width: 600, height: 600 };
+      const currentScrollTop = activeScrollContainer ? (activeScrollContainer.scrollTop || 0) : 0;
+      const currentScrollLeft = activeScrollContainer ? (activeScrollContainer.scrollLeft || 0) : 0;
+      const containerWidth = activeLayerContainer ? (activeLayerContainer.clientWidth || 500) : 500;
 
       let targetPin = node.aiChatPins.find(p => p.id === currentPinId);
 
       if (targetPin) {
         targetPin.chatHistory = [...floatingHistory];
-        targetPin.mode = mode;
+        targetPin.mode = isWholeNote ? 'copilot' : mode;
         targetPin.focalText = focalText || targetPin.focalText;
         targetPin.focalImages = focalImages && focalImages.length > 0 ? focalImages : targetPin.focalImages;
         targetPin.updatedAt = Date.now();
+        // Tự động kiểm tra và cứu tọa độ nếu từng bị âm do lỗi trước đây
+        if (typeof targetPin.x !== 'number' || targetPin.x < 12) targetPin.x = Math.max(16, containerWidth - 54);
+        if (typeof targetPin.y !== 'number' || targetPin.y < 12) targetPin.y = currentScrollTop + 24;
         showToast('📌 Đã cập nhật phiên chat đã ghim!');
       } else {
         currentPinId = 'aipin_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
         let initX = 20;
-        let initY = scrollTop + 30;
+        let initY = currentScrollTop + 24;
 
-        if (boundingBox && activeScrollContainer) {
-          // Tính toán vị trí chính xác trong nội dung cuộn (bao gồm độ cuộn scrollTop / scrollLeft)
-          initX = boundingBox.right - scrollRect.left + scrollLeft + 8;
-          initY = boundingBox.top - scrollRect.top + scrollTop;
-
-          if (initX + 44 > activeScrollContainer.clientWidth) {
-            initX = Math.max(8, boundingBox.left - scrollRect.left + scrollLeft - 44);
+        if (isWholeNote) {
+          // Chế độ ĐỌC HIỂU TOÀN BÀI: Đặt icon pin ở góc trên bên phải khung nhìn hiện tại (cuộn theo bài)
+          initX = Math.max(16, containerWidth - 54);
+          const existingCopilotPins = (node.aiChatPins || []).filter(p => (p.mode === 'copilot' || !p.focalText) && p.id !== currentPinId);
+          initY = currentScrollTop + 24 + (existingCopilotPins.length * 48);
+        } else if (boundingBox && activeLayerContainer) {
+          // Chế độ KHOANH VÙNG / ĐOẠN TRÍCH: Tính tọa độ chính xác theo vùng khoanh
+          if (isVisualMode) {
+            initX = boundingBox.right - scrollRect.left + 8;
+            initY = boundingBox.top - scrollRect.top;
+            if (initX + 44 > containerWidth) {
+              initX = Math.max(8, boundingBox.left - scrollRect.left - 44);
+            }
+          } else {
+            initX = boundingBox.right - scrollRect.left + currentScrollLeft + 8;
+            initY = boundingBox.top - scrollRect.top + currentScrollTop;
+            if (initX + 44 > containerWidth) {
+              initX = Math.max(8, boundingBox.left - scrollRect.left + currentScrollLeft - 44);
+            }
           }
-        } else if (activeScrollContainer) {
-          initX = Math.max(8, activeScrollContainer.clientWidth - 56);
-          initY = scrollTop + 30;
+        } else {
+          initX = Math.max(16, containerWidth - 54);
+          initY = currentScrollTop + 24;
         }
+
+        // Đảm bảo tọa độ luôn nằm trong phạm vi an toàn, tuyệt đối không bị âm hoặc tràn ra ngoài
+        initX = Math.max(12, Math.min(initX, containerWidth - 46));
+        initY = Math.max(12, initY);
 
         targetPin = {
           id: currentPinId,
-          mode: mode,
-          title: displaySnippet || (floatingHistory[0]?.text ? (floatingHistory[0].text.slice(0, 40) + '...') : (mode === 'copilot' ? 'AI Copilot' : 'Hỏi đáp AI')),
+          mode: isWholeNote ? 'copilot' : mode,
+          title: displaySnippet || (floatingHistory[0]?.text ? (floatingHistory[0].text.slice(0, 40) + '...') : (isWholeNote ? 'AI Copilot (Toàn bài)' : 'Hỏi đáp AI')),
           focalText: focalText || '',
           focalImages: focalImages || [],
           chatHistory: [...floatingHistory],
@@ -3625,14 +3657,24 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       const scroller = layer.closest('#neural-notepad-preview-content, #visual-note-canvas-wrapper') || layer.parentElement;
 
       pins.forEach(pin => {
+        // Tự động kiểm tra và cứu tọa độ an toàn nếu từng bị âm do lỗi trước đây
+        const safeX = Math.max(12, typeof pin.x === 'number' ? pin.x : 20);
+        const safeY = Math.max(12, typeof pin.y === 'number' ? pin.y : 20);
+        pin.x = safeX;
+        pin.y = safeY;
+
+        const isCopilotPin = pin.mode === 'copilot' || !pin.focalText;
         const pinEl = document.createElement('div');
-        pinEl.className = `neural-ai-chat-pin ${pin.mode === 'copilot' ? 'is-copilot-pin' : ''}`;
+        pinEl.className = `neural-ai-chat-pin ${isCopilotPin ? 'is-copilot-pin' : ''}`;
         pinEl.dataset.pinId = pin.id;
-        pinEl.style.left = `${pin.x || 20}px`;
-        pinEl.style.top = `${pin.y || 20}px`;
+        pinEl.style.left = `${pin.x}px`;
+        pinEl.style.top = `${pin.y}px`;
 
         const qCount = pin.chatHistory ? Math.max(1, Math.floor(pin.chatHistory.length / 2)) : 1;
-        pinEl.title = `💬 ${pin.title || 'Phiên hỏi đáp AI'}\n• Nhấp để mở lại phiên chat\n• Cầm kéo để di chuyển vị trí\n• Cuộn trang (roll) sẽ trôi theo bài`;
+        const pinTitleText = isCopilotPin
+          ? `✨ AI Copilot (Toàn bài): ${pin.title || 'Đọc hiểu toàn bài'}\n• Nhấp để mở lại phiên chat\n• Cầm kéo để di chuyển vị trí\n• Cuộn trang (roll) sẽ trôi theo bài`
+          : `💬 ${pin.title || 'Phiên hỏi đáp AI'}\n• Nhấp để mở lại phiên chat\n• Cầm kéo để di chuyển vị trí\n• Cuộn trang (roll) sẽ trôi theo bài`;
+        pinEl.title = pinTitleText;
 
         pinEl.innerHTML = `
           <div class="neural-ai-chat-pin-inner">

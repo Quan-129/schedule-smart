@@ -4,6 +4,29 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-19 07:45] - Khắc Phục Lỗi Ghim Icon AI Copilot Ở Chế Độ Toàn Bài & Tự Động Định Vị Thông Minh (Whole-Note AI Copilot Pinning Fix) 📌🤖✨
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng phản ánh: *"hình như khi ở chế độ toàn bài không gim được icon lên phần note"*.
+  - Nguyên nhân cốt lõi (Root Cause):
+    1. **Tọa độ Y bị âm (`initY < 0`)**: Khi người dùng mở AI Copilot ở chế độ toàn bài từ toolbar/header (`#btn-copilot-md`, `#btn-copilot-vis`, `#btn-toggle-ai-copilot`), `triggerBtn` được truyền vào làm `boundingBox` (có `top ≈ 45px - 90px`). Hàm `handlePinSession` cũ lấy `boundingBox.top - scrollRect.top` (trong đó `scrollRect.top ≈ 130px - 140px`) dẫn đến `initY = -95px`. Icon ghim bị gán `style.top = -95px`, văng hoàn toàn ra ngoài biên trên của khung cuộn và bị ẩn khỏi tầm mắt người dùng.
+    2. **Đo sai phần tử cuộn trong Visual mode**: `activeScrollContainer` trước đó trỏ vào `canvasWrapper` (vốn không có scrollbar, `scrollTop` luôn bằng 0), trong khi container cuộn thực sự là `visualPane` (`#neural-np-visual-pane`).
+    3. **Không có Layer Pin khi đang ở tab Soạn thảo Markdown (`edit`)**: Khi người dùng mở Copilot từ tab Soạn thảo rồi bấm Ghim, tab Edit chỉ là một `<textarea>` không có pin layer, còn hai tab kia đang `hidden`, khiến icon không thể xuất hiện trước mắt người dùng.
+  - Giải pháp triệt để:
+    1. **Định vị Độc lập Thông minh cho Chế độ Toàn bài (`isWholeNote`)**:
+       - Nhận diện khi ở chế độ toàn bài (`mode === 'copilot' || !focalText`), hệ thống KHÔNG sử dụng `boundingBox` của trigger button trên header.
+       - Tự động đo lường độ cuộn thực tế (`currentScrollTop`) của `visualPane` (chế độ Visual) hoặc `previewContent` (chế độ Preview).
+       - Định vị icon pin ở góc trên bên phải của khung nhìn hiện tại (`initX = Math.max(16, containerWidth - 54)`), và cách mép trên tầm mắt cuộn hiện tại một khoảng lý tưởng (`initY = currentScrollTop + 24`).
+       - Tự động xếp tầng so le nếu bài đã có các pin toàn bài trước đó (`existingCopilotPins.length * 48`) để các icon không đè lên nhau.
+       - Thêm cơ chế kẹp biên an toàn nghiêm ngặt (`Math.max(12, ...)`), đảm bảo tọa độ pin tuyệt đối KHÔNG BAO GIỜ bị âm hoặc tràn màn hình.
+    2. **Tự Động Chuyển Sang Tab Xem Trước (Preview) khi Ghim từ Tab Edit/Quiz**:
+       - Nếu người dùng đang ở tab Soạn thảo (`edit`) hoặc Trắc nghiệm (`quiz`) khi bấm Ghim, hệ thống tự động kích hoạt `switchViewTab('preview')` để mở ngay giao diện bài học đã biên dịch, giúp người dùng nhìn thấy ngay icon pin pop-in lung linh.
+    3. **Tự Động Cứu (Auto-Rescue) Các Pin Bị Âm Tọa Độ Trước Đó**:
+       - Trong hàm `renderAiChatPins`, tự động kiểm tra và chuẩn hóa `safeX = Math.max(12, pin.x)`, `safeY = Math.max(12, pin.y)`, giúp phục hồi ngay lập tức mọi icon ghim cũ từng bị lưu với tọa độ âm trước đây.
+- **🛠 Triển khai kỹ thuật ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  - Cập nhật hàm `handlePinSession()` và `renderAiChatPins()` trong [`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js).
+  - Nâng cấp phiên bản bộ nhớ đệm Service Worker lên `smart-schedule-modular-v172` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
 ## 📅 [2026-09-18 20:50] - Khắc Phục Lỗi Hiển Thị Chuỗi Base64 & Tự Động Giải Cứu Ghi Chú Sang Visual Notes (Base64 Pollution Fix & Visual Image Routing) 🖼️🛡️✨
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:

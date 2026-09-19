@@ -3,6 +3,24 @@
 > **Dự án**: Lịch Học Thông Minh & Chiếc Cặp Google Drive  
 > **Mục tiêu**: Lưu trữ tự động các góc nhìn tiếp thị, điểm độc đáo (USP), viral hooks và kịch bản truyền thông từ các tính năng kỹ thuật.
 
+## 💎 ENTRY 25: [2026-09-19] - "AI Copilot Toàn Bài & Chiếc Ghim Ma Thuật": Ghim Trợ Lý Ảo Trôi Đồng Bộ Cùng Bài Ghi Chú 📌🤖🪄✨
+
+### 📌 Phân Loại & Tags:
+`#WholeNoteCopilot` `#MagicPin` `#AIStudyCompanion` `#StickyNoteAI` `#SmartDraggablePins`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Ghim Trợ Lý AI Vào Đúng Bài Học (In-Situ Sticky AI)**:
+  * Không chỉ hỏi đáp một lần rồi biến mất, bạn có thể ghim nguyên một phiên trò chuyện hỏi đáp chuyên sâu với AI Copilot ngay bên cạnh nội dung bài học!
+  * Khi lăn chuột đọc bài (roll), icon ghim AI trôi đồng bộ theo bài viết. Muốn xem lại lúc nào chỉ cần click nhẹ là cuộc trò chuyện với AI hiện ra nguyên vẹn.
+- **Tự Động Xếp Tầng Thông Minh (Smart Layer Stacking)**:
+  * Dù bạn ghim bao nhiêu phiên hỏi đáp toàn bài hay trích đoạn cụ thể, icon vẫn tự động dàn hàng so le cực kỳ gọn gàng và thẩm mỹ, cho phép bạn cầm kéo (drag) đến vị trí bất kỳ tùy thích.
+- **Tự Động Chuyển Chế Độ Trực Quan**:
+  * Đang soạn thảo văn bản mà bấm ghim phiên chat? Ứng dụng tự động chuyển sang chế độ Xem trước với hiệu ứng icon bật nhảy (pop-in) lung linh, đưa lại cảm giác thỏa mãn thị giác tuyệt đỉnh!
+
+### 2. 🎣 Viral Hooks Cho TikTok / Reels / Shorts:
+- **Hook 1 (Ghim trợ lý học tập)**: *"Ai bảo hỏi AI xong là trôi mất tin nhắn? Với chiếc ghim ma thuật này, toàn bộ phân tích của AI Copilot sẽ dính chặt vào bài học của bạn mãi mãi!"*
+- **Hook 2 (Thao tác đỉnh cao)**: *"Học bài cùng AI mà cứ ngỡ đang dùng bảng vẽ ma thuật: Kéo icon đi khắp nơi, lăn chuột tới đâu icon trôi theo tới đó!"*
+
 ## 💎 ENTRY 24: [2026-09-18] - "Nói Không Với Mã Rác Base64": Đưa Ảnh Thẳng Vào Bảng Trực Quan & Tự Động Giải Cứu Ghi Chú Cũ 🖼️🪄🧼✨
 
 ### 📌 Phân Loại & Tags:
