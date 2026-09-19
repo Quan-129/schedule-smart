@@ -7,6 +7,7 @@ import { NeuralCanvasEngine, getDescendantCount } from '../../views/neural/Neura
 import { openEditNeuralNodeModal } from './EditNeuralNodeModal.js';
 import { openNeuralNotepadSidebar, closeNeuralNotepadSidebar } from './NeuralNotepadSidebar.js';
 import { openNeuralQuizModal } from './NeuralQuizModal.js';
+import { decomposeKnowledgeToExerciseTopics } from '../../../2.Backend/services/GeminiAIService.js';
 import { showToast } from '../Toast.js';
 
 // ==========================================================================
@@ -55,6 +56,10 @@ function renderNeuralModalShell(subject) {
       <div class="neural-legend-item">
         <span class="neural-legend-dot todo"></span>
         <span>Cần học</span>
+      </div>
+      <div class="neural-legend-item">
+        <span style="color:#f97316; font-size: 0.85rem;">🎯</span>
+        <span>Node Bài Tập &amp; Ôn Luyện</span>
       </div>
       <div class="neural-legend-item" style="margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 4px;">
         <span style="color:#38bdf8; font-weight: bold;">↗</span>
@@ -309,9 +314,20 @@ export function openNeuralKnowledgeModal(subjectCode) {
     });
   }
 
-  // Thêm nhánh con mới (hoặc tạo Node Gốc mới nếu sơ đồ đang trống)
-  const addNodeBtn = overlay.querySelector('#btn-neural-add-node');
-  addNodeBtn.addEventListener('click', () => {
+  // ========================================================================
+  // QUẢN LÝ TẠO NHÁNH MỚI (KIẾN THỨC vs BÀI TẬP & ÔN LUYỆN)
+  // ========================================================================
+  let activeAddTypePopover = null;
+  const closeAddTypePopover = () => {
+    if (activeAddTypePopover && activeAddTypePopover.parentNode) {
+      activeAddTypePopover.parentNode.removeChild(activeAddTypePopover);
+      activeAddTypePopover = null;
+    }
+  };
+
+  // 1. Tạo Nhánh Kiến Thức thông thường (Lý thuyết)
+  const handleCreateKnowledgeNode = (specifiedParentId = null) => {
+    closeAddTypePopover();
     const currentNodes = getSubjectKnowledgeNodes(subjectCode);
     const isFirstNode = !currentNodes || currentNodes.length === 0;
 
@@ -320,9 +336,8 @@ export function openNeuralKnowledgeModal(subjectCode) {
     let newY = 0;
 
     if (!isFirstNode) {
-      parentId = activeCanvasEngine.selectedNodeId || currentNodes.find(n => n.parentId === null)?.id || currentNodes[0]?.id || null;
+      parentId = specifiedParentId || activeCanvasEngine.selectedNodeId || currentNodes.find(n => n.parentId === null)?.id || currentNodes[0]?.id || null;
       const parent = currentNodes.find(n => n.id === parentId) || { x: 0, y: 0 };
-      // Tính toán tọa độ phân nhánh đẹp mắt quanh parent
       const angle = Math.random() * Math.PI * 2;
       const distance = 160 + Math.random() * 60;
       newX = Math.round((parent.x || 0) + Math.cos(angle) * distance);
@@ -336,14 +351,14 @@ export function openNeuralKnowledgeModal(subjectCode) {
       status: isFirstNode ? 'completed' : 'todo',
       x: newX,
       y: newY,
-      notes: isFirstNode ? 'Node gốc môn học' : ''
+      notes: isFirstNode ? 'Node gốc môn học' : '',
+      nodeType: 'knowledge'
     });
 
     const refreshed = getSubjectKnowledgeNodes(subjectCode);
     activeCanvasEngine.updateNodes(refreshed);
     activeCanvasEngine.selectedNodeId = newNode.id;
 
-    // Tự động mở form sửa node để người dùng nhập thông tin và link luôn
     openEditNeuralNodeModal(
       subjectCode,
       newNode,
@@ -354,6 +369,186 @@ export function openNeuralKnowledgeModal(subjectCode) {
         activeCanvasEngine.updateNodes(getSubjectKnowledgeNodes(subjectCode));
       }
     );
+  };
+
+  // 2. Tạo Nhánh Bài Tập & Ôn Luyện (AI bóc tách chuyên đề, mẹo thi & câu mẫu từ Node Cha)
+  const handleCreateExerciseNode = async (specifiedParentId = null) => {
+    closeAddTypePopover();
+    const currentNodes = getSubjectKnowledgeNodes(subjectCode);
+    if (!currentNodes || currentNodes.length === 0) {
+      showToast('⚠️ Vui lòng tạo Node Gốc trước khi thêm bài tập!');
+      return;
+    }
+
+    const parentId = specifiedParentId || activeCanvasEngine.selectedNodeId || currentNodes.find(n => n.parentId === null)?.id || currentNodes[0]?.id;
+    const parent = currentNodes.find(n => n.id === parentId) || currentNodes[0];
+
+    showToast(`🤖 AI đang đọc toàn bộ ghi chú & các đoạn chat đã ghim của "${parent.label}" để bóc tách chuyên đề...`);
+
+    let topics = [];
+    try {
+      topics = await decomposeKnowledgeToExerciseTopics(parent, currentNodes);
+    } catch (err) {
+      console.warn('Lỗi phân tách chuyên đề:', err);
+    }
+
+    if (!Array.isArray(topics) || topics.length === 0) {
+      topics = [
+        {
+          topicName: `Đặc tính & Khái niệm cốt lõi: ${parent.label}`,
+          summary: 'Nắm vững định nghĩa, đặc điểm bản chất và phạm vi ứng dụng.',
+          examTips: [
+            { title: 'Bí kíp nhận diện', content: 'Ghi nhớ định nghĩa chuẩn và các điều kiện cần & đủ.' },
+            { title: 'Bẫy thi thường gặp', content: 'Cảnh giác với phương án đảo ngược nguyên nhân - kết quả.' }
+          ]
+        },
+        {
+          topicName: `Quy trình & Phương pháp áp dụng: ${parent.label}`,
+          summary: 'Trình tự các bước thực hiện, công thức và nguyên lý vận hành.',
+          examTips: [
+            { title: 'Mẹo thứ tự các bước', content: 'Học thuộc mốc bước đầu tiên và bước nghiệm thu cuối cùng.' },
+            { title: 'Loại trừ đáp án', content: 'Loại ngay phương án làm sai lệch thứ tự logic của quy trình.' }
+          ]
+        },
+        {
+          topicName: `Bài toán thực tế & Tình huống: ${parent.label}`,
+          summary: 'Vận dụng lý thuyết vào xử lý case study thực tiễn.',
+          examTips: [
+            { title: 'Đọc kỹ câu hỏi', content: 'Xác định câu hỏi tìm khẳng định ĐÚNG hay khẳng định SAI.' },
+            { title: 'Phân tích số liệu', content: 'Chú ý đơn vị tính và các giả định ngoại lệ của bài toán.' }
+          ]
+        }
+      ];
+    }
+
+    // Tọa độ cho Node Bài Tập chính
+    const pX = parent.x || 0;
+    const pY = parent.y || 0;
+    const mainAngle = Math.random() * Math.PI * 2;
+    const mainDist = 180 + Math.random() * 40;
+    const mainX = Math.round(pX + Math.cos(mainAngle) * mainDist);
+    const mainY = Math.round(pY + Math.sin(mainAngle) * mainDist);
+
+    // Tạo Node Bài Tập chính
+    const exerciseMainNode = addNeuralNode(subjectCode, parent.id, {
+      label: `🎯 Bài Tập: ${parent.label}`,
+      url: '',
+      color: '#f97316',
+      status: 'learning',
+      x: mainX,
+      y: mainY,
+      notes: `## 🎯 BÀI TẬP & ÔN LUYỆN CHUYÊN ĐỀ: ${parent.label}\n\n*Hệ thống đã tự động đọc toàn bộ tri thức của node cha và phân tách thành ${topics.length} chuyên đề ôn luyện bên dưới.*\n\n${topics.map((t, idx) => `### ${idx + 1}. ${t.topicName}\n- **Trọng tâm**: ${t.summary}\n- **Mẹo thi**: ${t.examTips?.map(m => m.title).join(', ') || 'Xem chi tiết trong từng nhánh'}`).join('\n\n')}`,
+      nodeType: 'exercise',
+      exerciseData: {
+        parentLabel: parent.label,
+        topicsCount: topics.length,
+        topics
+      }
+    });
+
+    // Tạo các Sub-nodes Chuyên đề tỏa ra quanh Node Bài Tập chính
+    const baseAngle = mainAngle;
+    const spreadAngle = Math.PI * 0.8;
+    const stepAngle = topics.length > 1 ? spreadAngle / (topics.length - 1) : 0;
+    const startSubAngle = baseAngle - spreadAngle / 2;
+
+    topics.forEach((topic, idx) => {
+      const subAngle = startSubAngle + idx * stepAngle;
+      const subDist = 145 + (idx % 2 === 1 ? 35 : 0);
+      const subX = Math.round(mainX + Math.cos(subAngle) * subDist);
+      const subY = Math.round(mainY + Math.sin(subAngle) * subDist);
+
+      const tipsMd = (topic.examTips || []).map((t, i) => `**${i + 1}. 💡 ${t.title}**\n${t.content}`).join('\n\n');
+
+      addNeuralNode(subjectCode, exerciseMainNode.id, {
+        label: `📋 ${topic.topicName}`,
+        url: '',
+        color: '#f59e0b',
+        status: 'todo',
+        x: subX,
+        y: subY,
+        notes: `## 📋 CHUYÊN ĐỀ: ${topic.topicName}\n\n> 🎯 **Trọng tâm kiến thức**: ${topic.summary}\n\n---\n\n### 💡 Mẹo Làm Trắc Nghiệm & Bẫy Thi Thường Gặp:\n\n${tipsMd || 'Chưa có mẹo cụ thể.'}\n\n---\n\n*Bấm nút "Thử thách Quiz" hoặc mở bảng để AI sinh 5 câu hỏi mẫu thực chiến cho chuyên đề này!*`,
+        nodeType: 'exercise_topic',
+        exerciseData: {
+          topicName: topic.topicName,
+          summary: topic.summary,
+          tips: topic.examTips || [],
+          quizzes: []
+        }
+      });
+    });
+
+    const refreshed = getSubjectKnowledgeNodes(subjectCode);
+    activeCanvasEngine.updateNodes(refreshed);
+    activeCanvasEngine.selectedNodeId = exerciseMainNode.id;
+    showToast(`✨ Đã tạo bộ bài tập với ${topics.length} chuyên đề! Bấm vào từng nhánh để xem mẹo thi & luyện 5 câu mẫu.`, 'success');
+  };
+
+  // Nút Thêm Nhánh trên Toolbar: Mở Popover chọn loại node
+  const addNodeBtn = overlay.querySelector('#btn-neural-add-node');
+  addNodeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const currentNodes = getSubjectKnowledgeNodes(subjectCode);
+    const isFirstNode = !currentNodes || currentNodes.length === 0;
+
+    if (isFirstNode) {
+      handleCreateKnowledgeNode();
+      return;
+    }
+
+    if (activeAddTypePopover) {
+      closeAddTypePopover();
+      return;
+    }
+
+    const btnRect = addNodeBtn.getBoundingClientRect();
+    const popover = document.createElement('div');
+    popover.className = 'neural-add-node-popover';
+    popover.style.position = 'fixed';
+    popover.style.bottom = `${window.innerHeight - btnRect.top + 8}px`;
+    popover.style.left = `${Math.max(12, btnRect.left)}px`;
+    popover.style.zIndex = '99999';
+
+    popover.innerHTML = `
+      <div style="padding: 6px 12px 6px; font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+        Chọn loại nhánh muốn thêm
+      </div>
+      <button type="button" class="neural-add-type-btn" id="popover-add-knowledge">
+        <span class="type-icon" style="background: rgba(99, 102, 241, 0.2); color: #818cf8;"><i class="fa-solid fa-book-open"></i></span>
+        <div class="type-info">
+          <strong>📘 Nhánh Kiến Thức (Lý thuyết)</strong>
+          <span>Ghi chép Markdown, bảng vẽ ảnh, hỏi đáp AI</span>
+        </div>
+      </button>
+      <button type="button" class="neural-add-type-btn" id="popover-add-exercise">
+        <span class="type-icon" style="background: rgba(249, 115, 22, 0.2); color: #f97316;"><i class="fa-solid fa-bullseye"></i></span>
+        <div class="type-info">
+          <strong>🎯 Nhánh Bài Tập &amp; Ôn Luyện</strong>
+          <span>AI đọc hiểu toàn bộ node cha ➔ Tự bóc tách chuyên đề, mẹo thi &amp; 5 câu mẫu</span>
+        </div>
+      </button>
+    `;
+
+    document.body.appendChild(popover);
+    activeAddTypePopover = popover;
+
+    popover.querySelector('#popover-add-knowledge')?.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      handleCreateKnowledgeNode();
+    });
+
+    popover.querySelector('#popover-add-exercise')?.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      handleCreateExerciseNode();
+    });
+
+    const onDocClick = (ev) => {
+      if (!popover.contains(ev.target) && ev.target !== addNodeBtn) {
+        closeAddTypePopover();
+        document.removeEventListener('click', onDocClick);
+      }
+    };
+    setTimeout(() => document.addEventListener('click', onDocClick), 50);
   });
 
   // ========================================================================
@@ -363,48 +558,40 @@ export function openNeuralKnowledgeModal(subjectCode) {
   const handleDeleteSelectedNode = () => {
     const selectedId = activeCanvasEngine?.selectedNodeId;
     const currentNodes = getSubjectKnowledgeNodes(subjectCode);
-
-    if (!currentNodes || currentNodes.length === 0) {
-      showToast('Sơ đồ hiện tại đang trống, không có nhánh nào để xóa!', 'info');
-      return;
-    }
-
     if (!selectedId) {
-      showToast('Vui lòng nhấp chọn nhánh bạn muốn xóa trên sơ đồ!', 'warning');
+      showToast('⚠️ Vui lòng chọn một node nơ-ron trước khi xóa!');
       return;
     }
 
-    const targetNode = currentNodes.find(n => n.id === selectedId);
-    if (!targetNode) return;
+    const nodeToDelete = currentNodes.find(n => n.id === selectedId);
+    if (!nodeToDelete) return;
 
-    const isRoot = targetNode.parentId === null;
-    const childCount = getDescendantCount(selectedId, currentNodes);
+    const isRoot = nodeToDelete.parentId === null;
+    const childCount = currentNodes.filter(n => n && n.parentId === nodeToDelete.id && n.id !== nodeToDelete.id).length;
 
     let confirmMsg = '';
     if (isRoot) {
       confirmMsg = childCount > 0
-        ? `⚠️ BẠN ĐANG XÓA NODE GỐC CỦA MÔN HỌC!\n\nThao tác này sẽ xóa toàn bộ sơ đồ tri thức gồm Node Gốc "${targetNode.label}" và ${childCount} nhánh con trực thuộc.\n\nBạn có chắc chắn muốn xóa toàn bộ không?`
-        : `⚠️ Bạn có chắc chắn muốn xóa Node Gốc "${targetNode.label}" không?`;
+        ? `⚠️ BẠN ĐANG XÓA NODE GỐC CỦA MÔN HỌC!\n\nThao tác này sẽ xóa toàn bộ sơ đồ tri thức gồm Node Gốc "${nodeToDelete.label}" và ${childCount} nhánh con trực thuộc.\n\nBạn có chắc chắn muốn xóa toàn bộ không?`
+        : `⚠️ Bạn có chắc chắn muốn xóa Node Gốc "${nodeToDelete.label}" không?`;
     } else {
       confirmMsg = childCount > 0
-        ? `Xóa nhánh "${targetNode.label}" sẽ đồng thời xóa ${childCount} nhánh con trực thuộc.\n\nBạn có chắc chắn muốn xóa không?`
-        : `Bạn có chắc chắn muốn xóa nhánh "${targetNode.label}" không?`;
+        ? `Xóa node "${nodeToDelete.label}" sẽ đồng thời xóa ${childCount} nhánh con trực thuộc.\n\nBạn có chắc chắn muốn xóa không?`
+        : `Bạn có chắc chắn muốn xóa node "${nodeToDelete.label}" không?`;
     }
 
     if (window.confirm(confirmMsg)) {
-      deleteNeuralNode(subjectCode, selectedId);
+      deleteNeuralNode(subjectCode, nodeToDelete.id);
+      showToast(isRoot ? `Đã xóa Node Gốc "${nodeToDelete.label}" thành công! 🗑️` : `Đã xóa node "${nodeToDelete.label}" thành công! 🗑️`, 'success');
       activeCanvasEngine.selectedNodeId = null;
       activeCanvasEngine.updateNodes(getSubjectKnowledgeNodes(subjectCode));
       closeNeuralNotepadSidebar();
-      showToast(isRoot ? `Đã xóa Node Gốc "${targetNode.label}" thành công! 🗑️` : `Đã xóa nhánh "${targetNode.label}" thành công! 🗑️`, 'success');
     }
   };
 
-  if (deleteNodeBtn) {
-    deleteNodeBtn.addEventListener('click', handleDeleteSelectedNode);
-  }
+  deleteNodeBtn.addEventListener('click', handleDeleteSelectedNode);
 
-  // Context Menu Chuột Phải trên Canvas
+  // Context Menu chuột phải
   let currentContextMenuEl = null;
   const closeContextMenu = () => {
     if (currentContextMenuEl && currentContextMenuEl.parentNode) {
@@ -415,12 +602,13 @@ export function openNeuralKnowledgeModal(subjectCode) {
 
   activeCanvasEngine.onContextMenuRequest = (clickedNode, clientX, clientY) => {
     closeContextMenu();
+    closeAddTypePopover();
     if (!clickedNode) return;
 
     const menu = document.createElement('div');
     menu.className = 'neural-canvas-context-menu';
     menu.style.left = `${Math.min(clientX, window.innerWidth - 200)}px`;
-    menu.style.top = `${Math.min(clientY, window.innerHeight - 230)}px`;
+    menu.style.top = `${Math.min(clientY, window.innerHeight - 260)}px`;
 
     const isRoot = (clickedNode.parentId === null);
 
@@ -438,7 +626,10 @@ export function openNeuralKnowledgeModal(subjectCode) {
         <i class="fa-solid fa-bullseye"></i> Thử thách Quiz
       </button>
       <button type="button" class="neural-context-menu-item" id="ctx-add-child">
-        <i class="fa-solid fa-plus"></i> Thêm nhánh con
+        <i class="fa-solid fa-plus"></i> Thêm nhánh kiến thức
+      </button>
+      <button type="button" class="neural-context-menu-item" id="ctx-add-exercise" style="color: #f97316;">
+        <i class="fa-solid fa-bullseye" style="color: #f97316;"></i> Thêm bài tập (AI bóc tách)
       </button>
       <div class="neural-context-menu-divider"></div>
       <button type="button" class="neural-context-menu-item danger" id="ctx-delete-node">
@@ -474,8 +665,12 @@ export function openNeuralKnowledgeModal(subjectCode) {
 
     menu.querySelector('#ctx-add-child')?.addEventListener('click', () => {
       closeContextMenu();
-      activeCanvasEngine.selectedNodeId = clickedNode.id;
-      addNodeBtn.click();
+      handleCreateKnowledgeNode(clickedNode.id);
+    });
+
+    menu.querySelector('#ctx-add-exercise')?.addEventListener('click', () => {
+      closeContextMenu();
+      handleCreateExerciseNode(clickedNode.id);
     });
 
     menu.querySelector('#ctx-delete-node')?.addEventListener('click', () => {

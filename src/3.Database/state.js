@@ -660,7 +660,10 @@ export function addNeuralNode(subjectCode, parentId, nodeData = {}) {
     status: nodeData.status || (isFirstNode ? 'completed' : 'todo'), // 'todo' | 'learning' | 'completed'
     x: typeof nodeData.x === 'number' ? nodeData.x : 0,
     y: typeof nodeData.y === 'number' ? nodeData.y : 0,
-    notes: (nodeData.notes || (isFirstNode ? 'Node gốc môn học' : '')).trim()
+    notes: (nodeData.notes || (isFirstNode ? 'Node gốc môn học' : '')).trim(),
+    nodeType: nodeData.nodeType || 'knowledge', // 'knowledge' | 'exercise' | 'exercise_topic'
+    exerciseData: nodeData.exerciseData || null,
+    quizzes: Array.isArray(nodeData.quizzes) ? nodeData.quizzes : []
   };
 
   subject.knowledgeNodes.push(newNode);

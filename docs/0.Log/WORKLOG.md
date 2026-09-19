@@ -4,6 +4,49 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-19 09:40] - Phân Nhánh Node Bài Tập & Ôn Luyện: AI Tự Động Đọc Toàn Bộ Ngữ Cảnh, Bóc Tách Chủ Đề, Tạo Mẹo Thi Trắc Nghiệm & Bộ 5 Câu Hỏi Mẫu Chuẩn Đích Danh (AI-Powered Exercise Decomposition & 5-Quiz Generator) 🎯📋🤖✨
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng yêu cầu: *"à bây giờ thêm nhánh mới có tùy chọn là node kiên thức thì như những node hiện tại, node bài tập sẽ đọc qua toàn bộ kiến thức trong ghi chú và những đoạn chat ai đã đính kèm ở node cha để tạo bố bài tập những trước hết node bài tập đó phải chia nhỏ kiến thức trong node cha ra ví dụ ở chương 1 gôm đặc tính dự án, quane lý dự án, khởi nghiệp thì hãy chia nhỏ ra kiểu vậy thành các node nhỏ hơn tên là chủ đề đó, bên trong node đó sẽ gồm mẹo để làm trắc nghiệm và có chức năng gen câu hỏi mẫu nhưu chúng ta dã làm mỗi lần gen tạo ta 5 câu..."*.
+  - Giải quyết bài toán học sâu & luyện thi chủ động (Active Recall & Spaced Practice):
+    * Trước đây, toàn bộ các node chỉ thuần túy là "Node Kiến Thức" (Knowledge Node). Muốn luyện bài tập, sinh viên phải tự mở quiz modal hoặc làm bài trên toàn bộ node.
+    * Khi nội dung một chương/bài học rất dài (ví dụ: Chương 1 gồm Khái niệm, Đặc tính dự án, Quản lý dự án, Khởi nghiệp...), người học rất dễ bị ngợp nếu làm trắc nghiệm lẫn lộn.
+    * Người học cần một quy trình phân rã tri thức (Decomposition Pipeline): từ 1 Node gốc lớn -> bấm chọn tạo "Nhánh Bài Tập & Ôn Luyện" -> AI tự động đọc toàn bộ bài học (kể cả các đoạn chat phân tích cặn kẽ đã ghim `aiChatPins`) -> bóc tách ra 3-5 chủ đề trọng tâm -> tạo cây thư mục con trực quan trên Canvas -> mỗi chủ đề con trang bị sẵn Bí kíp & Mẹo né bẫy thi trắc nghiệm (Cheat-sheet) và Nút bấm tạo nhanh 5 câu hỏi trắc nghiệm kèm giải thích chuyên sâu.
+- **🛠 Triển khai kỹ thuật**:
+  1. **AI Service & Prompts Engine ([`GeminiAIService.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/2.Backend/services/GeminiAIService.js))**:
+     - Bổ sung `decomposeKnowledgeToExerciseTopics(parentNode, allNodes)`:
+       * Tổng hợp toàn diện ngữ cảnh node cha: Markdown notes, Visual notes, và đặc biệt là toàn bộ nội dung hội thoại AI ghim (`node.aiChatPins`).
+       * Prompt Gemini phân tích và trích xuất 3–5 chủ đề con (`topicName`, `summary`, `examTips`), kèm bộ Fallback Rules tự động tách mục theo Markdown headers (`#`, `##`, `-`) khi không có kết nối mạng / hết quota.
+     - Bổ sung `generate5TopicPracticeQuizzes(topicName, topicSummary, parentNode, allNodes)`:
+       * Sinh đúng 5 câu trắc nghiệm chuyên biệt cho chủ đề con, độ khó tăng dần từ Nhận biết -> Thông hiểu -> Vận dụng -> Bẫy trắc nghiệm kinh điển.
+       * Mỗi câu trả về 4 lựa chọn, đáp án đúng, giải thích chi tiết (`explanation`), phân tích bẫy (`trapAnalysis`) và nguyên tắc cốt lõi (`coreRule`).
+  2. **Nâng cấp State & Data Model ([`state.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/3.Database/state.js))**:
+     - Mở rộng hàm `addNeuralNode(graphId, nodeData)` hỗ trợ thuộc tính `nodeType`: `'knowledge'` (mặc định), `'exercise'` (node bài tập tổng), hoặc `'exercise_topic'` (node chủ đề con).
+     - Lưu trữ trường `exerciseData` và mảng `quizzes` sẵn sàng cho từng node luyện tập.
+  3. **Hiển thị Đồ Họa & Aura Nhận Diện Trên Canvas ([`NeuralCanvasEngine.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/views/neural/NeuralCanvasEngine.js))**:
+     - Nhận diện `nodeType` khi vẽ canvas:
+       * Node bài tập tổng (`exercise`): Thêm vòng hào quang xoay nét đứt màu Neon Orange (`#ff5722`), biểu tượng huy hiệu hồng tâm 🎯 rực sáng.
+       * Node chủ đề con (`exercise_topic`): Vòng sáng Amber/Cam nhạt mượt mà, biểu tượng bảng checklist 📋.
+  4. **Giao Diện Chọn Loại Nhánh & Tự Động Bố Trí Tỏa Tròn ([`NeuralKnowledgeModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralKnowledgeModal.js))**:
+     - Nút "+ Thêm Nhánh" trên thanh công cụ canvas nay kích hoạt Menu Popover 2 lựa chọn: 📘 **Nhánh Kiến Thức** & 🎯 **Nhánh Bài Tập & Ôn Luyện (AI Bóc Tách)**.
+     - Tích hợp thêm tùy chọn này vào Menu chuột phải (Context Menu) trên Canvas.
+     - Cơ chế `handleCreateExerciseNode`:
+       * Hiển thị trạng thái AI đang phân tích bài học (Processing Indicator / Toast thông báo).
+       * Tính toán tọa độ không gian tỏa tròn (Radial Layout): Node bài tập được đặt lệch phải node cha, các node chủ đề con tỏa đều xung quanh node bài tập với bán kính lý tưởng (150px), tự động nối dây liên kết tri thức mạch lạc.
+       * Tự động nạp nội dung tóm tắt & mẹo thi trắc nghiệm Markdown vào từng node con.
+  5. **Chỉnh Sửa Loại Node Linh Hoạt ([`EditNeuralNodeModal.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/EditNeuralNodeModal.js))**:
+     - Bổ sung bộ chọn Segmented Button `.neural-type-selector`: cho phép người dùng tự do chuyển đổi giữa 📘 Kiến thức và 🎯 Bài tập & Ôn luyện bất cứ lúc nào.
+  6. **Notepad Sidebar Dành Riêng Cho Luyện Tập ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+     - Header hiển thị Badge nổi bật: `🎯 BÀI TẬP & ÔN LUYỆN` hoặc `📋 CHỦ ĐỀ ÔN TẬP`.
+     - Tự động mở tab Xem trước (`preview`) để người học nắm ngay tóm tắt & mẹo làm bài.
+     - Tích hợp **Hero Action Box**:
+       * Nút **"✨ AI Gen 5 Câu Mẫu Ngay"** (`#btn-hero-gen-5-quizzes`): Gọi AI tạo 5 câu trắc nghiệm đúng trọng tâm chủ đề, lưu trực tiếp vào node và tự động chuyển sang tab Trắc nghiệm.
+       * Nút **"🚀 Làm Bài Test"** (`#btn-hero-take-test`): Bật ngay Quiz Modal mô phỏng bài thi trắc nghiệm thực chiến với đồng hồ bấm giờ và phân tích điểm số.
+  7. **CSS & Hiệu Ứng Trực Quan ([`13.neural-knowledge.css`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/styles/13.neural-knowledge.css))**:
+     - Bổ sung style cho popover menu, type selector buttons, Hero card Glassmorphism với viền gradient màu hổ phách/cam ấm rực rỡ.
+  8. **Nâng Cấp Service Worker ([`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+     - Nâng cấp phiên bản bộ nhớ đệm lên `smart-schedule-modular-v174`.
+
 ## 📅 [2026-09-19 09:25] - Tinh Gọn Header Tabs: Lược Bỏ Nút AI Copilot Thừa Trên Thanh Tiêu Đề Notepad (Streamlined Header Tabs) 🧹✨
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:

@@ -3,6 +3,25 @@
 > **Dự án**: Lịch Học Thông Minh & Chiếc Cặp Google Drive  
 > **Mục tiêu**: Lưu trữ tự động các góc nhìn tiếp thị, điểm độc đáo (USP), viral hooks và kịch bản truyền thông từ các tính năng kỹ thuật.
 
+## 💎 ENTRY 26: [2026-09-19] - "Biến Một Chương Dài Thành Bộ Câu Hỏi Trúng Đích": AI Tự Phân Rã Kiến Thức, Tặng Mẹo Né Bẫy & Luyện 5 Câu Trắc Nghiệm Tức Thì 🎯📋🧠✨
+
+### 📌 Phân Loại & Tags:
+`#AIExerciseNode` `#TopicDecomposition` `#ExamCheatSheet` `#5QuizGenerator` `#SmartExamPrep` `#ActiveRecall`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Phân Rã Tri Thức Một Chạm (One-Click Knowledge Decomposition)**:
+  * Không còn nỗi sợ bài học/chương học quá dài, hàng chục trang tài liệu ngổn ngang.
+  * Chỉ cần bấm chọn "Nhánh Bài Tập & Ôn Luyện", AI tự động "quét" sạch từ A đến Z: ghi chú chữ, sơ đồ vẽ và cả các đoạn thảo luận ghim cùng AI trước đó, tự động bóc tách thành 3–5 chủ đề ôn tập riêng biệt kèm cây nhánh sơ đồ tư duy tuyệt đẹp!
+- **Tích Hợp Sẵn Bí Kíp & Mẹo Né Bẫy (Exam Cheat-Sheet & Traps Included)**:
+  * Mỗi chủ đề con mở ra không phải là trang giấy trắng vô hồn, mà đã được AI đúc kết sẵn mẹo nhận diện từ khóa thi trắc nghiệm, các bẫy thường gặp của giảng viên và nguyên tắc cốt lõi giúp xử lý câu hỏi trong 5 giây!
+- **Bộ 5 Câu Trắc Nghiệm Mẫu Đích Danh Tức Thì (Instant 5-Question Quiz Generator)**:
+  * Ngay trong giao diện bài học, chỉ 1 cú click nút "✨ AI Gen 5 Câu Mẫu", hệ thống lập tức xuất xưởng 5 câu trắc nghiệm sát sườn phân cấp từ dễ đến bẫy tinh vi.
+  * Có thể mở chế độ Thi Thử (Test Simulation) bấm giờ làm bài ngay lập tức!
+
+### 2. 🎣 Viral Hooks Cho TikTok / Reels / Shorts:
+- **Hook 1 (Nỗi sợ tài liệu dài)**: *"Bạn sắp thi mà tài liệu dài tận 50 trang đọc không vào? Bấm 1 nút, AI bóc tách ngay thành 3 chủ đề nhỏ, viết luôn mẹo né bẫy thi cử và gen 5 câu trắc nghiệm luyện tập liền tay!"*
+- **Hook 2 (Ôn thi chủ động)**: *"Đừng học vẹt nữa! Xem cách chiếc Mindmap AI này biến cả chương sách thành sơ đồ bài tập tỏa tròn, có sẵn đề thi và mẹo giải cực đỉnh!"*
+
 ## 💎 ENTRY 25: [2026-09-19] - "AI Copilot Toàn Bài & Chiếc Ghim Ma Thuật": Ghim Trợ Lý Ảo Trôi Đồng Bộ Cùng Bài Ghi Chú 📌🤖🪄✨
 
 ### 📌 Phân Loại & Tags:

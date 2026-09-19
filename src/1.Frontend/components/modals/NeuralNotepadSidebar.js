@@ -7,7 +7,7 @@ import { renderMarkdownToHtml } from '../../../2.Backend/utils/markdownRenderer.
 import { openNeuralQuizModal } from './NeuralQuizModal.js';
 import { compressImage } from '../../../2.Backend/utils/imageCompressor.js';
 import { uploadNoteImageToStorage } from '../../../3.Database/auth/FirebaseAuthService.js';
-import { askContextualNoteQuestion } from '../../../2.Backend/services/GeminiAIService.js';
+import { askContextualNoteQuestion, generate5TopicPracticeQuizzes } from '../../../2.Backend/services/GeminiAIService.js';
 import { showToast } from '../Toast.js';
 
 // ==========================================================================
@@ -180,11 +180,14 @@ function renderNotepadTemplate(node) {
     (typeof visualNotes === 'string' && visualNotes.trim().length > 0)
   );
 
-  let defaultTab = 'visual';
-  if (hasVisualNotes) {
-    defaultTab = 'visual';
-  } else if (hasNotes) {
-    defaultTab = 'preview';
+  const isExerciseNode = node.nodeType === 'exercise' || node.nodeType === 'exercise_topic';
+  let defaultTab = isExerciseNode ? 'preview' : 'visual';
+  if (!isExerciseNode) {
+    if (hasVisualNotes) {
+      defaultTab = 'visual';
+    } else if (hasNotes) {
+      defaultTab = 'preview';
+    }
   }
 
   return `
@@ -200,7 +203,13 @@ function renderNotepadTemplate(node) {
 
     <div class="neural-notepad-header">
       <div class="neural-notepad-title-group">
+        ${isExerciseNode ? `
+        <span class="neural-notepad-badge" style="background: rgba(249, 115, 22, 0.2); color: #f97316; border-color: rgba(249, 115, 22, 0.4);" title="Node Bài Tập & Ôn Luyện">
+          <i class="fa-solid fa-bullseye"></i>
+        </span>
+        ` : `
         <span class="neural-notepad-badge"><i class="fa-solid fa-file-pen"></i></span>
+        `}
         <div>
           <h3 class="neural-notepad-title">${escapeHtml(node.label || 'Ghi Chú Khái Niệm')}</h3>
         </div>
@@ -208,7 +217,7 @@ function renderNotepadTemplate(node) {
       <div class="neural-notepad-header-actions">
         <div class="neural-notepad-tabs">
           <button type="button" class="neural-np-tab ${defaultTab === 'preview' ? 'active' : ''}" data-tab="preview" title="Bảng notepad đã gen ra">
-            <i class="fa-solid fa-eye"></i> Đã Gen Ra
+            <i class="fa-solid fa-eye"></i> ${isExerciseNode ? 'Ôn Luyện & Mẹo' : 'Đã Gen Ra'}
           </button>
           <button type="button" class="neural-np-tab ${defaultTab === 'edit' ? 'active' : ''}" data-tab="edit" title="Soạn thảo Markdown">
             <i class="fa-solid fa-pen-to-square"></i> Soạn thảo
@@ -295,6 +304,23 @@ function renderNotepadTemplate(node) {
       <!-- 2. Bảng Notepad Đã Gen Ra (Rich Preview) -->
       <div class="neural-np-pane ${defaultTab === 'preview' ? '' : 'hidden'}" id="neural-np-preview-pane">
         <div class="neural-notepad-rendered-content" id="neural-notepad-preview-content">
+          ${isExerciseNode ? `
+          <div class="exercise-practice-hero" id="exercise-practice-hero-box">
+            <div class="exercise-hero-left">
+              <div class="exercise-hero-tag"><i class="fa-solid fa-bullseye"></i> CHUYÊN ĐỀ ÔN LUYỆN THỰC CHIẾN</div>
+              <h4 class="exercise-hero-title">${escapeHtml(node.label || 'Chuyên đề bài tập')}</h4>
+              <p class="exercise-hero-desc">AI đã phân tích tri thức và trích xuất mẹo thi bên dưới. Bấm nút để sinh 5 câu trắc nghiệm thực chiến bám sát chuyên đề này!</p>
+            </div>
+            <div class="exercise-hero-actions">
+              <button type="button" class="btn-hero-gen-quizzes" id="btn-hero-gen-5-quizzes">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> AI Gen 5 Câu Mẫu
+              </button>
+              <button type="button" class="btn-hero-take-test" id="btn-hero-take-test" title="Làm bài kiểm tra tính điểm">
+                <i class="fa-solid fa-play"></i> Làm Bài Test (${(node.quizzes || []).length})
+              </button>
+            </div>
+          </div>
+          ` : ''}
           <div class="neural-rendered-markdown-body" id="neural-rendered-markdown-body">
             ${renderedHtml}
           </div>
@@ -809,6 +835,56 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
 
   if (btnOpenQuizFromVault) {
     btnOpenQuizFromVault.addEventListener('click', () => {
+      openNeuralQuizModal(parentContainer, subjectCode, node, () => {
+        updateQuizTabBadge();
+        renderQuizVaultList();
+        if (onSavedCallback) onSavedCallback(node.id, textarea.value);
+      });
+    });
+  }
+
+  // Gắn sự kiện Thẻ Hero Bài Tập Chuyên Đề: AI Gen 5 Câu Mẫu & Làm Bài Test
+  const btnGen5Quizzes = sidebar.querySelector('#btn-hero-gen-5-quizzes');
+  const btnTakeTest = sidebar.querySelector('#btn-hero-take-test');
+
+  if (btnGen5Quizzes) {
+    btnGen5Quizzes.addEventListener('click', async () => {
+      btnGen5Quizzes.disabled = true;
+      btnGen5Quizzes.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang tạo 5 câu...';
+      showToast(`🤖 AI đang đọc ngữ cảnh để tạo 5 câu hỏi trắc nghiệm thực chiến cho "${node.label}"...`);
+
+      try {
+        const allNodes = getSubjectKnowledgeNodes(subjectCode);
+        const parentNode = allNodes.find(n => n.id === node.parentId) || node;
+        const topicName = node.exerciseData?.topicName || node.label.replace(/^📋\s*/, '');
+        const topicSummary = node.exerciseData?.summary || '';
+
+        const newQuizzes = await generate5TopicPracticeQuizzes(topicName, topicSummary, parentNode, allNodes);
+        if (Array.isArray(newQuizzes) && newQuizzes.length > 0) {
+          if (!Array.isArray(node.quizzes)) node.quizzes = [];
+          // Chèn 5 câu mới lên đầu ngân hàng câu hỏi
+          node.quizzes = [...newQuizzes, ...node.quizzes];
+          saveAllNotes();
+          updateQuizTabBadge();
+          renderQuizVaultList();
+          if (btnTakeTest) {
+            btnTakeTest.innerHTML = `<i class="fa-solid fa-play"></i> Làm Bài Test (${node.quizzes.length})`;
+          }
+          showToast(`✨ Đã tạo thành công 5 câu hỏi mẫu cho chuyên đề "${topicName}"! Bấm "Làm Bài Test" để kiểm tra ngay.`, 'success');
+          // Tự động chuyển sang tab Trắc nghiệm để người dùng xem chi tiết các câu vừa gen
+          switchViewTab('quiz');
+        }
+      } catch (err) {
+        showToast(`Lỗi tạo câu hỏi mẫu: ${err.message}`, 'error');
+      } finally {
+        btnGen5Quizzes.disabled = false;
+        btnGen5Quizzes.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> AI Gen 5 Câu Mẫu';
+      }
+    });
+  }
+
+  if (btnTakeTest) {
+    btnTakeTest.addEventListener('click', () => {
       openNeuralQuizModal(parentContainer, subjectCode, node, () => {
         updateQuizTabBadge();
         renderQuizVaultList();

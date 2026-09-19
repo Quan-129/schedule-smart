@@ -66,6 +66,18 @@ function renderEditModalTemplate(node) {
       </div>
 
       <div class="neural-form-group">
+        <label>Phân loại nơ-ron</label>
+        <div class="neural-type-selector">
+          <button type="button" class="neural-type-btn ${(node.nodeType || 'knowledge') === 'knowledge' ? 'selected' : ''}" data-type="knowledge">
+            <i class="fa-solid fa-book-open"></i> Kiến thức (Lý thuyết)
+          </button>
+          <button type="button" class="neural-type-btn ${(node.nodeType === 'exercise' || node.nodeType === 'exercise_topic') ? 'selected' : ''}" data-type="exercise">
+            <i class="fa-solid fa-bullseye" style="color:#f97316;"></i> Bài tập &amp; Ôn luyện
+          </button>
+        </div>
+      </div>
+
+      <div class="neural-form-group">
         <label>Trạng thái tiếp thu</label>
         <div class="neural-status-selector">
           <button type="button" class="neural-status-btn ${status === 'todo' ? 'selected' : ''}" data-status="todo">
@@ -169,6 +181,17 @@ export function openEditNeuralNodeModal(subjectCode, node, onSavedCallback, onDe
     });
   });
 
+  // Type Selector (Kiến thức vs Bài tập & Ôn luyện)
+  let currentNodeType = node.nodeType || 'knowledge';
+  const typeBtns = overlay.querySelectorAll('.neural-type-btn');
+  typeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      typeBtns.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      currentNodeType = btn.dataset.type;
+    });
+  });
+
   // Close Events
   const closeBtn = overlay.querySelector('#btn-close-neural-editor');
   closeBtn.addEventListener('click', closeEditNeuralNodeModal);
@@ -203,6 +226,7 @@ export function openEditNeuralNodeModal(subjectCode, node, onSavedCallback, onDe
       url: urlInput.value.trim(),
       color: currentColor,
       status: currentStatus,
+      nodeType: currentNodeType,
       notes: notesInput.value.trim()
     };
 

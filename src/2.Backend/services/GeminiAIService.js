@@ -905,4 +905,366 @@ ${effectiveFullNotes ? effectiveFullNotes.slice(0, 16000) : '(Ghi chú dạng th
   throw new Error(`Không thể nhận phản hồi từ Gemini: ${lastError?.message || 'Lỗi không xác định'}`);
 }
 
+/**
+ * ==========================================================================
+ * EXERCISE & PRACTICE MODULE (BÓC TÁCH CHUYÊN ĐỀ & BỘ SINH 5 CÂU HỎI MẪU)
+ * ==========================================================================
+ */
+
+/**
+ * AI đọc toàn bộ tri thức của Node Cha (Markdown, Visual Notes, AI Chat Pins)
+ * và tự động phân tách thành 3 - 5 Chủ đề / Chuyên đề bài tập kèm Mẹo thi & Bẫy trắc nghiệm
+ * @param {Object} parentNode - Node kiến thức cha
+ * @param {Array<Object>} allNodes - Toàn bộ node của môn học
+ * @returns {Promise<Array<{ topicName: string, summary: string, examTips: Array<{ title: string, content: string }> }>>}
+ */
+export async function decomposeKnowledgeToExerciseTopics(parentNode, allNodes = []) {
+  if (!parentNode) return generateFallbackTopics('Chương học');
+
+  const apiKey = getGeminiApiKey();
+  const parentLabel = parentNode.label || 'Khái niệm';
+  const parentText = extractNodeText(parentNode);
+  const ancestry = traceNodeAncestryPath(allNodes, parentNode);
+
+  // Trích xuất các phiên chat đã đính kèm (AI Chat Pins)
+  let pinnedChatsSummary = '';
+  if (Array.isArray(parentNode.aiChatPins) && parentNode.aiChatPins.length > 0) {
+    pinnedChatsSummary = parentNode.aiChatPins.map((pin, idx) => {
+      const q = pin.title || pin.focalText || `Phiên #${idx + 1}`;
+      const lastAnswers = (pin.chatHistory || [])
+        .filter(msg => msg.role === 'model')
+        .slice(-2)
+        .map(m => m.text)
+        .join(' ');
+      return `[Ghim #${idx + 1} - "${q}"]: ${lastAnswers.slice(0, 300)}`;
+    }).join('\n');
+  }
+
+  const combinedContext = `
+Khái niệm / Bài học: "${parentLabel}"
+Phả hệ môn học: ${ancestry.breadcrumbStr || parentLabel}
+
+=== NỘI DUNG GHI CHÚ (LÝ THUYẾT & SƠ ĐỒ): ===
+${parentText || 'Chưa có ghi chú văn bản chi tiết'}
+
+=== CÁC PHIÊN THẢO LUẬN / HỎI ĐÁP CHUYÊN SÂU ĐÃ ĐÍNH KÈM (AI PINS): ===
+${pinnedChatsSummary || 'Chưa có phiên chat đính kèm'}
+  `.trim();
+
+  // Nếu không có API Key, trả về Fallback Topics dựa trên parsing tiêu đề / gạch đầu dòng
+  if (!apiKey) {
+    return generateFallbackTopics(parentLabel, parentText);
+  }
+
+  const prompt = `
+Bạn là Giảng viên Đại học chuyên gia xây dựng ngân hàng đề thi và giáo trình thực chiến.
+Dựa trên toàn bộ tri thức của chương/khái niệm sau đây:
+
+${combinedContext}
+
+NHIỆM VỤ:
+1. Đọc và phân tích sâu toàn bộ lý thuyết, sơ đồ số liệu và các đoạn hỏi đáp ghim.
+2. Bóc tách kiến thức này thành 3 đến 5 CHUYÊN ĐỀ / CHỦ ĐỀ BÀI TẬP TRỌNG TÂM (ví dụ ở Chương 1 có thể bóc thành: Đặc tính dự án, Quản lý dự án, Khởi sự dự án...).
+3. Với mỗi chuyên đề, cung cấp:
+   - "topicName": Tên chuyên đề ngắn gọn, súc tích, thực chiến (ví dụ: "Đặc tính & Vòng đời Dự án").
+   - "summary": Tóm tắt 1-2 câu ngắn về trọng tâm lý thuyết cần nắm vững.
+   - "examTips": Danh sách 2-4 mẹo thực chiến làm bài trắc nghiệm cho chuyên đề này (gồm "title" và "content"), ví dụ: "Từ khóa nhận diện nhanh", "Bẫy phân biệt giữa X và Y", "Sai lầm thường gặp khi chọn phương án nhiễu".
+
+YÊU CẦU ĐỊNH DẠNG:
+Trả về duy nhất một chuỗi JSON hợp lệ theo cấu trúc sau (không kèm markdown thừa):
+{
+  "topics": [
+    {
+      "topicName": "Tên chuyên đề",
+      "summary": "Tóm tắt ngắn gọn",
+      "examTips": [
+        {
+          "title": "Mẹo / Từ khóa",
+          "content": "Nội dung mẹo và cách tránh bẫy..."
+        }
+      ]
+    }
+  ]
+}
+  `.trim();
+
+  for (const model of BACKUP_MODELS) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.4,
+            responseMimeType: 'application/json'
+          }
+        })
+      });
+
+      if (!response.ok) continue;
+
+      const data = await response.json();
+      const rawParts = data.candidates?.[0]?.content?.parts;
+      const candidateText = Array.isArray(rawParts)
+        ? rawParts.map(p => p.text || '').join('')
+        : (rawParts?.[0]?.text || '');
+
+      let cleaned = candidateText.trim();
+      if (cleaned.startsWith('```json')) cleaned = cleaned.slice(7);
+      if (cleaned.startsWith('```')) cleaned = cleaned.slice(3);
+      if (cleaned.endsWith('```')) cleaned = cleaned.slice(0, -3);
+      cleaned = cleaned.trim();
+
+      const parsed = JSON.parse(cleaned);
+      if (Array.isArray(parsed.topics) && parsed.topics.length > 0) {
+        return parsed.topics;
+      }
+    } catch (e) {
+      console.warn(`Lỗi phân tách chuyên đề với model ${model}:`, e);
+    }
+  }
+
+  return generateFallbackTopics(parentLabel, parentText);
+}
+
+/**
+ * Sinh fallback các chuyên đề nếu không có API Key hoặc mạng lỗi
+ */
+function generateFallbackTopics(label, text = '') {
+  const lines = (text || '').split('\n').map(l => l.trim()).filter(Boolean);
+  const headings = lines.filter(l => l.startsWith('#') || l.startsWith('•') || l.startsWith('-'));
+
+  if (headings.length >= 2) {
+    return headings.slice(0, 4).map((h, i) => {
+      const cleanTitle = h.replace(/^[#•\-\*\d\.\s]+/, '').trim() || `Chuyên đề ${i + 1}`;
+      return {
+        topicName: cleanTitle,
+        summary: `Ôn tập trọng tâm các khái niệm cốt lõi của ${cleanTitle}.`,
+        examTips: [
+          { title: 'Từ khóa nhận diện', content: `Chú ý các thuật ngữ chính liên quan đến ${cleanTitle}.` },
+          { title: 'Bẫy đề thi', content: 'Cảnh giác với các phương án có chứa từ tuyệt đối như "luôn luôn", "chỉ có".' }
+        ]
+      };
+    });
+  }
+
+  return [
+    {
+      topicName: `Đặc tính & Khái niệm cốt lõi: ${label}`,
+      summary: `Nắm vững định nghĩa, đặc điểm bản chất và phạm vi ứng dụng của ${label}.`,
+      examTips: [
+        { title: 'Bí kíp nhận diện', content: 'Ghi nhớ định nghĩa chuẩn và các điều kiện cần & đủ.' },
+        { title: 'Bẫy thi thường gặp', content: 'Đề hay gài phương án đảo ngược nguyên nhân - kết quả.' }
+      ]
+    },
+    {
+      topicName: `Quy trình & Phương pháp áp dụng: ${label}`,
+      summary: `Trình tự các bước thực hiện, công thức và nguyên lý vận hành trong thực tế.`,
+      examTips: [
+        { title: 'Mẹo thứ tự các bước', content: 'Học thuộc mốc bước đầu tiên và bước nghiệm thu cuối cùng.' },
+        { title: 'Loại trừ đáp án', content: 'Loại ngay phương án làm sai lệch thứ tự logic của quy trình.' }
+      ]
+    },
+    {
+      topicName: `Phân tích tình huống & Bài toán thực tế: ${label}`,
+      summary: `Vận dụng lý thuyết để xử lý case study, liên hệ thực tiễn và giải bài tập tính toán.`,
+      examTips: [
+        { title: 'Đọc kỹ câu hỏi', content: 'Xác định câu hỏi tìm khẳng định ĐÚNG hay khẳng định SAI.' },
+        { title: 'Phân tích số liệu', content: 'Chú ý đơn vị tính và các giả định ngoại lệ của bài toán.' }
+      ]
+    }
+  ];
+}
+
+/**
+ * Sinh đúng 5 câu hỏi trắc nghiệm thực chiến bám sát chuyên đề đã chọn
+ * @param {string} topicName 
+ * @param {string} topicSummary 
+ * @param {Object} parentNode 
+ * @param {Array<Object>} allNodes 
+ * @returns {Promise<Array<Object>>}
+ */
+export async function generate5TopicPracticeQuizzes(topicName, topicSummary, parentNode, allNodes = []) {
+  const apiKey = getGeminiApiKey();
+  const parentLabel = parentNode?.label || 'Môn học';
+  const parentText = extractNodeText(parentNode);
+  const ancestry = traceNodeAncestryPath(allNodes, parentNode);
+
+  const prompt = `
+Bạn là Giảng viên Đại học kỳ cựu chuyên ra đề thi kết thúc học phần và thi trắc nghiệm chứng chỉ.
+Bối cảnh môn học: "${parentLabel}" (${ancestry.breadcrumbStr || ''})
+Chuyên đề trọng tâm cần ra đề: "${topicName}"
+Tóm tắt chuyên đề: "${topicSummary || ''}"
+
+TÀI LIỆU THAM KHẢO TỪ GHI CHÚ BÀI HỌC:
+${(parentText || '').slice(0, 2500)}
+
+NHIỆM VỤ:
+Hãy tạo chính xác ĐÚNG 5 CÂU HỎI TRẮC NGHIỆM THỰC CHIẾN bám sát chuyên đề "${topicName}".
+Mỗi câu hỏi phải đạt chuẩn sư phạm cao:
+1. "question": Câu hỏi rõ ràng, có tình huống thực tế hoặc lý thuyết có bẫy tư duy, không hỏi mẹo vặt vô nghĩa.
+2. "options": Đúng 4 lựa chọn (A, B, C, D) có tính nhiễu cao, độ dài cân đối.
+3. "answer": Chỉ số đáp án đúng (0 cho A, 1 cho B, 2 cho C, 3 cho D).
+4. "explanation": Giải thích chuyên sâu tại sao đáp án đó đúng, đồng thời phân tích ngắn gọn vì sao 3 phương án còn lại là bẫy sai.
+5. "trap": Chỉ ra cụ thể bẫy đề thi mà sinh viên hay bị lừa ở câu này.
+6. "rule": 1 câu chốt bản chất cốt lõi (Core Rule) để sinh viên nhớ suốt đời.
+
+YÊU CẦU ĐỊNH DẠNG:
+Trả về duy nhất một chuỗi JSON hợp lệ theo format:
+{
+  "quizzes": [
+    {
+      "question": "...",
+      "options": ["A. ...", "B. ...", "C. ...", "D. ..."],
+      "answer": 0,
+      "explanation": "...",
+      "trap": "...",
+      "rule": "..."
+    }
+  ]
+}
+  `.trim();
+
+  if (apiKey) {
+    for (const model of BACKUP_MODELS) {
+      try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.65,
+              responseMimeType: 'application/json'
+            }
+          })
+        });
+
+        if (!response.ok) continue;
+
+        const data = await response.json();
+        const rawParts = data.candidates?.[0]?.content?.parts;
+        const candidateText = Array.isArray(rawParts)
+          ? rawParts.map(p => p.text || '').join('')
+          : (rawParts?.[0]?.text || '');
+
+        let cleaned = candidateText.trim();
+        if (cleaned.startsWith('```json')) cleaned = cleaned.slice(7);
+        if (cleaned.startsWith('```')) cleaned = cleaned.slice(3);
+        if (cleaned.endsWith('```')) cleaned = cleaned.slice(0, -3);
+        cleaned = cleaned.trim();
+
+        const parsed = JSON.parse(cleaned);
+        if (Array.isArray(parsed.quizzes) && parsed.quizzes.length > 0) {
+          return parsed.quizzes.map((q, idx) => ({
+            id: `practice_${Date.now()}_${idx}_${Math.random().toString(36).substring(2, 6)}`,
+            question: q.question,
+            options: q.options,
+            answer: typeof q.answer === 'number' ? q.answer : 0,
+            explanation: q.explanation || 'Đáp án chính xác theo tài liệu bài học.',
+            trap: q.trap || 'Cẩn thận với các phương án gây nhiễu câu chữ.',
+            rule: q.rule || 'Bản chất cốt lõi của chuyên đề.',
+            topicName: topicName,
+            createdAt: new Date().toISOString()
+          }));
+        }
+      } catch (e) {
+        console.warn(`Lỗi gen 5 câu hỏi với model ${model}:`, e);
+      }
+    }
+  }
+
+  // Fallback 5 câu mẫu nếu không có API key
+  return generateFallback5Quizzes(topicName);
+}
+
+function generateFallback5Quizzes(topicName) {
+  return [
+    {
+      id: `practice_fallback_${Date.now()}_1`,
+      question: `Đặc điểm bản chất quan trọng nhất của chuyên đề "${topicName}" là gì?`,
+      options: [
+        `A. Là nền tảng lý thuyết bắt buộc để áp dụng vào các bài toán thực tế`,
+        `B. Chỉ có tính chất tham khảo, không có tính bắt buộc trong môn học`,
+        `C. Luôn không thay đổi trong mọi điều kiện bài toán`,
+        `D. Hoàn toàn độc lập và không liên quan đến các chuyên đề khác`
+      ],
+      answer: 0,
+      explanation: `Phương án A phản ánh đúng vai trò then chốt của ${topicName} trong hệ thống kiến thức môn học.`,
+      trap: `Các phương án B, C, D sử dụng các từ tuyệt đối hoặc đánh giá thấp vai trò của chuyên đề.`,
+      rule: `Hiểu rõ bản chất nền tảng trước khi áp dụng vào các bài tập phức tạp.`,
+      topicName: topicName,
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: `practice_fallback_${Date.now()}_2`,
+      question: `Khi phân tích và giải quyết bài toán thuộc "${topicName}", bước đầu tiên cần thực hiện là gì?`,
+      options: [
+        `A. Đi ngay vào tính toán kết quả mà không cần kiểm tra điều kiện`,
+        `B. Xác định rõ các giả định, dữ liệu đầu vào và mục tiêu của bài toán`,
+        `C. Chọn ngẫu nhiên một phương pháp thuận tay`,
+        `D. Bỏ qua các ràng buộc biên để đơn giản hóa`
+      ],
+      answer: 1,
+      explanation: `Bước xác định giả định và dữ liệu đầu vào là điều kiện tiên quyết để chọn phương pháp giải đúng đắn.`,
+      trap: `Sinh viên thường vội vàng tính toán mà bỏ qua các điều kiện biên hoặc ràng buộc đầu vào.`,
+      rule: `Chuẩn hóa dữ liệu đầu vào trước khi tiến hành xử lý.`,
+      topicName: topicName,
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: `practice_fallback_${Date.now()}_3`,
+      question: `Sai lầm phổ biến nhất khi làm trắc nghiệm phần "${topicName}" là gì?`,
+      options: [
+        `A. Đọc kỹ từng từ khóa và câu hỏi`,
+        `B. Nhầm lẫn giữa khái niệm định tính và chỉ số định lượng`,
+        `C. Sử dụng phương pháp loại trừ đáp án vô lý`,
+        `D. Kiểm tra lại kết quả với các ví dụ đơn giản`
+      ],
+      answer: 1,
+      explanation: `Sự nhầm lẫn giữa mặt định tính và định lượng là cái bẫy đề thi ưa thích của giảng viên.`,
+      trap: `Đề thi hay dùng từ vựng giống nhau nhưng thay đổi bản chất định lượng thành định tính.`,
+      rule: `Phân biệt rạch ròi giữa bản chất và số đo hiển thị.`,
+      topicName: topicName,
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: `practice_fallback_${Date.now()}_4`,
+      question: `Trong thực tế, chuyên đề "${topicName}" thường liên kết chặt chẽ nhất với khâu nào?`,
+      options: [
+        `A. Khâu lập kế hoạch, kiểm soát chất lượng và đánh giá rủi ro`,
+        `B. Khâu hủy bỏ dự án và giải thể đội ngũ`,
+        `C. Không liên kết với khâu nào trong quy trình`,
+        `D. Chỉ liên kết khi dự án đã gặp sự cố lớn`
+      ],
+      answer: 0,
+      explanation: `Chuyên đề này đóng vai trò then chốt trong việc kiểm soát rủi ro và chất lượng tổng thể.`,
+      trap: `Phương án D chỉ mô tả phần ngọn khi có sự cố, không phải quy trình phòng ngừa chủ động.`,
+      rule: `Chủ động kiểm soát từ khâu lập kế hoạch thay vì xử lý hậu quả.`,
+      topicName: topicName,
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: `practice_fallback_${Date.now()}_5`,
+      question: `Mẹo loại trừ nhanh nhất một phương án SAI trong câu hỏi về "${topicName}" là gì?`,
+      options: [
+        `A. Phương án chứa các từ hạn định tuyệt đối như "luôn luôn", "duy nhất", "không bao giờ"`,
+        `B. Phương án có phân tích điều kiện áp dụng rõ ràng`,
+        `C. Phương án liên hệ với thực tế quản trị`,
+        `D. Phương án có giải thích cơ sở khoa học`
+      ],
+      answer: 0,
+      explanation: `Trong các môn khoa học và quản lý, hiếm khi có sự tuyệt đối 100%. Các phương án khẳng định tuyệt đối thường là đáp án nhiễu.`,
+      trap: `Sinh viên hay bị lôi cuốn bởi câu chữ mang tính khẳng định mạnh mẽ.`,
+      rule: `Cảnh giác tối đa với các phát biểu mang tính tuyệt đối hóa trong đề thi trắc nghiệm.`,
+      topicName: topicName,
+      createdAt: new Date().toISOString()
+    }
+  ];
+}
+
+
 

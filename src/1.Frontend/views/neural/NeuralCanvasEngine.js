@@ -686,19 +686,23 @@ export class NeuralCanvasEngine {
     const isSelected = this.selectedNodeId === node.id;
     const isHovered = this.hoveredNode && this.hoveredNode.id === node.id;
 
-    // 0. Tính toán Tiến Trình Thử Thách & Nấc Màu Nơ-ron
+    // 0. Phân loại Loại Node (Kiến thức vs Bài tập & Ôn luyện)
+    const isExerciseNode = node.nodeType === 'exercise';
+    const isExerciseTopic = node.nodeType === 'exercise_topic';
+
+    // 0.1. Tính toán Tiến Trình Thử Thách & Nấc Màu Nơ-ron
     const passedCount = parseInt(node.quizPassedCount, 10) || 0;
     const targetCount = this.targetQuizCount || 3;
     const progress = Math.min(1, passedCount / targetCount);
 
-    // 1. Nấc Màu Nơ-ron (Đổi màu theo 1/3 nấc, 2/3 nấc, 3/3 nấc)
-    let nodeColor = node.color || '#6366f1';
+    // 1. Nấc Màu Nơ-ron (Đổi màu theo 1/3 nấc, 2/3 nấc, 3/3 nấc hoặc màu chuyên biệt Bài tập)
+    let nodeColor = node.color || (isExerciseNode ? '#f97316' : (isExerciseTopic ? '#f59e0b' : '#6366f1'));
     if (progress >= 1 || node.status === 'completed') {
       nodeColor = '#10b981'; // 100% Mastered: Xanh Ngọc Lục Bảo
     } else if (progress >= 0.5) {
-      nodeColor = '#f59e0b'; // Nấc 2 (>= 50%): Cam hổ phách năng lượng
+      nodeColor = isExerciseNode ? '#ea580c' : '#f59e0b'; // Nấc 2 (>= 50%): Cam hổ phách năng lượng
     } else if (progress > 0) {
-      nodeColor = '#06b6d4'; // Nấc 1 (> 0%): Cyan / Xanh lam sáng
+      nodeColor = isExerciseNode ? '#fb923c' : '#06b6d4'; // Nấc 1 (> 0%): Cyan / Cam sáng
     }
 
     ctx.save();
@@ -709,13 +713,25 @@ export class NeuralCanvasEngine {
 
     // 1. Aura Glow (và Hào quang khi là mục tiêu kết nối)
     ctx.beginPath();
-    ctx.arc(pos.x, pos.y, radius + (isConnectionTarget ? 16 * this.zoom : (isSelected ? 10 * this.zoom : 5 * this.zoom)), 0, Math.PI * 2);
+    ctx.arc(pos.x, pos.y, radius + (isConnectionTarget ? 16 * this.zoom : (isSelected ? 10 * this.zoom : (isExerciseNode ? 8 * this.zoom : 5 * this.zoom))), 0, Math.PI * 2);
     if (isConnectionTarget) {
       ctx.fillStyle = this.wireCycleBlocked ? 'rgba(239, 68, 68, 0.35)' : 'rgba(16, 185, 129, 0.35)';
     } else {
-      ctx.fillStyle = isSelected ? `${nodeColor}45` : (isHovered ? `${nodeColor}30` : `${nodeColor}18`);
+      ctx.fillStyle = isSelected ? `${nodeColor}45` : (isHovered ? `${nodeColor}30` : (isExerciseNode ? `${nodeColor}28` : `${nodeColor}18`));
     }
     ctx.fill();
+
+    // Vòng phát sáng phụ đặc trưng cho Node Bài tập chính
+    if (isExerciseNode) {
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, radius + 5 * this.zoom, 0, Math.PI * 2);
+      ctx.strokeStyle = '#f97316';
+      ctx.lineWidth = 1.5 * this.zoom;
+      ctx.setLineDash([4, 4]);
+      ctx.lineDashOffset = -this.pulsePhase * 16;
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
 
     if (isConnectionTarget) {
       ctx.beginPath();
@@ -738,8 +754,20 @@ export class NeuralCanvasEngine {
     ctx.fillStyle = gradient;
     ctx.fill();
 
+    // 2.5. Icon ở tâm của Node nếu là Node Bài Tập / Chuyên đề
+    if (isExerciseNode || isExerciseTopic) {
+      ctx.save();
+      ctx.font = `${Math.max(9, Math.round(radius * 0.85))}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+      ctx.shadowBlur = 4;
+      ctx.fillText(isExerciseNode ? '🎯' : '📋', pos.x, pos.y);
+      ctx.restore();
+    }
+
     // 3. Border Stroke
-    ctx.lineWidth = Math.max(1.5, (isSelected ? 3 : 2) * this.zoom);
+    ctx.lineWidth = Math.max(1.5, (isSelected ? 3 : (isExerciseNode ? 2.5 : 2)) * this.zoom);
     ctx.strokeStyle = isSelected ? '#ffffff' : nodeColor;
     ctx.stroke();
 
