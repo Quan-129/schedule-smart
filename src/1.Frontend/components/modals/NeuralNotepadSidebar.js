@@ -219,9 +219,6 @@ function renderNotepadTemplate(node) {
           <button type="button" class="neural-np-tab" data-tab="quiz" title="Ngân hàng câu hỏi trắc nghiệm đã lưu">
             <i class="fa-solid fa-bullseye"></i> Trắc nghiệm (${(node.quizzes || []).length})
           </button>
-          <button type="button" class="neural-np-tab" id="btn-toggle-ai-copilot" title="Mở Trợ lý AI Copilot đọc hiểu ngữ cảnh" style="color: #c084fc; border-color: rgba(168, 85, 247, 0.4);">
-            <i class="fa-solid fa-wand-magic-sparkles"></i> AI Copilot
-          </button>
         </div>
         ${node.parentId !== null ? `
         <button type="button" class="neural-delete-node-btn" id="btn-delete-node-from-sidebar" title="Xóa node kiến thức này">
@@ -1872,7 +1869,6 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   const aiInput = sidebar.querySelector('#neural-ai-input');
   const btnAiSend = sidebar.querySelector('#btn-ai-send');
   const quickChips = sidebar.querySelectorAll('.neural-ai-quick-chip');
-  const btnToggleAiCopilot = sidebar.querySelector('#btn-toggle-ai-copilot');
   const drawerHeader = sidebar.querySelector('#neural-ai-drawer-header');
   let handleOpenAiCopilotPopup = null;
 
@@ -2391,19 +2387,6 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     }
     hideSelectionPill();
   });
-
-  // Nút AI Copilot trên Header Tabs
-  if (btnToggleAiCopilot) {
-    btnToggleAiCopilot.addEventListener('click', () => {
-      if (typeof handleOpenAiCopilotPopup === 'function') {
-        handleOpenAiCopilotPopup(btnToggleAiCopilot);
-      } else if (aiDrawer && aiDrawer.classList.contains('active')) {
-        aiDrawer.classList.toggle('minimized');
-      } else {
-        openAiCopilot();
-      }
-    });
-  }
 
   // Thu nhỏ / Đóng Drawer
   if (btnCloseAiDrawer) {

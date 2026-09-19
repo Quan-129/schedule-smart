@@ -4,6 +4,20 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-19 09:25] - Tinh Gọn Header Tabs: Lược Bỏ Nút AI Copilot Thừa Trên Thanh Tiêu Đề Notepad (Streamlined Header Tabs) 🧹✨
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng yêu cầu: *"thế bỏ thằng ai compilot trên đầu này đi nó hơi thừa"*.
+  - Lý do tối ưu giao diện:
+    * Thanh Header Tabs (`.neural-notepad-tabs`) ban đầu chứa 4 tab điều hướng chế độ hiển thị nội dung: `Đã Gen Ra` (Preview), `Soạn thảo` (Edit), `Ghi chú` (Visual), `Trắc nghiệm` (Quiz).
+    * Việc đặt thêm một nút bấm hành động `AI Copilot` (`#btn-toggle-ai-copilot`) xen lẫn vào hàng tab điều hướng gây chật chội không gian hiển thị, đặc biệt trên các màn hình có tỉ lệ chia đôi hoặc màn hình nhỏ.
+    * Hơn nữa, nút chức năng AI Copilot đã được bố trí chuyên nghiệp, đầy đủ và tiện tay ngay trên Toolbar Markdown (`#btn-copilot-md`) và Toolbar Ghi Chú (`#btn-copilot-vis`), cũng như thanh công cụ chọn văn bản (Selection Pill) và nút khoanh vùng AI.
+    * Do đó, việc lược bỏ nút này trên header tabs giúp thanh tab bar quay về đúng chức năng điều hướng giao diện, sạch sẽ, thoáng đãng và trực quan hơn rất nhiều.
+- **🛠 Triển khai kỹ thuật ([`NeuralNotepadSidebar.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js))**:
+  - Lược bỏ thẻ button `#btn-toggle-ai-copilot` trong template HTML header tabs.
+  - Dọn dẹp khai báo DOM và bộ lắng nghe sự kiện `btnToggleAiCopilot` trong JS.
+  - Nâng cấp phiên bản cache Service Worker lên `smart-schedule-modular-v173` trong [`sw.js`](file:///c:/Users/Acer/Documents/D%E1%BB%B1%20%C3%A1n%20ma/tools_3/sw.js).
+
 ## 📅 [2026-09-19 07:45] - Khắc Phục Lỗi Ghim Icon AI Copilot Ở Chế Độ Toàn Bài & Tự Động Định Vị Thông Minh (Whole-Note AI Copilot Pinning Fix) 📌🤖✨
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:
