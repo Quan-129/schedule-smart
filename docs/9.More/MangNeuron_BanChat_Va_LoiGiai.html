@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Mạng Neuron Nhân Tạo: Bản Chất Cốt Lõi & Lời Giải Chi Tiết</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 9mm 11mm 9mm 11mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 8.35pt;
+      line-height: 1.32;
+      color: #0f172a;
+      background-color: #ffffff;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Page Container */
+    .a4-page {
+      width: 100%;
+      height: 279mm;
+      max-height: 279mm;
+      page-break-after: always;
+      break-after: page;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .a4-page:last-child {
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    /* Header & Footer */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1.5px solid #0284c7;
+      padding-bottom: 4px;
+      margin-bottom: 7px;
+    }
+    .page-header .brand {
+      font-weight: 800;
+      font-size: 8.2pt;
+      color: #0369a1;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .page-header .doc-tag {
+      font-size: 7.5pt;
+      font-weight: 600;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    .page-footer {
+      margin-top: auto;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 7.2pt;
+      color: #64748b;
+    }
+
+    /* Typography & Sections */
+    h1, h2, h3, h4, p {
+      margin: 0 0 4px 0;
+    }
+
+    .section-title {
+      font-size: 11.5pt;
+      font-weight: 800;
+      color: #0f172a;
+      border-left: 4px solid #0284c7;
+      padding-left: 7px;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-title .score-tag {
+      font-size: 7.5pt;
+      font-weight: 700;
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #bae6fd;
+    }
+
+    /* Boxes */
+    .box {
+      border-radius: 5px;
+      padding: 5px 8px;
+      margin-bottom: 5px;
+      font-size: 8.1pt;
+    }
+
+    .box-problem {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-left: 3.5px solid #475569;
+    }
+
+    .box-metaphor {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-left: 3.5px solid #d97706;
+      color: #78350f;
+    }
+
+    .box-concept {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 3.5px solid #16a34a;
+      color: #14532d;
+    }
+
+    .box-solution {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-left: 3.5px solid #0284c7;
+      color: #0c4a6e;
+    }
+
+    .box-warning {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 3.5px solid #dc2626;
+      color: #7f1d1d;
+    }
+
+    .box-code {
+      background: #0f172a;
+      color: #f8fafc;
+      border-radius: 5px;
+      padding: 6px 8px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 7.6pt;
+      line-height: 1.35;
+      margin-bottom: 5px;
+    }
+
+    .box-code pre {
+      margin: 0;
+      white-space: pre-wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 6.8pt;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+    .badge-problem { background: #334155; color: #ffffff; }
+    .badge-metaphor { background: #b45309; color: #ffffff; }
+    .badge-concept { background: #15803d; color: #ffffff; }
+    .badge-solution { background: #0369a1; color: #ffffff; }
+    .badge-code { background: #38bdf8; color: #0f172a; }
+    .badge-takeaway { background: #7e22ce; color: #ffffff; }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 3px 0 5px 0;
+      font-size: 7.7pt;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 3px 6px;
+      text-align: left;
+    }
+    th {
+      background: #f1f5f9;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    /* Math Formulas */
+    .math-block {
+      background: #ffffff;
+      border: 1px dashed #94a3b8;
+      border-radius: 4px;
+      padding: 4px 7px;
+      margin: 3px 0;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      font-size: 8.2pt;
+      color: #0f172a;
+    }
+    .math-sym {
+      font-weight: 700;
+      color: #0369a1;
+    }
+    .math-res {
+      font-weight: 800;
+      color: #b91c1c;
+      background: #fee2e2;
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+    .math-step {
+      display: block;
+      margin: 2px 0;
+      padding-left: 6px;
+      border-left: 2px solid #38bdf8;
+    }
+
+    /* Two-col layout */
+    .two-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+    }
+
+    /* Cover specific */
+    .cover-hero {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #0f172a 100%);
+      color: #ffffff;
+      padding: 18px 20px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .cover-title {
+      font-size: 19pt;
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+    .cover-subtitle {
+      font-size: 9.8pt;
+      font-weight: 400;
+      color: #bae6fd;
+      line-height: 1.35;
+    }
+    .cover-meta {
+      margin-top: 10px;
+      display: flex;
+      gap: 12px;
+      font-size: 7.8pt;
+      color: #e0f2fe;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      padding-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== TRANG 1: BÌA & TỔNG QUAN ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Artificial Neural Networks &bull; Academic Playbook</span>
+      <span class="doc-tag">Bộ Môn Học Máy & Trí Tuệ Nhân Tạo</span>
+    </div>
+
+    <div class="cover-hero">
+      <div class="cover-title">MẠNG NEURON NHÂN TẠO<br>BẢN CHẤT CỐT LÕI & LỜI GIẢI CHI TIẾT</div>
+      <div class="cover-subtitle">Từ nghiệm đóng Hồi quy Tuyến tính, Phân loại Logistic, Cơ chế phạt L1/L2 đến Lan truyền thuận MLP và Định lý Xấp xỉ Phổ quát XOR</div>
+      <div class="cover-meta">
+        <span>Tài liệu: Chuyên đề Mạng Neuron & Tối ưu</span>
+        <span>Quy chuẩn: 100% Zero-Emoji & Native Math</span>
+        <span>Khổ in: A4 Chuẩn In ấn</span>
+      </div>
+    </div>
+
+    <div class="box box-concept" style="margin-bottom: 8px;">
+      <span class="badge badge-concept">Triết Lý Sư Phạm</span>
+      <b>Học Bản Chất Để Ứng Dụng Bền Vững</b>
+      <p style="margin-top: 3px;">
+        Toán học trong Deep Learning không phải rào cản đánh đố, mà là <i>ngôn ngữ chính xác</i> để mô tả trực giác vật lý. Mọi phương trình ma trận hay đạo hàm hàm mất mát đều bắt nguồn từ nhu cầu thực tiễn: đo lường độ sai lệch, trừng phạt sự ngạo mạn khi phán đoán, ép mạng nơ-ron chọn lọc thông tin tinh gọn và uốn lượn ranh giới để giải quyết những bài toán thế giới thực phi tuyến tính.
+      </p>
+    </div>
+
+    <div class="section-title">
+      <span>MỤC LỤC 5 DẠNG BÀI TOÁN TRỌNG TÂM</span>
+      <span class="score-tag">5 Bài Toán Nền Tảng</span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 8%;">Câu</th>
+          <th style="width: 25%;">Chủ Đề Trọng Tâm</th>
+          <th style="width: 37%;">Bản Chất Cốt Lõi & Trực Giác Đời Thực</th>
+          <th style="width: 30%;">Nghiệm Số & Kết Quả Then Chốt</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight: 800; color: #0284c7;">Câu 1</td>
+          <td><b>Nghiệm Đóng Hồi Quy Tuyến Tính</b></td>
+          <td>Chiếc kiềng 3 chân; ma trận Gram X^T X đo độ xô lệch/tương quan giữa các góc nhìn; điều kiện khả nghịch để nghiệm không bị sụp đổ vô định.</td>
+          <td>X^T X đối xứng; det(X^T X) = 1; w = [0, 2, 0]^T; sai số bình phương bằng 0.</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 800; color: #0284c7;">Câu 2</td>
+          <td><b>Hồi Quy Logistic & Cross-Entropy</b></td>
+          <td>Mức độ tự tin của nhân chứng và hình phạt nói dối; hàm mất mát Cross-Entropy phạt theo cấp số mũ vô tận và triệt tiêu bão hòa đạo hàm Sigmoid.</td>
+          <td>z1 = -0.5, y1_hat = 0.3775, L1 = 0.9741; z2 = 0.0, y2_hat = 0.5000, L2 = 0.6931.</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 800; color: #0284c7;">Câu 3</td>
+          <td><b>So Sánh Ridge (L2) & LASSO (L1)</b></td>
+          <td>Cảnh sát phạt năng lượng (co nhỏ đều) vs Cảnh sát cắt phăng án phạt cố định; hình học quả cầu trơn vs kim cương góc nhọn tạo trọng số 0.</td>
+          <td>grad(L2) = w, subgrad(L1) = sign(w); lambda=0.1: Penalty L1 = 0.0900 gấp 5.14 lần L2 = 0.0175.</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 800; color: #0284c7;">Câu 4</td>
+          <td><b>Lan Truyền Thuận MLP & Hàm ReLU</b></td>
+          <td>Dây chuyền 2 công đoạn và chiếc van 1 chiều Diode bán dẫn; nếu không có ReLU, 100 lớp tuyến tính cũng chỉ suy biến thành 1 ma trận duy nhất.</td>
+          <td>z(1) = [0.5, 0.25]^T; a(1) = [0.5, 0.25]^T; z(2) = 0.325 (đầu ra mạng cuối cùng).</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 800; color: #0284c7;">Câu 5</td>
+          <td><b>Bài Toán XOR & Universal Approx</b></td>
+          <td>Bàn cờ ca-rô 4 ô chéo: một nhát kiếm thẳng bất khả phân tách; thiết kế MLP 2-2-1 với ReLU bẻ gập không gian, kẹp dải phân loại hoàn hảo.</td>
+          <td>Chứng minh mâu thuẫn b &le; 0 vs 2b &gt; 0; MLP 2-2-1: W(1), b(1), W(2)=[2, -6] giải đúng 4/4 điểm.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="box box-problem" style="margin-top: 6px;">
+      <span class="badge badge-problem">Bản Đồ Tư Duy Kiến Trúc</span>
+      <b>Lộ Trình Tiến Hóa Từ Tuyến Tính Sang Deep Learning</b>
+      <div style="display: flex; justify-content: space-between; margin-top: 4px; font-size: 7.7pt; line-height: 1.28;">
+        <div style="flex: 1; padding: 4px; background: #ffffff; border-radius: 4px; border: 1px solid #cbd5e1; margin-right: 4px;">
+          <b style="color: #0369a1;">1. Tuyến tính thuần</b><br>
+          Hồi quy OLS, ma trận X^T X, nghiệm đóng giải tích. Giới hạn: Chỉ khớp mặt phẳng phẳng.
+        </div>
+        <div style="flex: 1; padding: 4px; background: #ffffff; border-radius: 4px; border: 1px solid #cbd5e1; margin-right: 4px;">
+          <b style="color: #0369a1;">2. Phân loại & Co cụm</b><br>
+          Logistic Sigmoid, Cross-Entropy Loss, Regularization L1/L2 kiểm soát trọng số và overfitting.
+        </div>
+        <div style="flex: 1; padding: 4px; background: #ffffff; border-radius: 4px; border: 1px solid #cbd5e1;">
+          <b style="color: #0369a1;">3. Mạng nơ-ron sâu</b><br>
+          Lớp ẩn (Hidden Layer) + Kích hoạt phi tuyến (ReLU) bẻ gãy không gian, giải mã bài toán XOR.
+        </div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 1 / 6 &bull; Cẩm Nang Mạng Neuron Nhân Tạo</span>
+      <span>Học Máy & Trí Tuệ Nhân Tạo &bull; 2026</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 2: CÂU 1 - HỒI QUY TUYẾN TÍNH ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Câu 1 &bull; Nghiệm Đóng Hồi Quy Tuyến Tính (OLS Normal Equation)</span>
+      <span class="doc-tag">Ma Trận Gram & Khả Nghịch</span>
+    </div>
+
+    <div class="section-title">
+      <span>CÂU 1: HIỂU VỀ CÔNG THỨC NGHIỆM HỒI QUY TUYẾN TÍNH</span>
+      <span class="score-tag">Đại Số Tuyến Tính Ứng Dụng</span>
+    </div>
+
+    <div class="box box-problem">
+      <span class="badge badge-problem">Đề Bài Gốc</span>
+      Cho tập dữ liệu nhỏ với 3 mẫu và 2 đặc trưng (không tính bias):
+      <div class="math-block" style="text-align: center; margin: 3px 0;">
+        X = [ [1, 2, 1], [1, 3, 2], [1, 1, 1] ] , &nbsp; t = [ 4, 6, 2 ]^T
+      </div>
+      <i>(Ghi chú: Cột 1 toàn 1 là cột hệ số chặn bias x0 = 1; cột 2 là đặc trưng x1; cột 3 là đặc trưng x2).</i><br>
+      a) Tính ma trận X^T X và giải thích ý nghĩa của từng phần tử trong ma trận này.<br>
+      b) Tính định thức của X^T X và giải thích tại sao ma trận này phải khả nghịch.<br>
+      c) Tìm vector trọng số w sử dụng công thức nghiệm đóng.
+    </div>
+
+    <div class="box box-metaphor">
+      <span class="badge badge-metaphor">Ẩn Dụ Thực Tế</span>
+      <b>Chiếc Kiềng Ba Chân & Lăng Kính Đa Góc Độ</b><br>
+      Hãy tưởng tượng bạn định giá ngôi nhà dựa vào 2 camera quan sát (x1: diện tích, x2: số phòng). Ma trận X^T X chính là chiếc máy kiểm tra góc đặt của 2 camera:
+      <ul>
+        <li style="margin-bottom: 2px;"><b>Đường chéo chính</b>: Cường độ tín hiệu độc lập của từng camera (tổng bình phương giá trị).</li>
+        <li><b>Phần tử ngoài đường chéo</b>: Góc chồng lấn giữa 2 camera. Nếu 2 camera nhìn cùng một góc (x1 tỷ lệ hoàn toàn với x2), thông tin bị trùng lắp (đa cộng tuyến), kiềng ba chân bị gãy gập, định thức det = 0 và toán học không thể tìm ra giá trị độc lập của từng camera!</li>
+      </ul>
+    </div>
+
+    <div class="box box-solution">
+      <span class="badge badge-solution">Lời Giải Chi Tiết</span>
+      <b>a) Tính ma trận X^T X & Giải mã ý nghĩa từng phần tử</b>
+      <div class="math-block">
+        X^T = [ [1, 1, 1], [2, 3, 1], [1, 2, 1] ] &nbsp;&times;&nbsp; X = [ [1, 2, 1], [1, 3, 2], [1, 1, 1] ]<br>
+        <div class="math-step">
+          &bull; Hàng 1: [ 1+1+1=3 , 2+3+1=6 , 1+2+1=4 ]<br>
+          &bull; Hàng 2: [ 2+3+1=6 , 4+9+1=14 , 2+6+1=9 ]<br>
+          &bull; Hàng 3: [ 1+2+1=4 , 2+6+1=9 , 1+4+1=6 ]
+        </div>
+        &rarr; <span class="math-sym">X^T X =</span> [ [3, 6, 4], [6, 14, 9], [4, 9, 6] ] (Ma trận đối xứng kích thước 3&times;3).
+      </div>
+      <b>Ý nghĩa toán học:</b> Phần tử đường chéo chính (j, j) là tổng bình phương đặc trưng j (&Sigma; x_nj^2). Phần tử chéo (j, k) với j &ne; k là tích tương quan cặp (&Sigma; x_nj x_nk). X^T X chính là ma trận hiệp phương sai chưa chuẩn hóa (Gram Matrix).
+    </div>
+
+    <div class="two-cols">
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 1b</span>
+        <b>Tính Định Thức & Tính Khả Nghịch</b>
+        <div class="math-block">
+          Tính det(X):<br>
+          det(X) = 1(3&times;1 - 2&times;1) - 2(1&times;1 - 2&times;1) + 1(1&times;1 - 3&times;1)<br>
+          det(X) = 1(1) - 2(-1) + 1(-2) = 1 + 2 - 2 = <span class="math-res">1</span>.<br>
+          &rarr; <span class="math-sym">det(X^T X)</span> = (det(X))^2 = 1^2 = <span class="math-res">1</span>.
+        </div>
+        <b>Tại sao phải khả nghịch?</b><br>
+        Để tìm nghiệm duy nhất từ đạo hàm grad L = 0 &harr; (X^T X)w = X^T t, hệ phương trình phải có nghiệm duy nhất &harr; det(X^T X) &ne; 0. Nếu suy biến (det=0), các cột phụ thuộc tuyến tính, có vô số nghiệm và nghiệm không ổn định.
+      </div>
+
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 1c</span>
+        <b>Tìm Vector Trọng Số w</b>
+        <div class="math-block">
+          Vì X vuông khả nghịch: w = X^-1 t.<br>
+          Ma trận nghịch đảo X^-1:<br>
+          X^-1 = [ [1, -1, 1], [1, 0, -1], [-2, 1, 1] ]<br>
+          Nhân với vector mục tiêu t = [4, 6, 2]^T:<br>
+          <div class="math-step">
+            w0 = 1(4) - 1(6) + 1(2) = 4 - 6 + 2 = <span class="math-res">0</span><br>
+            w1 = 1(4) + 0(6) - 1(2) = 4 - 2 = <span class="math-res">2</span><br>
+            w2 = -2(4) + 1(6) + 1(2) = -8 + 6 + 2 = <span class="math-res">0</span>
+          </div>
+          &rarr; Vector trọng số: <span class="math-res">w = [0, 2, 0]^T</span>.
+        </div>
+        <b>Kiểm chứng:</b> Xw = [0+2(2)+0, 0+2(3)+0, 0+2(1)+0]^T = [4, 6, 2]^T &equiv; t (Khớp hoàn hảo 100%!).
+      </div>
+    </div>
+
+    <div class="box box-concept">
+      <span class="badge badge-takeaway">Đúc Kết Thực Chiến</span>
+      Nghiệm w = [0, 2, 0]^T cho thấy biến mục tiêu t hoàn toàn chỉ phụ thuộc tuyến tính vào đặc trưng x1 (với hệ số 2: t = 2 * x1). Đặc trưng x2 thừa thãi (hệ số 0) và hệ số chặn bias = 0.
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 2 / 6 &bull; Cẩm Nang Mạng Neuron Nhân Tạo</span>
+      <span>Học Máy & Trí Tuệ Nhân Tạo &bull; 2026</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 3: CÂU 2 - HỒI QUY LOGISTIC ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Câu 2 &bull; Hồi Quy Logistic & Phân Tích Hàm Mất Mát Cross-Entropy</span>
+      <span class="doc-tag">Xác Suất Sigmoid & Triệt Tiêu Gradient</span>
+    </div>
+
+    <div class="section-title">
+      <span>CÂU 2: PHÂN TÍCH HÀM MẤT MÁT TRONG HỒI QUY LOGISTIC</span>
+      <span class="score-tag">Phân Loại Nhị Phân</span>
+    </div>
+
+    <div class="box box-problem">
+      <span class="badge badge-problem">Đề Bài Gốc</span>
+      Cho 2 điểm dữ liệu với nhãn nhị phân:
+      <div class="math-block" style="text-align: center; margin: 3px 0;">
+        x1 = [1, 2]^T, y1 = 1 &nbsp;&bull;&nbsp; x2 = [1, 1]^T, y2 = 0 &nbsp;&bull;&nbsp; w = [0.5, -0.5]^T
+      </div>
+      a) Tính xác suất dự đoán y_hat1 và y_hat2 cho cả hai điểm.<br>
+      b) Tính hàm cross-entropy loss cho từng điểm dữ liệu.<br>
+      c) Giải thích tại sao hàm cross-entropy phù hợp cho bài toán phân loại nhị phân.
+    </div>
+
+    <div class="box box-metaphor">
+      <span class="badge badge-metaphor">Ẩn Dụ Thực Tế</span>
+      <b>Mức Độ Tự Tin Của Nhân Chứng & Hình Phạt Nói Dối</b><br>
+      Hàm Sigmoid &sigma;(z) đóng vai trò chuyển đổi điểm số thô thành mức độ tự tin (xác suất từ 0% đến 100%).
+      Nếu một nhân chứng trước tòa quả quyết 99% một người có tội (y_hat = 0.99) nhưng bằng chứng sau đó chứng minh người đó vô tội (y = 0):
+      <ul>
+        <li>Nếu dùng sai số bình phương (MSE), hình phạt tối đa chỉ là (0 - 0.99)^2 &asymp; 0.98 (quá nhẹ, nhân chứng không sợ).</li>
+        <li>Hàm Cross-Entropy phạt theo hàm số mũ vô tận: -ln(1 - 0.99) = -ln(0.01) &asymp; 4.6 (và tiến tới &infin; nếu chắc chắn 100%). Hình phạt vô cực này buộc mạng nơ-ron phải sửa sai ngay lập tức!</li>
+      </ul>
+    </div>
+
+    <div class="two-cols">
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 2a</span>
+        <b>Tính Xác Suất Dự Đoán Sigmoid</b>
+        <div class="math-block">
+          Công thức: &sigma;(z) = 1 / (1 + e^-z)<br>
+          <b>Điểm x1 = [1, 2]^T:</b><br>
+          z1 = w^T x1 = 0.5(1) + (-0.5)(2) = 0.5 - 1.0 = <span class="math-sym">-0.5</span><br>
+          y_hat1 = 1 / (1 + e^0.5) = 1 / (1 + 1.6487)<br>
+          <div class="math-step">
+            y_hat1 = 1 / 2.6487 &asymp; <span class="math-res">0.3775</span> (hay 37.75%)
+          </div>
+          <b>Điểm x2 = [1, 1]^T:</b><br>
+          z2 = w^T x2 = 0.5(1) + (-0.5)(1) = 0.5 - 0.5 = <span class="math-sym">0.0</span><br>
+          y_hat2 = 1 / (1 + e^0) = 1 / (1 + 1)<br>
+          <div class="math-step">
+            y_hat2 = 1 / 2.0000 = <span class="math-res">0.5000</span> (hay 50.00%)
+          </div>
+        </div>
+      </div>
+
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 2b</span>
+        <b>Tính Hàm Cross-Entropy Loss</b>
+        <div class="math-block">
+          L = - [ y * ln(y_hat) + (1-y) * ln(1 - y_hat) ]<br>
+          <b>Với điểm x1 (y1 = 1):</b><br>
+          L1 = - ln(y_hat1) = - ln(0.3775)<br>
+          <div class="math-step">
+            L1 = - (-0.9741) = <span class="math-res">0.9741</span>
+          </div>
+          <i>(Vì y1=1 mà mô hình chỉ đoán 37.75% nên mất mát khá cao).</i><br>
+          <b>Với điểm x2 (y2 = 0):</b><br>
+          L2 = - ln(1 - y_hat2) = - ln(1 - 0.5000)<br>
+          <div class="math-step">
+            L2 = - ln(0.5000) = ln(2) &asymp; <span class="math-res">0.6931</span>
+          </div>
+          <i>(Mô hình phân vân 50-50, mất mát bằng đúng ln(2)).</i>
+        </div>
+      </div>
+    </div>
+
+    <div class="box box-concept">
+      <span class="badge badge-concept">Câu 2c &bull; Bản Chất Sâu Sắc</span>
+      <b>Ba Lý Do Hàm Cross-Entropy Là Chuẩn Mực Tuyệt Đối Cho Phân Loại Nhị Phân</b>
+
+      <div style="margin-top: 2px; font-size: 7.9pt;">
+        <b>1. Nguyên lý Hợp lý Cực đại (MLE)</b>: Xuất phát từ phân phối Bernoulli P(y|x) = y_hat^y * (1 - y_hat)^(1-y). Lấy -ln(P) trực tiếp sinh ra Cross-Entropy. Tối thiểu hóa mất mát tương đương tối đa hóa xác suất thực tế.
+      </div>
+      <div style="margin-top: 2px; font-size: 7.9pt;">
+        <b>2. Hình phạt bất đối xứng vô cực</b>: Khi y = 1 mà y_hat &rarr; 0, mất mát -ln(y_hat) &rarr; +&infin;. Mô hình bị phạt nặng không giới hạn nếu tự tin vào phán đoán sai lệch.
+      </div>
+
+      <div style="margin-top: 3px; padding: 4px 6px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px;">
+        <b>3. Cơ chế triệt tiêu bão hòa đạo hàm (Giải quyết triệt để Vanishing Gradient):</b>
+        <div style="font-size: 7.6pt; color: #475569; margin: 1px 0;">
+          Đạo hàm của hàm Sigmoid y_hat = 1 / (1 + e^-z) theo biến z là: <b>d(y_hat)/dz = y_hat * (1 - y_hat)</b>.
+        </div>
+
+        <table style="width: 100%; margin: 2px 0 0 0; font-size: 7.5pt;">
+          <thead>
+            <tr style="background: #f8fafc;">
+              <th style="width: 50%; color: #dc2626; border-color: #fecaca; background: #fef2f2; padding: 2px 5px;">Nếu dùng sai số bình phương (MSE)</th>
+              <th style="width: 50%; color: #16a34a; border-color: #bbf7d0; background: #f0fdf4; padding: 2px 5px;">Nếu dùng hàm Cross-Entropy Loss (Chuẩn)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="vertical-align: top; border-color: #fecaca; background: #fffafb; padding: 3px 5px;">
+                &bull; <b>Hàm mất mát:</b> L_MSE = (1/2) * (y_hat - y)^2<br>
+                &bull; <b>Đạo hàm Chain Rule:</b><br>
+                dL/dz = [ dL/d(y_hat) ] &times; [ d(y_hat)/dz ]<br>
+                <span style="color: #b91c1c; font-weight: 700;">dL/dz = (y_hat - y) &times; [ y_hat * (1 - y_hat) ]</span><br>
+                <div style="margin-top: 2px; color: #991b1b; font-size: 7.2pt; line-height: 1.22;">
+                  <b>Hậu quả khi đoán sai bét:</b> Khi y = 1 mà y_hat = 0.001:<br>
+                  Cụm y_hat*(1-y_hat) &asymp; 0.001 &times; 0.999 &asymp; 0.001.<br>
+                  &rArr; dL/dz = (-0.999) &times; 0.001 &asymp; <b>-0.001 &asymp; 0</b>!<br>
+                  <i>Gradient triệt tiêu, mạng bị tê liệt không thể học!</i>
+                </div>
+              </td>
+              <td style="vertical-align: top; border-color: #bbf7d0; background: #fafffc; padding: 3px 5px;">
+                &bull; <b>Hàm mất mát:</b> L_CE = - [ y ln(y_hat) + (1-y) ln(1-y_hat) ]<br>
+                &bull; <b>Đạo hàm Chain Rule:</b><br>
+                dL/d(y_hat) = - y/y_hat + (1-y)/(1-y_hat) = (y_hat - y) / [ y_hat * (1 - y_hat) ]<br>
+                <span style="color: #15803d; font-weight: 700;">dL/dz = dL/d(y_hat) &times; d(y_hat)/dz = y_hat - y</span><br>
+                <div style="margin-top: 2px; color: #166534; font-size: 7.2pt; line-height: 1.22;">
+                  <b>Ưu điểm vượt trội:</b> Mẫu số triệt tiêu gọn cụm y_hat*(1-y_hat)!<br>
+                  Khi y = 1 mà y_hat = 0.001:<br>
+                  &rArr; dL/dz = 0.001 - 1 = <b>-0.999 (Lực kéo cực đại)</b>.<br>
+                  <i>Càng đoán sai nhiều, gradient càng mạnh, học cực nhanh!</i>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 3 / 6 &bull; Cẩm Nang Mạng Neuron Nhân Tạo</span>
+      <span>Học Máy & Trí Tuệ Nhân Tạo &bull; 2026</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 4: CÂU 3 - RIDGE VS LASSO ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Câu 3 &bull; So Sánh Ridge (L2) & LASSO (L1) Regularization</span>
+      <span class="doc-tag">Hình Học Ràng Buộc & Nghiệm Thưa (Sparsity)</span>
+    </div>
+
+    <div class="section-title">
+      <span>CÂU 3: SO SÁNH RIDGE VÀ LASSO REGULARIZATION</span>
+      <span class="score-tag">Kiểm Soát Overfitting</span>
+    </div>
+
+    <div class="box box-problem">
+      <span class="badge badge-problem">Đề Bài Gốc</span>
+      Cho hàm mất mát hồi quy tuyến tính với regularization:
+      <div class="math-block" style="text-align: center; margin: 3px 0;">
+        L(w) = 1/2 &Sigma; (tn - w^T xn)^2 + &lambda; R(w) &nbsp;&bull;&nbsp; R(w) = 1/2 w^T w (Ridge) &nbsp;hoặc&nbsp; R(w) = &Sigma; |wi| (LASSO)
+      </div>
+      a) Tính đạo hàm của R(w) cho cả hai trường hợp.<br>
+      b) Giải thích tại sao LASSO có xu hướng tạo ra các trọng số bằng 0.<br>
+      c) Cho &lambda; = 0.1, so sánh mức độ penalty của hai phương pháp khi w = [0.1, 0.5, -0.3]^T.
+    </div>
+
+    <div class="box box-metaphor">
+      <span class="badge badge-metaphor">Ẩn Dụ Thực Tế</span>
+      <b>Hai Vị Quan Tòa & Quả Cầu Tròn vs Viên Kim Cương Góc Nhọn</b><br>
+      <ul>
+        <li style="margin-bottom: 2px;"><b>Quan tòa Ridge (L2 - Phạt theo bình phương)</b>: "Thằng nào trọng số to ta phạt nặng theo bình phương, thằng nào nhỏ ta phạt nhẹ". Do đó, khi trọng số co dần về 0.001, mức phạt siêu nhỏ khiến Ridge hài lòng và dừng lại, không bao giờ ép về 0 tuyệt đối.</li>
+        <li><b>Quan tòa LASSO (L1 - Phạt đồng mức không đổi)</b>: "Bất kể ngươi to hay nhỏ, mỗi bước đi đều bị phạt đúng 1 khoản cố định". Lực kéo không đổi này kéo phăng các trọng số nhỏ qua vạch số 0 và kẹp dính tại 0, biến mô hình thành một bộ tự động lọc bỏ các đặc trưng thừa thãi!</li>
+      </ul>
+    </div>
+
+    <div class="two-cols">
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 3a</span>
+        <b>Đạo Hàm Của R(w)</b>
+        <div class="math-block">
+          <b>1. Ridge Regularization (L2):</b><br>
+          R(w) = 1/2 &Sigma; wi^2 &rarr; <span class="math-res">grad_w R(w) = w</span><br>
+          <i>(Với từng phần tử: &part;R/&part;wi = wi). Đạo hàm khả vi liên tục mọi nơi.</i><br><br>
+          <b>2. LASSO Regularization (L1):</b><br>
+          R(w) = &Sigma; |wi|. Hàm không khả vi tại wi = 0. Ta dùng dưới đạo hàm (Subgradient):<br>
+          <span class="math-res">&part;R/&part;wi = sign(wi)</span> =
+          <div class="math-step">
+            +1 khi wi &gt; 0<br>
+            -1 khi wi &lt; 0<br>
+            [-1, 1] khi wi = 0
+          </div>
+        </div>
+      </div>
+
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 3c</span>
+        <b>Tính & So Sánh Mức Phạt Khi &lambda; = 0.1</b>
+        <div class="math-block">
+          w = [0.1, 0.5, -0.3]^T<br>
+          &bull; w^T w = 0.1^2 + 0.5^2 + (-0.3)^2 = 0.01 + 0.25 + 0.09 = <span class="math-sym">0.35</span><br>
+          &bull; &Sigma; |wi| = |0.1| + |0.5| + |-0.3| = 0.1 + 0.5 + 0.3 = <span class="math-sym">0.90</span><br><br>
+          <b>Mức phạt Ridge (L2):</b><br>
+          Penalty_Ridge = &lambda; &times; (1/2 w^T w) = 0.1 &times; 0.5 &times; 0.35<br>
+          <div class="math-step">
+            Penalty_Ridge = <span class="math-res">0.0175</span>
+          </div>
+          <b>Mức phạt LASSO (L1):</b><br>
+          Penalty_LASSO = &lambda; &times; &Sigma; |wi| = 0.1 &times; 0.90<br>
+          <div class="math-step">
+            Penalty_LASSO = <span class="math-res">0.0900</span>
+          </div>
+        </div>
+        <b>Kết luận:</b> Penalty_LASSO (0.0900) cao gấp <b>5.14 lần</b> Penalty_Ridge (0.0175). Khi các trọng số nhỏ (|wi| &lt; 1), bình phương làm chúng tiêu giảm nhanh, do đó L1 phạt các trọng số nhỏ nghiêm khắc hơn L2 rất nhiều!
+      </div>
+    </div>
+
+    <div class="box box-concept">
+      <span class="badge badge-concept">Câu 3b &bull; Bản Chất Hình Học</span>
+      <b>Tại Sao LASSO Tạo Ra Trọng Số Bằng 0 Tuyệt Đối (Sparse Weights)?</b>
+      <div style="display: flex; gap: 8px; margin-top: 2px;">
+        <div style="flex: 1;">
+          <b>1. Góc nhìn Hình học Không gian Ràng buộc (KKT Conditions)</b><br>
+          Trong không gian 2D (w1, w2):<br>
+          &bull; Vùng ràng buộc của Ridge là hình tròn trơn w1^2 + w2^2 &le; C. Đường đồng mức sai số (hình elip) tiếp xúc với đường tròn tại các điểm trơn bất kỳ, xác suất rơi trúng trục tọa độ bằng 0.<br>
+          &bull; Vùng ràng buộc của LASSO là <b>hình thoi có các đỉnh nhọn</b> nằm ngay trên các trục tọa độ (|w1| + |w2| &le; C). Khi elip sai số nở rộng ra từ tâm, điểm tiếp xúc đầu tiên có xác suất cực cao rơi trúng các góc nhọn này &rarr; ép biến tương ứng bằng đúng 0!
+        </div>
+        <div style="flex: 1;">
+          <b>2. Góc nhìn Động lực học Cập nhật Gradient</b><br>
+          &bull; Ridge: &Delta;w &prop; -&lambda; w. Lực kéo tỷ lệ với độ lớn w. Càng gần 0 lực kéo càng triệt tiêu &rarr; chỉ tiệm cận 0.<br>
+          &bull; LASSO: &Delta;w &prop; -&lambda; sign(w). Lực kéo có độ lớn không đổi &lambda;. Ngay cả khi w = 0.0001, lực kéo vẫn là &lambda;, kéo thẳng w qua 0 và kẹp dính lại điểm cực tiểu 0 bằng toán tử Soft-Thresholding:
+          <div class="math-step">
+            S_&lambda;(w) = sign(w) * max(0, |w| - &lambda;)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 4 / 6 &bull; Cẩm Nang Mạng Neuron Nhân Tạo</span>
+      <span>Học Máy & Trí Tuệ Nhân Tạo &bull; 2026</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 5: CÂU 4 - LAN TRUYỀN THUẬN MLP ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Câu 4 &bull; Phân Tích Lan Truyền Thuận Trong MLP & Hàm Kích Hoạt ReLU</span>
+      <span class="doc-tag">Forward Propagation & Non-Linearity</span>
+    </div>
+
+    <div class="section-title">
+      <span>CÂU 4: PHÂN TÍCH LAN TRUYỀN THUẬN TRONG MLP</span>
+      <span class="score-tag">Mạng 2 Lớp (Multi-Layer Perceptron)</span>
+    </div>
+
+    <div class="box box-problem">
+      <span class="badge badge-problem">Đề Bài Gốc</span>
+      Xét MLP 2 lớp với các tham số:
+      <div class="math-block" style="text-align: center; margin: 3px 0;">
+        W(1) = [ [0.5, -0.2], [0.3, 0.1] ], &nbsp; b(1) = [ 0.1, -0.1 ]^T<br>
+        W(2) = [ 0.4, -0.3 ], &nbsp; b(2) = 0.2<br>
+        Đầu vào: x = [ 1.0, 0.5 ]^T, sử dụng hàm kích hoạt ReLU: ReLU(z) = max(0, z)
+      </div>
+      a) Tính đầu ra của lớp ẩn đầu tiên.<br>
+      b) Tính đầu ra cuối cùng của mạng.<br>
+      c) Giải thích vai trò của hàm kích hoạt ReLU trong việc tạo tính phi tuyến.
+    </div>
+
+    <div class="box box-metaphor">
+      <span class="badge badge-metaphor">Ẩn Dụ Thực Tế</span>
+      <b>Dây Chuyền Chế Biến Hai Công Đoạn & Chiếc Van Một Chiều (Diode Bán Dẫn)</b><br>
+      Lớp ẩn thứ nhất giống như một xưởng lọc thô, lớp thứ hai là khâu hoàn thiện sản phẩm.
+      Hàm kích hoạt ReLU hoạt động giống hệt một chiếc van 1 chiều (hoặc linh kiện bán dẫn Diode):
+      Nếu áp suất đẩy vào là dương (z &gt; 0), dòng điện/chất lỏng đi qua trọn vẹn không suy xuyển (hệ số góc = 1). Nhưng nếu áp suất âm (z &le; 0), chiếc van lập tức sập khóa chặt chặn đứng tín hiệu rác! Điểm gãy gập tại số 0 này chính là chìa khóa bẻ cong không gian toán học!
+    </div>
+
+    <div class="two-cols">
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 4a</span>
+        <b>Tính Đầu Ra Lớp Ẩn Đầu Tiên</b>
+        <div class="math-block">
+          Tính tổng có trọng số z(1) = W(1) x + b(1):<br>
+          z(1) = [ [0.5, -0.2], [0.3, 0.1] ] [ 1.0, 0.5 ]^T + [ 0.1, -0.1 ]^T<br>
+          <div class="math-step">
+            &bull; Neuron ẩn 1:<br>
+            z1(1) = (0.5 &times; 1.0) + (-0.2 &times; 0.5) + 0.1<br>
+            z1(1) = 0.5 - 0.1 + 0.1 = <span class="math-sym">0.50</span><br>
+            &bull; Neuron ẩn 2:<br>
+            z2(1) = (0.3 &times; 1.0) + (0.1 &times; 0.5) + (-0.1)<br>
+            z2(1) = 0.3 + 0.05 - 0.1 = <span class="math-sym">0.25</span>
+          </div>
+          &rarr; z(1) = [ 0.50, 0.25 ]^T.<br>
+          Áp dụng hàm kích hoạt ReLU: a(1) = max(0, z(1)):<br>
+          <div class="math-step">
+            a1(1) = max(0, 0.50) = <span class="math-res">0.50</span><br>
+            a2(1) = max(0, 0.25) = <span class="math-res">0.25</span>
+          </div>
+          &rarr; Đầu ra lớp ẩn: <span class="math-res">a(1) = [ 0.50, 0.25 ]^T</span>.
+        </div>
+      </div>
+
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 4b</span>
+        <b>Tính Đầu Ra Cuối Cùng Của Mạng</b>
+        <div class="math-block">
+          Tính đầu ra lớp thứ hai z(2) = W(2) a(1) + b(2):<br>
+          z(2) = [ 0.4, -0.3 ] [ 0.50, 0.25 ]^T + 0.2<br>
+          <div class="math-step">
+            z(2) = (0.4 &times; 0.50) + (-0.3 &times; 0.25) + 0.2<br>
+            z(2) = 0.20 - 0.075 + 0.20<br>
+            z(2) = 0.40 - 0.075 = <span class="math-res">0.325</span>
+          </div>
+          &rarr; Đầu ra cuối cùng của mạng: <span class="math-res">y_hat = 0.325</span>.
+        </div>
+        <b>Ý nghĩa thực thi:</b> Cả 2 neuron ẩn đều có giá trị tiền kích hoạt dương nên đều vượt qua ngưỡng mở van của ReLU, đóng góp đầy đủ vào tín hiệu tổng hợp đầu ra.
+      </div>
+    </div>
+
+    <div class="box box-concept">
+      <span class="badge badge-concept">Câu 4c &bull; Bản Chất Sâu Sắc</span>
+      <b>Vai Trò Cốt Tử Của Hàm Kích Hoạt ReLU Trong Việc Tạo Tính Phi Tuyến</b>
+      <ol style="margin: 2px 0 0 14px; padding: 0;">
+        <li style="margin-bottom: 2px;">
+          <b>Ngăn chặn sự sụp đổ tuyến tính (Prevent Linear Collapse)</b>: Nếu không có hàm kích hoạt phi tuyến (hoặc dùng hàm đồng nhất f(z)=z), mạng N lớp sẽ là: y = W(N) &hellip; (W(2)(W(1)x + b(1)) + b(2)) = W_tong * x + b_tong. Tích của hàng loạt ma trận tuyến tính chỉ là một ma trận tuyến tính duy nhất! Mạng sâu 100 lớp cũng chỉ mạnh ngang một mô hình hồi quy tuyến tính lớp 10.
+        </li>
+        <li style="margin-bottom: 2px;">
+          <b>Uốn lượn và phân mảnh không gian (Piecewise Linear Representation)</b>: ReLU tạo ra điểm gấp khúc tại 0. Mỗi neuron ReLU chia không gian thành 2 nửa: một nửa phẳng lặng (tắt = 0) và một nửa dốc nghiêng (bật = z). Khi kết hợp hàng trăm neuron ReLU, mạng tạo ra một bề mặt đa diện phức tạp (Polyhedron) có khả năng uốn lượn xấp xỉ bất kỳ hình dạng nào.
+        </li>
+        <li>
+          <b>Đạo hàm thông suốt không bão hòa</b>: Khi z &gt; 0, đạo hàm d(ReLU)/dz = 1. Tín hiệu lỗi lan truyền ngược (Backpropagation) truyền thẳng qua hàng chục lớp ẩn mà không bị co cụm về 0 như Sigmoid hay Tanh (triệt tiêu hiện tượng Vanishing Gradient).
+        </li>
+      </ol>
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 5 / 6 &bull; Cẩm Nang Mạng Neuron Nhân Tạo</span>
+      <span>Học Máy & Trí Tuệ Nhân Tạo &bull; 2026</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 6: CÂU 5 - UNIVERSAL APPROX & XOR ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Câu 5 &bull; Universal Approximation Theorem & Giải Mã Bài Toán XOR</span>
+      <span class="doc-tag">Định Lý Xấp Xỉ Phổ Quát</span>
+    </div>
+
+    <div class="section-title">
+      <span>CÂU 5: UNIVERSAL APPROXIMATION THEOREM TRONG THỰC TẾ</span>
+      <span class="score-tag">Bài Toán XOR Kinh Điển</span>
+    </div>
+
+    <div class="box box-problem">
+      <span class="badge badge-problem">Đề Bài Gốc</span>
+      Xét bài toán XOR - bài toán không thể giải được bằng mô hình tuyến tính:
+      <table style="width: 55%; margin: 3px auto; text-align: center;">
+        <thead><tr><th>x1</th><th>x2</th><th>Nhãn Mục Tiêu (y)</th><th>Ý Nghĩa Logic</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>0</td><td><b>0</b></td><td>Hai đầu vào giống nhau &rarr; Sai (0)</td></tr>
+          <tr><td>0</td><td>1</td><td><b>1</b></td><td>Hai đầu vào khác nhau &rarr; Đúng (1)</td></tr>
+          <tr><td>1</td><td>0</td><td><b>1</b></td><td>Hai đầu vào khác nhau &rarr; Đúng (1)</td></tr>
+          <tr><td>1</td><td>1</td><td><b>0</b></td><td>Hai đầu vào giống nhau &rarr; Sai (0)</td></tr>
+        </tbody>
+      </table>
+      a) Chứng minh tại sao không tồn tại đường thẳng phân tách hoàn hảo cho bài toán này.<br>
+      b) Thiết kế MLP đơn giản nhất (ít neuron nhất) có thể giải bài toán XOR.<br>
+      c) Tính đầu ra của MLP bạn thiết kế cho cả 4 trường hợp đầu vào.
+    </div>
+
+    <div class="box box-solution">
+      <span class="badge badge-solution">Câu 5a</span>
+      <b>Chứng Minh Toán Học: Tính Bất Khả Tuyến Tính Của XOR</b>
+      <div class="math-block">
+        Giả sử phản chứng tồn tại đường phân cách tuyến tính: f(x1, x2) = w1 x1 + w2 x2 + b.<br>
+        Điều kiện để phân tách hoàn hảo: f(x) &gt; 0 khi y = 1 và f(x) &le; 0 khi y = 0.<br>
+        <div class="math-step">
+          (1) Với (0, 0) &rarr; y=0: w1(0) + w2(0) + b &le; 0 &rarr; <span class="math-sym">b &le; 0</span><br>
+          (2) Với (0, 1) &rarr; y=1: w1(0) + w2(1) + b &gt; 0 &rarr; <span class="math-sym">w2 + b &gt; 0</span><br>
+          (3) Với (1, 0) &rarr; y=1: w1(1) + w2(0) + b &gt; 0 &rarr; <span class="math-sym">w1 + b &gt; 0</span><br>
+          (4) Với (1, 1) &rarr; y=0: w1(1) + w2(1) + b &le; 0 &rarr; <span class="math-sym">w1 + w2 + b &le; 0</span>
+        </div>
+        Cộng vế theo vế (2) và (3): (w1 + b) + (w2 + b) &gt; 0 &harr; <span class="math-sym">(w1 + w2 + b) + b &gt; 0</span>.<br>
+        Nhưng theo (4) thì w1+w2+b &le; 0 và theo (1) thì b &le; 0. Tổng hai số không dương bắt buộc phải &le; 0!<br>
+        Điều này mâu thuẫn hoàn toàn với kết luận &gt; 0. <span class="math-res">&rarr; Bất khả phân tách tuyến tính!</span>
+      </div>
+    </div>
+
+    <div class="two-cols">
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 5b</span>
+        <b>Thiết Kế MLP Tối Thiểu (2 - 2 - 1)</b>
+        Nguyên lý logic: XOR = OR - AND.<br>
+        Thiết kế mạng 2 neuron ẩn dùng hàm ReLU:<br>
+        <div class="math-step">
+          &bull; <b>Neuron h1 (Cổng OR)</b>: Kích hoạt khi x1+x2 &ge; 1<br>
+          h1 = ReLU( 1*x1 + 1*x2 - 0.5 )<br>
+          &bull; <b>Neuron h2 (Cổng AND)</b>: Kích hoạt khi x1+x2 &ge; 2<br>
+          h2 = ReLU( 1*x1 + 1*x2 - 1.5 )<br>
+          &bull; <b>Neuron đầu ra y</b>: Kết hợp tuyến tính<br>
+          y = 2 * h1 - 6 * h2 + 0
+        </div>
+        Bộ tham số: W(1) = [[1, 1], [1, 1]], b(1) = [-0.5, -1.5]^T, W(2) = [2, -6], b(2) = 0.
+      </div>
+
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 5c</span>
+        <b>Kiểm Chứng Đầu Ra Cho 4 Trường Hợp</b>
+        <table>
+          <thead>
+            <tr><th>(x1, x2)</th><th>h1 (OR)</th><th>h2 (AND)</th><th>y = 2*h1 - 6*h2</th><th>Đúng?</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><b>(0, 0)</b></td><td>max(0, -0.5)=0</td><td>max(0, -1.5)=0</td><td>2(0) - 6(0) = <span class="math-res">0.0</span></td><td>Chính xác</td></tr>
+            <tr><td><b>(0, 1)</b></td><td>max(0, 0.5)=0.5</td><td>max(0, -0.5)=0</td><td>2(0.5) - 6(0) = <span class="math-res">1.0</span></td><td>Chính xác</td></tr>
+            <tr><td><b>(1, 0)</b></td><td>max(0, 0.5)=0.5</td><td>max(0, -0.5)=0</td><td>2(0.5) - 6(0) = <span class="math-res">1.0</span></td><td>Chính xác</td></tr>
+            <tr><td><b>(1, 1)</b></td><td>max(0, 1.5)=1.5</td><td>max(0, 0.5)=0.5</td><td>2(1.5) - 6(0.5) = <span class="math-res">0.0</span></td><td>Chính xác</td></tr>
+          </tbody>
+        </table>
+        <i>(Lưu ý: Tại (1, 1), 2*1.5 - 6*0.5 = 3 - 3 = 0, triệt tiêu hoàn hảo!).</i>
+      </div>
+    </div>
+
+    <div class="box box-concept">
+      <span class="badge badge-takeaway">Đúc Kết Thực Chiến & Định Lý Cybenko (1989)</span>
+      <b>Ý Nghĩa Sống Còn Của Universal Approximation Theorem</b><br>
+      Bài toán XOR từng khiến nghiên cứu Mạng Nơ-ron rơi vào "Mùa đông AI" (AI Winter) suốt 15 năm khi Minsky & Papert chứng minh Perceptron 1 lớp bất lực. Đến năm 1989, Định lý Cybenko đã giải oan: <i>"Một mạng MLP chỉ cần duy nhất 1 lớp ẩn phi tuyến với đủ số neuron có thể xấp xỉ bất kỳ hàm số liên tục nào với độ chính xác tùy ý!"</i>. Lớp ẩn đóng vai trò biến đổi không gian đầu vào thành một không gian đặc trưng mới (Feature Space), nơi các điểm dữ liệu trở nên phân tách tuyến tính!
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 6 / 6 &bull; Cẩm Nang Mạng Neuron Nhân Tạo</span>
+      <span>Học Máy & Trí Tuệ Nhân Tạo &bull; 2026</span>
+    </div>
+  </div>
+
+</body>
+</html>

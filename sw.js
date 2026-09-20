@@ -4,7 +4,7 @@
  * ==========================================================================
  */
 
-const CACHE_NAME = 'smart-schedule-modular-v178';
+const CACHE_NAME = 'smart-schedule-modular-v179';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -23,6 +23,7 @@ const STATIC_ASSETS = [
   './src/1.Frontend/styles/12.backpack-folder.css',
   './src/1.Frontend/styles/13.neural-knowledge.css',
   './src/1.Frontend/styles/14.neural-quiz.css',
+  './src/1.Frontend/styles/15.pdf-viewer.css',
   './manifest.json',
   './src/1.Frontend/main.js',
   './src/1.Frontend/components/CircularNode.js',
@@ -30,7 +31,9 @@ const STATIC_ASSETS = [
   './src/1.Frontend/components/modals/NeuralNotepadSidebar.js',
   './src/1.Frontend/components/modals/NeuralKnowledgeModal.js',
   './src/1.Frontend/components/modals/NeuralQuizModal.js',
+  './src/1.Frontend/components/modals/PdfReaderModal.js',
   './src/2.Backend/services/GeminiAIService.js',
+  './src/2.Backend/services/PdfExtractionService.js',
   './src/1.Frontend/components/modals/EditNeuralNodeModal.js',
   './src/1.Frontend/views/neural/NeuralCanvasEngine.js',
   './src/1.Frontend/components/modals/EditSubjectModal.js',
@@ -56,6 +59,7 @@ const STATIC_ASSETS = [
   './src/3.Database/state.js',
   './src/3.Database/auth/FirebaseAuthService.js',
   './src/3.Database/storage/LocalStorageEngine.js',
+  './src/3.Database/storage/IndexedDBEngine.js',
   './src/3.Database/storage/SeedData.js',
   './src/4.Security/sanitizer.js',
   './src/4.Security/urlValidator.js',

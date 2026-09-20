@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Bản Chất Cây Quyết Định (Decision Trees) & Lời Giải Mẫu Toàn Diện</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 9mm 11mm 9mm 11mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 8.5pt;
+      line-height: 1.34;
+      color: #0f172a;
+      background-color: #ffffff;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Page Container */
+    .a4-page {
+      width: 100%;
+      height: 279mm;
+      max-height: 279mm;
+      page-break-after: always;
+      break-after: page;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .a4-page:last-child {
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    /* Header & Footer */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1.5px solid #cbd5e1;
+      padding-bottom: 2px;
+      margin-bottom: 4px;
+      font-size: 7.4pt;
+      font-weight: 600;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .page-footer {
+      margin-top: auto;
+      border-top: 1px solid #cbd5e1;
+      padding-top: 2px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 7.2pt;
+      color: #64748b;
+    }
+
+    /* Headings */
+    h1.ch-title {
+      font-size: 11.2pt;
+      font-weight: 800;
+      color: #1e3a8a;
+      margin: 0 0 4px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .ch-badge {
+      background: #1e40af;
+      color: #ffffff;
+      font-size: 7.2pt;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    h2.sec-title {
+      font-size: 8.8pt;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 4px 0 2px 0;
+      border-left: 3px solid #2563eb;
+      padding-left: 5px;
+    }
+
+    p {
+      margin: 0 0 3px 0;
+      text-align: justify;
+    }
+
+    /* Tag Badges (100% Zero-Emoji) */
+    .tag-badge {
+      display: inline-block;
+      font-size: 7pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+    .tag-slate { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+    .tag-blue { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .tag-green { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .tag-amber { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .tag-purple { background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
+
+    /* Problem Statement Box */
+    .card-problem {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-left: 4px solid #475569;
+      border-radius: 4px;
+      padding: 4px 8px;
+      margin-bottom: 4px;
+      font-size: 8pt;
+    }
+
+    .card-problem-title {
+      font-weight: 700;
+      color: #1e293b;
+      font-size: 8.3pt;
+      margin-bottom: 2px;
+    }
+
+    /* Decode / Breakdown Box (Giải mã bản chất) */
+    .card-decode {
+      background: #faf5ff;
+      border: 1px solid #e9d5ff;
+      border-left: 4px solid #9333ea;
+      border-radius: 4px;
+      padding: 4px 8px;
+      margin-bottom: 4px;
+      font-size: 7.9pt;
+      color: #3b0764;
+    }
+
+    .card-decode-title {
+      font-weight: 700;
+      color: #7e22ce;
+      font-size: 8.2pt;
+      margin-bottom: 2px;
+    }
+
+    /* Metaphor Box */
+    .card-meta {
+      background: #f0f7ff;
+      border: 1px solid #bfdbfe;
+      border-left: 4px solid #2563eb;
+      border-radius: 4px;
+      padding: 4px 8px;
+      margin-bottom: 4px;
+      font-size: 8pt;
+    }
+
+    .card-meta-title {
+      font-weight: 700;
+      color: #1d4ed8;
+      font-size: 8.3pt;
+      margin-bottom: 2px;
+    }
+
+    /* Solution Box */
+    .card-sol {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      padding: 3px 7px;
+      margin-bottom: 3px;
+    }
+
+    .card-sol-title {
+      font-weight: 700;
+      color: #0f172a;
+      font-size: 8.2pt;
+      margin-bottom: 1px;
+    }
+
+    /* Takeaway Box */
+    .card-takeaway {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 4px solid #16a34a;
+      border-radius: 4px;
+      padding: 3px 7px;
+      margin-top: 3px;
+      font-size: 7.9pt;
+    }
+
+    .card-takeaway-title {
+      font-weight: 700;
+      color: #15803d;
+      font-size: 8.2pt;
+      margin-bottom: 1px;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+    }
+
+    /* Native CSS Math Engine (Zero Type3 font, 100% vector outlines) */
+    .math-box {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 2px 6px;
+      margin: 2px 0;
+      text-align: center;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 8.6pt;
+    }
+
+    .m-line {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+      gap: 3px;
+    }
+
+    .m-frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0 3px;
+      font-size: 0.88em;
+    }
+
+    .m-num {
+      border-bottom: 1.1px solid #0f172a;
+      padding-bottom: 1px;
+    }
+
+    .m-den {
+      padding-top: 1px;
+    }
+
+    .m-sup {
+      font-size: 0.75em;
+      vertical-align: super;
+      line-height: 0;
+    }
+
+    .m-sub {
+      font-size: 0.75em;
+      vertical-align: sub;
+      line-height: 0;
+    }
+
+    .m-bold {
+      font-weight: 700;
+      color: #1e3a8a;
+    }
+
+    /* Tables */
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2px 0;
+      font-size: 7.7pt;
+      background: #ffffff;
+    }
+
+    table.data-table th, table.data-table td {
+      border: 1px solid #cbd5e1;
+      padding: 2.5px 4px;
+      text-align: center;
+    }
+
+    table.data-table th {
+      background: #f1f5f9;
+      color: #1e293b;
+      font-weight: 700;
+    }
+
+    .bg-green { background: #dcfce7; color: #166534; font-weight: 600; }
+    .bg-red { background: #fee2e2; color: #991b1b; font-weight: 600; }
+    .bg-blue { background: #e0e7ff; color: #3730a3; font-weight: 700; }
+
+    /* Cover Page */
+    .cover-box {
+      border: 2px solid #cbd5e1;
+      border-radius: 12px;
+      height: 100%;
+      padding: 30px 25px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #f8fafc;
+    }
+
+    .cover-badge {
+      display: inline-block;
+      background: #1e3a8a;
+      color: #ffffff;
+      font-size: 8pt;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 14px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .cover-main-title {
+      font-size: 20pt;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.25;
+      margin: 12px 0 8px 0;
+    }
+
+    .cover-main-title em {
+      font-style: normal;
+      color: #2563eb;
+    }
+
+    .cover-desc {
+      font-size: 9.8pt;
+      color: #334155;
+      line-height: 1.55;
+      margin-bottom: 15px;
+    }
+
+    .steps-flow {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 8px;
+      margin: 15px 0;
+    }
+
+    .step-card {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+
+    .step-num {
+      display: inline-block;
+      background: #eff6ff;
+      color: #2563eb;
+      font-weight: 800;
+      font-size: 10pt;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      margin-bottom: 4px;
+    }
+
+    .step-title {
+      font-weight: 700;
+      font-size: 8.5pt;
+      color: #0f172a;
+      margin-bottom: 3px;
+    }
+
+    .step-sub {
+      font-size: 7.2pt;
+      color: #64748b;
+      line-height: 1.25;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== TRANG 1: BÌA ==================== -->
+  <div class="a4-page">
+    <div class="cover-box">
+      <div>
+        <span class="cover-badge">Học Máy Chuyên Sâu • Machine Learning Mastery</span>
+        <div style="font-size: 9.2pt; color: #64748b; font-weight: 600; text-transform: uppercase;">
+          Chuyên Đề: Cây Quyết Định (Decision Trees) &amp; Các Kỹ Thuật Cắt Tỉa Nâng Cao
+        </div>
+      </div>
+
+      <div style="margin: auto 0;">
+        <div class="cover-main-title">
+          HIỂU ĐÚNG <em>BẢN CHẤT CỐT LÕI</em><br>
+          CÂY QUYẾT ĐỊNH (DECISION TREES)
+        </div>
+        <div class="cover-desc">
+          Bộ tài liệu phân tích trực quan toàn diện dựa trên đề bài tập về nhà <strong>"Bài Tập: Decision Trees"</strong>.
+          Đột phá với cấu trúc sư phạm 6 bước: <strong>Đề bài gốc &rarr; Ẩn dụ thực tế &rarr; Giải mã từng ký hiệu toán học &rarr; Cầu nối dữ liệu &rarr; Lời giải với bước tính trung gian &rarr; Đúc kết thực chiến</strong>.
+          Không chỉ thế số bấm máy tính: Giúp người học bóc tách tại sao có dấu trừ, tại sao dùng log₂, tại sao Gini lại bình phương xác suất, và tại sao cắt tỉa lại phạt thêm 0.5 lỗi!
+        </div>
+
+        <div class="steps-flow">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-title">Đề Bài Gốc</div>
+            <div class="step-sub">Nguyên văn đề bài và dữ liệu 14 mẫu chuẩn</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-title">Ẩn Dụ Thực Tế</div>
+            <div class="step-sub">Trò chơi 20 câu hỏi, thanh gạt nhiệt độ, cành thừa</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-title">Giải Mã Ký Hiệu</div>
+            <div class="step-sub">Hiểu từng số hạng: log₂, dấu âm, bình phương Gini</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-title">Bước Tính Rõ Ràng</div>
+            <div class="step-sub">Không nhảy cóc: Hiển thị đầy đủ phép tính trung gian</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="border-top: 1px solid #cbd5e1; padding-top: 10px; display: flex; justify-content: space-between; font-size: 8.2pt; color: #64748b;">
+        <div><strong>Mục lục chuyên đề:</strong> Information Gain &amp; Gain Ratio • Ngưỡng Liên Tục • Gini Index • Pessimistic Pruning • Cost-Complexity CART</div>
+        <div>Năm học 2026 • Tài liệu lưu hành học thuật</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 2: BÀI 1 ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span>Chuyên đề Decision Trees: TS. Trương Vĩnh Lân</span>
+      <span>Trang 2 / 6</span>
+    </div>
+
+    <h1 class="ch-title">
+      <span class="ch-badge">BÀI 1</span> Tính Toán Information Gain &amp; Gain Ratio (ID3 &amp; C4.5)
+    </h1>
+
+    <!-- ĐỀ BÀI GỐC -->
+    <div class="card-problem">
+      <div class="card-problem-title"><span class="tag-badge tag-slate">[Đề Bài Gốc]</span> Bài Tập 1: Tính Toán Information Gain và Gain Ratio</div>
+      <p style="margin-bottom: 2px;">
+        Cho tập dữ liệu dự đoán đi chơi tennis (Play) gồm 14 mẫu (9 Yes, 5 No) dựa trên: Outlook (Sunny, Overcast, Rain) và Humidity (High, Normal).
+        <br><strong>Yêu cầu:</strong> (a) Tính H(S); (b) Tính IG(S, Outlook); (c) Tính IG(S, Humidity); (d) Tính SplitInfo và Gain Ratio cho Outlook; (e) Thuộc tính nào nên được chọn để tách nút gốc? Giải thích ngắn gọn.
+      </p>
+    </div>
+
+    <!-- GIẢI MÃ KÝ HIỆU TOÁN HỌC -->
+    <div class="card-decode">
+      <div class="card-decode-title"><span class="tag-badge tag-purple">[Giải Mã Công Thức]</span> Tại sao Entropy lại là: H(S) = - &sum; pᵢ log₂(pᵢ)?</div>
+      • <strong>log₂(1/p) = -log₂(p) là gì?</strong> Đo "độ bất ngờ" (lượng thông tin tính bằng bit nhị phân). Biến cố chắc chắn xảy ra (p=1) thì log₂(1) = 0 bit (không bất ngờ). Biến cố càng hiếm thì khi xảy ra ta càng bất ngờ (nhiều bit).
+      <br>• <strong>Tại sao nhân thêm pᵢ?</strong> Lấy trung bình theo tần suất xuất hiện mỗi ngày.
+      <br>• <strong>Tại sao có dấu trừ (-)?</strong> Vì p &le; 1 nên log₂(p) luôn âm! Dấu trừ đứng trước triệt tiêu dấu âm để Entropy luôn dương.
+    </div>
+
+    <!-- ẨN DỤ THỰC TẾ -->
+    <div class="card-meta">
+      <div class="card-meta-title"><span class="tag-badge tag-blue">[Ẩn Dụ Thực Tế]</span> Trò Chơi 20 Câu Hỏi &amp; Chiếc Vé Phạt Câu Hỏi Gian Lận</div>
+      <p>
+        • <strong>Information Gain (IG):</strong> Lượng mù mờ giảm đi sau khi hỏi: IG = H(ban đầu) - H(còn lại).
+        <br>• <strong>Gain Ratio:</strong> Phạt câu hỏi băm quá nhiều nhánh nhỏ vô nghĩa (như hỏi số CCCD). Mẫu số SplitInfo đo mức độ băm nhỏ để dìm điểm gian lận!
+      </p>
+    </div>
+
+    <h2 class="sec-title">1. Bóc Tách Dữ Liệu 14 Mẫu (Play: 9 Yes, 5 No)</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 2px;">
+      <table class="data-table">
+        <thead><tr><th>Outlook</th><th>Yes</th><th>No</th><th>Tổng</th><th>Phép tính Entropy nhánh H(S_v)</th></tr></thead>
+        <tbody>
+          <tr><td>Sunny</td><td>2</td><td>3</td><td>5</td><td>- (2/5)log₂(2/5) - (3/5)log₂(3/5) = <strong>0.9710</strong></td></tr>
+          <tr><td>Overcast</td><td>4</td><td>0</td><td>4</td><td class="bg-green">100% Yes &rarr; H = <strong>0.0000</strong> (Tinh khiết)</td></tr>
+          <tr><td>Rain</td><td>3</td><td>2</td><td>5</td><td>- (3/5)log₂(3/5) - (2/5)log₂(2/5) = <strong>0.9710</strong></td></tr>
+        </tbody>
+      </table>
+      <table class="data-table">
+        <thead><tr><th>Humidity</th><th>Yes</th><th>No</th><th>Tổng</th><th>Phép tính Entropy nhánh H(S_v)</th></tr></thead>
+        <tbody>
+          <tr><td>High</td><td>3</td><td>4</td><td>7</td><td>- (3/7)log₂(3/7) - (4/7)log₂(4/7) = <strong>0.9852</strong></td></tr>
+          <tr><td>Normal</td><td>6</td><td>1</td><td>7</td><td>- (6/7)log₂(6/7) - (1/7)log₂(1/7) = <strong>0.5917</strong></td></tr>
+          <tr class="bg-blue"><td colspan="3">Tổng mẫu</td><td>14</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 class="sec-title">2. Lời Giải Với Đầy Đủ Bước Tính Trung Gian</h2>
+
+    <div class="card-sol">
+      <div class="card-sol-title">a. Entropy ban đầu H(S) — Hiển thị rõ giá trị logarit từng lớp:</div>
+      <p style="margin: 0;">
+        • Lớp Yes (9/14 &approx; 0.6429): log₂(9/14) &approx; -0.6374 &rarr; (9/14) &times; (-0.6374) = <strong>-0.4098</strong>.
+        <br>• Lớp No (5/14 &approx; 0.3571): log₂(5/14) &approx; -1.4854 &rarr; (5/14) &times; (-1.4854) = <strong>-0.5305</strong>.
+      </p>
+      <div class="math-box">
+        <div class="m-line">
+          H(S) = - [ (-0.4098) + (-0.5305) ] = - [ -0.9403 ] = <span class="m-bold">0.9403 bit</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card-sol">
+        <div class="card-sol-title">b. IG(S, Outlook) — Nhân trọng số từng nhánh:</div>
+        <p style="margin: 0;">
+          H(S|Outlook) = (5/14)&times;0.9710 + (4/14)&times;0 + (5/14)&times;0.9710 = 0.3468 + 0 + 0.3468 = <strong>0.6935</strong>.
+        </p>
+        <div class="math-box">
+          <div class="m-line">
+            IG = 0.9403 - 0.6935 = <span class="m-bold">0.2468 bit</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-sol">
+        <div class="card-sol-title">c. IG(S, Humidity) — Nhân trọng số từng nhánh:</div>
+        <p style="margin: 0;">
+          H(S|Humidity) = (7/14)&times;0.9852 + (7/14)&times;0.5917 = 0.4926 + 0.2959 = <strong>0.7885</strong>.
+        </p>
+        <div class="math-box">
+          <div class="m-line">
+            IG = 0.9403 - 0.7885 = <span class="m-bold">0.1518 bit</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card-sol">
+        <div class="card-sol-title">d. SplitInfo &amp; Gain Ratio (Outlook):</div>
+        <p style="margin: 0;">
+          SplitInfo đo mức độ băm vụn 14 mẫu thành 3 nhóm (5, 4, 5):
+          <br>SplitInfo = - [ 2&times;(5/14)log₂(5/14) + (4/14)log₂(4/14) ] = - [ -1.0610 - 0.5164 ] = <strong>1.5774</strong>.
+        </p>
+        <div class="math-box">
+          <div class="m-line">
+            GainRatio(Outlook) = 
+            <span class="m-frac"><span class="m-num">0.2468</span><span class="m-den">1.5774</span></span>
+            = <span class="m-bold">0.1565</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-sol">
+        <div class="card-sol-title">e. Lựa chọn thuộc tính tách nút gốc:</div>
+        <p style="margin: 0;">
+          SplitInfo(Humidity) = - 2&times;(7/14)log₂(7/14) = <strong>1.0000</strong>.
+          <br>GainRatio(Humidity) = 0.1518 / 1.0 = <strong>0.1518</strong>.
+          <br>So sánh: <strong>GainRatio(Outlook) = 0.1565 &gt; GainRatio(Humidity) = 0.1518</strong>.
+          <br>&rarr; <strong>Chọn Outlook làm nút gốc!</strong>
+        </p>
+      </div>
+    </div>
+
+    <div class="card-takeaway">
+      <div class="card-takeaway-title"><span class="tag-badge tag-green">[Đúc Kết Thực Chiến]</span> Tại sao C4.5 vượt trội hơn ID3?</div>
+      ID3 luôn bị cám dỗ chọn các thuộc tính có nhiều nhánh rẽ (như Ngày, Số điện thoại). C4.5 dùng Gain Ratio để lấy IG chia cho SplitInfo, giúp loại bỏ thuộc tính rẽ nhánh vụn vặt và chống Overfitting.
+    </div>
+
+    <div class="page-footer">
+      <span>Tài liệu tự học trực quan Học Máy • Decision Trees</span>
+      <span>schedule-smart • docs/9.More/</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 3: BÀI 2 ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span>Chuyên đề Decision Trees: TS. Trương Vĩnh Lân</span>
+      <span>Trang 3 / 6</span>
+    </div>
+
+    <h1 class="ch-title">
+      <span class="ch-badge">BÀI 2</span> Xác Định Ngưỡng Tối Ưu Cho Thuộc Tính Liên Tục
+    </h1>
+
+    <!-- ĐỀ BÀI GỐC -->
+    <div class="card-problem">
+      <div class="card-problem-title"><span class="tag-badge tag-slate">[Đề Bài Gốc]</span> Bài Tập 2: Xác định Ngưỡng Tối Ưu cho Thuộc Tính Liên Tục</div>
+      <p style="margin-bottom: 2px;">
+        Cho thuộc tính liên tục Temperature và nhãn Play gồm 14 mẫu: (64,No), (65,No), (68,Yes), (69,Yes), (70,Yes), (71,Yes), (72,No), (75,Yes), (80,Yes), (81,Yes), (83,No), (85,Yes), (86,No), (90,No). Tổng: 6 No, 8 Yes.
+        <br><strong>Yêu cầu:</strong> (a) Sắp xếp và liệt kê ngưỡng tiềm năng; (b) Tính IG cho T = 75; (c) So sánh T = 72.5 và T = 77.5 ngưỡng nào cho IG cao hơn mà không cần tính đầy đủ; (d) Tính Gain Ratio cho T = 75 nếu SplitInfo = 0.8.
+      </p>
+    </div>
+
+    <!-- GIẢI MÃ KÝ HIỆU TOÁN HỌC -->
+    <div class="card-decode">
+      <div class="card-decode-title"><span class="tag-badge tag-purple">[Giải Mã Bản Chất]</span> Định lý Ranh Giới (Fayyad &amp; Irani)</div>
+      • <strong>Tại sao ngưỡng cắt là (vᵢ + vᵢ₊₁)/2?</strong> Giữa 2 giá trị liên tục, điểm chính giữa là đường phân cách nhị phân công bằng nhất.
+      <br>• <strong>Tại sao chỉ cần xét các điểm ĐỔI NHÃN?</strong> Nếu 2 giá trị liên tiếp cùng là Yes (ví dụ 75 Yes và 80 Yes), nhát cắt đặt ở giữa sẽ chỉ chia tách tập Yes thành 2 nửa Yes, không hề làm tăng độ tinh khiết! Ngưỡng tối ưu bắt buộc phải nằm ở ranh giới giữa Yes và No.
+    </div>
+
+    <!-- ẨN DỤ THỰC TẾ -->
+    <div class="card-meta">
+      <div class="card-meta-title"><span class="tag-badge tag-blue">[Ẩn Dụ Thực Tế]</span> Vạch Đỏ Nhiệt Kế &amp; Lát Cắt Thông Minh</div>
+      <p>
+        Giống như bác sĩ chọn vạch 37.5° để phân loại sốt và không sốt: Ta chỉ tìm vạch cắt ở nơi có sự biến chuyển triệu chứng, không ai đi đặt vạch cắt giữa 2 người cùng sốt 39° và 40°!
+      </p>
+    </div>
+
+    <h2 class="sec-title">1. Sắp Xếp Dữ Liệu &amp; Xác Định Ranh Giới Chuyển Đổi Nhãn</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Giá trị</th><td>64</td><td>65</td><th class="bg-blue">|</th><td>68</td><td>69</td><td>70</td><td>71</td><th class="bg-blue">|</th><td>72</td><th class="bg-blue">|</th><td>75</td><td>80</td><td>81</td><th class="bg-blue">|</th><td>83</td><th class="bg-blue">|</th><td>85</td><th class="bg-blue">|</th><td>86</td><td>90</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>Nhãn</th><td class="bg-red">No</td><td class="bg-red">No</td><th>&rarr;</th><td class="bg-green">Yes</td><td class="bg-green">Yes</td><td class="bg-green">Yes</td><td class="bg-green">Yes</td><th>&rarr;</th><td class="bg-red">No</td><th>&rarr;</th><td class="bg-green">Yes</td><td class="bg-green">Yes</td><td class="bg-green">Yes</td><th>&rarr;</th><td class="bg-red">No</td><th>&rarr;</th><td class="bg-green">Yes</td><th>&rarr;</th><td class="bg-red">No</td><td class="bg-red">No</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 class="sec-title">2. Lời Giải Chi Tiết</h2>
+
+    <div class="card-sol">
+      <div class="card-sol-title">a. Liệt kê các ngưỡng tiềm năng:</div>
+      <p>
+        • Tất cả 13 ngưỡng: 64.5, <strong>66.5*</strong>, 68.5, 69.5, 70.5, <strong>71.5*</strong>, <strong>73.5*</strong>, 77.5, 80.5, <strong>82.0*</strong>, <strong>84.0*</strong>, <strong>85.5*</strong>, 88.0.
+        <br>• Các <strong>ngưỡng đổi nhãn (*)</strong> mang giá trị phân loại thật sự: <strong>66.5, 71.5, 73.5, 82.0, 84.0, 85.5</strong>.
+      </p>
+    </div>
+
+    <div class="card-sol">
+      <div class="card-sol-title">b. Tính Information Gain cho ngưỡng T = 75 (&le; 75 và &gt; 75) — Từng bước chi tiết:</div>
+      <p style="margin: 0;">
+        • Toàn bộ 14 mẫu (8 Yes, 6 No): H(S) = - (8/14)log₂(8/14) - (6/14)log₂(6/14) = - (-0.4613 - 0.5239) = <strong>0.9852</strong>.
+        <br>• Nhánh Trái (&le; 75 gồm 8 mẫu: 5 Yes, 3 No): H_trái = - (5/8)log₂(5/8) - (3/8)log₂(3/8) = - (-0.4238 - 0.5306) = <strong>0.9544</strong>.
+        <br>• Nhánh Phải (&gt; 75 gồm 6 mẫu: 3 Yes, 3 No): H_phải = - (3/6)log₂(3/6) - (3/6)log₂(3/6) = <strong>1.0000</strong> (cân bằng 50-50).
+        <br>• Entropy sau khi tách: H(S|T=75) = (8/14) &times; 0.9544 + (6/14) &times; 1.0000 = 0.5454 + 0.4286 = <strong>0.9740</strong>.
+      </p>
+      <div class="math-box">
+        <div class="m-line">
+          IG(S, Temperature@T=75) = H(S) - H(S|T=75) = 0.9852 - 0.9740 = <span class="m-bold">0.0112 bit</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card-sol">
+        <div class="card-sol-title">c. So sánh T = 72.5 và T = 77.5 (Không cần tính số):</div>
+        <p style="margin: 0;">
+          • <strong>T = 72.5:</strong> Nằm tại ranh giới chuyển nhãn 72(No) và 75(Yes). Nhánh phải cô lập được chuỗi Yes thuần khiết (75, 80, 81), làm giảm mạnh entropy!
+          <br>• <strong>T = 77.5:</strong> Nằm giữa 75(Yes) và 80(Yes). Cả 2 phía đều là Yes, chia cắt vô bổ một nhóm đồng nhất.
+          <br>&rarr; <strong>Kết luận: Ngưỡng T = 72.5 chắc chắn cho IG cao hơn T = 77.5!</strong>
+        </p>
+      </div>
+
+      <div class="card-sol">
+        <div class="card-sol-title">d. Tính Gain Ratio cho T = 75:</div>
+        <p style="margin: 0;">Biết SplitInfo(S, Temperature@T=75) = 0.8:</p>
+        <div class="math-box">
+          <div class="m-line">
+            GainRatio = 
+            <span class="m-frac"><span class="m-num">IG</span><span class="m-den">SplitInfo</span></span>
+            = <span class="m-frac"><span class="m-num">0.0112</span><span class="m-den">0.8</span></span>
+            = <span class="m-bold">0.0140</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-takeaway">
+      <div class="card-takeaway-title"><span class="tag-badge tag-green">[Đúc Kết Thực Chiến]</span> Bí quyết tối ưu của LightGBM &amp; CatBoost:</div>
+      Khi làm việc với hàng triệu dòng dữ liệu số liên tục, thuật toán không bao giờ duyệt hết mọi giá trị mà dùng histogram chia bin và chỉ kiểm tra các điểm đổi nhãn, giúp tiết kiệm 95% tài nguyên tính toán.
+    </div>
+
+    <div class="page-footer">
+      <span>Tài liệu tự học trực quan Học Máy • Decision Trees</span>
+      <span>schedule-smart • docs/9.More/</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 4: BÀI 3 ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span>Chuyên đề Decision Trees: TS. Trương Vĩnh Lân</span>
+      <span>Trang 4 / 6</span>
+    </div>
+
+    <h1 class="ch-title">
+      <span class="ch-badge">BÀI 3</span> Phân Tích Rẽ Nhánh &amp; Tính Toán Gini Index (CART)
+    </h1>
+
+    <!-- ĐỀ BÀI GỐC -->
+    <div class="card-problem">
+      <div class="card-problem-title"><span class="tag-badge tag-slate">[Đề Bài Gốc]</span> Bài Tập 3: Phân tích Rẽ nhánh và Tính toán Gini Index</div>
+      <p style="margin-bottom: 2px;">
+        Xét một nút trong cây quyết định chứa 20 samples với phân phối lớp: [5, 15] (lớp 0: 5, lớp 1: 15). Phép tách nhị phân tạo ra hai nút con:
+        <br>• Nút con trái: 8 samples, phân phối [4, 4] &nbsp;|&nbsp; • Nút con phải: 12 samples, phân phối [1, 11].
+        <br><strong>Yêu cầu:</strong> (a) Tính Gini nút cha; (b) Tính Gini con trái và con phải; (c) Tính mức giảm Gini Impurity (&Delta;Gini); (d) Đánh giá phép tách này có tốt không? Giải thích.
+      </p>
+    </div>
+
+    <!-- GIẢI MÃ KÝ HIỆU TOÁN HỌC -->
+    <div class="card-decode">
+      <div class="card-decode-title"><span class="tag-badge tag-purple">[Giải Mã Bản Chất]</span> Tại sao Gini lại là: Gini = 1 - &sum; pᵢ²?</div>
+      • <strong>Bình phương xác suất pᵢ² là gì?</strong> Thò tay vào rổ bốc 1 quả, ghi nhận màu, bỏ lại, bốc tiếp quả 2. Xác suất để cả 2 lần đều bốc trúng màu i là: pᵢ &times; pᵢ = pᵢ².
+      <br>• <strong>Tổng &sum; pᵢ² = p₀² + p₁² là gì?</strong> Là xác suất bốc được 2 quả <em>CÙNG MÀU</em>.
+      <br>• <strong>Tại sao lấy 1 trừ đi?</strong> 1 - &sum; pᵢ² chính là xác suất bốc phải 2 quả <em>KHÁC MÀU</em> (bốc phải sự nhầm lẫn, vẩn đục). Nếu rổ 100% cùng 1 màu &rarr; Gini = 0 (tinh khiết tuyệt đối).
+    </div>
+
+    <!-- ẨN DỤ THỰC TẾ -->
+    <div class="card-meta">
+      <div class="card-meta-title"><span class="tag-badge tag-blue">[Ẩn Dụ Thực Tế]</span> Máy Lọc Nước &amp; Phép Tách Thuần Khiết</div>
+      <p>
+        Gini đo "độ đục" của nước. Nhát cắt rẽ nhánh giống như một màng lọc: Nước sau khi qua màng lọc càng trong vắt (Gini càng giảm sâu về 0) thì màng lọc đó càng xịn!
+      </p>
+    </div>
+
+    <h2 class="sec-title">1. Bảng Chi Tiết Tần Suất &amp; Xác Suất Trước / Sau Tách</h2>
+    <table class="data-table">
+      <thead>
+        <tr><th>Nút</th><th>Mẫu</th><th>Lớp 0</th><th>Lớp 1</th><th>Tỉ lệ (p₀, p₁)</th><th>Xác suất cùng màu (p₀² + p₁²)</th><th>Gini = 1 - &sum; pᵢ²</th></tr>
+      </thead>
+      <tbody>
+        <tr><th>Nút Cha</th><td>20</td><td>5</td><td>15</td><td>p₀ = 0.25, p₁ = 0.75</td><td>0.25² + 0.75² = 0.0625 + 0.5625 = 0.6250</td><td>1 - 0.6250 = <strong>0.3750</strong> (3/8)</td></tr>
+        <tr><th>Con Trái</th><td>8</td><td>4</td><td>4</td><td>p₀ = 0.50, p₁ = 0.50</td><td>0.50² + 0.50² = 0.2500 + 0.2500 = 0.5000</td><td class="bg-red">1 - 0.5000 = <strong>0.5000</strong> (Đục tối đa)</td></tr>
+        <tr><th>Con Phải</th><td>12</td><td>1</td><td>11</td><td>p₀ = 1/12, p₁ = 11/12</td><td>(1/12)² + (11/12)² = 1/144 + 121/144 = 122/144</td><td class="bg-green">1 - 122/144 = <strong>0.1528</strong> (Rất trong)</td></tr>
+      </tbody>
+    </table>
+
+    <h2 class="sec-title">2. Lời Giải Chi Tiết</h2>
+
+    <div class="card-sol">
+      <div class="card-sol-title">a. Gini Index của nút cha:</div>
+      <div class="math-box">
+        <div class="m-line">
+          Gini(Cha) = 1 - [ (5/20)<span class="m-sup">2</span> + (15/20)<span class="m-sup">2</span> ] = 1 - [ 0.0625 + 0.5625 ] = 1 - 0.6250 = <span class="m-bold">0.3750</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card-sol">
+        <div class="card-sol-title">b1. Gini Con Trái (8 mẫu [4, 4]):</div>
+        <div class="math-box">
+          <div class="m-line">
+            Gini<span class="m-sub">L</span> = 1 - [ 0.5<span class="m-sup">2</span> + 0.5<span class="m-sup">2</span> ] = 1 - 0.50 = <span class="m-bold">0.5000</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-sol">
+        <div class="card-sol-title">b2. Gini Con Phải (12 mẫu [1, 11]):</div>
+        <div class="math-box">
+          <div class="m-line">
+            Gini<span class="m-sub">R</span> = 1 - [ <span class="m-frac"><span class="m-num">1</span><span class="m-den">144</span></span> + <span class="m-frac"><span class="m-num">121</span><span class="m-den">144</span></span> ] = <span class="m-frac"><span class="m-num">22</span><span class="m-den">144</span></span> &approx; <span class="m-bold">0.1528</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-sol">
+      <div class="card-sol-title">c. Mức độ giảm Gini Impurity (&Delta;Gini) — Trọng số từng nhánh:</div>
+      <p style="margin: 0;">
+        • Gini trung bình sau tách: Gini_split = (8/20) &times; Gini_L + (12/20) &times; Gini_R = 0.4 &times; 0.5000 + 0.6 &times; 0.1528 = 0.2000 + 0.0917 = <strong>0.2917</strong>.
+      </p>
+      <div class="math-box">
+        <div class="m-line">
+          &Delta;Gini = Gini(Cha) - Gini_split = 0.3750 - 0.2917 = <span class="m-bold">0.0833</span> (chính xác bằng phân số 1/12)
+        </div>
+      </div>
+    </div>
+
+    <div class="card-sol">
+      <div class="card-sol-title">d. Đánh giá: Phép tách này có tốt không?</div>
+      <p style="margin: 0;">
+        • <strong>Ưu điểm:</strong> &Delta;Gini &gt; 0 chứng minh độ tinh khiết có tăng. Nhánh phải rất xuất sắc khi gom được 11/12 mẫu Lớp 1 (đạt độ thuần khiết 91.7%, Gini giảm sâu về 0.1528), giúp mô hình tự tin ra quyết định Lớp 1.
+        <br>• <strong>Nhược điểm:</strong> Nhánh trái rơi vào bế tắc (tỷ lệ 4:4, Gini = 0.5), bắt buộc phải tách tiếp ở tầng sau.
+        <br>&rarr; <strong>Kết luận:</strong> Đây là phép tách <strong>khá tốt</strong> vì đã cô lập thành công phần lớn Lớp 1 vào một nhánh thuần khiết.
+      </p>
+    </div>
+
+    <div class="card-takeaway">
+      <div class="card-takeaway-title"><span class="tag-badge tag-green">[Đúc Kết Thực Chiến]</span> Tại sao thư viện Scikit-Learn chọn Gini làm mặc định?</div>
+      Gini chỉ gồm phép cộng trừ và bình phương đơn giản (CPU tính trong 1 chu kỳ), trong khi Entropy bắt buộc phải tính hàm log₂ (tốn hàng chục chu kỳ CPU). Gini giúp Scikit-Learn huấn luyện cây nhanh hơn gấp 3-5 lần mà độ chính xác chênh lệch dưới 1%.
+    </div>
+
+    <div class="page-footer">
+      <span>Tài liệu tự học trực quan Học Máy • Decision Trees</span>
+      <span>schedule-smart • docs/9.More/</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 5: BÀI 4 ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span>Chuyên đề Decision Trees: TS. Trương Vĩnh Lân</span>
+      <span>Trang 5 / 6</span>
+    </div>
+
+    <h1 class="ch-title">
+      <span class="ch-badge">BÀI 4</span> Đánh Giá Pruning Sử Dụng Lỗi Pessimistic (C4.5)
+    </h1>
+
+    <!-- ĐỀ BÀI GỐC -->
+    <div class="card-problem">
+      <div class="card-problem-title"><span class="tag-badge tag-slate">[Đề Bài Gốc]</span> Bài Tập 4: Đánh giá Pruning sử dụng Lỗi Pessimistic</div>
+      <p style="margin-bottom: 2px;">
+        Một nút t có 20 samples, phân phối lớp [13, 7] (Lớp A: 13, Lớp B: 7). Cây con dưới nút t có 2 lá:
+        <br>• Lá 1: 10 samples, phân phối [8, 2] &nbsp;|&nbsp; • Lá 2: 10 samples, phân phối [5, 5].
+        <br>Công thức đơn giản hóa: <strong>Lỗi pessimistic = Lỗi quan sát được + 0.5 &times; (Số lá)</strong>.
+        <br><strong>Yêu cầu:</strong> (a) Tính lỗi quan sát nếu không cắt tỉa; (b) Tính lỗi quan sát nếu có cắt tỉa; (c) Áp dụng ước tính pessimistic; (d) Quyết định cắt tỉa hay không? Giải thích.
+      </p>
+    </div>
+
+    <!-- GIẢI MÃ KÝ HIỆU TOÁN HỌC -->
+    <div class="card-decode">
+      <div class="card-decode-title"><span class="tag-badge tag-purple">[Giải Mã Bản Chất]</span> Tại sao lại phạt thêm "+ 0.5 cho mỗi chiếc lá"?</div>
+      • <strong>Cạm bẫy lạc quan (Optimistic bias):</strong> Trên tập huấn luyện, bạn càng vẽ thêm nhiều cành lá thì số lỗi nhìn thấy càng ít (học vẹt).
+      <br>• <strong>Hình phạt bi quan (Pessimistic penalty):</strong> Tác giả C4.5 giả định rằng trên dữ liệu thực tế tương lai, mỗi chiếc lá con mọc thêm sẽ có nguy cơ gây thêm 0.5 lỗi ngẫu nhiên. Nếu mọc thêm lá mà không giảm bớt được lỗi thực tế thì tổng điểm phạt sẽ tăng lên &rarr; Phải vung dao cắt tỉa!
+    </div>
+
+    <!-- ẨN DỤ THỰC TẾ -->
+    <div class="card-meta">
+      <div class="card-meta-title"><span class="tag-badge tag-blue">[Ẩn Dụ Thực Tế]</span> Dao Cạo Occam: "Đừng Thêm Chi Tiết Khi Không Cần Thiết"</div>
+      <p>
+        Giống như thiết kế bộ máy doanh nghiệp: Nếu lập thêm một phòng ban mới mà doanh thu và năng suất không hề tăng, thì phòng ban đó chỉ làm tốn thêm chi phí quản lý vận hành. Cắt giảm phòng ban thừa là quyết định sáng suốt nhất!
+      </p>
+    </div>
+
+    <h2 class="sec-title">1. Bảng So Sánh Hai Kịch Bản Trước &amp; Sau Cắt Tỉa</h2>
+    <table class="data-table">
+      <thead>
+        <tr><th>Kịch Bản</th><th>Cấu Trúc</th><th>Quy Tắc Quyết Định</th><th>Số Lỗi Quan Sát (E)</th><th>Phạt Lá (0.5 &times; L)</th><th>Tổng Lỗi Pessimistic</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>Không Cắt Tỉa<br>(Giữ 2 lá con)</th>
+          <td>2 Lá (L = 2):<br>Lá 1: [8A, 2B]<br>Lá 2: [5A, 5B]</td>
+          <td>Lá 1 bầu đa số A (sai 2 mẫu B)<br>Lá 2 bầu đa số A/B (sai 5 mẫu)</td>
+          <td class="bg-blue"><strong>E = 2 + 5 = 7 lỗi</strong></td>
+          <td>2 &times; 0.5 = <strong>1.0 lỗi phạt</strong></td>
+          <td class="bg-red"><strong>7 + 1.0 = 8.0 lỗi</strong></td>
+        </tr>
+        <tr>
+          <th>Có Cắt Tỉa<br>(Thu về 1 lá t)</th>
+          <td>1 Lá (L = 1):<br>Nút t: [13A, 7B]</td>
+          <td>Nút t bầu đa số A<br>(sai 7 mẫu B)</td>
+          <td class="bg-blue"><strong>E = 7 lỗi</strong></td>
+          <td>1 &times; 0.5 = <strong>0.5 lỗi phạt</strong></td>
+          <td class="bg-green"><strong>7 + 0.5 = 7.5 lỗi</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 class="sec-title">2. Lời Giải Chi Tiết</h2>
+
+    <div class="grid-2">
+      <div class="card-sol">
+        <div class="card-sol-title">a. Lỗi quan sát khi KHÔNG cắt tỉa (giữ 2 lá):</div>
+        <p style="margin: 0;">
+          • Lá 1 (8A, 2B): Đoán nhãn A &rarr; Sai <strong>2</strong> mẫu.
+          <br>• Lá 2 (5A, 5B): Đoán nhãn A hoặc B &rarr; Sai <strong>5</strong> mẫu.
+        </p>
+        <div class="math-box">
+          <div class="m-line">
+            E<span class="m-sub">subtree</span> = 2 + 5 = <span class="m-bold">7 lỗi</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-sol">
+        <div class="card-sol-title">b. Lỗi quan sát khi CÓ cắt tỉa (thu về 1 lá t):</div>
+        <p style="margin: 0;">
+          Nút t có 20 mẫu (13A, 7B). Biểu quyết đa số gán nhãn dự đoán là A &rarr; Sai 7 mẫu thuộc lớp B.
+        </p>
+        <div class="math-box">
+          <div class="m-line">
+            E<span class="m-sub">pruned</span> = 20 - 13 = <span class="m-bold">7 lỗi</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-sol">
+      <div class="card-sol-title">c. Áp dụng công thức ước tính Pessimistic:</div>
+      <p style="margin: 0;">
+        • Giữ cây con (gồm L = 2 lá): Lỗi_pessimistic(subtree) = 7 + (2 &times; 0.5) = 7 + 1.0 = <strong>8.0 lỗi</strong>.
+        <br>• Cắt tỉa thành 1 lá (L = 1 lá): Lỗi_pessimistic(pruned) = 7 + (1 &times; 0.5) = 7 + 0.5 = <strong>7.5 lỗi</strong>.
+      </p>
+    </div>
+
+    <div class="card-sol">
+      <div class="card-sol-title">d. Quyết định &amp; Giải thích bản chất:</div>
+      <p style="margin: 0;">
+        So sánh: <strong>Lỗi_pessimistic(pruned) = 7.5 &lt; Lỗi_pessimistic(subtree) = 8.0</strong>.
+        <br>&rarr; <strong>QUYẾT ĐỊNH: NÊN CẮT TỈA (PRUNE)!</strong>
+        <br><em>Giải thích bản chất:</em> Trên dữ liệu huấn luyện, việc mọc thêm 2 lá không làm giảm được bất kỳ lỗi nào (đều sai 7 mẫu). Việc duy trì 2 lá chỉ làm tăng nguy cơ học vẹt (Overfitting). Công thức Pessimistic phạt thẳng tay 2 chiếc lá này (phạt 1.0 lỗi), khiến phương án cắt tỉa (chỉ phạt 0.5) chiến thắng!
+      </p>
+    </div>
+
+    <div class="card-takeaway">
+      <div class="card-takeaway-title"><span class="tag-badge tag-green">[Đúc Kết Thực Chiến]</span> Điểm độc đáo của Pessimistic Pruning trong C4.5:</div>
+      Thông thường để cắt tỉa bạn cần chia riêng một tập kiểm định (Validation set). C4.5 không cần tập Validation mà dùng ngay công thức phạt thống kê Pessimistic này trên tập huấn luyện, cực kỳ quý giá khi dữ liệu ít.
+    </div>
+
+    <div class="page-footer">
+      <span>Tài liệu tự học trực quan Học Máy • Decision Trees</span>
+      <span>schedule-smart • docs/9.More/</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 6: BÀI 5 & TỔNG KẾT ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span>Chuyên đề Decision Trees: TS. Trương Vĩnh Lân</span>
+      <span>Trang 6 / 6</span>
+    </div>
+
+    <h1 class="ch-title">
+      <span class="ch-badge">BÀI 5</span> Cắt Tỉa Độ Phức Tạp Chi Phí Cost-Complexity (CART)
+    </h1>
+
+    <!-- ĐỀ BÀI GỐC -->
+    <div class="card-problem">
+      <div class="card-problem-title"><span class="tag-badge tag-slate">[Đề Bài Gốc]</span> Bài Tập 5: Tính Toán Cost-Complexity Pruning (CART)</div>
+      <p style="margin-bottom: 2px;">
+        Cho cây quyết định T có lỗi huấn luyện R(T) = 25, số lá |T| = 10.
+        <br><strong>Yêu cầu:</strong> (a) Viết biểu thức R_&alpha;(T); (b) Tính R_&alpha;(T) cho &alpha; = 0.5 và &alpha; = 2.0; (c) Cắt tỉa tạo ra cây T' có R(T') = 30 và |T'| = 4. Với &alpha; = 2.0, nên giữ cây gốc T hay chọn T'? (d) Ý nghĩa của việc tăng giá trị &alpha;.
+      </p>
+    </div>
+
+    <!-- GIẢI MÃ KÝ HIỆU TOÁN HỌC -->
+    <div class="card-decode">
+      <div class="card-decode-title"><span class="tag-badge tag-purple">[Giải Mã Bản Chất]</span> Ý nghĩa hàm chi phí: R_&alpha;(T) = R(T) + &alpha; |T|</div>
+      • <strong>R(T):</strong> Chi phí sai số (số mẫu đoán sai trên tập huấn luyện).
+      <br>• <strong>|T|:</strong> Chi phí cồng kềnh (số lượng lá của cây).
+      <br>• <strong>&alpha; (Complexity Parameter):</strong> "Mức thuế tính trên mỗi chiếc lá". Cân bằng giữa việc giảm lỗi sai và giữ cho cây nhỏ gọn.
+    </div>
+
+    <!-- ẨN DỤ THỰC TẾ -->
+    <div class="card-meta">
+      <div class="card-meta-title"><span class="tag-badge tag-blue">[Ẩn Dụ Thực Tế]</span> Chi Phí Thuê Mặt Bằng Chi Nhánh &amp; Bài Toán Đóng Cửa</div>
+      <p>
+        Giữ 10 chi nhánh (|T|=10) thì phục vụ sát từng khách hơn (chỉ sai 25 đơn hàng), nhưng tiền thuê mặt bằng rất tốn (&alpha;&times;10). Khi tiền thuê tăng vọt (&alpha;=2.0), chấp nhận đóng bớt 6 chi nhánh để tổng chi phí là thấp nhất!
+      </p>
+    </div>
+
+    <h2 class="sec-title">1. Lời Giải Chi Tiết</h2>
+
+    <div class="card-sol">
+      <div class="card-sol-title">a. Biểu thức tính hàm chi phí độ phức tạp R_&alpha;(T):</div>
+      <div class="math-box">
+        <div class="m-line">
+          R<span class="m-sub">&alpha;</span>(T) = R(T) + &alpha; &times; |T|
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card-sol">
+        <div class="card-sol-title">b1. Tính với &alpha; = 0.5 (Thuế nhẹ):</div>
+        <p style="margin: 0;">R₀.₅(T) = 25 (lỗi) + 0.5 &times; 10 (phạt lá) = 25 + 5 = <strong>30.0</strong>.</p>
+      </div>
+
+      <div class="card-sol">
+        <div class="card-sol-title">b2. Tính với &alpha; = 2.0 (Thuế nặng):</div>
+        <p style="margin: 0;">R₂.₀(T) = 25 (lỗi) + 2.0 &times; 10 (phạt lá) = 25 + 20 = <strong>45.0</strong>.</p>
+      </div>
+    </div>
+
+    <div class="card-sol">
+      <div class="card-sol-title">c. So sánh cây gốc T và cây cắt tỉa T' khi &alpha; = 2.0:</div>
+      <p style="margin: 0;">
+        • Cây gốc T: R₂.₀(T) = 25 + 2.0 &times; 10 = <strong>45.0</strong>.
+        <br>• Cây cắt tỉa T': R₂.₀(T') = 30 + 2.0 &times; 4 = 30 + 8 = <strong>38.0</strong>.
+      </p>
+      <div class="math-box">
+        <div class="m-line">
+          So sánh: R<span class="m-sub">2.0</span>(T') = 38.0 &lt; R<span class="m-sub">2.0</span>(T) = 45.0 &rarr; <span class="m-bold">Chọn cây đã cắt tỉa T'!</span>
+        </div>
+      </div>
+      <p style="margin: 0;"><em>Bản chất:</em> Dù T' tăng thêm 5 lỗi (từ 25 lên 30), nhưng tiết kiệm được hẳn 6 lá (từ 10 xuống 4), giúp giảm được 6 &times; 2 = 12 điểm phạt. Lợi ích tinh gọn (12) áp đảo chi phí sai số (5)!</p>
+    </div>
+
+    <div class="card-sol">
+      <div class="card-sol-title">d. Ý nghĩa của việc tăng giá trị &alpha;:</div>
+      <p style="margin: 0;">
+        • &alpha; = 0: Không phạt lá &rarr; giữ cây to nhất, cố học vẹt để ép lỗi train về cực tiểu (Overfitting).
+        <br>• &alpha; càng tăng: Phạt lá càng nặng &rarr; ép thuật toán phải cắt tỉa mạnh tay, tạo ra các cây nhỏ gọn, tăng tính tổng quát hóa trên dữ liệu mới. Nếu &alpha; &rarr; &infin;, cây sẽ bị tỉa chỉ còn 1 nút gốc duy nhất.
+      </p>
+    </div>
+
+    <h2 class="sec-title">2. Bảng Tra Cứu Nhanh 5 Dạng Bài Decision Trees (Master Cheatsheet)</h2>
+    <table class="data-table" style="font-size: 7.6pt;">
+      <thead>
+        <tr><th>Chủ Đề</th><th>Thuật Toán</th><th>Công Thức Trọng Tâm</th><th>Bản Chất &amp; Nguyên Tắc Ứng Dụng</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Information Gain &amp; Ratio</strong></td>
+          <td>ID3 / C4.5</td>
+          <td>IG = H(S) - H(S|A)<br>GR = IG / SplitInfo</td>
+          <td>Dùng Gain Ratio để phạt các thuộc tính băm vụn dữ liệu thành quá nhiều nhánh.</td>
+        </tr>
+        <tr>
+          <td><strong>Thuộc Tính Liên Tục</strong></td>
+          <td>C4.5 / CART</td>
+          <td>T = (vᵢ + vᵢ₊₁) / 2</td>
+          <td>Định lý Fayyad &amp; Irani: Chỉ cần xét các điểm đổi nhãn để tiết kiệm 95% thời gian tính.</td>
+        </tr>
+        <tr>
+          <td><strong>Gini Impurity</strong></td>
+          <td>CART</td>
+          <td>Gini = 1 - &sum; pᵢ²</td>
+          <td>Xác suất bốc phải 2 phần tử khác màu. Tính nhanh gấp nhiều lần Entropy vì không dùng log₂.</td>
+        </tr>
+        <tr>
+          <td><strong>Pessimistic Pruning</strong></td>
+          <td>C4.5</td>
+          <td>Lỗi = Quan sát + 0.5 &times; L</td>
+          <td>Phạt thêm 0.5 lỗi cho mỗi lá để phát hiện các cành thừa không giúp ích cho phân loại.</td>
+        </tr>
+        <tr>
+          <td><strong>Cost-Complexity Pruning</strong></td>
+          <td>CART (Scikit-Learn)</td>
+          <td>R_&alpha;(T) = R(T) + &alpha;|T|</td>
+          <td>Dùng Cross-Validation quét tìm &alpha; (ccp_alpha) tối ưu nhất để cân bằng giữa lỗi và số lá.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="page-footer">
+      <span>Tài liệu tự học trực quan Học Máy • Decision Trees</span>
+      <span>Trang 6 / 6 • Hoàn thành xuất bản PDF</span>
+    </div>
+  </div>
+
+</body>
+</html>

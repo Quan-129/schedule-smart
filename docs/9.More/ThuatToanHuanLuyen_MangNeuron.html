@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Mạng Neuron Nhân Tạo: Thuật Toán Huấn Luyện & Tối Ưu Hóa</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 8.5mm 11mm 8.5mm 11mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 8.2pt;
+      line-height: 1.30;
+      color: #0f172a;
+      background-color: #ffffff;
+      margin: 0;
+      padding: 0;
+    }
+
+    .a4-page {
+      width: 100%;
+      height: 280mm;
+      max-height: 280mm;
+      page-break-after: always;
+      break-after: page;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .a4-page:last-child {
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1.5px solid #0284c7;
+      padding-bottom: 3px;
+      margin-bottom: 6px;
+    }
+    .page-header .brand {
+      font-weight: 800;
+      font-size: 8.1pt;
+      color: #0369a1;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .page-header .doc-tag {
+      font-size: 7.4pt;
+      font-weight: 600;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    .page-footer {
+      margin-top: auto;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 3px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 7.1pt;
+      color: #64748b;
+    }
+
+    h1, h2, h3, h4, p {
+      margin: 0 0 3px 0;
+    }
+
+    .section-title {
+      font-size: 11.2pt;
+      font-weight: 800;
+      color: #0f172a;
+      border-left: 4px solid #0284c7;
+      padding-left: 7px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-title .score-tag {
+      font-size: 7.4pt;
+      font-weight: 700;
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid #bae6fd;
+    }
+
+    .box {
+      border-radius: 5px;
+      padding: 5px 8px;
+      margin-bottom: 4px;
+      font-size: 8.0pt;
+    }
+
+    .box-problem {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-left: 3.5px solid #475569;
+    }
+
+    .box-metaphor {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-left: 3.5px solid #d97706;
+      color: #78350f;
+    }
+
+    .box-concept {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 3.5px solid #16a34a;
+      color: #14532d;
+    }
+
+    .box-solution {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-left: 3.5px solid #0284c7;
+      color: #0c4a6e;
+    }
+
+    .box-warning {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 3.5px solid #dc2626;
+      color: #7f1d1d;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 6.8pt;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+    .badge-problem { background: #334155; color: #ffffff; }
+    .badge-metaphor { background: #b45309; color: #ffffff; }
+    .badge-concept { background: #15803d; color: #ffffff; }
+    .badge-solution { background: #0369a1; color: #ffffff; }
+    .badge-takeaway { background: #7e22ce; color: #ffffff; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2px 0 4px 0;
+      font-size: 7.6pt;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 3px 5px;
+      text-align: left;
+    }
+    th {
+      background: #f1f5f9;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    .math-block {
+      background: #ffffff;
+      border: 1px dashed #94a3b8;
+      border-radius: 4px;
+      padding: 3px 6px;
+      margin: 2px 0;
+      font-family: "Segoe UI", Roboto, sans-serif;
+      font-size: 8.0pt;
+      color: #0f172a;
+    }
+    .math-sym {
+      font-weight: 700;
+      color: #0369a1;
+    }
+    .math-res {
+      font-weight: 800;
+      color: #b91c1c;
+      background: #fee2e2;
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+    .math-step {
+      display: block;
+      margin: 2px 0;
+      padding-left: 5px;
+      border-left: 2px solid #38bdf8;
+    }
+
+    .two-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .cover-hero {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #0f172a 100%);
+      color: #ffffff;
+      padding: 16px 18px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .cover-title {
+      font-size: 18pt;
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 5px;
+      letter-spacing: -0.5px;
+    }
+    .cover-subtitle {
+      font-size: 9.4pt;
+      font-weight: 400;
+      color: #bae6fd;
+      line-height: 1.32;
+    }
+    .cover-meta {
+      margin-top: 8px;
+      display: flex;
+      gap: 12px;
+      font-size: 7.6pt;
+      color: #e0f2fe;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      padding-top: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== TRANG 1: BÌA & MỤC LỤC ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Neural Networks &bull; Training & Optimization Masterclass</span>
+      <span class="doc-tag">Bộ Môn Học Máy & Trí Tuệ Nhân Tạo</span>
+    </div>
+
+    <div class="cover-hero">
+      <div class="cover-title">MẠNG NEURON NHÂN TẠO<br>THUẬT TOÁN HUẤN LUYỆN & TỐI ƯU HÓA</div>
+      <div class="cover-subtitle">Giải mã toàn diện Momentum, Huber Loss, Adam Optimizer, Focal Loss, Cosine Annealing và Lan truyền ngược Backpropagation qua trực giác đời thực</div>
+      <div class="cover-meta">
+        <span>Tài liệu: Chuyên đề Thuật Toán Huấn Luyện AI</span>
+        <span>Quy chuẩn: 100% Zero-Emoji & Native Math</span>
+        <span>Khổ in: A4 7 Trang Chuẩn In Ấn</span>
+      </div>
+    </div>
+
+    <div class="box box-concept" style="margin-bottom: 6px;">
+      <span class="badge badge-concept">Triết Lý Sư Phạm</span>
+      <b>Hiểu Tận Gốc Bản Chất Bằng Ngôn Ngữ Đời Thường</b>
+      <p style="margin-top: 2px;">
+        Huấn luyện mạng nơ-ron thực chất giống như <b>dạy một đứa trẻ tập đi và thích nghi với địa hình hiểm trở</b>. Các công thức toán học cao siêu chỉ là những quy tắc vật lý rất tự nhiên: quán tính lăn dốc giúp xe không bị kẹt (Momentum), người quan tòa công tâm không nghe tin đồn thất thiệt (Huber), vận động viên biết tăng giảm nhịp thở thông minh (Adam), người thầy dành 90% thời gian kèm học sinh yếu (Focal Loss), và chiếc máy bay hạ cánh mượt mà xuống đường băng (Cosine Annealing).
+      </p>
+    </div>
+
+    <div class="section-title">
+      <span>MỤC LỤC 6 DẠNG BÀI TOÁN TỐI ƯU TRỌNG TÂM</span>
+      <span class="score-tag">6 Trụ Cột Huấn Luyện AI</span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 8%;">Câu</th>
+          <th style="width: 24%;">Chủ Đề Trọng Tâm</th>
+          <th style="width: 38%;">Ẩn Dụ Thực Tế & Bản Chất Trực Giác</th>
+          <th style="width: 30%;">Nghiệm Số & Kết Quả Then Chốt</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight: 800; color: #0284c7;">Câu 1</td>
+          <td><b>Gradient Descent with Momentum</b></td>
+          <td>Cỗ xe trượt tuyết có quán tính; tích lũy tốc độ dọc hẻm núi, triệt tiêu dao động lắc lư zíc-zắc hai bên sườn đồi, lướt qua cực tiểu địa phương.</td>
+          <td>vt = [0.59, -1.47]; theta_t = [0.9941, -0.9853]; ổn định và tăng tốc độ hội tụ.</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 800; color: #0284c7;">Câu 2</td>
+          <td><b>Hàm Mất Mát Huber Loss</b></td>
+          <td>Vị quan tòa khoan dung; phạt bình phương với lỗi nhỏ nhưng chuyển sang phạt đường thẳng với lỗi lớn, không bị điểm ngoại lai (outliers) bắt cóc.</td>
+          <td>Huber = [0.045, 1.000, 1.600]; MSE trung bình = 2.25; điểm e3=2.1: Huber (1.6) thấp hơn MSE (4.41).</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 800; color: #0284c7;">Câu 3</td>
+          <td><b>Thuật Toán Tối Ưu Adam</b></td>
+          <td>Vận động viên thông thái; kết hợp quán tính hướng đi (Moment 1) và tự điều chỉnh độ dài bước chân theo độ rung lắc (Moment 2); phao cứu sinh epsilon.</td>
+          <td>m̂1 = [0.1, -0.4]; v̂1 = [0.01, 0.16]; theta1 = [-0.001, +0.001]; eps=10^-8 chống nổ chia 0.</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 800; color: #0284c7;">Câu 4</td>
+          <td><b>Focal Loss & Hard Example Mining</b></td>
+          <td>Người thầy tập trung kèm học sinh yếu; dìm mất mát của câu dễ (p=0.9) xuống 400 lần, dồn toàn bộ gradient bắt mạng nơ-ron học ca khó (p=0.6).</td>
+          <td>FL1 = 0.000263; FL2 = 0.020433; FL dìm câu dễ 400 lần; độ chênh lệch ca khó vọt lên 77.57 lần.</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 800; color: #0284c7;">Câu 5</td>
+          <td><b>Cosine Annealing Schedule</b></td>
+          <td>Chiếc máy bay hạ cánh mượt mà; lượn sóng Cosine giảm learning rate trơn tru, giai đoạn đầu khám phá rộng, giai đoạn cuối trượt êm ái vào đáy chảo.</td>
+          <td>t=0: lr=0.1000; t=50: lr=0.0505; t=100: lr=0.0010; khắc phục nhược điểm giật cục của Step Decay.</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 800; color: #0284c7;">Câu 6</td>
+          <td><b>Backpropagation Trong Mạng MLP</b></td>
+          <td>Dây chuyền sản xuất dập lỗi ngược; tính forward pass, đo sai số MSE, truyền tín hiệu lỗi ngược dòng tính trọn vẹn gradient 4 ma trận và cập nhật trọng số.</td>
+          <td>Forward <i>ŷ</i> = 0.325; Loss = 0.2278; Backward delta2 = -0.675; delta1 = [-0.27, 0.2025]; W2, b2, W1, b1 mới.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="box box-problem" style="margin-top: 4px;">
+      <span class="badge badge-problem">Bức Tranh Tổng Thể</span>
+      <b>Hệ Sinh Thái Tối Ưu Hóa Trong Deep Learning Hiện Đại</b>
+      <div style="display: flex; justify-content: space-between; margin-top: 3px; font-size: 7.6pt; line-height: 1.25;">
+        <div style="flex: 1; padding: 4px; background: #ffffff; border-radius: 4px; border: 1px solid #cbd5e1; margin-right: 4px;">
+          <b style="color: #0369a1;">1. Hàm mất mát thông minh</b><br>
+          Huber chống nhiễu ngoại lai; Focal Loss chống mất cân bằng lớp cực đoan (Object Detection).
+        </div>
+        <div style="flex: 1; padding: 4px; background: #ffffff; border-radius: 4px; border: 1px solid #cbd5e1; margin-right: 4px;">
+          <b style="color: #0369a1;">2. Bộ tối ưu thích nghi</b><br>
+          Momentum tích lũy quán tính; Adam tự thích nghi tốc độ học cho từng tham số riêng biệt.
+        </div>
+        <div style="flex: 1; padding: 4px; background: #ffffff; border-radius: 4px; border: 1px solid #cbd5e1;">
+          <b style="color: #0369a1;">3. Chiến lược học bền vững</b><br>
+          Cosine Annealing hạ cánh mềm; Backpropagation tự động hóa dây chuyền sửa lỗi toàn mạng.
+        </div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 1 / 7 &bull; Cẩm Nang Thuật Toán Huấn Luyện Mạng Neuron</span>
+      <span>Học Máy & Trí Tuệ Nhân Tạo &bull; 2026</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 2: CÂU 1 - MOMENTUM ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Câu 1 &bull; Gradient Descent Với Momentum</span>
+      <span class="doc-tag">Quán Tính Vật Lý & Ổn Định Cập Nhật</span>
+    </div>
+
+    <div class="section-title">
+      <span>CÂU 1: CẬP NHẬT GRADIENT DESCENT VỚI MOMENTUM</span>
+      <span class="score-tag">Động Lực Học Quán Tính</span>
+    </div>
+
+    <div class="box box-problem">
+      <span class="badge badge-problem">Đề Bài Gốc</span>
+      Giả sử tại bước thời gian t, ta có:
+      <div class="math-block" style="text-align: center; margin: 2px 0;">
+        Gradient của loss: gt = [ 0.5, -1.2 ] &nbsp;&bull;&nbsp; Vận tốc bước trước: vt-1 = [ 0.1, -0.3 ]<br>
+        Hệ số momentum &mu; = 0.9 &nbsp;&bull;&nbsp; Tốc độ học &eta; = 0.01 &nbsp;&bull;&nbsp; Tham số &theta;t-1 = [ 1.0, -1.0 ]
+      </div>
+      a) Tính vận tốc mới vt sử dụng công thức: <b>vt = &mu; * vt-1 + gt</b><br>
+      b) Cập nhật tham số &theta;t sử dụng: <b>&theta;t = &theta;t-1 - &eta; * vt</b><br>
+      c) Giải thích ý nghĩa của việc sử dụng momentum trong việc ổn định quá trình cập nhật.
+    </div>
+
+    <div class="box box-metaphor">
+      <span class="badge badge-metaphor">Ẩn Dụ Cho Bé Hiểu</span>
+      <b>Quả Cầu Tuyết Lăn Xuống Dốc & Chiếc Xe Trượt Tuyết Có Quán Tính</b><br>
+      Hãy tưởng tượng bạn trượt tuyết xuống một khe núi hẹp:
+      <ul>
+        <li><b>Nếu không có quán tính (GD thuần túy)</b>: Mỗi bước đi bạn chỉ nhìn theo cơn gió tạt ngang tức thời. Gió thổi sang trái bạn bước sang trái, gió tạt sang phải bạn bước sang phải. Kết quả là bạn bị <b>lắc lư zíc-zắc hỗn loạn giữa 2 vách núi</b>, say sóng và di chuyển cực kỳ chậm!</li>
+        <li><b>Khi có quán tính (Momentum)</b>: Bạn ngồi trên một cỗ xe trượt nặng trịch (&mu; = 0.9). Chiếc xe giữ lại 90% vận tốc cũ. Hướng lao xuống dốc tích tụ ngày càng mạnh, còn các cơn gió tạt ngang đổi chiều liên tục sẽ <b>tự triệt tiêu lẫn nhau</b>! Hơn nữa, quán tính giúp xe phóng vọt qua những hố ga nhỏ (cực tiểu địa phương) mà không bị mắc kẹt!</li>
+      </ul>
+    </div>
+
+    <div class="two-cols">
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 1a</span>
+        <b>Tính Vận Tốc Mới vt</b>
+        <div class="math-block">
+          Công thức: vt = &mu; * vt-1 + gt<br>
+          vt = 0.9 &times; [ 0.1, -0.3 ] + [ 0.5, -1.2 ]<br>
+          <div class="math-step">
+            &bull; Chiều 1: 0.9(0.1) + 0.5 = 0.09 + 0.5 = <span class="math-res">0.59</span><br>
+            &bull; Chiều 2: 0.9(-0.3) + (-1.2) = -0.27 - 1.2 = <span class="math-res">-1.47</span>
+          </div>
+          &rArr; Vận tốc mới: <span class="math-res">vt = [ 0.59, -1.47 ]</span>.
+        </div>
+        <i>(Vận tốc cũ [-0.3] cùng hướng âm với gradient mới [-1.2] nên chiều thứ hai được gia tốc vọt lên -1.47!).</i>
+      </div>
+
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 1b</span>
+        <b>Cập Nhật Tham Số &theta;t</b>
+        <div class="math-block">
+          Công thức: &theta;t = &theta;t-1 - &eta; * vt<br>
+          &theta;t = [ 1.0, -1.0 ] - 0.01 &times; [ 0.59, -1.47 ]<br>
+          <div class="math-step">
+            &bull; &theta;t,1 = 1.0 - 0.0059 = <span class="math-res">0.9941</span><br>
+            &bull; &theta;t,2 = -1.0 - (-0.0147) = -1.0 + 0.0147 = <span class="math-res">-0.9853</span>
+          </div>
+          &rArr; Tham số mới: <span class="math-res">&theta;t = [ 0.9941, -0.9853 ]</span>.
+        </div>
+        <i>(Tham số dịch chuyển mượt mà ngược hướng dốc tổng hợp).</i>
+      </div>
+    </div>
+
+    <div class="box box-concept">
+      <span class="badge badge-concept">Câu 1c &bull; Bản Chất Sâu Sắc</span>
+      <b>Ba Ý Nghĩa Sống Còn Của Momentum Trong Tối Ưu Hóa Mạng Nơ-ron</b>
+      <ol style="margin: 2px 0 0 14px; padding: 0;">
+        <li style="margin-bottom: 2px;">
+          <b>Triệt tiêu dao động zíc-zắc (Dampening Oscillations)</b>: Trong các thung lũng hẹp (Ravines - dốc một bên rất đứng nhưng đáy thung lũng thoải dài), gradient bị giật liên tục giữa hai sườn dốc. Vì các gradient này đổi dấu liên tục, tổng vận tốc vt trung bình theo chiều ngang bị triệt tiêu về gần 0, giúp mạng không bị văng khỏi khe núi.
+        </li>
+        <li style="margin-bottom: 2px;">
+          <b>Gia tốc theo hướng nhất quán (Accelerating Convergence)</b>: Dọc theo đáy khe dốc, các gradient liên tục chỉ về cùng một hướng. Hệ số &mu; = 0.9 hoạt động như chuỗi cấp số nhân: 1 + 0.9 + 0.9^2 + ... = 1/(1 - 0.9) = 10 lần! Tốc độ hội tụ tăng vọt gấp 10 lần so với Gradient Descent truyền thống.
+        </li>
+        <li>
+          <b>Vượt qua điểm yên ngựa và hố cực tiểu nông (Escape Saddle Points & Local Minima)</b>: Tại các lòng chảo phẳng lì (Saddle points), gradient triệt tiêu gt &asymp; 0 khiến GD đứng hình. Nhờ vận tốc tích lũy vt-1 từ trước, mô hình vẫn trượt thẳng qua vùng mù này và tiếp tục lăn xuống đáy tối ưu toàn cục.
+        </li>
+      </ol>
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 2 / 7 &bull; Cẩm Nang Thuật Toán Huấn Luyện Mạng Neuron</span>
+      <span>Học Máy & Trí Tuệ Nhân Tạo &bull; 2026</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 3: CÂU 2 - HUBER LOSS ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Câu 2 &bull; Tính Toán & Phân Tích Hàm Mất Mát Huber Loss</span>
+      <span class="doc-tag">Robust Statistics & Xử Lý Outliers</span>
+    </div>
+
+    <div class="section-title">
+      <span>CÂU 2: TÍNH TOÁN HÀM MẤT MÁT HUBER LOSS</span>
+      <span class="score-tag">Miễn Nhiễm Điểm Ngoại Lai</span>
+    </div>
+
+    <div class="box box-problem">
+      <span class="badge badge-problem">Đề Bài Gốc</span>
+      Cho sai số dự đoán trên 3 điểm dữ liệu: e = [ 0.3, -1.5, 2.1 ]. Sử dụng hàm mất mát Huber với &delta; = 1.0:
+      <div class="math-block" style="text-align: center; margin: 2px 0;">
+        L_&delta;(ei) = 1/2 * ei^2 &nbsp; (nếu |ei| &le; &delta;) &nbsp;&bull;&nbsp; L_&delta;(ei) = &delta; * (|ei| - 1/2 * &delta;) &nbsp; (nếu |ei| &gt; &delta;)
+      </div>
+      a) Tính giá trị hàm mất mát Huber cho từng điểm dữ liệu.<br>
+      b) Tính tổng loss trung bình (MSE) trên 3 điểm.<br>
+      c) So sánh và giải thích sự khác biệt giữa loss của điểm thứ 3 (e3 = 2.1) khi tính bằng Huber vs MSE. Tại sao Huber được gọi là "robust to outliers"?
+    </div>
+
+    <div class="box box-metaphor">
+      <span class="badge badge-metaphor">Ẩn Dụ Cho Bé Hiểu</span>
+      <b>Vị Quan Tòa Thông Thái & Tin Đồn Thất Thiệt</b><br>
+      Hãy tưởng tượng một lớp học có một vài bạn báo cáo sai sót:
+      <ul>
+        <li><b>Quan tòa MSE (Sai số bình phương)</b>: Áp dụng luật "phạt theo bình phương". Ai sai một tí (0.3) thì phạt nhẹ (0.09). Nhưng nếu có một học sinh báo cáo con số khổng lồ vô lý (e = 2.1 - nghi ngờ do máy đo hỏng), MSE phạt nặng tới 2.1^2 = 4.41! Mức phạt này áp đảo toàn bộ lớp, khiến cả lớp phải vất vả bẻ lái mô hình chỉ để phục vụ một tin đồn ngoại lai sai lệch!</li>
+        <li><b>Quan tòa Huber (Thông thái & Tỉnh táo)</b>: Nếu sai sót nhỏ trong ngưỡng bình thường (|e| &le; 1.0), quan tòa dùng bình phương êm ái. Nhưng nếu sai số vượt ngưỡng (&gt; 1.0), quan tòa chuyển ngay sang mức phạt bậc nhất nhẹ nhàng (đường thẳng). Điểm ngoại lai không thể làm lật thuyền được!</li>
+      </ul>
+    </div>
+
+    <div class="two-cols">
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 2a</span>
+        <b>Tính Huber Loss Cho Từng Điểm (&delta; = 1.0)</b>
+        <div class="math-block">
+          &bull; <b>Điểm e1 = 0.3:</b> |0.3| &le; 1.0 &rArr; Dùng nhánh bậc 2:<br>
+          <div class="math-step">
+            L_&delta;(0.3) = 1/2 &times; 0.3^2 = 1/2 &times; 0.09 = <span class="math-res">0.0450</span>
+          </div>
+          &bull; <b>Điểm e2 = -1.5:</b> |-1.5| = 1.5 &gt; 1.0 &rArr; Dùng nhánh bậc 1:<br>
+          <div class="math-step">
+            L_&delta;(-1.5) = 1.0 &times; (1.5 - 0.5 &times; 1.0) = 1.0 &times; 1.0 = <span class="math-res">1.0000</span>
+          </div>
+          &bull; <b>Điểm e3 = 2.1:</b> |2.1| = 2.1 &gt; 1.0 &rArr; Dùng nhánh bậc 1:<br>
+          <div class="math-step">
+            L_&delta;(2.1) = 1.0 &times; (2.1 - 0.5 &times; 1.0) = 1.0 &times; 1.6 = <span class="math-res">1.6000</span>
+          </div>
+        </div>
+        &rArr; Vector Huber loss: <span class="math-res">[ 0.045, 1.000, 1.600 ]</span>.
+      </div>
+
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 2b</span>
+        <b>Tính Tổng Loss Trung Bình MSE</b>
+        <div class="math-block">
+          Công thức chuẩn MSE = (1/N) &Sigma; ei^2:<br>
+          &bull; e1^2 = 0.3^2 = 0.09<br>
+          &bull; e2^2 = (-1.5)^2 = 2.25<br>
+          &bull; e3^2 = 2.1^2 = 4.41<br>
+          <div class="math-step">
+            Tổng = 0.09 + 2.25 + 4.41 = 6.75<br>
+            MSE = 6.75 / 3 = <span class="math-res">2.2500</span>
+          </div>
+          <i>(Nếu dùng quy ước 1/(2N) &Sigma; ei^2 thì MSE = 1.1250).</i>
+        </div>
+        <b>Nhận xét:</b> Riêng điểm e3 đóng góp tới 4.41 / 6.75 = <b>65.3%</b> tổng sai số của toàn bộ mô hình!
+      </div>
+    </div>
+
+    <div class="box box-concept">
+      <span class="badge badge-concept">Câu 2c &bull; Bản Chất Sâu Sắc</span>
+      <b>So Sánh Điểm e3 = 2.1 & Tại Sao Huber Loss Miễn Nhiễm Với Điểm Ngoại Lai (Robust to Outliers)?</b>
+      <div style="display: flex; gap: 8px; margin-top: 2px;">
+        <div style="flex: 1;">
+          <b>1. Đối chiếu định lượng tại điểm cá biệt e3 = 2.1:</b><br>
+          &bull; MSE loss = 2.1^2 = <b>4.4100</b> (vọt lên rất cao).<br>
+          &bull; Huber loss = 1.0 &times; (2.1 - 0.5) = <b>1.6000</b>.<br>
+          &rArr; Mất mát MSE cao gấp <b>2.76 lần</b> so với Huber loss! MSE phóng đại cực hạn các sai số lớn do phép lũy thừa bậc 2.
+        </div>
+        <div style="flex: 1;">
+          <b>2. Cơ chế kháng nhiễu (Robustness Mechanism):</b><br>
+          &bull; <b>Đạo hàm theo sai số của MSE:</b> d(MSE)/de = 2e. Với e = 2.1, lực kéo gradient là 4.2. Càng xa trung tâm, lực kéo càng tiến tới vô cùng, kéo vẹo toàn bộ đường hồi quy theo điểm nhiễu.<br>
+          &bull; <b>Đạo hàm của Huber:</b> Khi |e| &gt; &delta;, d(Huber)/de = &delta; * sign(e) = <b>hằng số cố định &plusmn;1.0</b>! Dù dữ liệu có nhiễu tới e = 1000 thì gradient vẫn giữ trần cố định là 1.0, bảo vệ mô hình tuyệt đối không bị lật đổ.
+        </div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 3 / 7 &bull; Cẩm Nang Thuật Toán Huấn Luyện Mạng Neuron</span>
+      <span>Học Máy & Trí Tuệ Nhân Tạo &bull; 2026</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 4: CÂU 3 - ADAM OPTIMIZER ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Câu 3 &bull; Thuật Toán Tối Ưu Hóa Thích Nghi Adam (Adaptive Moment Estimation)</span>
+      <span class="doc-tag">Moment 1, Moment 2 & Hiệu Chỉnh Độ Lệch</span>
+    </div>
+
+    <div class="section-title">
+      <span>CÂU 3: CẬP NHẬT ADAM OPTIMIZER</span>
+      <span class="score-tag">Chuẩn Mực Deep Learning Hiện Đại</span>
+    </div>
+
+    <div class="box box-problem">
+      <span class="badge badge-problem">Đề Bài Gốc</span>
+      Tại bước t = 1, cho:
+      <div class="math-block" style="text-align: center; margin: 2px 0;">
+        Gradient: g1 = [ 0.1, -0.4 ] &nbsp;&bull;&nbsp; &theta;0 = [ 0.0, 0.0 ] &nbsp;&bull;&nbsp; m0 = [ 0, 0 ], v0 = [ 0, 0 ]<br>
+        Hyperparameters: &eta; = 0.001 &nbsp;&bull;&nbsp; &beta;1 = 0.9 &nbsp;&bull;&nbsp; &beta;2 = 0.999 &nbsp;&bull;&nbsp; &epsilon; = 10^-8
+      </div>
+      a) Tính moment bậc nhất m1 và moment bậc hai v1 đã hiệu chỉnh độ lệch (bias-corrected): m̂₁, v̂₁.<br>
+      b) Thực hiện cập nhật tham số &theta;1.<br>
+      c) Giải thích vai trò của &epsilon; trong công thức cập nhật Adam. Điều gì xảy ra nếu &epsilon; = 0?
+    </div>
+
+    <div class="box box-metaphor">
+      <span class="badge badge-metaphor">Ẩn Dụ Cho Bé Hiểu</span>
+      <b>Vận Động Viên Leo Núi Thông Thái & Chiếc Phao Cứu Sinh Epsilon</b><br>
+      Adam là sự kết hợp thiên tài giữa hai trợ lý:
+      <ul>
+        <li><b>Trợ lý 1 (Moment bậc nhất m)</b>: "Nhìn về hướng gió trung bình" (quán tính hướng đi).</li>
+        <li><b>Trợ lý 2 (Moment bậc hai v)</b>: "Đo độ gồ ghề của mặt đất" (tổng bình phương gradient). Nếu một con đường quá hiểm trở rung lắc dữ dội (v lớn), Adam sẽ <b>tự động chia cho căn bậc hai của v</b> để thu nhỏ bước chân, tránh trượt ngã. Nếu đường êm đềm (v nhỏ), Adam tự tin sải bước dài hơn!</li>
+        <li><b>Chiếc phao &epsilon;</b>: Khi mặt đất bằng phẳng tuyệt đối không có độ dốc (v = 0), chiếc phao &epsilon; ở dưới mẫu số ngăn chặn thảm họa "chia cho số 0" khiến vận động viên ngất xỉu!</li>
+      </ul>
+    </div>
+
+    <div class="two-cols">
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 3a</span>
+        <b>Tính Moment & Hiệu Chỉnh Độ Lệch Tại t = 1</b>
+        <div class="math-block">
+          <b>1. First Moment m̂₁ (Quán tính hướng đi):</b><br>
+          m₁ = &beta;₁ * m₀ + (1 &minus; &beta;₁) * g₁ = 0.9(0) + 0.1 &times; [ 0.1, -0.4 ]<br>
+          <div class="math-step">
+            m₁ = [ 0.010, -0.040 ]<br>
+            Hiệu chỉnh: m̂₁ = m₁ / (1 &minus; &beta;₁¹)<br>
+            <span class="math-sym">m̂₁ =</span> [ 0.01, -0.04 ] / (1 - 0.9) = <span class="math-res">[ 0.10, -0.40 ]</span>
+          </div>
+          <b>2. Second Moment v̂₁ (Độ rung bình phương):</b><br>
+          v₁ = &beta;₂ * v₀ + (1 &minus; &beta;₂) * g₁² = 0.999(0) + 0.001 &times; [ 0.1², (-0.4)² ]<br>
+          <div class="math-step">
+            v₁ = 0.001 &times; [ 0.01, 0.16 ] = [ 0.00001, 0.00016 ]<br>
+            Hiệu chỉnh: v̂₁ = v₁ / (1 &minus; &beta;₂¹)<br>
+            <span class="math-sym">v̂₁ =</span> v₁ / (1 - 0.999) = v₁ / 0.001 = <span class="math-res">[ 0.01, 0.16 ]</span>
+          </div>
+        </div>
+        <i style="font-size: 7.3pt; color: #475569;">(Dấu mũ "hat" m̂, v̂ quy ước giá trị đã khử độ lệch Bias-Correction).</i>
+      </div>
+
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 3b</span>
+        <b>Cập Nhật Tham Số &theta;₁ (Chuẩn Hóa Bước Nhảy)</b>
+        <div class="math-block">
+          Công thức: <b>&theta;₁ = &theta;₀ &minus; &eta; &times; m̂₁ / ( &radic;(v̂₁) + &epsilon; )</b><br>
+          <i style="font-size: 7.3pt;">(Với &theta;₀ = [0, 0], &eta; = 0.001, &epsilon; = 10⁻⁸ &asymp; 0):</i>
+          <table style="width: 100%; margin: 3px 0; font-size: 7.4pt;">
+            <thead>
+              <tr style="background: #e0f2fe;">
+                <th style="width: 28%;">Tọa độ</th>
+                <th style="width: 28%; text-align: center;">Độ rung &radic;(v̂₁)</th>
+                <th style="width: 44%; text-align: right;">Giá trị mới &theta;₁</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>Chiều 1 (&theta;₁,₁)</b></td>
+                <td style="text-align: center;">&radic;(0.01) = <b>0.1</b></td>
+                <td style="text-align: right;">0 &minus; 0.001 &times; (0.1/0.1) = <span class="math-res">-0.0010</span></td>
+              </tr>
+              <tr>
+                <td><b>Chiều 2 (&theta;₁,₂)</b></td>
+                <td style="text-align: center;">&radic;(0.16) = <b>0.4</b></td>
+                <td style="text-align: right;">0 &minus; 0.001 &times; (-0.4/0.4) = <span class="math-res">+0.0010</span></td>
+              </tr>
+            </tbody>
+          </table>
+          &rArr; Vector mới: <span class="math-res">&theta;₁ = [ -0.0010, +0.0010 ]</span>.
+        </div>
+        <div style="font-size: 7.3pt; color: #0369a1; line-height: 1.22;">
+          <b>Kỳ diệu:</b> Dù g1,2 (-0.4) mạnh gấp 4 lần g1,1 (0.1), Adam tự chia cho độ rung &radic;(v̂) để chuẩn hóa bước nhảy về đúng độ lớn &eta; = 0.001!
+        </div>
+      </div>
+    </div>
+
+    <div class="box box-concept">
+      <span class="badge badge-concept">Câu 3c &bull; Bản Chất Sâu Sắc</span>
+      <b>Vai Trò Của Hằng Số &epsilon; = 10^-8 Và Thảm Họa Khi &epsilon; = 0</b>
+      <ol style="margin: 2px 0 0 14px; padding: 0;">
+        <li style="margin-bottom: 2px;">
+          <b>Bảo vệ ổn định số học (Numerical Stability)</b>: Trong công thức chia căn bậc hai m̂ / (&radic;(v̂) + &epsilon;), &epsilon; đóng vai trò là số hạng làm trơn (smoothing term). Nó đảm bảo mẫu số luôn luôn dương nghiêm ngặt trong mọi tình huống tính toán của CPU/GPU.
+        </li>
+        <li style="margin-bottom: 2px;">
+          <b>Điều gì xảy ra nếu &epsilon; = 0?</b> Nếu &epsilon; = 0, tại những tham số mà gradient bằng 0 liên tục (ví dụ các neuron bị khóa bởi ReLU hoặc các đặc trưng thưa hiếm xuất hiện), ta sẽ có v̂ = 0. Khi đó phép tính trở thành <b>m̂ / 0</b> hoặc <b>0 / 0</b>!
+        </li>
+        <li>
+          <b>Hậu quả thực tế</b>: Máy tính sẽ lập tức sinh ra giá trị lỗi <b>NaN (Not a Number)</b> hoặc <b>Inf (Vô cùng)</b>. Giá trị rác này sẽ lan truyền ngược và lây nhiễm ra toàn bộ mạng nơ-ron qua các phép nhân ma trận tiếp theo, phá hủy hoàn toàn mô hình chỉ sau đúng 1 bước cập nhật!
+        </li>
+      </ol>
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 4 / 7 &bull; Cẩm Nang Thuật Toán Huấn Luyện Mạng Neuron</span>
+      <span>Học Máy & Trí Tuệ Nhân Tạo &bull; 2026</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 5: CÂU 4 - FOCAL LOSS ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Câu 4 &bull; Focal Loss & Cơ Chế Khai Phá Ca Khó (Hard Example Mining)</span>
+      <span class="doc-tag">Xử Lý Mất Cân Bằng Lớp Cực Đoan</span>
+    </div>
+
+    <div class="section-title">
+      <span>CÂU 4: FOCAL LOSS CHO PHÂN LOẠI NHỊ PHÂN</span>
+      <span class="score-tag">Đột Phá Thị Giác Máy Tính (RetinaNet)</span>
+    </div>
+
+    <div class="box box-problem">
+      <span class="badge badge-problem">Đề Bài Gốc</span>
+      Xét bài toán binary classification. Cho 2 điểm dữ liệu cùng nhãn thực y = 1:
+      <div class="math-block" style="text-align: center; margin: 2px 0;">
+        &bull; Điểm 1: y1 = 1, xác suất p1 = 0.9 (Dễ phân loại đúng) &nbsp;&bull;&nbsp; Điểm 2: y2 = 1, xác suất p2 = 0.6 (Khó phân loại hơn)<br>
+        Tham số Focal Loss: &gamma; = 2.0, &alpha; = 0.25 &nbsp;&bull;&nbsp; Công thức: <b>FL(pt) = -&alpha;t * (1 - pt)^&gamma; * log(pt)</b>
+      </div>
+      a) Tính Focal Loss cho từng điểm dữ liệu.<br>
+      b) So sánh Focal Loss với Cross-Entropy loss tiêu chuẩn (tính CE loss cho cả hai điểm).<br>
+      c) Dựa trên kết quả, giải thích cơ chế "hard example mining" của Focal Loss.
+    </div>
+
+    <div class="box box-metaphor">
+      <span class="badge badge-metaphor">Ẩn Dụ Cho Bé Hiểu</span>
+      <b>Người Thầy Ôn Thi Thông Minh & 1000 Câu Hỏi Trắc Nghiệm Dễ</b><br>
+      Hãy tưởng tượng bạn đang ôn thi:
+      <ul>
+        <li>Trong đề thi có <b>999 câu cực dễ</b> (1 + 1 = 2, robot đoán tự tin 90%) và chỉ có <b>1 câu cực khó</b> (robot đoán 60%).</li>
+        <li><b>Nếu dùng Cross-Entropy thường</b>: Dù mỗi câu dễ chỉ bị trừ điểm rất nhỏ, nhưng lấy số nhỏ đó nhân với 999 câu dễ thì tổng điểm trừ của câu dễ vẫn đè bẹp câu khó! Robot sẽ dành trọn ngày chỉ để ôn lại câu dễ mà bỏ quên hoàn toàn câu khó!</li>
+        <li><b>Focal Loss xuất hiện</b>: Dùng hệ số giảm âm (1 - p)^2. Câu dễ (p=0.9) bị dìm điểm phạt xuống <b>400 lần</b> (gần như biến mất). Toàn bộ tâm trí của người thầy được dồn vào <b>1 câu hỏi khó duy nhất</b>!</li>
+      </ul>
+    </div>
+
+    <div class="two-cols">
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 4a & 4b</span>
+        <b>Tính & So Sánh Định Lượng FL vs CE</b>
+        <div class="math-block">
+          <i>(Quy chuẩn AI sử dụng log tự nhiên ln, &alpha;t = 0.25, &gamma; = 2):</i><br>
+          <b>1. Điểm 1: Dễ phân loại (p1 = 0.9):</b><br>
+          &bull; CE1 = -ln(0.9) &asymp; <span class="math-sym">0.1054</span><br>
+          &bull; Hệ số điều chế: (1 - 0.9)^2 = 0.1^2 = 0.01<br>
+          <div class="math-step">
+            FL1 = 0.25 &times; 0.01 &times; 0.1054 = <span class="math-res">0.000263</span>
+          </div>
+          &rArr; <b>FL1 làm suy giảm mất mát CE tới:</b> 0.1054 / 0.000263 &asymp; <b>400 lần!</b><br><br>
+          <b>2. Điểm 2: Khó phân loại (p2 = 0.6):</b><br>
+          &bull; CE2 = -ln(0.6) &asymp; <span class="math-sym">0.5108</span><br>
+          &bull; Hệ số điều chế: (1 - 0.6)^2 = 0.4^2 = 0.16<br>
+          <div class="math-step">
+            FL2 = 0.25 &times; 0.16 &times; 0.5108 = <span class="math-res">0.020433</span>
+          </div>
+          &rArr; <b>FL2 chỉ làm giảm mất mát CE:</b> 0.5108 / 0.020433 &asymp; <b>25 lần.</b>
+        </div>
+      </div>
+
+      <div class="box box-solution">
+        <span class="badge badge-solution">Đối Chiếu Bảng Số Liệu</span>
+        <b>Sự Thay Đổi Cục Diện Giữa Hai Điểm</b>
+        <table>
+          <thead>
+            <tr><th>Chỉ Số</th><th>Điểm 1 (Dễ, p=0.9)</th><th>Điểm 2 (Khó, p=0.6)</th><th>Tỷ Lệ (Khó / Dễ)</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><b>Cross-Entropy</b></td>
+              <td>0.1054</td>
+              <td>0.5108</td>
+              <td><b>4.85 lần</b></td>
+            </tr>
+            <tr>
+              <td><b>Hệ số (1-pt)^2</b></td>
+              <td>0.0100 (phạt siêu nhẹ)</td>
+              <td>0.1600 (giữ lại đáng kể)</td>
+              <td><b>16.00 lần</b></td>
+            </tr>
+            <tr>
+              <td><b>Focal Loss</b></td>
+              <td><span class="math-res">0.000263</span></td>
+              <td><span class="math-res">0.020433</span></td>
+              <td><b style="color: #b91c1c; font-size: 8.5pt;">77.57 lần!</b></td>
+            </tr>
+          </tbody>
+        </table>
+        <b>Phát hiện chấn động:</b> Trong Cross-Entropy, mẫu khó chỉ quan trọng hơn mẫu dễ 4.85 lần. Nhưng qua lăng kính Focal Loss, mẫu khó đã quan trọng hơn gấp <b>77.57 lần</b>! Mẫu dễ hoàn toàn bị vô hiệu hóa!
+      </div>
+    </div>
+
+    <div class="box box-concept">
+      <span class="badge badge-concept">Câu 4c &bull; Bản Chất Sâu Sắc</span>
+      <b>Cơ Chế "Hard Example Mining" Tự Động Hóa Tuyệt Vời Của Focal Loss</b>
+      <ol style="margin: 2px 0 0 14px; padding: 0;">
+        <li style="margin-bottom: 2px;">
+          <b>Vấn đề mất cân bằng tiền cảnh / hậu cảnh (Foreground-Background Imbalance)</b>: Trong nhận diện vật thể (Object Detection), mỗi bức ảnh có tới 100,000 ô neo (anchors) là nền trời đất trống (Easy Negatives, p &ge; 0.99) và chỉ có vài ô chứa đồ vật thật. Hàng trăm nghìn mẫu dễ cộng dồn gradient lại sẽ nhấn chìm toàn bộ tín hiệu học tập của vật thể quý giá.
+        </li>
+        <li style="margin-bottom: 2px;">
+          <b>Bộ lọc động tự nhiên (Dynamic Modulating Factor)</b>: Hệ số (1 - pt)^&gamma; hoạt động như một bộ giảm thanh tự động. Khi pt &rarr; 1, hệ số này tiến về 0 theo hàm lũy thừa bậc &gamma;, dập tắt gradient của những mẫu đã học xong. Khi pt &le; 0.5, hệ số này giữ giá trị lớn, truyền nguyên vẹn xung lực gradient để chỉnh sửa mạng.
+        </li>
+        <li>
+          <b>Không cần thuật toán lấy mẫu phức tạp</b>: Trước đây người ta phải dùng kỹ thuật OHEM (Online Hard Example Mining) thủ công rất tốn RAM và tính toán. Focal Loss giải quyết trọn vẹn bài toán hóc búa này chỉ bằng một dòng code hàm mất mát duy nhất!
+        </li>
+      </ol>
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 5 / 7 &bull; Cẩm Nang Thuật Toán Huấn Luyện Mạng Neuron</span>
+      <span>Học Máy & Trí Tuệ Nhân Tạo &bull; 2026</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 6: CÂU 5 - COSINE ANNEALING ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Câu 5 &bull; Lịch Trình Tốc Độ Học Cosine Annealing Schedule</span>
+      <span class="doc-tag">Learning Rate Decay Mềm Mại</span>
+    </div>
+
+    <div class="section-title">
+      <span>CÂU 5: COSINE ANNEALING LEARNING RATE SCHEDULE</span>
+      <span class="score-tag">Điều Phối Tốc Độ Học Tối Ưu</span>
+    </div>
+
+    <div class="box box-problem">
+      <span class="badge badge-problem">Đề Bài Gốc</span>
+      Xét lịch trình học Cosine Annealing không có Warm Restarts:
+      <div class="math-block" style="text-align: center; margin: 2px 0;">
+        &eta;max = 0.1 &nbsp;&bull;&nbsp; &eta;min = 0.001 &nbsp;&bull;&nbsp; Tổng số epoch: Tmax = 100<br>
+        Công thức: <b>&eta;t = &eta;min + 1/2 * (&eta;max - &eta;min) * ( 1 + cos(&pi;*t / Tmax) )</b>
+      </div>
+      a) Tính learning rate tại epoch t = 0, t = 50, t = 100.<br>
+      b) Vẽ phác thảo đồ thị learning rate theo epoch (mô tả định tính).<br>
+      c) Giải thích lợi ích của việc sử dụng Cosine Annealing so với Step Decay truyền thống.
+    </div>
+
+    <div class="box box-metaphor">
+      <span class="badge badge-metaphor">Ẩn Dụ Cho Bé Hiểu</span>
+      <b>Chiếc Máy Bay Hạ Cánh Xuống Đường Băng vs Nhảy Cầu Thang Giật Cục</b><br>
+      Hãy tưởng tượng bạn đang điều khiển máy bay hạ cánh:
+      <ul>
+        <li><b>Kiểu cũ (Step Decay)</b>: Máy bay đang bay nhanh, bạn giật phanh đột ngột làm nó rớt xuống 1 tầng; bay tiếp rồi lại giật phanh rớt xuống tầng nữa. Những cú rơi bậc thang này gây sốc áp suất, hành khách nôn nao và máy bay rất dễ đâm sầm xuống đất!</li>
+        <li><b>Kiểu mới (Cosine Annealing)</b>: Máy bay lượn theo một đường cong Cosine mềm mại như dải lụa. Lúc đầu ở trên cao lướt êm, đoạn giữa hạ độ cao thoai thoải, và đoạn cuối là đà tiếp đất êm ái không hề có một rung chấn nhỏ nào!</li>
+      </ul>
+    </div>
+
+    <div class="two-cols">
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 5a</span>
+        <b>Tính Toán Tốc Độ Học Tại Các Epoch</b>
+        <div class="math-block">
+          Hiệu số: &eta;max - &eta;min = 0.1 - 0.001 = <span class="math-sym">0.099</span>.<br>
+          Biên độ: 1/2 &times; 0.099 = <span class="math-sym">0.0495</span>.<br><br>
+          &bull; <b>Tại epoch t = 0 (Bắt đầu):</b><br>
+          cos(0) = 1 &rArr; 1 + cos(0) = 2<br>
+          <div class="math-step">
+            &eta;0 = 0.001 + 0.0495 &times; 2 = 0.001 + 0.099 = <span class="math-res">0.1000</span> (&eta;max)
+          </div>
+          &bull; <b>Tại epoch t = 50 (Chính giữa quá trình):</b><br>
+          cos(50&pi;/100) = cos(&pi;/2) = 0 &rArr; 1 + cos(&pi;/2) = 1<br>
+          <div class="math-step">
+            &eta;50 = 0.001 + 0.0495 &times; 1 = 0.001 + 0.0495 = <span class="math-res">0.0505</span>
+          </div>
+          &bull; <b>Tại epoch t = 100 (Kết thúc):</b><br>
+          cos(100&pi;/100) = cos(&pi;) = -1 &rArr; 1 + cos(&pi;) = 0<br>
+          <div class="math-step">
+            &eta;100 = 0.001 + 0.0495 &times; 0 = 0.001 + 0 = <span class="math-res">0.0010</span> (&eta;min)
+          </div>
+        </div>
+      </div>
+
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 5b</span>
+        <b>Mô Tả Định Tính Đồ Thị &eta;t Theo Epoch</b>
+        <div class="math-block">
+          Đồ thị là một nửa chu kỳ sóng Cosine trơn (S-curve lật ngược):<br>
+          <div class="svg-container" style="padding: 2px; margin: 2px 0;">
+            <svg width="280" height="75" viewBox="0 0 280 75">
+              <!-- Axes -->
+              <line x1="35" y1="60" x2="265" y2="60" stroke="#94a3b8" stroke-width="1.2"/>
+              <line x1="35" y1="60" x2="35" y2="10" stroke="#94a3b8" stroke-width="1.2"/>
+              <!-- Ticks -->
+              <text x="5" y="16" font-size="7" fill="#64748b">0.100</text>
+              <text x="5" y="38" font-size="7" fill="#64748b">0.050</text>
+              <text x="5" y="62" font-size="7" fill="#64748b">0.001</text>
+              <!-- S-curve (Cosine half wave) -->
+              <path d="M 35,14 C 95,14 115,36 150,36 C 185,36 205,58 260,58" fill="none" stroke="#0284c7" stroke-width="2.2"/>
+              <!-- Key points -->
+              <circle cx="35" cy="14" r="3" fill="#16a34a"/>
+              <circle cx="150" cy="36" r="3" fill="#d97706"/>
+              <circle cx="260" cy="58" r="3" fill="#b91c1c"/>
+              <text x="155" y="34" font-size="6.8" fill="#d97706" font-weight="700">t=50 (0.0505)</text>
+              <!-- X labels -->
+              <text x="32" y="70" font-size="7" fill="#64748b">0</text>
+              <text x="142" y="70" font-size="7" fill="#64748b">50</text>
+              <text x="250" y="70" font-size="7" fill="#64748b">100 (Epoch)</text>
+            </svg>
+          </div>
+          &bull; <b>Giai đoạn đầu (0 - 20)</b>: Giảm rất chậm, giữ tốc độ lớn để tự do khám phá không gian tham số rộng lớn.<br>
+          &bull; <b>Giai đoạn giữa (20 - 80)</b>: Dốc xuống nhanh để nhanh chóng tiếp cận thung lũng nghiệm tối ưu.<br>
+          &bull; <b>Giai đoạn cuối (80 - 100)</b>: Mặt đáy thoải phẳng, giảm tốc độ cực nhỏ để rà soát tinh chỉnh vi mô quanh đáy vực.
+        </div>
+      </div>
+    </div>
+
+    <div class="box box-concept">
+      <span class="badge badge-concept">Câu 5c &bull; Bản Chất Sâu Sắc</span>
+      <b>Ba Lợi Ích Vượt Trội Của Cosine Annealing So Với Step Decay Truyền Thống</b>
+      <ol style="margin: 2px 0 0 14px; padding: 0;">
+        <li style="margin-bottom: 2px;">
+          <b>Loại bỏ cú sốc gradient (No Destructive Shocks)</b>: Trong Step Decay, việc chia tốc độ học cho 10 tại các epoch cố định (như epoch 30, 60) tạo ra sự đứt gãy đột ngột. Mô hình có thể bị kẹt lại ngay tại vùng lồi lõm xấu mà nó vừa rơi vào. Cosine Annealing biến đổi liên tục trơn tru, giúp mô hình thích nghi nhẹ nhàng.
+        </li>
+        <li style="margin-bottom: 2px;">
+          <b>Không cần phỏng đoán siêu tham số (Hyperparameter-Free Milestones)</b>: Với Step Decay, kỹ sư phải vò đầu bứt tai chọn xem nên giảm ở epoch nào (30? 40? hay 75?). Với Cosine Annealing, lịch trình tự động dàn trải hoàn hảo từ epoch 0 đến epoch cuối cùng dựa trên hàm lượng giác tự nhiên.
+        </li>
+        <li>
+          <b>Hội tụ sâu vào đáy cực tiểu phẳng (Flat Minima Convergence)</b>: Đạo hàm của Cosine bằng 0 tại cả 2 đầu mút t = 0 và t = Tmax. Ở những epoch cuối, learning rate giảm chậm dần và duy trì đều đặn quanh &eta;min, giúp trọng số hội tụ chính xác vào tâm của các vùng cực tiểu phẳng (Flat Minima) - nơi mô hình đạt khả năng tổng quát hóa (Generalization) cao nhất trên tập dữ liệu thực tế!
+        </li>
+      </ol>
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 6 / 7 &bull; Cẩm Nang Thuật Toán Huấn Luyện Mạng Neuron</span>
+      <span>Học Máy & Trí Tuệ Nhân Tạo &bull; 2026</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 7: CÂU 6 - BACKPROPAGATION ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Câu 6 &bull; Lan Truyền Ngược (Backpropagation) Trong Mạng MLP 1 Lớp Ẩn</span>
+      <span class="doc-tag">Dây Chuyền Đạo Hàm Tự Động & Cập Nhật Trọng Số</span>
+    </div>
+
+    <div class="section-title">
+      <span>CÂU 6: BACKPROPAGATION TRONG MLP ĐƠN GIẢN</span>
+      <span class="score-tag">Trái Tim Của Deep Learning</span>
+    </div>
+
+    <div class="box box-problem">
+      <span class="badge badge-problem">Đề Bài Gốc</span>
+      Xét mạng MLP 1 lớp ẩn với các tham số:
+      <div class="math-block" style="text-align: center; margin: 2px 0;">
+        W(1) = [ [0.5, -0.2], [0.3, 0.1] ], &nbsp; b(1) = [ 0.1, -0.1 ]<sup>T</sup><br>
+        W(2) = [ 0.4, -0.3 ], &nbsp; b(2) = 0.2 &nbsp;&bull;&nbsp; Hàm kích hoạt ReLU &nbsp;&bull;&nbsp; Đầu vào x = [ 1.0, 0.5 ]<sup>T</sup><br>
+        Nhãn thực: y = 1 &nbsp;&bull;&nbsp; Hàm mất mát MSE Loss: L = 1/2 * (<i>ŷ</i> - y)^2 &nbsp;&bull;&nbsp; Learning rate &eta; = 0.1
+      </div>
+      a) Thực hiện forward pass để tính đầu ra <i>ŷ</i>.<br>
+      b) Tính loss L giữa <i>ŷ</i> và y.<br>
+      c) Thực hiện backward pass để tính gradient cho W(2), b(2), W(1), b(1).<br>
+      d) Cập nhật các tham số với learning rate &eta; = 0.1.
+    </div>
+
+    <div class="two-cols">
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 6a & 6b</span>
+        <b>Forward Pass & Tính Mất Mát L</b>
+        <div class="math-block">
+          <b>1. Lớp ẩn 1:</b> z(1) = W(1) x + b(1)<br>
+          z1(1) = 0.5(1.0) - 0.2(0.5) + 0.1 = 0.5 - 0.1 + 0.1 = 0.50<br>
+          z2(1) = 0.3(1.0) + 0.1(0.5) - 0.1 = 0.3 + 0.05 - 0.1 = 0.25<br>
+          <div class="math-step">
+            a(1) = ReLU(z(1)) = max(0, z(1)) = <span class="math-res">[ 0.50, 0.25 ]<sup>T</sup></span>
+          </div>
+          <b>2. Lớp ra:</b> z(2) = W(2) a(1) + b(2)<br>
+          <div class="math-step">
+            <i>ŷ</i> = 0.4(0.50) - 0.3(0.25) + 0.2 = 0.20 - 0.075 + 0.20<br>
+            <span class="math-sym"><i>ŷ</i> =</span> <span class="math-res">0.3250</span>
+          </div>
+          <b>3. MSE Loss L:</b> L = 1/2 * (<i>ŷ</i> - y)^2<br>
+          <div class="math-step">
+            L = 1/2 &times; (0.325 - 1.0)^2 = 1/2 &times; (-0.675)^2 = 1/2 &times; 0.455625<br>
+            <span class="math-sym">L =</span> <span class="math-res">0.2278</span> <i>(Nếu không có 1/2 thì L = 0.4556).</i>
+          </div>
+        </div>
+      </div>
+
+      <div class="box box-solution">
+        <span class="badge badge-solution">Câu 6c</span>
+        <b>Backward Pass Tính Gradient Từng Lớp</b>
+        <div class="math-block">
+          <b>1. Sai số lớp ra &delta;(2):</b><br>
+          <div class="math-step">
+            &delta;(2) = &part;L/&part;z(2) = <i>ŷ</i> - y = 0.325 - 1.0 = <span class="math-res">-0.6750</span><br>
+            &part;L/&part;W(2) = &delta;(2) * (a(1))<sup>T</sup> = -0.675 &times; [0.50, 0.25]<br>
+            <span class="math-sym">&part;L/&part;W(2) =</span> <span class="math-res">[ -0.3375, -0.16875 ]</span><br>
+            <span class="math-sym">&part;L/&part;b(2) =</span> &delta;(2) = <span class="math-res">-0.6750</span>
+          </div>
+          <b>2. Sai số lan truyền ngược về lớp ẩn &delta;(1):</b><br>
+          Vì z(1) = [0.5, 0.25] &gt; 0 nên ReLU'(z(1)) = [1, 1]<sup>T</sup>.<br>
+          &delta;(1) = [ (W(2))<sup>T</sup> * &delta;(2) ] &odot; ReLU'(z(1))<br>
+          &delta;(1) = [ 0.4 &times; (-0.675), -0.3 &times; (-0.675) ]<sup>T</sup> = <span class="math-res">[ -0.2700, +0.2025 ]<sup>T</sup></span><br>
+          <div class="math-step">
+            &part;L/&part;W(1) = &delta;(1) * x<sup>T</sup> = [ -0.2700, 0.2025 ]<sup>T</sup> &times; [ 1.0, 0.5 ]<br>
+            <span class="math-sym">&part;L/&part;W(1) =</span> [ [ <span class="math-res">-0.2700, -0.1350</span> ], [ <span class="math-res">+0.2025, +0.10125</span> ] ]<br>
+            <span class="math-sym">&part;L/&part;b(1) =</span> &delta;(1) = <span class="math-res">[ -0.2700, +0.2025 ]<sup>T</sup></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="box box-solution">
+      <span class="badge badge-solution">Câu 6d</span>
+      <b>Cập Nhật Tham Số Toàn Mạng Với Learning Rate &eta; = 0.1 (&theta;mới = &theta;cũ - &eta; * grad(L))</b>
+      <div class="two-cols" style="gap: 8px;">
+        <div class="math-block">
+          <b>1. Cập nhật tham số Lớp Ra:</b><br>
+          &bull; W(2)mới = [ 0.4, -0.3 ] - 0.1 &times; [ -0.3375, -0.16875 ]<br>
+          W(2)mới = [ 0.4 + 0.03375, -0.3 + 0.016875 ] = <span class="math-res">[ 0.43375, -0.283125 ]</span><br>
+          &bull; b(2)mới = 0.2 - 0.1 &times; (-0.6750) = 0.2 + 0.0675 = <span class="math-res">0.2675</span>
+        </div>
+        <div class="math-block">
+          <b>2. Cập nhật tham số Lớp Ẩn:</b><br>
+          &bull; W(1)mới = W(1) - 0.1 &times; [ [ -0.2700, -0.1350 ], [ 0.2025, 0.10125 ] ]<br>
+          W(1)mới = [ [ <span class="math-res">0.5270, -0.1865</span> ], [ <span class="math-res">0.27975, 0.089875</span> ] ]<br>
+          &bull; b(1)mới = [ 0.1, -0.1 ]<sup>T</sup> - 0.1 &times; [ -0.2700, 0.2025 ]<sup>T</sup> = <span class="math-res">[ 0.1270, -0.12025 ]<sup>T</sup></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="box box-concept">
+      <span class="badge badge-takeaway">Đúc Kết Sư Phạm Toàn Diện</span>
+      <b>Bản Chất Chuỗi Phản Ứng Dây Chuyền Backpropagation</b><br>
+      Toàn bộ quá trình Backpropagation chính là một chiếc thước đo trách nhiệm: Sai số ở đầu ra (&delta;2 = -0.675) được phân phối ngược về lớp ẩn thông qua các "đường ống dẫn" chính là trọng số W(2). Trọng số nào kết nối mạnh hơn sẽ phải chịu trách nhiệm sửa sai nhiều hơn. Nhờ quy tắc chuỗi vi tích phân, hàng tỷ tham số trong các mô hình AI nghìn tỷ tham số như GPT hay Llama đều được cập nhật song song cực nhanh chỉ trong vài mili-giây!
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 7 / 7 &bull; Cẩm Nang Thuật Toán Huấn Luyện Mạng Neuron</span>
+      <span>Học Máy & Trí Tuệ Nhân Tạo &bull; 2026</span>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -8,6 +8,8 @@ import { openNeuralQuizModal } from './NeuralQuizModal.js';
 import { compressImage } from '../../../2.Backend/utils/imageCompressor.js';
 import { uploadNoteImageToStorage } from '../../../3.Database/auth/FirebaseAuthService.js';
 import { askContextualNoteQuestion, generate5TopicPracticeQuizzes } from '../../../2.Backend/services/GeminiAIService.js';
+import { savePdfAttachment, deletePdfAttachment } from '../../../3.Database/storage/IndexedDBEngine.js';
+import { openPdfReaderModal } from './PdfReaderModal.js';
 import { showToast } from '../Toast.js';
 
 // ==========================================================================
@@ -274,6 +276,11 @@ function renderNotepadTemplate(node) {
           <span>Tải ảnh</span>
           <input type="file" id="md-file-input" accept="image/*" multiple style="display: none;">
         </label>
+        <label class="neural-np-tool-btn" id="lbl-upload-md-pdf" title="Đính kèm tệp PDF tài liệu vào ghi chú" style="cursor: pointer;">
+          <i class="fa-solid fa-file-pdf" style="color: #f87171;"></i>
+          <span>Tải PDF</span>
+          <input type="file" id="md-pdf-input" accept="application/pdf,.pdf" multiple style="display: none;">
+        </label>
 
         <div class="neural-np-tool-divider"></div>
 
@@ -376,8 +383,13 @@ function renderNotepadTemplate(node) {
           <div class="neural-np-tool-divider"></div>
           <label class="visual-paste-btn" id="lbl-upload-vis-img" title="Tải ảnh lên từ máy tính (chọn 1 hoặc nhiều ảnh cùng lúc - hoặc bấm Ctrl+V để dán)">
             <i class="fa-solid fa-cloud-arrow-up"></i>
-            <span>Tải ảnh từ máy (Hàng loạt)</span>
+            <span>Tải ảnh từ máy</span>
             <input type="file" id="vis-file-input" accept="image/*" multiple style="display: none;">
+          </label>
+          <label class="visual-paste-btn" id="lbl-upload-vis-pdf" title="Đính kèm tệp PDF tài liệu vào ghi chú" style="cursor: pointer;">
+            <i class="fa-solid fa-file-pdf" style="color: #f87171;"></i>
+            <span>Tải PDF</span>
+            <input type="file" id="vis-pdf-input" accept="application/pdf,.pdf" multiple style="display: none;">
           </label>
           <div class="neural-np-tool-divider"></div>
           <button type="button" class="neural-np-tool-btn neural-btn-snipping" id="btn-snipe-ai-vis" title="Khoanh vùng hỏi AI (Kéo chuột chọn bất kỳ đoạn nào để hỏi)">
@@ -390,17 +402,18 @@ function renderNotepadTemplate(node) {
           </button>
         </div>
 
-        <!-- Canvas Wrapper chứa Text Editor nền & Lớp ảnh nổi đè lên -->
+        <!-- Canvas Wrapper chứa Text Editor nền & Lớp ảnh/PDF nổi đè lên -->
         <div class="visual-note-canvas-wrapper" id="visual-note-canvas-wrapper">
           <div 
             class="visual-rich-editor" 
             id="visual-rich-editor" 
             contenteditable="true" 
             spellcheck="false"
-            data-placeholder="Gõ văn bản ghi chú tại đây...&#10;• Bấm nút 'Tải ảnh từ máy' để chọn hàng loạt ảnh từ máy tính hoặc kéo thả ảnh vào đây&#10;• Bấm Ctrl+V để dán ảnh tức thì, kéo thả tự do và co giãn 4 góc mượt mà!"
+            data-placeholder="Gõ văn bản ghi chú tại đây...&#10;• Bấm nút 'Tải ảnh từ máy' hoặc 'Tải PDF' để đính kèm tài liệu vào ghi chú&#10;• Bấm Ctrl+V để dán ảnh tức thì, kéo thả tự do và co giãn 4 góc mượt mà!"
           >${initialVisualHtml}</div>
 
           <div class="visual-images-layer" id="visual-images-layer"></div>
+          <div class="visual-pdfs-layer" id="visual-pdfs-layer"></div>
           <div class="neural-ai-pins-layer" id="neural-ai-visual-pins-layer"></div>
         </div>
       </div>
@@ -654,6 +667,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   const btnOpenQuizFromVault = sidebar.querySelector('#btn-open-quiz-from-vault');
   const visualEditor = sidebar.querySelector('#visual-rich-editor');
   const visualImagesLayer = sidebar.querySelector('#visual-images-layer');
+  const visualPdfsLayer = sidebar.querySelector('#visual-pdfs-layer');
   const canvasWrapper = sidebar.querySelector('#visual-note-canvas-wrapper');
   const mdToolbar = sidebar.querySelector('#neural-notepad-toolbar');
   const tabBtns = sidebar.querySelectorAll('.neural-np-tab');
@@ -662,9 +676,9 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   const undoBtn = sidebar.querySelector('#btn-hist-undo');
   const redoBtn = sidebar.querySelector('#btn-hist-redo');
 
-  // Hàm hủy chọn tất cả các ảnh nổi (ẩn khung viền điều chỉnh, 4 núm co giãn và nút xóa)
+  // Hàm hủy chọn tất cả các ảnh nổi và thẻ PDF nổi
   const deselectAllVisualCards = () => {
-    sidebar.querySelectorAll('.visual-floating-img-card.active').forEach(c => {
+    sidebar.querySelectorAll('.visual-floating-img-card.active, .visual-floating-pdf-card.active').forEach(c => {
       c.classList.remove('active');
     });
   };
@@ -1063,7 +1077,39 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   const updateLivePreview = () => {
     if (previewContent) {
       const mdBody = previewContent.querySelector('#neural-rendered-markdown-body') || previewContent;
-      mdBody.innerHTML = renderMarkdownToHtml(textarea.value);
+      let html = renderMarkdownToHtml(textarea.value);
+      if (Array.isArray(currentPdfs) && currentPdfs.length > 0) {
+        const badgesHtml = currentPdfs.map(p => `
+          <div class="markdown-pdf-attachment-badge" data-pdf-id="${p.id}" data-pdf-name="${escapeHtml(p.name)}">
+            <i class="fa-solid fa-file-pdf"></i>
+            <span class="badge-title">${escapeHtml(p.name)}</span>
+            <span class="badge-size">(${p.size || '0 KB'})</span>
+            <span class="badge-action-hint">👁️ Xem PDF</span>
+          </div>
+        `).join('');
+        html += `<div class="markdown-pdf-tray" style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed rgba(255,255,255,0.15);"><div style="font-size: 0.8rem; font-weight: 700; color: #f87171; margin-bottom: 8px;"><i class="fa-solid fa-paperclip"></i> Tệp PDF đính kèm:</div>${badgesHtml}</div>`;
+      }
+      mdBody.innerHTML = html;
+
+      mdBody.querySelectorAll('.markdown-pdf-attachment-badge').forEach(badge => {
+        badge.addEventListener('click', () => {
+          const pid = badge.dataset.pdfId;
+          const pname = badge.dataset.pdfName;
+          openPdfReaderModal({
+            pdfId: pid,
+            pdfName: pname,
+            subjectCode,
+            targetNode: node,
+            allNodes: getSubjectKnowledgeNodes(subjectCode),
+            onInsertToNote: (textToInsert) => {
+              textarea.value += textToInsert;
+              updateLivePreview();
+              saveAllNotes();
+            }
+          });
+        });
+      });
+
       renderAiChatPins();
     }
   };
@@ -1091,12 +1137,13 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   sidebar.querySelector('#btn-fmt-highlight')?.addEventListener('click', () => handleFormat('==', '=='));
 
   // ========================================================================
-  // VISUAL CANVAS NOTE: RICH-TEXT & FLOATING OVERLAY IMAGES CONTROLLER
+  // VISUAL CANVAS NOTE: RICH-TEXT, IMAGES & PDF ATTACHMENTS CONTROLLER
   // ========================================================================
-  const visualNotes = node.visualNotes || { html: '', images: [] };
+  const visualNotes = node.visualNotes || { html: '', images: [], pdfs: [] };
   let currentImages = Array.isArray(visualNotes.images) ? [...visualNotes.images] : [];
+  let currentPdfs = Array.isArray(visualNotes.pdfs) ? [...visualNotes.pdfs] : (Array.isArray(node.pdfs) ? [...node.pdfs] : []);
 
-  // Tự động tính toán và mở rộng chiều cao tối thiểu cho Canvas Wrapper khi nội dung/ảnh dài xuống dưới
+  // Tự động tính toán và mở rộng chiều cao tối thiểu cho Canvas Wrapper khi nội dung/ảnh/PDF dài xuống dưới
   const updateCanvasWrapperHeight = () => {
     if (!canvasWrapper) return;
     let maxBottom = 650;
@@ -1106,6 +1153,14 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     if (Array.isArray(currentImages) && currentImages.length > 0) {
       currentImages.forEach(img => {
         const bottom = (Number(img.y) || 0) + (Number(img.height) || 0) + 160;
+        if (bottom > maxBottom) {
+          maxBottom = bottom;
+        }
+      });
+    }
+    if (Array.isArray(currentPdfs) && currentPdfs.length > 0) {
+      currentPdfs.forEach(pdf => {
+        const bottom = (Number(pdf.y) || 0) + 90;
         if (bottom > maxBottom) {
           maxBottom = bottom;
         }
@@ -1289,7 +1344,111 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     });
   };
 
+  // Render các thẻ file PDF nổi trên Visual Canvas
+  const renderVisualPdfs = () => {
+    if (!visualPdfsLayer) return;
+    visualPdfsLayer.innerHTML = '';
+
+    currentPdfs.forEach(pdfItem => {
+      const card = document.createElement('div');
+      card.className = 'visual-floating-pdf-card';
+      card.dataset.id = pdfItem.id;
+      card.style.left = `${pdfItem.x || 20}px`;
+      card.style.top = `${pdfItem.y || 40}px`;
+
+      card.innerHTML = `
+        <div class="visual-pdf-icon-box">
+          <i class="fa-solid fa-file-pdf"></i>
+        </div>
+        <div class="visual-pdf-info">
+          <span class="visual-pdf-name" title="${escapeHtml(pdfItem.name)}">${escapeHtml(pdfItem.name)}</span>
+          <div class="visual-pdf-meta">
+            <span class="visual-pdf-badge-tag">PDF</span>
+            <span>${escapeHtml(pdfItem.size || '0 KB')}</span>
+          </div>
+        </div>
+        <div class="visual-pdf-actions">
+          <button type="button" class="visual-pdf-btn btn-view-pdf" title="Mở đọc tài liệu in-app (Kèm AI Snipping & Copilot)">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+          <button type="button" class="visual-pdf-btn btn-delete-pdf" title="Xóa file PDF này khỏi ghi chú">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      `;
+
+      // 1. Nút mở đọc PDF
+      card.querySelector('.btn-view-pdf')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openPdfReaderModal({
+          pdfId: pdfItem.id,
+          pdfName: pdfItem.name,
+          subjectCode,
+          targetNode: node,
+          allNodes: getSubjectKnowledgeNodes(subjectCode),
+          onInsertToNote: (textToInsert) => {
+            if (visualEditor) {
+              visualEditor.innerHTML += textToInsert;
+              saveAllNotes();
+            }
+            if (textarea) {
+              textarea.value += textToInsert;
+              updateLivePreview();
+              saveAllNotes();
+            }
+          }
+        });
+      });
+
+      // 2. Nút xóa PDF
+      card.querySelector('.btn-delete-pdf')?.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        currentPdfs = currentPdfs.filter(p => p.id !== pdfItem.id);
+        card.remove();
+        await deletePdfAttachment(pdfItem.id);
+        updateLivePreview();
+        saveAllNotes();
+        showToast('Đã xóa tệp PDF khỏi ghi chú!', 'info');
+      });
+
+      // 3. Pointer drag di chuyển thẻ PDF
+      card.addEventListener('pointerdown', (e) => {
+        if (e.target.closest('.visual-pdf-btn')) return;
+        e.preventDefault();
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const initLeft = card.offsetLeft;
+        const initTop = card.offsetTop;
+
+        const onPointerMove = (moveEvt) => {
+          const zoom = parseFloat(notepadBodyEl?.style?.getPropertyValue('--notepad-zoom')) || 1.0;
+          const dx = (moveEvt.clientX - startX) / zoom;
+          const dy = (moveEvt.clientY - startY) / zoom;
+          const newX = Math.max(0, initLeft + dx);
+          const newY = Math.max(0, initTop + dy);
+          card.style.left = `${newX}px`;
+          card.style.top = `${newY}px`;
+          pdfItem.x = newX;
+          pdfItem.y = newY;
+        };
+
+        const onPointerUp = () => {
+          window.removeEventListener('pointermove', onPointerMove);
+          window.removeEventListener('pointerup', onPointerUp);
+          updateCanvasWrapperHeight();
+          saveAllNotes();
+        };
+
+        window.addEventListener('pointermove', onPointerMove);
+        window.addEventListener('pointerup', onPointerUp);
+      });
+
+      visualPdfsLayer.appendChild(card);
+    });
+  };
+
   renderVisualImages();
+  renderVisualPdfs();
   setTimeout(updateCanvasWrapperHeight, 80);
 
   // 4. Lắng nghe click/pointerdown ra vùng ngoài card để tự động hủy chọn (ẩn khung viền & núm chỉnh)
@@ -1533,21 +1692,82 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     await handleMultipleVisualImages(files);
   };
 
-  // Lắng nghe Ctrl + V dán ảnh từ Clipboard (Luôn nạp trực quan vào tab Ghi Chú để hiển thị ảnh đẹp mắt)
+  // 3. Xử lý nạp file PDF vào IndexedDB và hiển thị lên Visual Canvas & Preview
+  const handleMultiplePdfUpload = async (files) => {
+    if (!files || files.length === 0) return;
+    const pdfFiles = Array.from(files).filter(f => f.type === 'application/pdf' || f.name?.toLowerCase().endsWith('.pdf'));
+    if (pdfFiles.length === 0) return;
+
+    if (saveStatus) {
+      saveStatus.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang nạp ${pdfFiles.length} file PDF vào IndexedDB...`;
+    }
+
+    try {
+      const wrapperW = canvasWrapper ? canvasWrapper.clientWidth : 400;
+      let startY = (visualPane ? visualPane.scrollTop : 0) + 50;
+
+      if (currentPdfs.length > 0) {
+        const maxY = Math.max(...currentPdfs.map(p => (p.y || 0) + 60));
+        if (maxY > startY) startY = maxY + 15;
+      }
+
+      for (let i = 0; i < pdfFiles.length; i++) {
+        const file = pdfFiles[i];
+        const savedMeta = await savePdfAttachment(file, {
+          subjectCode,
+          nodeId: node.id,
+          name: file.name
+        });
+
+        const targetX = Math.max(20, Math.round((wrapperW - 320) / 2));
+        const targetY = startY + (i * 70);
+
+        currentPdfs.push({
+          id: savedMeta.id,
+          name: savedMeta.name,
+          size: savedMeta.size,
+          sizeBytes: savedMeta.sizeBytes,
+          x: targetX,
+          y: targetY,
+          uploadedAt: savedMeta.createdAt
+        });
+      }
+
+      renderVisualPdfs();
+      updateCanvasWrapperHeight();
+      updateLivePreview();
+      saveAllNotes();
+
+      showToast(`Đã đính kèm thành công ${pdfFiles.length} tệp PDF vào ghi chú! 📄`, 'success');
+    } catch (err) {
+      console.error('Lỗi lưu PDF vào IndexedDB:', err);
+      showToast('Có lỗi xảy ra khi lưu file PDF!', 'error');
+    }
+  };
+
+  // Lắng nghe Ctrl + V dán ảnh hoặc PDF từ Clipboard
   sidebar.addEventListener('paste', (e) => {
     const items = (e.clipboardData || window.clipboardData)?.items;
     if (items) {
       const imgBlobs = [];
+      const pdfBlobs = [];
       for (let item of items) {
         if (item.type && item.type.startsWith('image/')) {
           const blob = item.getAsFile();
           if (blob) imgBlobs.push(blob);
+        } else if (item.type === 'application/pdf') {
+          const blob = item.getAsFile();
+          if (blob) pdfBlobs.push(blob);
         }
       }
       if (imgBlobs.length > 0) {
         e.preventDefault();
         switchViewTab('visual');
         handleMultipleVisualImages(imgBlobs);
+      }
+      if (pdfBlobs.length > 0) {
+        e.preventDefault();
+        handleMultiplePdfUpload(pdfBlobs);
       }
     }
   });
@@ -1563,7 +1783,18 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     });
   }
 
-  // Chọn ảnh hàng loạt từ máy tính trên Markdown Toolbar (Tự chuyển sang tab Ghi Chú để người dùng xem ảnh ngay)
+  // Chọn PDF từ máy tính trên Visual Toolbar
+  const visPdfInput = sidebar.querySelector('#vis-pdf-input');
+  if (visPdfInput) {
+    visPdfInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        handleMultiplePdfUpload(e.target.files);
+        e.target.value = '';
+      }
+    });
+  }
+
+  // Chọn ảnh hàng loạt từ máy tính trên Markdown Toolbar
   const mdFileInput = sidebar.querySelector('#md-file-input');
   if (mdFileInput) {
     mdFileInput.addEventListener('change', (e) => {
@@ -1575,7 +1806,18 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     });
   }
 
-  // Kéo thả file ảnh trực tiếp từ máy tính vào toàn bộ Sidebar (Drag & Drop)
+  // Chọn PDF từ máy tính trên Markdown Toolbar
+  const mdPdfInput = sidebar.querySelector('#md-pdf-input');
+  if (mdPdfInput) {
+    mdPdfInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        handleMultiplePdfUpload(e.target.files);
+        e.target.value = '';
+      }
+    });
+  }
+
+  // Kéo thả file ảnh & PDF trực tiếp từ máy tính vào toàn bộ Sidebar (Drag & Drop)
   const onSidebarDragOver = (e) => {
     if (e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files')) {
       e.preventDefault();
@@ -1593,7 +1835,14 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   const onSidebarDrop = (e) => {
     sidebar.classList.remove('is-dragging-files');
     if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const droppedImgs = Array.from(e.dataTransfer.files).filter(f => f.type && f.type.startsWith('image/'));
+      const allFiles = Array.from(e.dataTransfer.files);
+      const droppedPdfs = allFiles.filter(f => f.type === 'application/pdf' || f.name?.toLowerCase().endsWith('.pdf'));
+      const droppedImgs = allFiles.filter(f => f.type && f.type.startsWith('image/'));
+
+      if (droppedPdfs.length > 0) {
+        e.preventDefault();
+        handleMultiplePdfUpload(droppedPdfs);
+      }
       if (droppedImgs.length > 0) {
         e.preventDefault();
         switchViewTab('visual');
@@ -1803,16 +2052,19 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
     const newNotes = textarea.value;
     const newVisualNotes = {
       html: visualEditor ? visualEditor.innerHTML : (node.visualNotes?.html || ''),
-      images: currentImages
+      images: currentImages,
+      pdfs: currentPdfs
     };
 
     updateNeuralNode(subjectCode, node.id, { 
       notes: newNotes,
       visualNotes: newVisualNotes,
+      pdfs: currentPdfs,
       aiChatPins: node.aiChatPins || []
     });
     node.notes = newNotes;
     node.visualNotes = newVisualNotes;
+    node.pdfs = currentPdfs;
 
     if (saveStatus) {
       saveStatus.innerHTML = '<i class="fa-solid fa-check"></i> Đã lưu thành công!';

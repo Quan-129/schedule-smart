@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Mô Hình Tuyến Tính &amp; Bài Toán Hồi Quy: Cẩm Nang Học Thuật Toàn Diện</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 7.5mm 10mm 7.5mm 10mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 8.0pt;
+      line-height: 1.26;
+      color: #0f172a;
+      background-color: #ffffff;
+      margin: 0;
+      padding: 0;
+    }
+
+    .a4-page {
+      width: 100%;
+      height: 282mm;
+      max-height: 282mm;
+      page-break-after: always;
+      break-after: page;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .a4-page:last-child {
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1.5px solid #0284c7;
+      padding-bottom: 2.5px;
+      margin-bottom: 4px;
+    }
+    .page-header .brand {
+      font-weight: 800;
+      font-size: 8.0pt;
+      color: #0369a1;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .page-header .doc-tag {
+      font-size: 7.2pt;
+      font-weight: 600;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
+    .page-footer {
+      margin-top: auto;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 3px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 7.0pt;
+      color: #64748b;
+    }
+
+    h1, h2, h3, h4, p {
+      margin: 0 0 2px 0;
+    }
+
+    .section-title {
+      font-size: 10.3pt;
+      font-weight: 800;
+      color: #0f172a;
+      border-left: 4px solid #0284c7;
+      padding-left: 6px;
+      margin-bottom: 3.5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-title .score-tag {
+      font-size: 7.0pt;
+      font-weight: 700;
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 1.5px 6px;
+      border-radius: 4px;
+      border: 1px solid #bae6fd;
+    }
+
+    .box {
+      border-radius: 5px;
+      padding: 3.5px 6px;
+      margin-bottom: 3.5px;
+      font-size: 7.8pt;
+    }
+
+    .box-problem {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-left: 3.5px solid #475569;
+    }
+
+    .box-metaphor {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-left: 3.5px solid #d97706;
+      color: #78350f;
+    }
+
+    .box-concept {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 3.5px solid #16a34a;
+      color: #14532d;
+    }
+
+    .box-solution {
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      border-left: 3.5px solid #0284c7;
+      color: #0c4a6e;
+    }
+
+    .box-warning {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-left: 3.5px solid #dc2626;
+      color: #7f1d1d;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 6.6pt;
+      font-weight: 700;
+      padding: 1px 4.5px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+    .badge-problem { background: #334155; color: #ffffff; }
+    .badge-metaphor { background: #b45309; color: #ffffff; }
+    .badge-concept { background: #15803d; color: #ffffff; }
+    .badge-solution { background: #0369a1; color: #ffffff; }
+    .badge-takeaway { background: #7e22ce; color: #ffffff; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2px 0 3px 0;
+      font-size: 7.4pt;
+    }
+    th, td {
+      border: 1px solid #cbd5e1;
+      padding: 2.2px 4.5px;
+      text-align: left;
+    }
+    th {
+      background: #f1f5f9;
+      font-weight: 700;
+      color: #1e293b;
+    }
+
+    /* NATIVE CSS MATH ENGINE (Zero Type3, Academic Serif) */
+    .math-block {
+      background: #ffffff;
+      border: 1px dashed #94a3b8;
+      border-radius: 4px;
+      padding: 2.5px 5px;
+      margin: 2px 0;
+      font-family: "Times New Roman", "DejaVu Serif", serif;
+      font-size: 8.2pt;
+      color: #0f172a;
+    }
+    .math-sym {
+      font-weight: 700;
+      color: #0369a1;
+      font-family: "Times New Roman", "DejaVu Serif", serif;
+    }
+    .math-res {
+      font-weight: 700;
+      color: #b91c1c;
+      background: #fee2e2;
+      padding: 1px 4.5px;
+      border-radius: 3px;
+      font-family: "Times New Roman", "DejaVu Serif", serif;
+      display: inline-block;
+    }
+    .math-step {
+      display: block;
+      margin: 1.5px 0;
+      padding-left: 5px;
+      border-left: 2px solid #38bdf8;
+      font-family: "Times New Roman", "DejaVu Serif", serif;
+    }
+
+    /* Fraction styling */
+    .m-frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0 1.5px;
+      font-size: 0.88em;
+      line-height: 1.0;
+    }
+    .m-num {
+      border-bottom: 1px solid #0f172a;
+      padding-bottom: 1px;
+    }
+    .m-den {
+      padding-top: 1px;
+    }
+
+    .two-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+    }
+
+    /* FIGURE HERO LAYOUT (Spacious, High-Resolution, Large Visuals) */
+    .figure-hero {
+      display: flex;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 5px 7px;
+      margin: 4px 0;
+      gap: 8px;
+      align-items: center;
+    }
+    .figure-hero .canvas-area {
+      flex: 1.35;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .figure-hero .insight-area {
+      flex: 1;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 5px;
+      padding: 5px 7px;
+      font-size: 7.5pt;
+      line-height: 1.28;
+    }
+
+    .cover-hero {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #0f172a 100%);
+      color: #ffffff;
+      padding: 14px 18px;
+      border-radius: 8px;
+      margin-bottom: 6px;
+    }
+    .cover-title {
+      font-size: 16.5pt;
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 4px;
+      letter-spacing: -0.5px;
+    }
+    .cover-subtitle {
+      font-size: 8.8pt;
+      font-weight: 400;
+      color: #bae6fd;
+      line-height: 1.28;
+    }
+    .cover-meta {
+      margin-top: 6px;
+      display: flex;
+      gap: 12px;
+      font-size: 7.2pt;
+      color: #e0f2fe;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      padding-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== TRANG 1: BÌA & MỤC LỤC ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Linear Models &bull; Regression Problems Masterclass</span>
+      <span class="doc-tag">Đại Học Bách Khoa TP.HCM (HCMUT)</span>
+    </div>
+
+    <div class="cover-hero">
+      <div class="cover-title">MÔ HÌNH TUYẾN TÍNH &amp; BÀI TOÁN HỒI QUY<br>BẢN CHẤT CỐT LÕI TỪ A ĐẾN Z</div>
+      <div class="cover-subtitle">Giải mã toàn diện 43 Slide bài giảng HCMUT: Từ Nhiễu Gaussian, Cực đại Hợp lý (MLE), Nghiệm đóng OLS, Gradient Descent đến Hàm cơ sở phi tuyến và Cảnh sát Regularization Ridge/LASSO</div>
+      <div class="cover-meta">
+        <span>Tác giả bài giảng: Khoa Khoa Học &amp; Kỹ Thuật Máy Tính - HCMUT</span>
+        <span>Quy chuẩn: 100% Zero-Emoji &amp; Native Math</span>
+        <span>Ấn bản: Cẩm Nang Thực Chiến 8 Trang Chuẩn In A4</span>
+      </div>
+    </div>
+
+    <div class="box box-concept">
+      <span class="badge badge-concept">Triết Lý Sư Phạm Xuyên Suốt</span>
+      <b>Câu Chuyện "Cậu Bé Thợ Mộc &amp; Chiếc Thước Kẻ Thông Minh"</b>
+      <p style="margin-top: 2px;">
+        Toàn bộ 43 slide bài giảng thực chất là một vở kịch 6 màn tự nhiên: Cậu bé có tấm ván gỗ cắm <i>N</i> cây đinh lộn xộn. Cậu muốn đặt một chiếc thước kẻ phẳng sao cho tổng độ căng dây chun lò xo là nhỏ nhất. Khi đinh nằm thành hình con sóng, cậu đeo chiếc kính 3D (Hàm cơ sở) để biến sóng thành phẳng. Khi cậu háo thắng uốn thước theo từng hạt bụi (Overfitting), các trọng số nổ tung lên hàng triệu, người bố phải dùng chiếc còng số 8 (Ridge / LASSO) để ép thước thẳng thớm trở lại!
+      </p>
+    </div>
+
+    <div class="section-title">
+      <span>MỤC LỤC 6 CHƯƠNG BÀI GIẢNG BÁCH KHOA</span>
+      <span class="score-tag">Đầy Đủ 43 Slide</span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 8%;">Chương</th>
+          <th style="width: 25%;">Nội Dung Trọng Tâm</th>
+          <th style="width: 37%;">Ẩn Dụ Cho Bé Hiểu &amp; Trực Giác Vật Lý</th>
+          <th style="width: 30%;">Công Thức &amp; Kết Quả Cốt Lõi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight: 800; color: #0284c7;">Chương 1</td>
+          <td><b>Định Nghĩa Bài Toán &amp; Giả Định</b><br><i>(Slide 3 - 9)</i></td>
+          <td>Cây đinh cắm trên ván gỗ; tiếng ồn gió rung lắc tự nhiên Gaussian; giả định mẫu độc lập i.i.d; chiếc thước thẳng <b>w</b><sup>T</sup><b>x</b>.</td>
+          <td><i>t</i> = <i>h</i>(<b>x</b>) + &epsilon;; &epsilon; ~ N(0, &sigma;²); <i>ŷ</i> = <b>w</b><sup>T</sup><b>x</b> = &Sigma; <i>w</i><sub>d</sub> <i>x</i><sub>d</sub>; Ma trận <b>X</b> (<i>N</i>&times;<i>D</i>), vector <b>t</b> (<i>N</i>&times;1).</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 800; color: #0284c7;">Chương 2A</td>
+          <td><b>Nghiệm Đóng Giải Tích (MLE)</b><br><i>(Slide 10 - 19)</i></td>
+          <td>Lò xo kéo căng; lấy -log làm mất hàm mũ Gaussian, hiển lộ Sum-of-Squares Error; hình chiếu vuông góc lên không gian cột.</td>
+          <td><i>p</i>(<i>t</i>|<b>x</b>) ~ N; -log <i>p</i> &rarr; <i>E</i><sub>D</sub>(<b>w</b>) = <span class="m-frac"><span class="m-num">1</span><span class="m-den">2</span></span> &Sigma; (<i>t</i><sub>n</sub> - <b>w</b><sup>T</sup><b>x</b><sub>n</sub>)²; Nghiệm đóng <b>w</b><sub>ML</sub> = (<b>X</b><sup>T</sup><b>X</b>)<sup>-1</sup><b>X</b><sup>T</sup><b>t</b>; &sigma;² = 1/&beta;<sub>ML</sub>.</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 800; color: #0284c7;">Chương 2B</td>
+          <td><b>Nghiệm Lặp Gradient Descent</b><br><i>(Slide 20 - 22)</i></td>
+          <td>Đi bộ trong sương mù; khi có hàng triệu cây đinh, tính ma trận nghịch đảo bị nổ máy tính; bước dò dẫm theo sườn đồi.</td>
+          <td>Chi phí nghịch đảo O(<i>D</i>³); Gradient trung bình &Delta;<b>W</b><sub>B</sub> = <span class="m-frac"><span class="m-num">1</span><span class="m-den">B</span></span> &Sigma; (<b>w</b><sup>T</sup><b>x</b><sub>n</sub> - <i>t</i><sub>n</sub>)<b>x</b><sub>n</sub>; <b>w</b><sup>(t)</sup> = <b>w</b><sup>(t-1)</sup> - &eta;&Delta;<b>W</b><sub>B</sub>.</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 800; color: #0284c7;">Chương 3</td>
+          <td><b>Quan Hệ Phi Tuyến &amp; Hàm Cơ Sở</b><br><i>(Slide 23 - 27)</i></td>
+          <td>Chiếc kính 3D ma thuật; nhìn qua lăng kính phi tuyến &phi;(<b>x</b>) để biến con sóng hình sin uốn lượn thành mặt phẳng tắp.</td>
+          <td><b>x</b> &rarr; <b>x</b><sub>new</sub> = [&phi;<sub>0</sub>(<b>x</b>), ..., &phi;<sub>M-1</sub>(<b>x</b>)]; Tuyến tính với tham số <b>w</b> nhưng phi tuyến với dữ liệu <b>x</b>; Nghiệm đóng giữ nguyên.</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 800; color: #0284c7;">Chương 4 &amp; 5A</td>
+          <td><b>Đánh Giá &amp; Căn Bệnh Overfitting</b><br><i>(Slide 28 - 35)</i></td>
+          <td>Học vẹt thông minh quá hóa rồ; thước uốn éo chạm 100% đinh huấn luyện; lật tẩy bảng Slide 35 trọng số bùng nổ lên hàng triệu.</td>
+          <td>MSE = <span class="m-frac"><span class="m-num">1</span><span class="m-den">N</span></span> <b>e</b><sup>T</sup><b>e</b>; RMSE = &radic;MSE; <i>M</i>=9 khiến <i>w</i><sub>7</sub> = -7,379,635; Train Error = 0 nhưng Test Error vọt lên trời!</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 800; color: #0284c7;">Chương 5B</td>
+          <td><b>Khống Chế Overfitting (Regularization)</b><br><i>(Slide 36 - 41)</i></td>
+          <td>Chiếc còng số 8; Cảnh sát Ridge (L2) co nhỏ trọng số &amp; cứu ma trận suy biến; Cảnh sát LASSO (L1) cắt phăng biến thừa về 0.</td>
+          <td>&Sigma; |<i>w</i><sub>m</sub>|<sup>q</sup> &le; &eta;; Ridge: <i>L</i>(<b>w</b>) + <span class="m-frac"><span class="m-num">&lambda;</span><span class="m-den">2</span></span> <b>w</b><sup>T</sup><b>w</b> &rarr; <b>w</b> = (&lambda;<b>I</b> + <b>X</b><sup>T</sup><b>X</b>)<sup>-1</sup><b>X</b><sup>T</sup><b>t</b>; LASSO: <i>L</i>(<b>w</b>) + <span class="m-frac"><span class="m-num">&lambda;</span><span class="m-den">2</span></span> &Sigma;|<i>w</i><sub>m</sub>| (Thưa).</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 800; color: #0284c7;">Chương 6</td>
+          <td><b>Dự Đoán Đa Mục Tiêu (Multi-target)</b><br><i>(Slide 42 - 43)</i></td>
+          <td>Bắn một mũi tên trúng nhiều đích; cùng một căn nhà đoán đồng thời giá bán, tiền điện, tuổi thọ chỉ bằng một phép nhân ma trận.</td>
+          <td><b>T</b> kích thước <i>N</i>&times;<i>K</i>; Ma trận trọng số <b>W</b> (<i>M</i>&times;<i>K</i>) = (<b>X</b><sup>T</sup><b>X</b>)<sup>-1</sup><b>X</b><sup>T</sup><b>T</b>; Dùng chung bộ trích xuất đặc trưng (Shared Extractor).</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="box box-problem" style="margin-top: 3px;">
+      <span class="badge badge-problem">Bản Đồ Kiến Trúc</span>
+      <b>3 Câu Hỏi Vàng Quyết Định Thành Bại Khi Làm Việc Với Hồi Quy Tuyến Tính</b>
+      <div style="display: flex; justify-content: space-between; margin-top: 2px; font-size: 7.4pt; line-height: 1.25;">
+        <div style="flex: 1; padding: 3px 5px; background: #ffffff; border-radius: 4px; border: 1px solid #cbd5e1; margin-right: 4px;">
+          <b style="color: #0369a1;">1. Dùng Closed-form hay GD?</b><br>
+          <i>D</i> &lt; 10,000: Dùng nghiệm đóng OLS cực nhanh. <i>D</i> &gt; 100,000: Bắt buộc dùng SGD/Adam để tránh tràn RAM.
+        </div>
+        <div style="flex: 1; padding: 3px 5px; background: #ffffff; border-radius: 4px; border: 1px solid #cbd5e1; margin-right: 4px;">
+          <b style="color: #0369a1;">2. Làm sao uốn cong đường thẳng?</b><br>
+          Thêm các bậc đa thức &phi;(<b>x</b>) = [<i>x</i>, <i>x</i>², <i>x</i>³] hoặc hàm RBF. Giữ nguyên thuật toán tuyến tính, chỉ đổi không gian đầu vào!
+        </div>
+        <div style="flex: 1; padding: 3px 5px; background: #ffffff; border-radius: 4px; border: 1px solid #cbd5e1;">
+          <b style="color: #0369a1;">3. Dùng Ridge hay LASSO?</b><br>
+          Nhiều biến tương quan mạnh: Dùng Ridge (ổn định). Cần loại bỏ biến rác, làm mô hình nhẹ: Dùng LASSO (ép về 0).
+        </div>
+      </div>
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 1 / 8 &bull; Cẩm Nang Mô Hình Tuyến Tính &amp; Bài Toán Hồi Quy</span>
+      <span>Khoa KH&amp;KT Máy Tính &bull; ĐH Bách Khoa TP.HCM &bull; 2026</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 2: CHƯƠNG 1 - ĐỊNH NGHĨA BÀI TOÁN ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Chương 1 &bull; Định Nghĩa Bài Toán &amp; Giả Định Thế Giới Thực (Slide 3 - 9)</span>
+      <span class="doc-tag">Problem Definition &amp; Assumptions</span>
+    </div>
+
+    <div class="section-title">
+      <span>CHƯƠNG 1: BÀI TOÁN HỒI QUY &amp; CÁC GIẢ ĐỊNH CỐT LÕI</span>
+      <span class="score-tag">Cơ Sở Toán Học Slide 3 - 9</span>
+    </div>
+
+    <div class="box box-problem">
+      <span class="badge badge-problem">Khung Bài Toán</span>
+      Cho tập dữ liệu gồm <i>N</i> mẫu quan sát: mỗi mẫu là vector đặc trưng <b>x</b><sub>n</sub> = [ <i>x</i><sub>n,0</sub>, <i>x</i><sub>n,1</sub>, ..., <i>x</i><sub>n,D-1</sub> ]<sup>T</sup> với <i>x</i><sub>n,0</sub> = 1 (hệ số bias).<br>
+      Biến mục tiêu liên tục <i>t</i><sub>n</sub> &isin; &real; tập hợp thành vector <b>t</b> = [ <i>t</i><sub>1</sub>, <i>t</i><sub>2</sub>, ..., <i>t</i><sub>N</sub> ]<sup>T</sup>.<br>
+      Mô hình hồi quy tuyến tính giả định nhãn dự đoán <i>ŷ</i> là tổ hợp tuyến tính của các đặc trưng:
+      <div class="math-block" style="text-align: center; margin: 2px 0;">
+        <i>ŷ</i>(<b>x</b>, <b>w</b>) = <i>w</i><sub>0</sub> <i>x</i><sub>0</sub> + <i>w</i><sub>1</sub> <i>x</i><sub>1</sub> + ... + <i>w</i><sub>D-1</sub> <i>x</i><sub>D-1</sub> = &Sigma; <i>w</i><sub>d</sub> <i>x</i><sub>d</sub> = <span class="math-sym"><b>w</b><sup>T</sup><b>x</b></span> &nbsp; (Công thức 2)
+      </div>
+      Mục tiêu: Tìm vector trọng số <b>w</b> = [ <i>w</i><sub>0</sub>, <i>w</i><sub>1</sub>, ..., <i>w</i><sub>D-1</sub> ]<sup>T</sup> để mô hình dự đoán sát thực tế nhất.
+    </div>
+
+    <div class="two-cols">
+      <div class="box box-metaphor">
+        <span class="badge badge-metaphor">Ẩn Dụ Cho Bé Hiểu</span>
+        <b>Cây Đinh, Tấm Ván &amp; Chiếc Thước Kẻ</b><br>
+        Hãy tưởng tượng bạn có một tấm ván gỗ cắm <i>N</i> cây đinh. Vị trí ngang của đinh là diện tích nhà (<i>x</i>), độ cao của đinh là giá bán (<i>t</i>).<br>
+        Bạn muốn đặt một <b>chiếc thước kẻ thẳng tắp (<b>w</b><sup>T</sup><b>x</b>)</b> sao cho chiếc thước này đi qua tâm của đàn đinh.
+        Góc nghiêng của thước là <i>w</i><sub>1</sub> (giá tăng bao nhiêu trên mỗi mét vuông), độ cao gác đầu thước là <i>w</i><sub>0</sub> (giá đất nền cơ bản).
+      </div>
+
+      <div class="box box-concept">
+        <span class="badge badge-concept">Giả Định Vũ Trụ</span>
+        <b>Quy Luật Ẩn &amp; Tiếng Ồn Gaussian (Slide 6 - 7)</b><br>
+        Trong thế giới thực, dữ liệu không bao giờ nằm thẳng hàng hoàn hảo. Giáo sư mô hình hóa:
+        <div class="math-block">
+          <span class="math-sym"><i>t</i> = <i>h</i>(<b>x</b>) + &epsilon;</span> &nbsp; với &nbsp; <span class="math-sym">&epsilon; ~ N(0, &sigma;²)</span>
+        </div>
+        &bull; <b><i>h</i>(<b>x</b>)</b>: Quy luật thật hoàn hảo của tự nhiên (chân lý ẩn giấu).<br>
+        &bull; <b>&epsilon;</b>: Tiếng ồn ngẫu nhiên (gió rung, thước đo sai, tâm lý khách). Tiếng ồn tuân theo phân phối chuẩn Gaussian.<br>
+        &bull; <b>i.i.d</b>: Các mẫu đinh được cắm độc lập và tuân theo cùng phân phối xác suất.
+      </div>
+    </div>
+
+    <!-- HÌNH 1 MỚI: TO RÕ GẤP ĐÔI, CAO 155PX -->
+    <div class="figure-hero">
+      <div class="canvas-area">
+        <svg width="370" height="150" viewBox="0 0 370 150">
+          <!-- Axes -->
+          <line x1="45" y1="125" x2="355" y2="125" stroke="#64748b" stroke-width="2"/>
+          <line x1="45" y1="125" x2="45" y2="15" stroke="#64748b" stroke-width="2"/>
+          <text x="315" y="118" font-size="10" fill="#475569" font-weight="700">Đầu vào x &rarr;</text>
+          <text x="10" y="25" font-size="10" fill="#475569" font-weight="700">Giá trị t</text>
+
+          <!-- True function h(x) curve (sin wave) -->
+          <path d="M 50,85 Q 120,-10 200,75 T 350,70" fill="none" stroke="#0284c7" stroke-width="3.5"/>
+          <text x="65" y="25" font-size="10.5" fill="#0284c7" font-weight="800">Quy luật thật: h(x) = sin(2&pi;x)</text>
+
+          <!-- Linear model line -->
+          <line x1="50" y1="115" x2="350" y2="40" stroke="#16a34a" stroke-width="2.8" stroke-dasharray="6,4"/>
+          <text x="180" y="55" font-size="10.5" fill="#16a34a" font-weight="800">Thước tuyến tính: ŷ = w₀ + w₁x</text>
+
+          <!-- Data points with Gaussian noise -->
+          <circle cx="85" cy="55" r="5" fill="#ef4444"/>
+          <circle cx="120" cy="28" r="5" fill="#ef4444"/>
+          <circle cx="155" cy="18" r="5" fill="#ef4444"/>
+          <circle cx="195" cy="50" r="5" fill="#ef4444"/>
+          <circle cx="230" cy="78" r="5" fill="#ef4444"/>
+          <circle cx="270" cy="105" r="5" fill="#ef4444"/>
+          <circle cx="310" cy="98" r="5" fill="#ef4444"/>
+          <circle cx="340" cy="62" r="5" fill="#ef4444"/>
+
+          <!-- Error bracket and bell curve -->
+          <line x1="155" y1="18" x2="155" y2="90" stroke="#dc2626" stroke-width="1.8" stroke-dasharray="3,3"/>
+          <path d="M 135,54 C 145,54 150,30 155,30 C 160,30 165,54 175,54" fill="none" stroke="#dc2626" stroke-width="2"/>
+          <text x="162" y="42" font-size="9.5" fill="#dc2626" font-weight="800">Tiếng ồn &epsilon; ~ N(0, &sigma;²)</text>
+        </svg>
+      </div>
+      <div class="insight-area">
+        <b style="color: #0369a1; font-size: 8.5pt;">Bản Chất Cốt Lõi Hình 1:</b>
+        <ul style="margin: 3px 0 0 14px; padding: 0;">
+          <li><b>Chân lý ẩn giấu:</b> Đường màu xanh dương là hàm thực tế <i>h</i>(<i>x</i>) của tự nhiên.</li>
+          <li><b>Nhiễu ngẫu nhiên:</b> Mỗi chấm đỏ thực tế bị rung lắc lệch khỏi đường xanh bởi tiếng ồn Gaussian &epsilon;.</li>
+          <li><b>Mục tiêu của mô hình:</b> Đặt thước thẳng xanh lá <i>ŷ</i> sao cho tổng lực căng lò xo tới toàn bộ các điểm đỏ đạt mức tối thiểu!</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="box box-solution">
+      <span class="badge badge-solution">Tổ Chức Dữ Liệu</span>
+      <b>Cấu Trúc Ma Trận Thiết Kế <b>X</b> (Design Matrix) &amp; Vector Mục Tiêu <b>t</b> (Slide 4 - 5)</b>
+      <div style="display: flex; gap: 8px; align-items: center; margin-top: 2px;">
+        <div style="flex: 1.3;">
+          Ma trận <b>X kích thước <i>N</i> &times; <i>D</i></b> (<i>N</i> dòng là <i>N</i> ngôi nhà, <i>D</i> cột là <i>D</i> đặc trưng):<br>
+          Cột đầu tiên luôn là <b>số 1</b> (cột bias <i>x</i><sub>0</sub> = 1). Các cột sau là diện tích, số tầng, khoảng cách...<br>
+          Vector <b>t kích thước <i>N</i> &times; 1</b>: Chứa toàn bộ giá trị thực tế đo đạc được của <i>N</i> mẫu.
+        </div>
+        <div style="flex: 1; background: #ffffff; padding: 4px; border: 1px solid #cbd5e1; border-radius: 4px; font-family: 'Times New Roman', serif; font-size: 7.7pt;">
+          <b>X</b> = [ [1, <i>x</i><sub>11</sub>, ..., <i>x</i><sub>1,D-1</sub>],<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;[1, <i>x</i><sub>21</sub>, ..., <i>x</i><sub>2,D-1</sub>],<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;...,<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;[1, <i>x</i><sub>N1</sub>, ..., <i>x</i><sub>N,D-1</sub>] ] (<i>N</i>&times;<i>D</i>)<br>
+          <b>t</b> = [ <i>t</i><sub>1</sub>, <i>t</i><sub>2</sub>, ..., <i>t</i><sub>N</sub> ]<sup>T</sup> (<i>N</i>&times;1)
+        </div>
+      </div>
+    </div>
+
+    <div class="box box-concept">
+      <span class="badge badge-takeaway">Đúc Kết Chương 1</span>
+      Bản chất của bài toán hồi quy tuyến tính không phải là vẽ bừa một đường thẳng, mà là <b>tìm một mặt phẳng tối ưu trong không gian <i>D</i> chiều</b> để bóc tách tín hiệu thật <i>h</i>(<b>x</b>) ra khỏi lớp sương mù của tiếng ồn ngẫu nhiên Gaussian &epsilon;.
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 2 / 8 &bull; Cẩm Nang Mô Hình Tuyến Tính &amp; Bài Toán Hồi Quy</span>
+      <span>Khoa KH&amp;KT Máy Tính &bull; ĐH Bách Khoa TP.HCM &bull; 2026</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 3: CHƯƠNG 2A - NGHIỆM ĐÓNG OLS ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Chương 2A &bull; Cực Đại Hóa Hợp Lý (MLE) &amp; Nghiệm Đóng OLS (Slide 10 - 19)</span>
+      <span class="doc-tag">Maximum Likelihood &amp; Analytical Solution</span>
+    </div>
+
+    <div class="section-title">
+      <span>CHƯƠNG 2A: TỪ XÁC SUẤT GAUSSIAN ĐẾN NGHIỆM ĐÓNG KINH ĐIỂN</span>
+      <span class="score-tag">Trọng Tâm Đề Thi Slide 10 - 19</span>
+    </div>
+
+    <div class="box box-metaphor">
+      <span class="badge badge-metaphor">Ẩn Dụ Cho Bé Hiểu</span>
+      <b>Chiếc Lò Xo Kéo Căng &amp; Phép Thuật Của Logarithm</b><br>
+      Tại sao ta lại cộng các bình phương khoảng cách? Vì mỗi cây đinh nối với chiếc thước kẻ bằng một <b>sợi dây chun lò xo</b>.
+      Năng lượng co giãn của lò xo tỷ lệ thuận với bình phương khoảng cách (1/2 <i>k</i> <i>e</i>²). Chiếc thước kẻ sẽ tự động dừng lại ở vị trí cân bằng tĩnh học: vị trí mà <b>tổng năng lượng co kéo của toàn bộ dây chun đạt mức nhỏ nhất</b>!<br>
+      Về mặt toán học: Phân phối Gaussian chứa hàm mũ exp(-<i>e</i>²). Khi ta lấy -log (Log-Likelihood), phép nhân xác suất biến thành phép cộng, và hàm exp() biến mất, để lộ ra tổng bình phương sai số <i>E</i><sub>D</sub>(<b>w</b>)!
+    </div>
+
+    <div class="two-cols">
+      <div class="box box-concept">
+        <span class="badge badge-concept">Dẫn Xuất MLE (Slide 12-14)</span>
+        Hàm xác suất hợp lý Likelihood của toàn bộ <i>N</i> mẫu i.i.d:
+        <div class="math-block">
+          <i>p</i>(<b>t</b> | <b>X</b>, <b>w</b>, &beta;) = &prod; N(<i>t</i><sub>n</sub> | <b>w</b><sup>T</sup><b>x</b><sub>n</sub>, &beta;<sup>-1</sup>)
+        </div>
+        Lấy -log của Likelihood để chuyển sang hàm mất mát (Error):
+        <div class="math-block">
+          <span class="math-sym"><i>L</i>(<b>w</b>, &beta;) = &beta; <i>E</i><sub>D</sub>(<b>w</b>) - <span class="m-frac"><span class="m-num">N</span><span class="m-den">2</span></span> log &beta; + <i>C</i></span>
+        </div>
+        Trong đó: <span class="math-res"><i>E</i><sub>D</sub>(<b>w</b>) = <span class="m-frac"><span class="m-num">1</span><span class="m-den">2</span></span> &Sigma; [ <i>t</i><sub>n</sub> - <b>w</b><sup>T</sup><b>x</b><sub>n</sub> ]²</span> (Sum-of-Squares Error)!<br>
+        <b>Kết luận chấn động:</b> Cực đại hóa xác suất (MLE) tương đương 100% với việc tối thiểu hóa tổng bình phương sai số <i>E</i><sub>D</sub>(<b>w</b>)!
+      </div>
+
+      <div class="box box-solution">
+        <span class="badge badge-solution">Nghiệm Đóng OLS</span>
+        <b>Công Thức Nghiệm Normal Equation (Slide 17-18)</b>
+        Lấy đạo hàm của hàm mất mát <i>E</i><sub>D</sub>(<b>w</b>) theo vector <b>w</b> và triệt tiêu bằng 0:
+        <div class="math-block">
+          &part;<i>E</i><sub>D</sub> / &part;<b>w</b> = &Sigma; [ <b>w</b><sup>T</sup><b>x</b><sub>n</sub> - <i>t</i><sub>n</sub> ] <b>x</b><sub>n</sub><sup>T</sup> = <b>0</b><sup>T</sup><br>
+          &rarr; <b>w</b><sup>T</sup> (&Sigma; <b>x</b><sub>n</sub> <b>x</b><sub>n</sub><sup>T</sup>) = &Sigma; <i>t</i><sub>n</sub> <b>x</b><sub>n</sub><sup>T</sup><br>
+          Chuyển sang dạng ma trận toàn cục:<br>
+          <div class="math-step">
+            (<b>X</b><sup>T</sup><b>X</b>) <b>w</b> = <b>X</b><sup>T</sup><b>t</b><br>
+            &rarr; <span class="math-res" style="font-size: 8.8pt;"><b>w</b><sub>ML</sub> = (<b>X</b><sup>T</sup><b>X</b>)<sup>-1</sup> <b>X</b><sup>T</sup> <b>t</b></span> &nbsp; (Công thức 8)
+          </div>
+        </div>
+        <b>Kích thước các ma trận:</b><br>
+        &bull; <b>X</b><sup>T</sup><b>X</b>: Kích thước <i>D</i> &times; <i>D</i> (Ma trận Gram đối xứng).<br>
+        &bull; <b>X</b><sup>T</sup><b>t</b>: Kích thước <i>D</i> &times; 1.<br>
+        &bull; <b>w</b><sub>ML</sub>: Vector trọng số nghiệm đóng kích thước <i>D</i> &times; 1.<br>
+        &bull; Phương sai nhiễu: &sigma;² = 1/&beta;<sub>ML</sub> = <span class="m-frac"><span class="m-num">1</span><span class="m-den">N</span></span> &Sigma; [ <i>t</i><sub>n</sub> - <b>w</b><sub>ML</sub><sup>T</sup><b>x</b><sub>n</sub> ]².
+      </div>
+    </div>
+
+    <!-- HÌNH 2 MỚI: TO RÕ GẤP ĐÔI, CAO 160PX -->
+    <div class="figure-hero">
+      <div class="canvas-area">
+        <svg width="370" height="155" viewBox="0 0 370 155">
+          <!-- Plane (Col X) -->
+          <polygon points="40,140 220,140 340,65 160,65" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+          <text x="60" y="130" font-size="10.5" fill="#0369a1" font-weight="800">Không gian cột Span(X) trong không gian Rᴺ</text>
+
+          <!-- Origin O -->
+          <circle cx="140" cy="105" r="4.5" fill="#0f172a"/>
+          <text x="125" y="118" font-size="9.5" fill="#0f172a" font-weight="700">Gốc O</text>
+
+          <!-- Vector y_hat = Xw (in plane) -->
+          <line x1="140" y1="105" x2="270" y2="85" stroke="#16a34a" stroke-width="3.5"/>
+          <text x="235" y="105" font-size="11" fill="#16a34a" font-weight="800">ŷ = Xw</text>
+
+          <!-- Vector t (outside plane) -->
+          <line x1="140" y1="105" x2="270" y2="25" stroke="#ef4444" stroke-width="3.5"/>
+          <text x="195" y="38" font-size="11" fill="#ef4444" font-weight="800">Vector thực tế t trong Rᴺ</text>
+
+          <!-- Error vector e = t - Xw (orthogonal to plane) -->
+          <line x1="270" y1="85" x2="270" y2="25" stroke="#7c3aed" stroke-width="3" stroke-dasharray="4,4"/>
+          <text x="278" y="58" font-size="10.5" fill="#7c3aed" font-weight="800">e = t - Xw (Vuông góc)</text>
+
+          <!-- Right angle symbol -->
+          <polyline points="270,72 258,72 258,85" fill="none" stroke="#7c3aed" stroke-width="1.8"/>
+        </svg>
+      </div>
+      <div class="insight-area">
+        <b style="color: #b91c1c; font-size: 8.5pt;">Hình Học Chiếu Trực Giao:</b>
+        <p style="margin: 2px 0 3px 0;">Vector <b>t</b> nằm ngoài mặt phẳng <b>X</b>. Khoảng cách ngắn nhất đạt được khi vector sai số <b>e</b> <b>vuông góc</b> với mọi cột của <b>X</b>:</p>
+        <div style="background: #ffffff; padding: 3px 5px; border-radius: 4px; border: 1px solid #cbd5e1; font-family: 'Times New Roman', serif; font-size: 8.5pt; color: #b91c1c; font-weight: 700;">
+          <b>X</b><sup>T</sup> &bull; (<b>t</b> - <b>Xw</b>) = <b>0</b><br>
+          &rarr; (<b>X</b><sup>T</sup><b>X</b>) <b>w</b> = <b>X</b><sup>T</sup><b>t</b>
+        </div>
+        <p style="margin-top: 3px; color: #64748b;">Hình chiếu vuông góc trực tiếp sinh ra hệ phương trình chuẩn tắc Normal Equation mà không cần giải tích vi phân!</p>
+      </div>
+    </div>
+
+    <div class="box box-concept">
+      <span class="badge badge-takeaway">Đúc Kết Chương 2A</span>
+      Công thức nghiệm đóng <span class="math-sym"><b>w</b> = (<b>X</b><sup>T</sup><b>X</b>)<sup>-1</sup><b>X</b><sup>T</sup><b>t</b></span> là viên ngọc quý của đại số tuyến tính: Nó tìm ra giải pháp tối ưu toàn cục chỉ sau <b>đúng một cái chớp mắt</b>, không cần vòng lặp, không cần thử sai!
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 3 / 8 &bull; Cẩm Nang Mô Hình Tuyến Tính &amp; Bài Toán Hồi Quy</span>
+      <span>Khoa KH&amp;KT Máy Tính &bull; ĐH Bách Khoa TP.HCM &bull; 2026</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 4: CHƯƠNG 2B - GRADIENT DESCENT ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Chương 2B &bull; Nghiệm Lặp Bằng Gradient Descent (Slide 20 - 22)</span>
+      <span class="doc-tag">Iterative Solution &amp; Big Data Scaling</span>
+    </div>
+
+    <div class="section-title">
+      <span>CHƯƠNG 2B: TẠI SAO PHẢI DÙNG GRADIENT DESCENT KHI ĐÃ CÓ NGHIỆM ĐÓNG?</span>
+      <span class="score-tag">Quy Mô Lớn Slide 20 - 22</span>
+    </div>
+
+    <div class="box box-warning">
+      <span class="badge badge-problem">Tử Huyệt Của Nghiệm Đóng OLS</span>
+      Phép tính ma trận nghịch đảo (<b>X</b><sup>T</sup><b>X</b>)<sup>-1</sup> có độ phức tạp tính toán là <b>O(<i>D</i>³)</b> với <i>D</i> là số chiều đặc trưng:
+      <ul style="margin: 1px 0 0 14px; padding: 0;">
+        <li>Nếu <i>D</i> = 100 đặc trưng: Máy tính tính trong 0.001 giây (quá dễ).</li>
+        <li>Nếu <i>D</i> = 100,000 (dữ liệu gen di truyền, ảnh vệ tinh, văn bản): <i>D</i>³ = 10<sup>15</sup> phép tính! Máy tính sẽ bị tràn bộ nhớ RAM (Out-of-Memory) và treo cứng hàng tuần!</li>
+        <li>Hơn nữa, nếu dữ liệu đến liên tục theo luồng thời gian thực (Online Streaming Data), ta không thể đảo ma trận lại từ đầu mỗi giây. Bắt buộc phải có cách tiếp cận thứ hai: <b>Nghiệm lặp Gradient Descent</b>!</li>
+      </ul>
+    </div>
+
+    <div class="two-cols">
+      <div class="box box-metaphor">
+        <span class="badge badge-metaphor">Ẩn Dụ Cho Bé Hiểu</span>
+        <b>Người Leo Núi Nhắm Mắt Dò Đường Trong Đêm Sương Mù</b><br>
+        Thay vì đứng trên đỉnh núi nhìn một phát thấy ngay đáy vực (nghiệm đóng OLS nhưng đòi hỏi siêu máy tính):<br>
+        Cậu bé nhắm mắt lại, dùng đôi chân cảm nhận độ dốc của mặt đất ngay dưới chân mình (Gradient &Delta;<b>W</b>).
+        Nếu thấy chân dốc về bên phải, cậu bé bước một bước nhỏ cỡ &eta; về bên trái. Cứ kiên trì bước từng bước như vậy, dù sương mù dày đặc cậu bé chắc chắn sẽ trượt xuống đáy thung lũng sâu nhất!
+      </div>
+
+      <div class="box box-solution">
+        <span class="badge badge-solution">Thuật Toán Bách Khoa</span>
+        <b>Công Thức Cập Nhật Gradient Descent (Slide 20-22)</b>
+        Chia tập dữ liệu thành các lô nhỏ (Mini-batch) kích thước <i>B</i> mẫu:
+        <div class="math-block">
+          Hàm mất mát trung bình trên lô <i>B</i>:<br>
+          <i>Ē</i>(<b>w</b>) = <span class="m-frac"><span class="m-num">1</span><span class="m-den">2B</span></span> &Sigma; [ <i>t</i><sub>n</sub> - <b>w</b><sup>T</sup><b>x</b><sub>n</sub> ]² &nbsp; (Công thức 10)<br>
+          Gradient trung bình trên lô <i>B</i>:<br>
+          <span class="math-sym">&Delta;<b>W</b><sub>B</sub> = <span class="m-frac"><span class="m-num">1</span><span class="m-den">B</span></span> &Sigma; (<b>w</b><sup>(t-1)T</sup><b>x</b><sub>n</sub> - <i>t</i><sub>n</sub>) <b>x</b><sub>n</sub></span> &nbsp; (Công thức 11)
+        </div>
+        <b>Quy tắc cập nhật trọng số:</b>
+        <div class="math-step">
+          <span class="math-res"><b>w</b><sup>(t)</sup> = <b>w</b><sup>(t-1)</sup> - &eta; &Delta;<b>W</b><sub>B</sub></span>
+        </div>
+        &bull; <b>&eta; (Learning Rate)</b>: Độ dài bước chân mỗi lần bước.<br>
+        &bull; <b>Điều kiện dừng</b>: Khi mức giảm sai số |<i>e</i><sub>t</sub> - <i>e</i><sub>t-1</sub>| nhỏ hơn ngưỡng &epsilon; (hội tụ).
+      </div>
+    </div>
+
+    <!-- HÌNH 3 MỚI: TO RÕ GẤP ĐÔI, CAO 160PX, KHÔNG DÙNG THẺ B TRONG SVG -->
+    <div class="figure-hero">
+      <div class="canvas-area">
+        <svg width="350" height="155" viewBox="0 0 350 155">
+          <!-- Parabola Bowl (Convex Loss Surface) -->
+          <path d="M 30,20 Q 180,145 330,20" fill="none" stroke="#0284c7" stroke-width="3"/>
+          <text x="35" y="18" font-size="10.5" fill="#0369a1" font-weight="800">Mặt cong Parabol Lồi E(w)</text>
+
+          <!-- Global Minimum -->
+          <circle cx="180" cy="132" r="6" fill="#16a34a"/>
+          <text x="130" y="150" font-size="10" fill="#16a34a" font-weight="700">Đáy tối ưu w* (Gradient = 0)</text>
+
+          <!-- Gradient descent steps -->
+          <circle cx="65" cy="42" r="5" fill="#ef4444"/>
+          <text x="75" y="40" font-size="9.5" fill="#ef4444" font-weight="800">w⁽⁰⁾</text>
+
+          <line x1="65" y1="42" x2="105" y2="78" stroke="#ef4444" stroke-width="2.5"/>
+          <circle cx="105" cy="78" r="4.5" fill="#ef4444"/>
+          <text x="115" y="75" font-size="9.5" fill="#ef4444" font-weight="800">w⁽¹⁾</text>
+
+          <line x1="105" y1="78" x2="145" y2="110" stroke="#ef4444" stroke-width="2.5"/>
+          <circle cx="145" cy="110" r="4" fill="#ef4444"/>
+          <text x="153" y="108" font-size="9.5" fill="#ef4444" font-weight="800">w⁽²⁾</text>
+
+          <line x1="145" y1="110" x2="175" y2="130" stroke="#ef4444" stroke-width="2.5"/>
+        </svg>
+      </div>
+      <div class="insight-area">
+        <b style="color: #0f172a; font-size: 8.5pt;">So Sánh 3 Chiến Lược Gradient Descent:</b>
+        <div style="margin-top: 3px; display: flex; flex-direction: column; gap: 4px;">
+          <div style="background: #ffffff; padding: 3px 5px; border-radius: 4px; border-left: 3px solid #0369a1;">
+            <b style="color: #0369a1;">&bull; Batch GD (B = N):</b> Dùng toàn bộ <i>N</i> mẫu. Đi thẳng tắp tới đích, nhưng ngốn sạch RAM với Big Data.
+          </div>
+          <div style="background: #ffffff; padding: 3px 5px; border-radius: 4px; border-left: 3px solid #d97706;">
+            <b style="color: #d97706;">&bull; Stochastic GD (B = 1):</b> Dùng 1 mẫu mỗi bước. Cực nhanh nhưng dao động zíc-zắc mạnh quanh đáy.
+          </div>
+          <div style="background: #ffffff; padding: 3px 5px; border-radius: 4px; border-left: 3px solid #16a34a;">
+            <b style="color: #16a34a;">&bull; Mini-batch GD (B = 32-256):</b> Cân bằng hoàn hảo! Tiêu chuẩn vàng trong huấn luyện Deep Learning hiện đại.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="box box-concept">
+      <span class="badge badge-takeaway">Đúc Kết Chương 2B</span>
+      Nghiệm đóng OLS là giải pháp tuyệt đối cho dữ liệu nhỏ và vừa. Còn <b>Mini-batch Gradient Descent</b> chính là chiếc động cơ vĩnh cửu giúp trí tuệ nhân tạo nuốt trọn hàng triệu terabyte dữ liệu lớn (Big Data)!
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 4 / 8 &bull; Cẩm Nang Mô Hình Tuyến Tính &amp; Bài Toán Hồi Quy</span>
+      <span>Khoa KH&amp;KT Máy Tính &bull; ĐH Bách Khoa TP.HCM &bull; 2026</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 5: CHƯƠNG 3 - HÀM CƠ SỞ PHI TUYẾN ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Chương 3 &bull; Xử Lý Quan Hệ Phi Tuyến Bằng Hàm Cơ Sở (Slide 23 - 27)</span>
+      <span class="doc-tag">Basis Functions &amp; Feature Space Mapping</span>
+    </div>
+
+    <div class="section-title">
+      <span>CHƯƠNG 3: BÍ THUẬT BIẾN ĐƯỜNG THẲNG THÀNH ĐƯỜNG CONG UỐN LƯỢN</span>
+      <span class="score-tag">Đột Phá Năng Lực Mô Hình Slide 23 - 27</span>
+    </div>
+
+    <div class="box box-problem">
+      <span class="badge badge-problem">Nghịch Lý Lớn</span>
+      Mô hình hồi quy tuyến tính <i>ŷ</i> = <i>w</i><sub>0</sub> + <i>w</i><sub>1</sub> <i>x</i><sub>1</sub> chỉ có thể vẽ được <b>đường thẳng phẳng lì</b>. Nhưng hiện thực cuộc sống đầy rẫy những con sóng uốn lượn: quỹ đạo bay của tên lửa (parabol), đồ thị sóng âm thanh (sin/cos), chu kỳ kinh tế (phi tuyến).<br>
+      Làm thế nào để giữ nguyên thuật toán tuyến tính đơn giản mà vẫn vẽ được những đường cong uốn lượn phức tạp?
+    </div>
+
+    <div class="two-cols">
+      <div class="box box-metaphor">
+        <span class="badge badge-metaphor">Ẩn Dụ Cho Bé Hiểu</span>
+        <b>Chiếc Kính Râm 3D &amp; Tờ Giấy Uốn Cong</b><br>
+        Hãy tưởng tượng một con đường cong queo hình chữ S trên mặt bàn. Nếu nhìn trực diện bằng mắt thường, chiếc thước kẻ thẳng đơ của bạn hoàn toàn bất lực.<br>
+        Nhưng nếu bạn cầm tờ giấy lên và uốn cong nó trong không gian 3 chiều: nhìn từ trên cao xuống qua một chiếc kính râm đổi màu, <b>con đường ngoằn ngoèo đó bỗng nhiên thẳng tắp</b>!<br>
+        Bạn chỉ việc dùng thước kẻ một đường thẳng trên không gian 3D mới. Khi thả phẳng tờ giấy ra, bạn đã có một đường cong hoàn mỹ!
+      </div>
+
+      <div class="box box-solution">
+        <span class="badge badge-solution">Bản Chất Toán Học</span>
+        <b>Ánh Xạ Không Gian Bằng Hàm Cơ Sở &phi;(<b>x</b>) (Slide 26)</b>
+        Biến đổi vector đầu vào <b>x</b> sang không gian đặc trưng mới <b>x</b><sub>new</sub> bằng <i>M</i> hàm cơ sở:
+        <div class="math-block">
+          <b>x</b> &rarr; <span class="math-sym"><b>x</b><sub>new</sub> = [ &phi;<sub>0</sub>(<b>x</b>), &phi;<sub>1</sub>(<b>x</b>), &phi;<sub>2</sub>(<b>x</b>), ..., &phi;<sub>M-1</sub>(<b>x</b>) ]<sup>T</sup></span>
+        </div>
+        Ví dụ kinh điển: <b>Đa thức bậc <i>M</i> (Polynomial Basis)</b>:<br>
+        &bull; &phi;<sub>0</sub>(<b>x</b>) = 1 &nbsp;&bull;&nbsp; &phi;<sub>1</sub>(<b>x</b>) = <i>x</i> &nbsp;&bull;&nbsp; &phi;<sub>2</sub>(<b>x</b>) = <i>x</i>² &nbsp;&bull;&nbsp; &phi;<sub>3</sub>(<b>x</b>) = <i>x</i>³ ...<br>
+        Phương trình hồi quy trở thành:
+        <div class="math-step">
+          <i>ŷ</i>(<b>x</b>, <b>w</b>) = <i>w</i><sub>0</sub> + <i>w</i><sub>1</sub> <i>x</i> + <i>w</i><sub>2</sub> <i>x</i>² + ... + <i>w</i><sub>M-1</sub> <i>x</i><sup>M-1</sup> = <span class="math-res"><b>w</b><sup>T</sup>&phi;(<b>x</b>)</span>
+        </div>
+        <b>Điểm cốt tử:</b> Mô hình là <b>phi tuyến đối với đầu vào gốc <b>x</b></b>, nhưng lại là <b>tuyến tính 100% đối với tham số <b>w</b></b>! Mọi công thức nghiệm đóng <b>w</b> = (<b>X</b><sup>T</sup><b>X</b>)<sup>-1</sup><b>X</b><sup>T</sup><b>t</b> được giữ nguyên vẹn tuyệt đối, chỉ thay ma trận <b>X</b> kích thước <i>N</i>&times;<i>D</i> bằng ma trận &Phi; kích thước <i>N</i>&times;<i>M</i>!
+      </div>
+    </div>
+
+    <!-- HÌNH 4 MỚI: TO RÕ GẤP ĐÔI, CAO 150PX -->
+    <div class="figure-hero">
+      <div class="canvas-area">
+        <svg width="400" height="145" viewBox="0 0 400 145">
+          <!-- 1D Non-linear data -->
+          <rect x="10" y="10" width="165" height="125" rx="5" fill="#fffafb" stroke="#fecaca" stroke-width="1.5"/>
+          <text x="20" y="28" font-size="9.5" fill="#b91c1c" font-weight="800">1. Không gian gốc x (1D cong):</text>
+          <path d="M 25,105 Q 92,30 160,105" fill="none" stroke="#ef4444" stroke-width="3"/>
+          <circle cx="35" cy="98" r="4" fill="#ef4444"/>
+          <circle cx="65" cy="62" r="4" fill="#ef4444"/>
+          <circle cx="92" cy="45" r="4" fill="#ef4444"/>
+          <circle cx="120" cy="62" r="4" fill="#ef4444"/>
+          <circle cx="150" cy="98" r="4" fill="#ef4444"/>
+          <text x="35" y="123" font-size="8.5" fill="#64748b" font-weight="700">Thước thẳng 1D bất lực!</text>
+
+          <!-- Transformation Arrow -->
+          <line x1="185" y1="72" x2="225" y2="72" stroke="#0284c7" stroke-width="3.5"/>
+          <polyline points="218,65 228,72 218,79" fill="none" stroke="#0284c7" stroke-width="3.5"/>
+          <text x="180" y="58" font-size="8.5" fill="#0369a1" font-weight="900">&phi;(x)=[x, x²]</text>
+
+          <!-- 2D Linear Separable / Fitting -->
+          <rect x="235" y="10" width="155" height="125" rx="5" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+          <text x="245" y="28" font-size="9.5" fill="#15803d" font-weight="800">2. Không gian mới [x, x²] (2D):</text>
+          <line x1="250" y1="110" x2="375" y2="40" stroke="#16a34a" stroke-width="3"/>
+          <circle cx="260" cy="104" r="4" fill="#16a34a"/>
+          <circle cx="290" cy="88" r="4" fill="#16a34a"/>
+          <circle cx="315" cy="74" r="4" fill="#16a34a"/>
+          <circle cx="345" cy="58" r="4" fill="#16a34a"/>
+          <circle cx="365" cy="46" r="4" fill="#16a34a"/>
+          <text x="250" y="123" font-size="8.5" fill="#15803d" font-weight="700">Thước phẳng vừa khít trên 2D!</text>
+        </svg>
+      </div>
+      <div class="insight-area">
+        <b style="color: #0369a1; font-size: 8.5pt;">Các Họ Hàm Cơ Sở Phổ Biến:</b>
+        <ul style="margin: 3px 0 0 14px; padding: 0;">
+          <li><b>Đa thức (Polynomial):</b> &phi;(<i>x</i>) = [1, <i>x</i>, <i>x</i>², <i>x</i>³, ...]. Rất trực quan nhưng bậc cao dễ nổ trọng số.</li>
+          <li><b>Gaussian RBF:</b> &phi;(<i>x</i>) = exp(-&gamma;||<i>x</i> - <i>c</i>||²). Đo mức độ gần gũi với tâm <i>c</i>, dùng phổ biến trong SVM/Kernel.</li>
+          <li><b>Sigmoidal:</b> &phi;(<i>x</i>) = &sigma;(<b>w</b><sup>T</sup><b>x</b> + <i>b</i>). Nền tảng cấu thành mạng nơ-ron sâu (Deep Neural Networks)!</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="box box-concept">
+      <span class="badge badge-takeaway">Đúc Kết Chương 3</span>
+      Hàm cơ sở Basis Function là cây cầu nối vĩ đại: Nó giữ lại sự đơn giản thanh lịch của toán học tuyến tính nhưng lại mở ra sức mạnh vô hạn để biểu diễn mọi hình thù phức tạp của vũ trụ.
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 5 / 8 &bull; Cẩm Nang Mô Hình Tuyến Tính &amp; Bài Toán Hồi Quy</span>
+      <span>Khoa KH&amp;KT Máy Tính &bull; ĐH Bách Khoa TP.HCM &bull; 2026</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 6: CHƯƠNG 4 & 5A - OVERFITTING ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Chương 4 &amp; 5A &bull; Đánh Giá Mô Hình &amp; Căn Bệnh Overfitting (Slide 28 - 35)</span>
+      <span class="doc-tag">Model Evaluation &amp; The Overfitting Crisis</span>
+    </div>
+
+    <div class="section-title">
+      <span>CHƯƠNG 4 &amp; 5A: ĐÁNH GIÁ MÔ HÌNH &amp; BÓC TRẦN CĂN BỆNH HỌC VẸT</span>
+      <span class="score-tag">Hiện Tượng Nổ Trọng Số Slide 28 - 35</span>
+    </div>
+
+    <div class="two-cols">
+      <div class="box box-solution">
+        <span class="badge badge-solution">Thước Đo Điểm Số</span>
+        <b>MSE &amp; RMSE (Slide 29 - 30)</b>
+        Sau khi huấn luyện, ta đo sai số trên tập kiểm tra:
+        <div class="math-block">
+          &bull; <b>Mean-Squared Error:</b><br>
+          MSE = <span class="m-frac"><span class="m-num">1</span><span class="m-den">N</span></span> &Sigma; [ <i>t</i><sub>n</sub> - <b>w</b><sub>ML</sub><sup>T</sup><b>x</b><sub>n</sub> ]² = <span class="m-frac"><span class="m-num">1</span><span class="m-den">N</span></span> <b>e</b><sup>T</sup><b>e</b><br>
+          <i>(Đo phương sai sai số, nhưng đơn vị bị bình phương).</i><br>
+          &bull; <b>Root Mean-Squared Error:</b><br>
+          <span class="math-res">RMSE = &radic;MSE</span><br>
+          <i>(Đưa về cùng đơn vị đo lường với nhãn <i>t</i>, giúp trực quan hóa sai lệch thực tế).</i>
+        </div>
+      </div>
+
+      <div class="box box-metaphor">
+        <span class="badge badge-metaphor">Ẩn Dụ Cho Bé Hiểu</span>
+        <b>Cậu Bé Học Vẹt &amp; Đề Thi Mới Lạ</b><br>
+        Hãy tưởng tượng một học sinh chuẩn bị đi thi:
+        <ul style="margin: 2px 0 0 14px; padding: 0;">
+          <li><b>Học sinh lười (<i>M</i> = 1 - Underfitting)</b>: Chỉ học lướt đúng 1 công thức đường thẳng. Đề bài thật là đường cong nên thi thử trượt, thi thật cũng trượt!</li>
+          <li><b>Học sinh học vẹt (<i>M</i> = 9 - Overfitting)</b>: Học thuộc lòng từng dấu chấm dấu phẩy của 10 đề thi cũ. Bài nào trong sách làm đúng 100% (Error = 0). Nhưng khi phát đề thi mới, câu chữ đổi khác một tí là cắn bút khóc thét!</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- HÌNH 5 MỚI: TO RÕ GẤP ĐÔI, CAO 155PX -->
+    <div class="svg-container" style="padding: 4px 6px;">
+      <svg width="630" height="150" viewBox="0 0 630 150">
+        <!-- Plot 1: Underfitting (M=1) -->
+        <g transform="translate(10, 5)">
+          <rect width="195" height="140" rx="4" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+          <text x="12" y="22" font-size="10" fill="#475569" font-weight="800">M = 1: Underfitting (Quá nông)</text>
+          <!-- Ground truth -->
+          <path d="M 20,105 Q 70,25 120,85 T 185,75" fill="none" stroke="#0284c7" stroke-width="2" stroke-dasharray="3,3"/>
+          <!-- Data points -->
+          <circle cx="35" cy="80" r="4.5" fill="#64748b"/>
+          <circle cx="70" cy="40" r="4.5" fill="#64748b"/>
+          <circle cx="115" cy="85" r="4.5" fill="#64748b"/>
+          <circle cx="160" cy="55" r="4.5" fill="#64748b"/>
+          <!-- Model line -->
+          <line x1="20" y1="88" x2="180" y2="55" stroke="#ef4444" stroke-width="3"/>
+          <text x="25" y="130" font-size="9" fill="#b91c1c" font-weight="700">Train Error cao, Test Error cao!</text>
+        </g>
+
+        <!-- Plot 2: Good fit (M=3,4) -->
+        <g transform="translate(218, 5)">
+          <rect width="195" height="140" rx="4" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+          <text x="12" y="22" font-size="10" fill="#15803d" font-weight="800">M = 4: Good Fit (Tối ưu nhất!)</text>
+          <path d="M 20,105 Q 70,25 120,85 T 185,75" fill="none" stroke="#0284c7" stroke-width="2" stroke-dasharray="3,3"/>
+          <circle cx="35" cy="80" r="4.5" fill="#16a34a"/>
+          <circle cx="70" cy="40" r="4.5" fill="#16a34a"/>
+          <circle cx="115" cy="85" r="4.5" fill="#16a34a"/>
+          <circle cx="160" cy="55" r="4.5" fill="#16a34a"/>
+          <!-- Model curve -->
+          <path d="M 20,95 Q 70,28 120,82 T 180,68" fill="none" stroke="#16a34a" stroke-width="3.2"/>
+          <text x="22" y="130" font-size="9" fill="#15803d" font-weight="700">Test RMSE nhỏ nhất = 0.2730</text>
+        </g>
+
+        <!-- Plot 3: Overfitting (M=9) -->
+        <g transform="translate(425, 5)">
+          <rect width="195" height="140" rx="4" fill="#fffafb" stroke="#fecaca" stroke-width="1.5"/>
+          <text x="12" y="22" font-size="10" fill="#b91c1c" font-weight="800">M = 9: Overfitting (Học vẹt)</text>
+          <path d="M 20,105 Q 70,25 120,85 T 185,75" fill="none" stroke="#0284c7" stroke-width="2" stroke-dasharray="3,3"/>
+          <circle cx="35" cy="80" r="4.5" fill="#ef4444"/>
+          <circle cx="70" cy="40" r="4.5" fill="#ef4444"/>
+          <circle cx="115" cy="85" r="4.5" fill="#ef4444"/>
+          <circle cx="160" cy="55" r="4.5" fill="#ef4444"/>
+          <!-- Wildly oscillating curve -->
+          <path d="M 18,135 C 30,-30 40,120 70,40 C 85,-20 100,135 115,85 C 135,30 145,130 160,55 C 170,-30 185,145 192,5" fill="none" stroke="#dc2626" stroke-width="2.5"/>
+          <text x="15" y="130" font-size="9" fill="#b91c1c" font-weight="700">Train Error = 0, Test vọt trời!</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="box box-warning">
+      <span class="badge badge-problem">Bóc Mẽ Thủ Phạm</span>
+      <b>Lật Tẩy Bảng Slide 35: Tại Sao Overfitting Khiến Trọng Số Bùng Nổ Lên Hàng Triệu?</b>
+      <table>
+        <thead>
+          <tr>
+            <th>Hệ số trọng số</th>
+            <th>M = 1 (Bậc 1)</th>
+            <th>M = 3 (Bậc 3)</th>
+            <th>M = 4 (Tối ưu nhất)</th>
+            <th>M = 8 (Bắt đầu nổ)</th>
+            <th style="color: #b91c1c; background: #fee2e2;">M = 9 (Bùng nổ kinh hoàng!)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><b>w₁</b></td><td>-1.31</td><td>10.41</td><td>12.37</td><td>63.19</td><td style="color: #b91c1c;"><b>-154.83</b></td></tr>
+          <tr><td><b>w₃</b></td><td>-</td><td>23.08</td><td>38.98</td><td>7,961.97</td><td style="color: #b91c1c;"><b>-37,399.20</b></td></tr>
+          <tr><td><b>w₅</b></td><td>-</td><td>-</td><td>-</td><td>68,127.79</td><td style="color: #b91c1c;"><b>-512,435.36</b></td></tr>
+          <tr><td><b>w₇</b></td><td>-</td><td>-</td><td>-</td><td>53,483.92</td><td style="color: #b91c1c; font-weight: 800;">-868,571.73 (Gần 1 triệu!)</td></tr>
+          <tr><td><b>w₈</b></td><td>-</td><td>-</td><td>-</td><td>-13,947.86</td><td style="color: #b91c1c;"><b>473,885.94</b></td></tr>
+          <tr><td><b>Test RMSE</b></td><td>0.5573</td><td>0.3246</td><td><span class="math-res">0.3242 (Best)</span></td><td>0.5983</td><td style="color: #b91c1c; font-weight: 800;">1.1001 (Tệ gấp 3.4 lần!)</td></tr>
+        </tbody>
+      </table>
+      <b>Giải mã bản chất:</b> Để uốn đường cong xuyên qua 2 điểm dữ liệu ở cạnh nhau mà lệch nhau một tí xíu do tiếng ồn, đạo hàm của đường cong phải cực dốc. Để tạo độ dốc kinh hoàng đó, các trọng số <b>w</b> phải tự triệt tiêu nhau ở mức hàng trăm nghìn (ví dụ: +867,000 rồi lại -868,000). Mô hình trở nên cực kỳ mong manh và nhạy cảm với bất kỳ nhiễu nhỏ nào!
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 6 / 8 &bull; Cẩm Nang Mô Hình Tuyến Tính &amp; Bài Toán Hồi Quy</span>
+      <span>Khoa KH&amp;KT Máy Tính &bull; ĐH Bách Khoa TP.HCM &bull; 2026</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 7: CHƯƠNG 5B - REGULARIZATION ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Chương 5B &bull; Khống Chế Overfitting Bằng Regularization (Slide 36 - 41)</span>
+      <span class="doc-tag">Ridge (L2) vs LASSO (L1) &amp; Lagrange Multipliers</span>
+    </div>
+
+    <div class="section-title">
+      <span>CHƯƠNG 5B: CHIẾC CÒNG SỐ 8 — DẸP LOẠN BÙNG NỔ TRỌNG SỐ</span>
+      <span class="score-tag">Kỹ Thuật Sống Còn Slide 36 - 41</span>
+    </div>
+
+    <div class="box box-concept">
+      <span class="badge badge-concept">Nguyên Lý Occam's Razor</span>
+      <b>"Giữa Hai Mô Hình Cùng Khớp Dữ Liệu, Luôn Luôn Chọn Mô Hình Đơn Giản Hơn!"</b><br>
+      Vì Slide 35 chỉ ra rằng Overfitting luôn đi kèm với việc <b>trọng số <b>w</b> bị bùng nổ độ lớn</b>, giải pháp của giáo sư là: Đặt ra một chiếc lồng sắt giam giữ độ lớn của trọng số <b>w</b> lại:
+      <div class="math-block" style="text-align: center;">
+        Tối thiểu hóa <i>E</i><sub>D</sub>(<b>w</b>) &nbsp;&bull;&nbsp; Thỏa mãn ràng buộc: <span class="math-sym">&Sigma; |<i>w</i><sub>m</sub>|<sup>q</sup> &le; &eta;</span> &nbsp; (Công thức 15)
+      </div>
+      Áp dụng nhân tử Lagrange (Lagrangian Multipliers), bài toán có điều kiện chuyển thành bài toán không điều kiện với hệ số phạt &lambda;:
+      <div class="math-block" style="text-align: center;">
+        <span class="math-res"><i>L</i>(<b>w</b>) = <span class="m-frac"><span class="m-num">1</span><span class="m-den">2</span></span> &Sigma; [ <i>t</i><sub>n</sub> - <b>w</b><sup>T</sup><b>x</b><sub>n</sub> ]² + <span class="m-frac"><span class="m-num">&lambda;</span><span class="m-den">2</span></span> <i>R</i>(<b>w</b>)</span>
+      </div>
+    </div>
+
+    <div class="two-cols">
+      <div class="box box-solution">
+        <span class="badge badge-solution">Cảnh Sát Ridge (L2)</span>
+        <b>Ridge Regression (<i>q</i> = 2 - Slide 38 - 39)</b>
+        Hàm phạt: <i>R</i>(<b>w</b>) = <b>w</b><sup>T</sup><b>w</b> = &Sigma; <i>w</i><sub>m</sub>² (Bình phương chuẩn L2).<br>
+        Lấy đạo hàm triệt tiêu bằng 0:
+        <div class="math-block">
+          &part;<i>L</i> / &part;<b>w</b> = <b>X</b><sup>T</sup>(<b>Xw</b> - <b>t</b>) + &lambda;<b>w</b> = <b>0</b><br>
+          (<b>X</b><sup>T</sup><b>X</b> + &lambda;<b>I</b>) <b>w</b> = <b>X</b><sup>T</sup><b>t</b><br>
+          <div class="math-step">
+            <span class="math-res">&rarr; <b>w</b><sub>ridge</sub> = (&lambda;<b>I</b> + <b>X</b><sup>T</sup><b>X</b>)<sup>-1</sup> <b>X</b><sup>T</sup> <b>t</b></span>
+          </div>
+        </div>
+        <b>Hai Phép Màu Của Tấm Đệm &lambda;<b>I</b>:</b><br>
+        1. <b>Co nhỏ trọng số (Weight Decay)</b>: Ép các trọng số to tướng co nhỏ lại, dập tắt hiện tượng uốn lượn điên cuồng.<br>
+        2. <b>Cứu nguy ma trận suy biến</b>: Nếu <b>X</b><sup>T</sup><b>X</b> bị kẹt không khả nghịch (det = 0 do đa cộng tuyến), việc cộng thêm &lambda;<b>I</b> (với &lambda; &gt; 0) sẽ cộng &lambda; vào toàn bộ đường chéo chính, biến ma trận thành <b>xác định dương nghiêm ngặt &rarr; Đảo được 100%!</b>
+      </div>
+
+      <div class="box box-solution">
+        <span class="badge badge-solution">Cảnh Sát LASSO (L1)</span>
+        <b>LASSO Regression (<i>q</i> = 1 - Slide 40 - 41)</b>
+        Hàm phạt: <i>R</i>(<b>w</b>) = &Sigma; |<i>w</i><sub>m</sub>| (Chuẩn L1 - Trị tuyệt đối).<br>
+        Hàm không khả vi tại <i>w</i><sub>m</sub> = 0, không có nghiệm đóng OLS, phải giải bằng thuật toán lặp (Coordinate Descent).
+        <div class="math-block">
+          <span class="math-res"><i>L</i>(<b>w</b>) = <span class="m-frac"><span class="m-num">1</span><span class="m-den">2</span></span> &Sigma; [ <i>t</i><sub>n</sub> - <b>w</b><sup>T</sup><b>x</b><sub>n</sub> ]² + <span class="m-frac"><span class="m-num">&lambda;</span><span class="m-den">2</span></span> &Sigma; |<i>w</i><sub>m</sub>|</span>
+        </div>
+        <b>Sức Mạnh Đặc Trưng: Nghiệm Thưa (Sparsity)</b><br>
+        &bull; LASSO không chỉ co nhỏ, mà còn <b>cắt phăng các trọng số thừa về đúng số 0 tròn trĩnh</b>!<br>
+        &bull; <b>Tự động chọn lọc đặc trưng (Feature Selection)</b>: Nếu đưa vào 1,000 đặc trưng rác, LASSO sẽ gạt bỏ 950 đặc trưng (<i>w</i> = 0) và chỉ giữ lại 50 đặc trưng cốt lõi!
+      </div>
+    </div>
+
+    <!-- HÌNH 6 MỚI: TO RÕ GẤP ĐÔI, CAO 155PX -->
+    <div class="svg-container" style="padding: 4px 6px;">
+      <svg width="630" height="150" viewBox="0 0 630 150">
+        <!-- Ridge (L2) Circle constraint -->
+        <g transform="translate(25, 5)">
+          <text x="25" y="16" font-size="10" fill="#0369a1" font-weight="800">Ridge (L2): Hình Tròn w₁² + w₂² &le; C</text>
+          <!-- Axes -->
+          <line x1="20" y1="80" x2="250" y2="80" stroke="#94a3b8" stroke-width="1.5"/>
+          <line x1="135" y1="20" x2="135" y2="140" stroke="#94a3b8" stroke-width="1.5"/>
+          <text x="240" y="74" font-size="8.5" fill="#64748b">w₁</text>
+          <text x="142" y="28" font-size="8.5" fill="#64748b">w₂</text>
+          <!-- Circle -->
+          <circle cx="135" cy="80" r="44" fill="#e0f2fe" stroke="#0284c7" stroke-width="2.5"/>
+          <!-- Contours of Loss -->
+          <ellipse cx="205" cy="42" rx="55" ry="26" fill="none" stroke="#d97706" stroke-width="1.5" stroke-dasharray="3,3"/>
+          <ellipse cx="205" cy="42" rx="32" ry="15" fill="none" stroke="#d97706" stroke-width="1.5"/>
+          <!-- Tangent contact point -->
+          <circle cx="166" cy="58" r="5" fill="#ef4444"/>
+          <text x="175" y="60" font-size="9" fill="#ef4444" font-weight="800">Tiếp xúc trơn: w₁ &ne; 0, w₂ &ne; 0</text>
+          <text x="50" y="138" font-size="8.5" fill="#0369a1" font-weight="700">&rarr; Co nhỏ trọng số nhưng không triệt tiêu về 0</text>
+        </g>
+
+        <!-- LASSO (L1) Diamond constraint -->
+        <g transform="translate(345, 5)">
+          <text x="25" y="16" font-size="10" fill="#15803d" font-weight="800">LASSO (L1): Hình Thoi |w₁| + |w₂| &le; C</text>
+          <!-- Axes -->
+          <line x1="20" y1="80" x2="250" y2="80" stroke="#94a3b8" stroke-width="1.5"/>
+          <line x1="135" y1="20" x2="135" y2="140" stroke="#94a3b8" stroke-width="1.5"/>
+          <text x="240" y="74" font-size="8.5" fill="#64748b">w₁</text>
+          <text x="142" y="28" font-size="8.5" fill="#64748b">w₂</text>
+          <!-- Diamond -->
+          <polygon points="135,36 179,80 135,124 91,80" fill="#f0fdf4" stroke="#16a34a" stroke-width="2.5"/>
+          <!-- Contours of Loss -->
+          <ellipse cx="205" cy="42" rx="55" ry="26" fill="none" stroke="#d97706" stroke-width="1.5" stroke-dasharray="3,3"/>
+          <!-- Tangent contact point at corner on axis -->
+          <circle cx="135" cy="36" r="5.5" fill="#ef4444"/>
+          <text x="145" y="38" font-size="9.5" fill="#b91c1c" font-weight="900">Đỉnh nhọn trên trục &rarr; w₁ = 0!</text>
+          <text x="45" y="138" font-size="8.5" fill="#15803d" font-weight="700">&rarr; Cắt phăng biến thừa, tạo nghiệm thưa (Sparsity)</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="box box-concept">
+      <span class="badge badge-takeaway">Đúc Kết Chương 5B</span>
+      Hình học KKT đã giải thích tất cả: Hình tròn tiếp xúc trơn nên chỉ co nhỏ trọng số (Ridge). Hình thoi có <b>các đỉnh nhọn nằm ngay trên trục tọa độ</b> nên elip sai số va trúng đỉnh nhọn trước tiên, ép triệt để biến thừa về đúng số 0 (LASSO)!
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 7 / 8 &bull; Cẩm Nang Mô Hình Tuyến Tính &amp; Bài Toán Hồi Quy</span>
+      <span>Khoa KH&amp;KT Máy Tính &bull; ĐH Bách Khoa TP.HCM &bull; 2026</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 8: CHƯƠNG 6 & CHEAT-SHEET TỔNG KẾT ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span class="brand">Chương 6 &bull; Dự Đoán Đa Mục Tiêu &amp; Master Cheat-Sheet (Slide 42 - 43)</span>
+      <span class="doc-tag">Multi-target Prediction &amp; Final Synthesis</span>
+    </div>
+
+    <div class="section-title">
+      <span>CHƯƠNG 6: DỰ ĐOÁN ĐA MỤC TIÊU &amp; MASTER CHEAT-SHEET TỔNG KẾT</span>
+      <span class="score-tag">Đích Đến Hoàn Chỉnh Slide 42 - 43</span>
+    </div>
+
+    <div class="box box-problem">
+      <span class="badge badge-problem">Bài Toán Thực Tế</span>
+      Trong thực tế, một đầu vào <b>x</b> không chỉ sinh ra một mục tiêu duy nhất. Ví dụ: Từ thông số động cơ xe, ta muốn dự đoán đồng thời cả <b><i>K</i> mục tiêu</b>: [ Mức tiêu thụ xăng <i>t</i><sub>1</sub>, Lượng khí thải <i>t</i><sub>2</sub>, Độ rung máy <i>t</i><sub>3</sub> ].<br>
+      Thay vì phải tốn công huấn luyện <i>K</i> mô hình riêng rẽ, ta gom toàn bộ các vector mục tiêu thành <b>Ma trận <b>T</b> kích thước <i>N</i> &times; <i>K</i></b>.
+    </div>
+
+    <div class="two-cols">
+      <div class="box box-solution">
+        <span class="badge badge-solution">Kiến Trúc Chia Sẻ</span>
+        <b>Công Thức Đa Mục Tiêu (Công thức 19 - 20)</b>
+        Sử dụng chung một bộ trích xuất đặc trưng (Shared Feature Extractor) và ma trận trọng số <b>W</b> kích thước <i>M</i> &times; <i>K</i>:
+        <div class="math-block">
+          <span class="math-res" style="font-size: 8.8pt;"><b>W</b> = (<b>X</b><sup>T</sup><b>X</b>)<sup>-1</sup> <b>X</b><sup>T</sup> <b>T</b></span> &nbsp; (Công thức 19)<br>
+          Với từng biến mục tiêu thứ <i>k</i>:
+          <div class="math-step">
+            <b>w</b><sub>k</sub> = (<b>X</b><sup>T</sup><b>X</b>)<sup>-1</sup> <b>X</b><sup>T</sup> <b>t</b><sub>k</sub> &nbsp; (Công thức 20)
+          </div>
+        </div>
+        <b>Ưu thế vượt bậc:</b> Ma trận nghịch đảo (<b>X</b><sup>T</sup><b>X</b>)<sup>-1</sup> chỉ cần tính <b>đúng một lần duy nhất</b>! Sau đó nhân một lượt với ma trận <b>T</b> là giải quyết xong toàn bộ <i>K</i> bài toán!
+      </div>
+
+      <div class="box box-metaphor">
+        <span class="badge badge-metaphor">Ẩn Dụ Cho Bé Hiểu</span>
+        <b>Chiếc Lò Nướng Bánh Đa Năng</b><br>
+        Thay vì xây 3 cái lò nướng riêng biệt để nướng bánh mì, bánh quy và pizza:
+        Bạn dùng chung một buồng nhiệt (Ma trận <b>X</b><sup>T</sup><b>X</b> tính một lần). Bạn chỉ cần đặt 3 chiếc khay khuôn khác nhau (3 cột của ma trận <b>T</b>) vào cùng một lò nướng là có ngay 3 mẻ bánh nóng hổi cùng một lúc!
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top: 4px;">
+      <span>BẢNG TỔNG HỢP VÀNG: TOÀN BỘ CÔNG THỨC &amp; QUY TẮC BÁCH KHOA</span>
+      <span class="score-tag">Ôn Tập Phỏng Vấn &amp; Đi Thi</span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 22%;">Khái Niệm &amp; Ký Hiệu</th>
+          <th style="width: 28%;">Công Thức Toán Học Chuẩn</th>
+          <th style="width: 25%;">Ý Nghĩa Vật Lý / Trực Giác</th>
+          <th style="width: 25%;">Lưu Ý Sống Còn Khi Thi / Code</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>Mô hình tuyến tính</b></td>
+          <td><i>ŷ</i> = <b>w</b><sup>T</sup><b>x</b> = &Sigma; <i>w</i><sub>d</sub> <i>x</i><sub>d</sub></td>
+          <td>Góc nghiêng và độ cao đặt chiếc thước kẻ.</td>
+          <td>Luôn có cột bias <i>x</i><sub>0</sub> = 1 ở đầu ma trận <b>X</b>.</td>
+        </tr>
+        <tr>
+          <td><b>Nhiễu Gaussian</b></td>
+          <td>&epsilon; ~ N(0, &sigma;²), <i>p</i>(<i>t</i>|<b>x</b>) ~ N</td>
+          <td>Gió rung lắc tự nhiên, trung bình lệch bằng 0.</td>
+          <td>Giả định i.i.d: mẫu độc lập, cùng phân phối.</td>
+        </tr>
+        <tr>
+          <td><b>Nghiệm đóng OLS</b></td>
+          <td><b>w</b><sub>ML</sub> = (<b>X</b><sup>T</sup><b>X</b>)<sup>-1</sup> <b>X</b><sup>T</sup> <b>t</b></td>
+          <td>Chiếu vuông góc vector <b>t</b> lên không gian cột <b>X</b>.</td>
+          <td>Chỉ dùng khi <i>D</i> &lt; 10,000; <b>X</b><sup>T</sup><b>X</b> phải khả nghịch.</td>
+        </tr>
+        <tr>
+          <td><b>Gradient Descent</b></td>
+          <td><b>w</b><sup>(t)</sup> = <b>w</b><sup>(t-1)</sup> - &eta; &Delta;<b>W</b><sub>B</sub></td>
+          <td>Đi bộ dò dốc trong sương mù theo từng bước &eta;.</td>
+          <td>Dùng cho Big Data; cần chuẩn hóa đặc trưng.</td>
+        </tr>
+        <tr>
+          <td><b>Hàm cơ sở &phi;(<b>x</b>)</b></td>
+          <td><i>ŷ</i> = <b>w</b><sup>T</sup>&phi;(<b>x</b>)</td>
+          <td>Kính 3D: tuyến tính với <b>w</b>, phi tuyến với <b>x</b>.</td>
+          <td>Bậc <i>M</i> quá cao sẽ dẫn thẳng tới Overfitting!</td>
+        </tr>
+        <tr>
+          <td><b>Thước đo sai số</b></td>
+          <td>MSE = <span class="m-frac"><span class="m-num">1</span><span class="m-den">N</span></span> <b>e</b><sup>T</sup><b>e</b>; RMSE = &radic;MSE</td>
+          <td>Khoảng cách dây chun kéo lệch giữa thước &amp; đinh.</td>
+          <td>RMSE dùng cùng đơn vị đo với nhãn <i>t</i>.</td>
+        </tr>
+        <tr>
+          <td><b>Ridge Regression (L2)</b></td>
+          <td><b>w</b> = (&lambda;<b>I</b> + <b>X</b><sup>T</sup><b>X</b>)<sup>-1</sup> <b>X</b><sup>T</sup> <b>t</b></td>
+          <td>Co nhỏ trọng số; đệm &lambda;<b>I</b> cứu ma trận suy biến.</td>
+          <td>Không triệt tiêu về 0; giữ lại toàn bộ đặc trưng.</td>
+        </tr>
+        <tr>
+          <td><b>LASSO Regression (L1)</b></td>
+          <td><i>L</i>(<b>w</b>) + <span class="m-frac"><span class="m-num">&lambda;</span><span class="m-den">2</span></span> &Sigma;|<i>w</i><sub>m</sub>|</td>
+          <td>Đỉnh nhọn hình thoi cắt trục tọa độ; ép <b>w</b> = 0.</td>
+          <td>Tự động chọn lọc đặc trưng; không có nghiệm đóng.</td>
+        </tr>
+        <tr>
+          <td><b>Đa mục tiêu (Multi-target)</b></td>
+          <td><b>W</b> = (<b>X</b><sup>T</sup><b>X</b>)<sup>-1</sup> <b>X</b><sup>T</sup> <b>T</b></td>
+          <td>Bắn một mũi tên trúng <i>K</i> đích cùng lúc.</td>
+          <td>Chỉ nghịch đảo ma trận một lần duy nhất.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="box box-concept" style="margin-top: 2px;">
+      <span class="badge badge-takeaway">Lời Kết Của Cẩm Nang</span>
+      Từ 43 slide bài giảng của Đại học Bách Khoa, chúng ta thấy một sợi chỉ đỏ xuyên suốt: <b>Toán học không sinh ra để đánh đố, toán học sinh ra để giải quyết thực tiễn</b>. Khi hiểu được trực giác vật lý đằng sau từng dấu tích phân, ma trận hay đạo hàm, bạn không chỉ vượt qua mọi kỳ thi điểm tối đa mà còn nắm chắc vũ khí để xây dựng các hệ thống AI thực chiến vững chắc mai sau!
+    </div>
+
+    <div class="page-footer">
+      <span>Trang 8 / 8 &bull; Cẩm Nang Mô Hình Tuyến Tính &amp; Bài Toán Hồi Quy</span>
+      <span>Khoa KH&amp;KT Máy Tính &bull; ĐH Bách Khoa TP.HCM &bull; 2026</span>
+    </div>
+  </div>
+
+</body>
+</html>

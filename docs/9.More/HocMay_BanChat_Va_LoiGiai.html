@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Bản Chất Học Máy & Lời Giải Mẫu 5 Dạng Bài Kinh Điển</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 10mm 12mm 10mm 12mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 8.8pt;
+      line-height: 1.38;
+      color: #0f172a;
+      background-color: #ffffff;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Page Container */
+    .a4-page {
+      width: 100%;
+      height: 275mm;
+      max-height: 275mm;
+      page-break-after: always;
+      break-after: page;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .a4-page:last-child {
+      page-break-after: avoid;
+      break-after: avoid;
+    }
+
+    /* Header & Footer */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1.5px solid #cbd5e1;
+      padding-bottom: 3px;
+      margin-bottom: 6px;
+      font-size: 7.6pt;
+      font-weight: 600;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .page-footer {
+      margin-top: auto;
+      border-top: 1px solid #cbd5e1;
+      padding-top: 3px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 7.3pt;
+      color: #64748b;
+    }
+
+    /* Headings */
+    h1.ch-title {
+      font-size: 12pt;
+      font-weight: 800;
+      color: #1e3a8a;
+      margin: 0 0 5px 0;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .ch-badge {
+      background: #1e40af;
+      color: #ffffff;
+      font-size: 7.5pt;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    h2.sec-title {
+      font-size: 9.2pt;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 5px 0 3px 0;
+      border-left: 3px solid #2563eb;
+      padding-left: 6px;
+    }
+
+    p {
+      margin: 0 0 4px 0;
+      text-align: justify;
+    }
+
+    /* Tag Badges (100% Zero-Emoji) */
+    .tag-badge {
+      display: inline-block;
+      font-size: 7.2pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+    .tag-slate { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+    .tag-blue { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .tag-green { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .tag-amber { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+
+    /* Problem Statement Box */
+    .card-problem {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-left: 4px solid #475569;
+      border-radius: 5px;
+      padding: 5px 9px;
+      margin-bottom: 5px;
+      font-size: 8.4pt;
+    }
+
+    .card-problem-title {
+      font-weight: 700;
+      color: #1e293b;
+      font-size: 8.6pt;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Metaphor Box */
+    .card-meta {
+      background: #f0f7ff;
+      border: 1px solid #bfdbfe;
+      border-left: 4px solid #2563eb;
+      border-radius: 5px;
+      padding: 5px 9px;
+      margin-bottom: 5px;
+    }
+
+    .card-meta-title {
+      font-weight: 700;
+      color: #1d4ed8;
+      font-size: 8.6pt;
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Solution Box */
+    .card-sol {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 5px;
+      padding: 4px 8px;
+      margin-bottom: 4px;
+    }
+
+    .card-sol-title {
+      font-weight: 700;
+      color: #0f172a;
+      font-size: 8.5pt;
+      margin-bottom: 2px;
+    }
+
+    /* Takeaway Box */
+    .card-takeaway {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 4px solid #16a34a;
+      border-radius: 5px;
+      padding: 4px 8px;
+      margin-top: 4px;
+      font-size: 8.2pt;
+    }
+
+    .card-takeaway-title {
+      font-weight: 700;
+      color: #15803d;
+      font-size: 8.5pt;
+      margin-bottom: 2px;
+    }
+
+    .card-alert {
+      background: #fffbeb;
+      border: 1px solid #fef3c7;
+      border-left: 3px solid #f59e0b;
+      border-radius: 4px;
+      padding: 3px 6px;
+      margin: 3px 0;
+      font-size: 8pt;
+      color: #92400e;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    /* Native CSS Math Engine */
+    .math-box {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 3px 6px;
+      margin: 2px 0;
+      text-align: center;
+      font-family: "Cambria Math", "Times New Roman", serif;
+      font-size: 9.3pt;
+    }
+
+    .m-line {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+      gap: 3px;
+    }
+
+    .m-frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      padding: 0 3px;
+      font-size: 0.88em;
+    }
+
+    .m-num {
+      border-bottom: 1.1px solid #0f172a;
+      padding-bottom: 1px;
+    }
+
+    .m-den {
+      padding-top: 1px;
+    }
+
+    .m-sqrt {
+      display: inline-flex;
+      align-items: center;
+    }
+    .m-sqrt-sym {
+      font-size: 1.1em;
+      margin-right: 1px;
+    }
+    .m-sqrt-body {
+      border-top: 1.1px solid #0f172a;
+      padding-top: 1px;
+    }
+
+    .m-sup {
+      font-size: 0.75em;
+      vertical-align: super;
+      line-height: 0;
+    }
+
+    .m-sub {
+      font-size: 0.75em;
+      vertical-align: sub;
+      line-height: 0;
+    }
+
+    .m-bold {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-weight: 700;
+      color: #1e3a8a;
+    }
+
+    /* Tables */
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 3px 0;
+      font-size: 8pt;
+      background: #ffffff;
+    }
+
+    table.data-table th, table.data-table td {
+      border: 1px solid #cbd5e1;
+      padding: 3px 5px;
+      text-align: center;
+    }
+
+    table.data-table th {
+      background: #f1f5f9;
+      color: #1e293b;
+      font-weight: 700;
+    }
+
+    .bg-green { background: #dcfce7; color: #166534; font-weight: 600; }
+    .bg-red { background: #fee2e2; color: #991b1b; font-weight: 600; }
+    .bg-blue { background: #e0e7ff; color: #3730a3; font-weight: 700; }
+
+    /* Cover Page */
+    .cover-box {
+      border: 2px solid #cbd5e1;
+      border-radius: 12px;
+      height: 100%;
+      padding: 30px 25px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: #f8fafc;
+    }
+
+    .cover-badge {
+      display: inline-block;
+      background: #1e3a8a;
+      color: #ffffff;
+      font-size: 8pt;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 14px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .cover-main-title {
+      font-size: 20pt;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.25;
+      margin: 12px 0 8px 0;
+    }
+
+    .cover-main-title em {
+      font-style: normal;
+      color: #2563eb;
+    }
+
+    .cover-desc {
+      font-size: 10pt;
+      color: #334155;
+      line-height: 1.55;
+      margin-bottom: 15px;
+    }
+
+    .steps-flow {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 8px;
+      margin: 15px 0;
+    }
+
+    .step-card {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+
+    .step-num {
+      display: inline-block;
+      background: #eff6ff;
+      color: #2563eb;
+      font-weight: 800;
+      font-size: 10pt;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+      margin-bottom: 4px;
+    }
+
+    .step-title {
+      font-weight: 700;
+      font-size: 8.5pt;
+      color: #0f172a;
+      margin-bottom: 3px;
+    }
+
+    .step-sub {
+      font-size: 7.2pt;
+      color: #64748b;
+      line-height: 1.25;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== TRANG 1: BÌA ==================== -->
+  <div class="a4-page">
+    <div class="cover-box">
+      <div>
+        <span class="cover-badge">Học Máy Chuyên Sâu • Machine Learning Mastery</span>
+        <div style="font-size: 9.2pt; color: #64748b; font-weight: 600; text-transform: uppercase;">
+          Tài Liệu Hướng Dẫn Bản Chất &amp; Lời Giải Mẫu 5 Dạng Bài Tập Kinh Điển
+        </div>
+      </div>
+
+      <div style="margin: auto 0;">
+        <div class="cover-main-title">
+          HIỂU ĐÚNG <em>BẢN CHẤT CỐT LÕI</em><br>
+          CÁC ĐỘ ĐO ĐÁNH GIÁ TRONG HỌC MÁY
+        </div>
+        <div class="cover-desc">
+          Bộ tài liệu phân tích trực quan toàn diện dựa trên đề bài tập về nhà <strong>"Giới thiệu về Học Máy" - TS. Trương Vĩnh Lân</strong>.
+          Cấu trúc chuẩn mực gồm 5 bước tiếp cận: <strong>Đề bài gốc &rarr; Ẩn dụ thực tế &rarr; Cầu nối toán học &rarr; Lời giải chi tiết &rarr; Đúc kết thực chiến</strong>.
+          Giúp người học xóa bỏ hoàn toàn rào cản công thức khô khan, nắm trọn bản chất để ứng dụng vững vàng vào nghiên cứu, đồ án và phỏng vấn kỹ sư AI.
+        </div>
+
+        <div class="steps-flow">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <div class="step-title">Đề Bài Gốc</div>
+            <div class="step-sub">Đầy đủ số liệu chuẩn từ đề của TS. Trương Vĩnh Lân</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <div class="step-title">Ẩn Dụ Thực Tế</div>
+            <div class="step-sub">Mường tượng bối cảnh sống động (sân bay, thợ mộc, bắn bia)</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <div class="step-title">Lời Giải Chi Tiết</div>
+            <div class="step-sub">Tính toán từng bước, phân số tối giản và % chuẩn xác</div>
+          </div>
+          <div class="step-card">
+            <div class="step-num">4</div>
+            <div class="step-title">Liên Kết Thực Chiến</div>
+            <div class="step-sub">Bí quyết chọn độ đo khi giải quyết bài toán thực tế</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="border-top: 1px solid #cbd5e1; padding-top: 10px; display: flex; justify-content: space-between; font-size: 8.2pt; color: #64748b;">
+        <div><strong>Mục lục chuyên đề:</strong> Ma trận Nhầm lẫn • Hồi quy • Bias-Variance • Đa lớp • Xác suất ROC-AUC</div>
+        <div>Năm học 2026 • Tài liệu lưu hành học thuật</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 2: BÀI 1 ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span>Chuyên đề Học Máy: TS. Trương Vĩnh Lân</span>
+      <span>Trang 2 / 6</span>
+    </div>
+
+    <h1 class="ch-title">
+      <span class="ch-badge">BÀI 1</span> Ma Trận Nhầm Lẫn &amp; Phân Loại Nhị Phân (Binary Classification)
+    </h1>
+
+    <!-- ĐỀ BÀI GỐC -->
+    <div class="card-problem">
+      <div class="card-problem-title"><span class="tag-badge tag-slate">[Đề Bài Gốc]</span> Tính toán Ma trận Nhầm lẫn</div>
+      <p style="margin-bottom: 2px;">
+        Cho ma trận nhầm lẫn cho một bài toán phân loại nhị phân: 
+        <strong>[[80, 10], [5, 105]]</strong>, trong đó các hàng đại diện cho Lớp Dương tính Thực tế và Lớp Âm tính Thực tế, các cột đại diện cho Lớp Dương tính Dự đoán và Lớp Âm tính Dự đoán.
+        <br><strong>Yêu cầu tính:</strong> Độ chính xác (Accuracy), Độ chuẩn xác (Precision), Độ nhạy (Recall), Điểm F1 (F1-Score).
+      </p>
+    </div>
+
+    <!-- ẨN DỤ THỰC TẾ -->
+    <div class="card-meta">
+      <div class="card-meta-title"><span class="tag-badge tag-blue">[Ẩn Dụ Thực Tế]</span> Cửa Soi Chiếu Hành Lý An Ninh Sân Bay</div>
+      <p>
+        Hãy hình dung hệ thống máy soi chiếu hành lý tại sân bay:
+        <br>• <strong>Dương tính (Positive):</strong> Hành lý có chứa hung khí hoặc dao kéo (Mối đe dọa).
+        <br>• <strong>Âm tính (Negative):</strong> Hành lý bình thường (An toàn).
+        <br>Khi khách đi qua: Máy réo còi (Đoán Dương) thì giữ vali lại soát; Máy im lặng (Đoán Âm) thì cho khách lên máy bay.
+      </p>
+    </div>
+
+    <h2 class="sec-title">1. Bóc Tách Ma Trận Đề Bài (Hàng = Thực Tế, Cột = Dự Đoán)</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th colspan="2" rowspan="2">Ma trận Nhầm lẫn</th>
+          <th colspan="2">Dự Đoán (Prediction)</th>
+          <th rowspan="2">Tổng Thực Tế</th>
+        </tr>
+        <tr>
+          <th>Dương tính (Máy báo cấm)</th>
+          <th>Âm tính (Máy cho qua)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th rowspan="2">Thực Tế<br>(Actual)</th>
+          <th>Dương tính</th>
+          <td class="bg-green"><strong>TP = 80</strong> (Bắt đúng có hung khí)</td>
+          <td class="bg-red"><strong>FN = 10</strong> (Bỏ lọt tội phạm!)</td>
+          <td><strong>P = 90 kiện</strong></td>
+        </tr>
+        <tr>
+          <th>Âm tính</th>
+          <td class="bg-red"><strong>FP = 5</strong> (Báo động giả / oan)</td>
+          <td class="bg-green"><strong>TN = 105</strong> (Cho qua an toàn)</td>
+          <td><strong>N = 110 kiện</strong></td>
+        </tr>
+        <tr class="bg-blue">
+          <th colspan="2">Tổng Dự Đoán</th>
+          <td><strong>85 lần máy réo còi</strong></td>
+          <td><strong>115 lần máy im lặng</strong></td>
+          <td><strong>Tổng N = 200</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 class="sec-title">2. Lời Giải Chi Tiết Từng Chỉ Số</h2>
+
+    <div class="grid-2">
+      <div class="card-sol">
+        <div class="card-sol-title">a. Độ chính xác (Accuracy)</div>
+        <p><strong>Bản chất:</strong> Toàn cuộc, máy phán đoán đúng bao nhiêu %?</p>
+        <div class="math-box">
+          <div class="m-line">
+            Accuracy = 
+            <span class="m-frac"><span class="m-num">TP + TN</span><span class="m-den">N</span></span>
+            = <span class="m-frac"><span class="m-num">80 + 105</span><span class="m-den">200</span></span>
+            = <span class="m-frac"><span class="m-num">185</span><span class="m-den">200</span></span>
+            = <span class="m-bold">0.925 (92.5%)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-sol">
+        <div class="card-sol-title">b. Độ chuẩn xác (Precision)</div>
+        <p><strong>Bản chất:</strong> Mỗi khi còi hú báo cấm, lời nói uy tín bao nhiêu %?</p>
+        <div class="math-box">
+          <div class="m-line">
+            Precision = 
+            <span class="m-frac"><span class="m-num">TP</span><span class="m-den">TP + FP</span></span>
+            = <span class="m-frac"><span class="m-num">80</span><span class="m-den">80 + 5</span></span>
+            = <span class="m-frac"><span class="m-num">80</span><span class="m-den">85</span></span>
+            &approx; <span class="m-bold">0.9412 (94.12%)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card-sol">
+        <div class="card-sol-title">c. Độ nhạy (Recall)</div>
+        <p><strong>Bản chất:</strong> Quét sạch không, bắt được bao nhiêu trong 90 vụ có cấm?</p>
+        <div class="math-box">
+          <div class="m-line">
+            Recall = 
+            <span class="m-frac"><span class="m-num">TP</span><span class="m-den">TP + FN</span></span>
+            = <span class="m-frac"><span class="m-num">80</span><span class="m-den">80 + 10</span></span>
+            = <span class="m-frac"><span class="m-num">8</span><span class="m-den">9</span></span>
+            &approx; <span class="m-bold">0.8889 (88.89%)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-sol">
+        <div class="card-sol-title">d. Điểm F1 (F1-Score)</div>
+        <p><strong>Bản chất:</strong> Trung bình điều hòa cân bằng giữa Uy tín và Quét sạch.</p>
+        <div class="math-box">
+          <div class="m-line">
+            F<span class="m-sub">1</span> = 2 &times; 
+            <span class="m-frac"><span class="m-num">Pre &times; Rec</span><span class="m-den">Pre + Rec</span></span>
+            = <span class="m-frac"><span class="m-num">160</span><span class="m-den">85 + 90</span></span>
+            = <span class="m-frac"><span class="m-num">32</span><span class="m-den">35</span></span>
+            &approx; <span class="m-bold">0.9143 (91.43%)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-takeaway">
+      <div class="card-takeaway-title"><span class="tag-badge tag-green">[Đúc Kết Thực Chiến]</span></div>
+      • <strong>Ưu tiên Recall cao:</strong> Tầm soát ung thư, phát hiện bom, gian lận thẻ. Thà báo động nhầm còn hơn để lọt mối nguy!
+      <br>• <strong>Ưu tiên Precision cao:</strong> Lọc Spam Email, gợi ý mua sắm. Thư mời quan trọng bị chuyển vào hòm rác là khách bỏ app ngay!
+    </div>
+
+    <div class="page-footer">
+      <span>Tài liệu tự học trực quan Học Máy</span>
+      <span>schedule-smart • docs/9.More/</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 3: BÀI 2 ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span>Chuyên đề Học Máy: TS. Trương Vĩnh Lân</span>
+      <span>Trang 3 / 6</span>
+    </div>
+
+    <h1 class="ch-title">
+      <span class="ch-badge">BÀI 2</span> Các Chỉ Số Đánh Giá Mô Hình Hồi Quy (Regression Metrics)
+    </h1>
+
+    <!-- ĐỀ BÀI GỐC -->
+    <div class="card-problem">
+      <div class="card-problem-title"><span class="tag-badge tag-slate">[Đề Bài Gốc]</span> Các chỉ số Hồi quy</div>
+      <p style="margin-bottom: 2px;">
+        Cho các giá trị thực tế <strong>y = [2, 4, 6, 8]</strong> và các giá trị dự đoán <strong>ŷ = [1.8, 3.9, 6.2, 8.1]</strong>.
+        <br><strong>Yêu cầu tính:</strong> Sai số tuyệt đối trung bình (MAE), Sai số bình phương trung bình (MSE), Căn bậc hai của sai số bình phương trung bình (RMSE), Hệ số xác định (R²).
+      </p>
+    </div>
+
+    <!-- ẨN DỤ THỰC TẾ -->
+    <div class="card-meta">
+      <div class="card-meta-title"><span class="tag-badge tag-blue">[Ẩn Dụ Thực Tế]</span> Bác Thợ Mộc Đo Cắt 4 Thanh Gỗ</div>
+      <p>
+        Bạn đặt bác thợ mộc cắt 4 thanh gỗ chuẩn kích thước thực tế: y = [2, 4, 6, 8] (cm).
+        <br>Khi xuất xưởng, bác thợ cắt ra kích thước dự đoán là: ŷ = [1.8, 3.9, 6.2, 8.1] (cm).
+        <br>Làm sao để đo lường công tâm xem tay nghề bác thợ mộc chính xác đến mức độ nào?
+      </p>
+    </div>
+
+    <h2 class="sec-title">1. Bảng Đo Chi Tiết Sai Số Từng Nhát Cắt (n = 4 mẫu)</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Mẫu i</th>
+          <th>Thực tế y<span class="m-sub">i</span></th>
+          <th>Dự đoán ŷ<span class="m-sub">i</span></th>
+          <th>Sai số dư e<span class="m-sub">i</span> = y<span class="m-sub">i</span> - ŷ<span class="m-sub">i</span></th>
+          <th>Sai số tuyệt đối |e<span class="m-sub">i</span>|</th>
+          <th>Sai số bình phương e<span class="m-sub">i</span><span class="m-sup">2</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>2.0</td><td>1.8</td><td>+0.2</td><td>0.2</td><td>0.04</td></tr>
+        <tr><td>2</td><td>4.0</td><td>3.9</td><td>+0.1</td><td>0.1</td><td>0.01</td></tr>
+        <tr><td>3</td><td>6.0</td><td>6.2</td><td>-0.2</td><td>0.2</td><td>0.04</td></tr>
+        <tr><td>4</td><td>8.0</td><td>8.1</td><td>-0.1</td><td>0.1</td><td>0.01</td></tr>
+        <tr class="bg-blue">
+          <td><strong>Tổng &sum;</strong></td>
+          <td><strong>20.0</strong></td>
+          <td><strong>20.0</strong></td>
+          <td><strong>0.0</strong></td>
+          <td><strong>&sum;|e| = 0.6</strong></td>
+          <td><strong>SS<span class="m-sub">res</span> = 0.10</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 class="sec-title">2. Lời Giải Chi Tiết &amp; Bản Chất 4 Chỉ Số</h2>
+
+    <div class="grid-2">
+      <div class="card-sol">
+        <div class="card-sol-title">a. MAE (Sai số tuyệt đối trung bình)</div>
+        <p><strong>Bản chất:</strong> Cứ lệch bao nhiêu cm thì tính bấy nhiêu, không thiên vị.</p>
+        <div class="math-box">
+          <div class="m-line">
+            MAE = 
+            <span class="m-frac"><span class="m-num">&sum; |y<span class="m-sub">i</span> - ŷ<span class="m-sub">i</span>|</span><span class="m-den">n</span></span>
+            = <span class="m-frac"><span class="m-num">0.6</span><span class="m-den">4</span></span>
+            = <span class="m-bold">0.15 cm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-sol">
+        <div class="card-sol-title">b. MSE (Sai số bình phương trung bình)</div>
+        <p><strong>Bản chất:</strong> Phạt theo cấp số nhân đối với các vết cắt lệch lớn.</p>
+        <div class="math-box">
+          <div class="m-line">
+            MSE = 
+            <span class="m-frac"><span class="m-num">&sum; (y<span class="m-sub">i</span> - ŷ<span class="m-sub">i</span>)<span class="m-sup">2</span></span><span class="m-den">n</span></span>
+            = <span class="m-frac"><span class="m-num">0.10</span><span class="m-den">4</span></span>
+            = <span class="m-bold">0.025 cm<span class="m-sup">2</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card-sol">
+        <div class="card-sol-title">c. RMSE (Căn bậc hai của MSE)</div>
+        <p><strong>Bản chất:</strong> Khai căn để kéo đơn vị đo về lại cùng đơn vị cm ban đầu.</p>
+        <div class="math-box">
+          <div class="m-line">
+            RMSE = <span class="m-sqrt"><span class="m-sqrt-sym">&radic;</span><span class="m-sqrt-body">MSE</span></span>
+            = <span class="m-sqrt"><span class="m-sqrt-sym">&radic;</span><span class="m-sqrt-body">0.025</span></span>
+            &approx; <span class="m-bold">0.1581 cm</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-sol">
+        <div class="card-sol-title">d. Hệ số xác định (R<span class="m-sup">2</span>)</div>
+        <p><strong>Bản chất:</strong> So với một kẻ đoán mò lấy trung bình ȳ = 5.0, ta xịn hơn bao nhiêu %?</p>
+        <div class="math-box">
+          <div class="m-line">
+            R<span class="m-sup">2</span> = 1 - 
+            <span class="m-frac"><span class="m-num">SS<span class="m-sub">res</span></span><span class="m-den">SS<span class="m-sub">tot</span></span></span>
+            = 1 - <span class="m-frac"><span class="m-num">0.10</span><span class="m-den">20.0</span></span>
+            = 1 - 0.005
+            = <span class="m-bold">0.995 (99.5%)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-sol">
+      <p style="margin: 0;">
+        <strong>Chi tiết tính R²:</strong> ȳ = 5.0 &rarr; SS<span class="m-sub">tot</span> = (2-5)² + (4-5)² + (6-5)² + (8-5)² = <strong>20.0</strong>; SS<span class="m-sub">res</span> = <strong>0.10</strong>.
+        <br>&rarr; Mô hình giải thích được tới <strong>99.5%</strong> phương sai dữ liệu!
+      </p>
+    </div>
+
+    <div class="card-takeaway">
+      <div class="card-takeaway-title"><span class="tag-badge tag-green">[Khi Nào Dùng MAE vs RMSE?]</span></div>
+      • Dữ liệu có <strong>nhiều giá trị ngoại lai (outliers)</strong>: Dùng <strong>MAE</strong> để không bị các điểm đột biến kéo lệch.
+      <br>• Không được phép mắc sai số lớn (y tế, tự hành): Bắt buộc dùng <strong>RMSE</strong> để phạt thật nặng.
+    </div>
+
+    <div class="page-footer">
+      <span>Tài liệu tự học trực quan Học Máy</span>
+      <span>schedule-smart • docs/9.More/</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 4: BÀI 3 ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span>Chuyên đề Học Máy: TS. Trương Vĩnh Lân</span>
+      <span>Trang 4 / 6</span>
+    </div>
+
+    <h1 class="ch-title">
+      <span class="ch-badge">BÀI 3</span> Phân Rã Độ Chệch &amp; Phương Sai (Bias - Variance Decomposition)
+    </h1>
+
+    <!-- ĐỀ BÀI GỐC -->
+    <div class="card-problem">
+      <div class="card-problem-title"><span class="tag-badge tag-slate">[Đề Bài Gốc]</span> Phân rã Độ chệch - Phương sai</div>
+      <p style="margin-bottom: 2px;">
+        Giả sử với một đầu vào x cố định, hàm thực là <strong>f(x) = 5</strong>, và mô hình học được f&#770;(x) có các dự đoán sau trên 3 tập huấn luyện khác nhau:
+        <strong>f&#770;₁(x) = 4.5, f&#770;₂(x) = 5.5, f&#770;₃(x) = 5.0</strong>. Giả sử không có nhiễu (&sigma;² = 0).
+        <br><strong>Yêu cầu tính:</strong> Độ chệch bình phương (Bias²), Phương sai (Variance), Tổng lỗi kỳ vọng (Total Expected Error).
+      </p>
+    </div>
+
+    <!-- ẨN DỤ THỰC TẾ -->
+    <div class="card-meta">
+      <div class="card-meta-title"><span class="tag-badge tag-blue">[Ẩn Dụ Thực Tế]</span> Cung Thủ Bắn Vào Hồng Tâm</div>
+      <p>
+        Mục tiêu hồng tâm có tọa độ thực là f(x) = 5. Bắn 3 ngày trên 3 tập dữ liệu: điểm rơi rơi vào 4.5, 5.5, 5.0.
+        <br>• <strong>Độ chệch (Bias):</strong> Lỗi do thước ngắm có bị lệch tâm không?
+        <br>• <strong>Phương sai (Variance):</strong> Lỗi do tay cầm súng có bị run không (các phát bắn có tản mác không)?
+      </p>
+    </div>
+
+    <h2 class="sec-title">1. Lời Giải Chi Tiết Từng Bước</h2>
+
+    <div class="card-sol">
+      <div class="card-sol-title">Bước 1: Tính Kỳ vọng dự đoán trung bình E[f&#770;(x)]</div>
+      <p>Trọng tâm điểm rơi của 3 ngày bắn:</p>
+      <div class="math-box">
+        <div class="m-line">
+          E[f&#770;(x)] = 
+          <span class="m-frac"><span class="m-num">4.5 + 5.5 + 5.0</span><span class="m-den">3</span></span>
+          = <span class="m-frac"><span class="m-num">15.0</span><span class="m-den">3</span></span>
+          = <span class="m-bold">5.0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-sol">
+      <div class="card-sol-title">Bước 2: Tính Độ chệch bình phương (Bias²) — "Lỗi do ngắm lệch"</div>
+      <p>Khoảng cách giữa trọng tâm dự đoán trung bình và hồng tâm thật f(x) = 5:</p>
+      <div class="math-box">
+        <div class="m-line">
+          Bias[f&#770;(x)] = E[f&#770;(x)] - f(x) = 5.0 - 5.0 = 0 &rarr; 
+          <span class="m-bold">Bias² = 0² = 0</span>
+        </div>
+      </div>
+      <div class="card-alert">
+        <span class="tag-badge tag-amber">[Ý Nghĩa Bản Chất]</span> Bias² = 0 chứng minh mô hình hoàn toàn không có lỗi hệ thống (Unbiased Estimator). Dự đoán trung bình trúng phóc tâm!
+      </div>
+    </div>
+
+    <div class="card-sol">
+      <div class="card-sol-title">Bước 3: Tính Phương sai (Variance) — "Lỗi do run tay"</div>
+      <p>Mức độ dao động phân tán của từng phát bắn quanh điểm rơi trung bình 5.0:</p>
+      <div class="math-box">
+        <div class="m-line">
+          Variance = 
+          <span class="m-frac"><span class="m-num">(4.5 - 5.0)² + (5.5 - 5.0)² + (5.0 - 5.0)²</span><span class="m-den">3</span></span>
+          = <span class="m-frac"><span class="m-num">(-0.5)² + (0.5)² + 0</span><span class="m-den">3</span></span>
+          = <span class="m-frac"><span class="m-num">0.5</span><span class="m-den">3</span></span>
+          = <span class="m-frac"><span class="m-num">1</span><span class="m-den">6</span></span>
+          &approx; <span class="m-bold">0.1667</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-sol">
+      <div class="card-sol-title">Bước 4: Tính Tổng lỗi kỳ vọng (Total Expected Error)</div>
+      <p>Giả sử không có nhiễu ngẫu nhiên (&sigma;² = 0), theo định lý phân rã kinh điển:</p>
+      <div class="math-box">
+        <div class="m-line">
+          Total Expected Error = Bias² + Variance + &sigma;² = 0 + 
+          <span class="m-frac"><span class="m-num">1</span><span class="m-den">6</span></span>
+          + 0 = <span class="m-frac"><span class="m-num">1</span><span class="m-den">6</span></span>
+          &approx; <span class="m-bold">0.1667</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-takeaway">
+      <div class="card-takeaway-title"><span class="tag-badge tag-green">[Triết Lý Kinh Điển]</span> The Bias - Variance Tradeoff trong Machine Learning:</div>
+      • <strong>High Bias (Underfitting - Chưa học tới):</strong> Mô hình quá đơn giản. Thước ngắm bị lệch, dự đoán luôn sai bản chất.
+      <br>• <strong>High Variance (Overfitting - Học vẹt quá đà):</strong> Mô hình quá phức tạp, ghi nhớ từng điểm nhiễu. Đổi tập dữ liệu là bắn trượt tơi bời.
+      <br>• <strong>Mục tiêu của Kỹ sư AI:</strong> Tìm điểm cân bằng (Sweet Spot) để Tổng Sai Số là nhỏ nhất!
+    </div>
+
+    <div class="page-footer">
+      <span>Tài liệu tự học trực quan Học Máy</span>
+      <span>schedule-smart • docs/9.More/</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 5: BÀI 4 ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span>Chuyên đề Học Máy: TS. Trương Vĩnh Lân</span>
+      <span>Trang 5 / 6</span>
+    </div>
+
+    <h1 class="ch-title">
+      <span class="ch-badge">BÀI 4</span> Đánh Giá Phân Loại Đa Lớp (Multiclass Classification)
+    </h1>
+
+    <!-- ĐỀ BÀI GỐC -->
+    <div class="card-problem">
+      <div class="card-problem-title"><span class="tag-badge tag-slate">[Đề Bài Gốc]</span> Các chỉ số đa lớp</div>
+      <p style="margin-bottom: 2px;">
+        Cho ma trận nhầm lẫn cho bài toán 3 lớp:
+        <strong>[[10, 2, 1], [1, 15, 0], [0, 1, 20]]</strong> (Hàng: Thực tế Lớp 1, 2, 3; Cột: Dự đoán Lớp 1, 2, 3).
+        <br><strong>Yêu cầu tính:</strong> Độ chính xác (Accuracy), Độ chuẩn xác Vĩ mô (Macro-Precision), Độ nhạy theo trọng số (Weighted-Recall).
+      </p>
+    </div>
+
+    <!-- ẨN DỤ THỰC TẾ -->
+    <div class="card-meta">
+      <div class="card-meta-title"><span class="tag-badge tag-blue">[Ẩn Dụ Thực Tế]</span> Bầu Cử Đại Diện Các Tỉnh Thành</div>
+      <p>
+        Trong quốc gia có 3 tỉnh: Tỉnh 1 (13 dân), Tỉnh 2 (16 dân), Tỉnh 3 (21 dân).
+        <br>• <strong>Macro (Chủ nghĩa bình quân):</strong> Mỗi tỉnh có đúng 1 lá phiếu ngang nhau, bất kể tỉnh giàu hay nghèo, đông hay vắng.
+        <br>• <strong>Weighted (Đại diện theo dân số):</strong> Tỉnh nào đông dân hơn thì lá phiếu có trọng lượng nặng hơn tương ứng.
+      </p>
+    </div>
+
+    <h2 class="sec-title">1. Bóc Tách Ma Trận Đa Lớp 3x3 (Hàng = Thực tế, Cột = Dự đoán)</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th colspan="2" rowspan="2">Ma Trận 3x3</th>
+          <th colspan="3">Lớp Dự Đoán</th>
+          <th rowspan="2">Tổng Thực Tế (N<span class="m-sub">i</span>)</th>
+          <th rowspan="2">Recall Từng Lớp</th>
+        </tr>
+        <tr>
+          <th>Lớp 1 (C<span class="m-sub">1</span>)</th>
+          <th>Lớp 2 (C<span class="m-sub">2</span>)</th>
+          <th>Lớp 3 (C<span class="m-sub">3</span>)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th rowspan="3">Thực Tế</th>
+          <th>Lớp 1</th>
+          <td class="bg-green"><strong>10</strong> (TP₁)</td>
+          <td>2</td>
+          <td>1</td>
+          <td><strong>13</strong></td>
+          <td>10/13 &approx; 76.92%</td>
+        </tr>
+        <tr>
+          <th>Lớp 2</th>
+          <td>1</td>
+          <td class="bg-green"><strong>15</strong> (TP₂)</td>
+          <td>0</td>
+          <td><strong>16</strong></td>
+          <td>15/16 = 93.75%</td>
+        </tr>
+        <tr>
+          <th>Lớp 3</th>
+          <td>0</td>
+          <td>1</td>
+          <td class="bg-green"><strong>20</strong> (TP₃)</td>
+          <td><strong>21</strong></td>
+          <td>20/21 &approx; 95.24%</td>
+        </tr>
+        <tr class="bg-blue">
+          <th colspan="2">Tổng Dự Đoán</th>
+          <td><strong>11</strong></td>
+          <td><strong>18</strong></td>
+          <td><strong>21</strong></td>
+          <td><strong>Tổng N = 50</strong></td>
+          <td>—</td>
+        </tr>
+        <tr class="bg-blue">
+          <th colspan="2">Precision Từng Lớp</th>
+          <td>10/11 &approx; 90.91%</td>
+          <td>15/18 &approx; 83.33%</td>
+          <td>20/21 &approx; 95.24%</td>
+          <td>—</td>
+          <td>—</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 class="sec-title">2. Lời Giải Chi Tiết</h2>
+
+    <div class="card-sol">
+      <div class="card-sol-title">a. Độ chính xác toàn cục (Accuracy)</div>
+      <p>Tổng số ca đoán đúng trên đường chéo chính chia cho tổng mẫu:</p>
+      <div class="math-box">
+        <div class="m-line">
+          Accuracy = 
+          <span class="m-frac"><span class="m-num">10 + 15 + 20</span><span class="m-den">50</span></span>
+          = <span class="m-frac"><span class="m-num">45</span><span class="m-den">50</span></span>
+          = <span class="m-bold">0.90 (90.0%)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-sol">
+      <div class="card-sol-title">b. Độ chuẩn xác Vĩ mô (Macro-Precision) — "Bình đẳng tuyệt đối"</div>
+      <p>Lấy trung bình cộng không trọng số của Precision 3 lớp:</p>
+      <div class="math-box">
+        <div class="m-line">
+          Macro-Precision = 
+          <span class="m-frac"><span class="m-num">P<span class="m-sub">1</span> + P<span class="m-sub">2</span> + P<span class="m-sub">3</span></span><span class="m-den">3</span></span>
+          = <span class="m-frac"><span class="m-num">(10/11) + (15/18) + (20/21)</span><span class="m-den">3</span></span>
+          &approx; <span class="m-frac"><span class="m-num">0.9091 + 0.8333 + 0.9524</span><span class="m-den">3</span></span>
+          &approx; <span class="m-bold">0.8983 (89.83%)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-sol">
+      <div class="card-sol-title">c. Độ nhạy theo trọng số (Weighted-Recall) — "Đại diện theo dân số"</div>
+      <p>Nhân từng Recall với trọng số tỉ lệ mẫu thực tế của lớp đó:</p>
+      <div class="math-box">
+        <div class="m-line">
+          Weighted-Recall = 
+          <span class="m-frac"><span class="m-num">13</span><span class="m-den">50</span></span>&times;<span class="m-frac"><span class="m-num">10</span><span class="m-den">13</span></span>
+          + <span class="m-frac"><span class="m-num">16</span><span class="m-den">50</span></span>&times;<span class="m-frac"><span class="m-num">15</span><span class="m-den">16</span></span>
+          + <span class="m-frac"><span class="m-num">21</span><span class="m-den">50</span></span>&times;<span class="m-frac"><span class="m-num">20</span><span class="m-den">21</span></span>
+          = <span class="m-frac"><span class="m-num">10 + 15 + 20</span><span class="m-den">50</span></span>
+          = <span class="m-bold">0.90 (90.0%)</span>
+        </div>
+      </div>
+      <div class="card-alert">
+        <span class="tag-badge tag-amber">[Quy Luật Toán Học]</span> Vì mẫu số tự triệt tiêu (N<span class="m-sub">i</span> / N) &times; (TP<span class="m-sub">i</span> / N<span class="m-sub">i</span>) = TP<span class="m-sub">i</span> / N, nên trong phân loại đa lớp rời rạc, <strong>Weighted-Recall luôn luôn chính xác bằng Accuracy</strong>!
+      </div>
+    </div>
+
+    <div class="card-takeaway">
+      <div class="card-takeaway-title"><span class="tag-badge tag-green">[Khi Nào Dùng Macro vs Weighted?]</span></div>
+      • Dùng <strong>Macro</strong> khi các lớp thiểu số cực kỳ quan trọng (nhận diện bệnh hiếm, phát hiện gian lận hiếm gặp).
+      <br>• Dùng <strong>Weighted</strong> khi muốn phản ánh sát hiệu suất thực tế trên phân phối dữ liệu tự nhiên.
+    </div>
+
+    <div class="page-footer">
+      <span>Tài liệu tự học trực quan Học Máy</span>
+      <span>schedule-smart • docs/9.More/</span>
+    </div>
+  </div>
+
+  <!-- ==================== TRANG 6: BÀI 5 & TỔNG KẾT ==================== -->
+  <div class="a4-page">
+    <div class="page-header">
+      <span>Chuyên đề Học Máy: TS. Trương Vĩnh Lân</span>
+      <span>Trang 6 / 6</span>
+    </div>
+
+    <h1 class="ch-title">
+      <span class="ch-badge">BÀI 5</span> Bản Chất Xác Suất Của ROC-AUC &amp; Tổng Kết Cheatsheet
+    </h1>
+
+    <!-- ĐỀ BÀI GỐC -->
+    <div class="card-problem">
+      <div class="card-problem-title"><span class="tag-badge tag-slate">[Đề Bài Gốc]</span> Xác suất ROC-AUC</div>
+      <p style="margin-bottom: 2px;">
+        Cho hai tập điểm từ bộ phân loại nhị phân: Điểm Dương tính: <strong>[0.8, 0.6, 0.9]</strong>, Điểm Âm tính: <strong>[0.3, 0.4, 0.2]</strong>.
+        <br><strong>Yêu cầu:</strong> Ước tính AUC bằng cách diễn giải xác suất <strong>AUC = P(s⁺ &gt; s⁻)</strong> bằng cách đếm số cặp mà s⁺ &gt; s⁻.
+      </p>
+    </div>
+
+    <!-- ẨN DỤ THỰC TẾ -->
+    <div class="card-meta">
+      <div class="card-meta-title"><span class="tag-badge tag-blue">[Ẩn Dụ Thực Tế]</span> Trận Đấu Solo 1-vs-1 Giữa Người Bệnh &amp; Người Khỏe</div>
+      <p>
+        Bác sĩ chấm điểm nguy cơ: Dương tính s<span class="m-sup">+</span> = [0.8, 0.6, 0.9] &nbsp;|&nbsp; Âm tính s<span class="m-sup">-</span> = [0.3, 0.4, 0.2].
+        <br><strong>Bản chất AUC:</strong> Bốc ngẫu nhiên 1 người bệnh và 1 người khỏe, xác suất người bệnh được chấm điểm cao hơn là bao nhiêu?
+      </p>
+    </div>
+
+    <h2 class="sec-title">1. Bảng Đấu Solo 9 Cặp Đối Đầu (n<span class="m-sup">+</span> &times; n<span class="m-sup">-</span> = 3 &times; 3 = 9 cặp)</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th rowspan="2">Điểm Dương Tính (s<span class="m-sup">+</span>)</th>
+          <th colspan="3">Điểm Âm Tính (s<span class="m-sup">-</span>)</th>
+          <th rowspan="2">Kết Quả Đối Đầu</th>
+        </tr>
+        <tr>
+          <th>s<span class="m-sup">-</span> = 0.3</th>
+          <th>s<span class="m-sup">-</span> = 0.4</th>
+          <th>s<span class="m-sup">-</span> = 0.2</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>s<span class="m-sup">+</span> = 0.8</th>
+          <td class="bg-green">0.8 > 0.3 (Thắng)</td>
+          <td class="bg-green">0.8 > 0.4 (Thắng)</td>
+          <td class="bg-green">0.8 > 0.2 (Thắng)</td>
+          <td><strong>3 / 3 Thắng</strong></td>
+        </tr>
+        <tr>
+          <th>s<span class="m-sup">+</span> = 0.6</th>
+          <td class="bg-green">0.6 > 0.3 (Thắng)</td>
+          <td class="bg-green">0.6 > 0.4 (Thắng)</td>
+          <td class="bg-green">0.6 > 0.2 (Thắng)</td>
+          <td><strong>3 / 3 Thắng</strong></td>
+        </tr>
+        <tr>
+          <th>s<span class="m-sup">+</span> = 0.9</th>
+          <td class="bg-green">0.9 > 0.3 (Thắng)</td>
+          <td class="bg-green">0.9 > 0.4 (Thắng)</td>
+          <td class="bg-green">0.9 > 0.2 (Thắng)</td>
+          <td><strong>3 / 3 Thắng</strong></td>
+        </tr>
+        <tr class="bg-blue">
+          <th>Tổng Kết</th>
+          <td colspan="3">Toàn bộ 9/9 cặp thì điểm Dương tính đều vượt trội điểm Âm tính!</td>
+          <td><strong>AUC = 9/9 = 1.0 (100%)</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top: 2px;">
+      &rarr; <strong>Kết luận:</strong> Phân loại <strong>hoàn hảo tuyệt đối (Perfect Classifier)</strong> vì min(s<span class="m-sup">+</span>) = 0.6 &gt; max(s<span class="m-sup">-</span>) = 0.4.
+    </p>
+
+    <h2 class="sec-title">2. Bảng Tra Cứu Nhanh Bản Chất 5 Dạng Bài (Master Cheatsheet)</h2>
+    <table class="data-table" style="font-size: 7.8pt;">
+      <thead>
+        <tr>
+          <th>Dạng Bài</th>
+          <th>Ẩn Dụ Thực Tế</th>
+          <th>Công Thức Cốt Lõi</th>
+          <th>Nguyên Tắc Thực Chiến</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Ma Trận Nhầm Lẫn</strong></td>
+          <td>Còi báo cháy / Soi sân bay</td>
+          <td>Pre = TP / (TP+FP)<br>Rec = TP / (TP+FN)</td>
+          <td>Y tế/Bom mìn chọn Recall.<br>Spam/Gợi ý chọn Precision.</td>
+        </tr>
+        <tr>
+          <td><strong>Hồi Quy (Regression)</strong></td>
+          <td>Thợ mộc đo cưa gỗ</td>
+          <td>MAE = &sum;|e| / n<br>R² = 1 - (SS<span class="m-sub">res</span> / SS<span class="m-sub">tot</span>)</td>
+          <td>Nhiều outlier dùng MAE.<br>Phạt lỗi nặng dùng RMSE.</td>
+        </tr>
+        <tr>
+          <td><strong>Bias - Variance</strong></td>
+          <td>Bắn bia (Lệch tâm vs Run tay)</td>
+          <td>Lỗi = Bias² + Var + &sigma;²</td>
+          <td>Underfitting &rarr; Giảm Bias.<br>Overfitting &rarr; Giảm Var.</td>
+        </tr>
+        <tr>
+          <td><strong>Đa Lớp (Multiclass)</strong></td>
+          <td>Bầu cử: Bình đẳng vs Dân số</td>
+          <td>Weighted-Recall = Accuracy</td>
+          <td>Lớp hiếm quan trọng &rarr; Macro.<br>Phân phối tự nhiên &rarr; Weighted.</td>
+        </tr>
+        <tr>
+          <td><strong>Xác Suất ROC-AUC</strong></td>
+          <td>Trận đấu solo 1-vs-1</td>
+          <td>AUC = P(s<span class="m-sup">+</span> > s<span class="m-sup">-</span>)</td>
+          <td>Chấm điểm tín dụng, xếp hạng tìm kiếm, chống gian lận.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="card-takeaway" style="margin-top: 3px;">
+      <div class="card-takeaway-title"><span class="tag-badge tag-green">[Quy Trình 4 Bước]</span> Tư duy chuẩn kỹ sư khi tiếp cận bài toán Học Máy:</div>
+      1. Xác định dạng đầu ra (Phân loại rời rạc hay Hồi quy liên tục).
+      <br>2. Kiểm tra phân phối dữ liệu (Mất cân bằng nhãn hay có ngoại lai).
+      <br>3. Xác định "nỗi đau kinh doanh" (Sợ bỏ sót hay sợ làm phiền khách).
+      <br>4. Luôn kết hợp chỉ số tối ưu chính (Primary) kèm chỉ số bảo vệ (Guardrail).
+    </div>
+
+    <div class="page-footer">
+      <span>Tài liệu tự học trực quan Học Máy</span>
+      <span>Trang 6 / 6 • Hoàn thành xuất bản PDF</span>
+    </div>
+  </div>
+
+</body>
+</html>

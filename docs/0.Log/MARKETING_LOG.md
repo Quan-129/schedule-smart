@@ -3,6 +3,25 @@
 > **Dự án**: Lịch Học Thông Minh & Chiếc Cặp Google Drive  
 > **Mục tiêu**: Lưu trữ tự động các góc nhìn tiếp thị, điểm độc đáo (USP), viral hooks và kịch bản truyền thông từ các tính năng kỹ thuật.
 
+## 💎 ENTRY 27: [2026-09-20] - "Sổ Tay AI Đa Năng": Thả Trực Tiếp PDF Slide Vào Note, Khoanh Công Thức Hỏi AI & Tự Động Tạo Bộ Đề Ôn Thi 📄🤖✂️🎯
+
+### 📌 Phân Loại & Tags:
+`#UploadPDFInNote` `#IndexedDBStorage` `#InAppPdfReader` `#GeminiVisionSnipping` `#AIQuizGenerator` `#SmartNoteTaking`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Kéo Thả Slide/PDF Vào Sổ Tay - Lưu 100% Offline Bằng IndexedDB**:
+  * Không sợ tràn dung lượng trình duyệt, không cần mở Google Drive hay Acrobat ngoài. Kéo thả file PDF slide bài giảng hoặc đề cương vào sổ tay, tài liệu được lưu dưới dạng thẻ nổi tương tác, kéo rê đặt cạnh đoạn ghi chép tương ứng.
+- **Snipping Tool Thần Thánh - Khoanh Vùng Nào Giải Vùng Đó Bằng Gemini Vision**:
+  * Đang đọc tài liệu gặp một công thức toán ngoằn ngoèo, một sơ đồ mạch điện hay một câu bài tập khó? Chỉ cần bấm **"Khoanh hỏi AI"** và kéo chuột khoanh vùng $\rightarrow$ Gemini Vision đọc trực tiếp từng pixel trên hình vẽ để giải đề và phân tích bản chất ngay tại chỗ!
+- **Tự Động Trích Xuất & Sinh Bộ Đề Trắc Nghiệm Ôn Tập (Instant Quiz Vault)**:
+  * Từ trang slide PDF, chỉ cần 1 click là AI đọc hiểu văn bản, tự động tạo bộ câu hỏi trắc nghiệm kiểm tra kiến thức và đính kèm lời giải chuyên sâu vào Kho Câu Hỏi của bài học.
+- **1-Click Chèn Lời Giải Vào Note**:
+  * Mọi lời giải thích, phân tích công thức từ tài liệu PDF đều có thể bấm nút chèn thẳng vào sổ tay ghi chú chỉ với 1 cú click.
+
+### 2. 🎣 Viral Hooks Cho TikTok / Reels / Shorts:
+- **Hook 1 (Cứu tinh mùa ôn thi)**: *"Ai bảo ghi chú chỉ up được ảnh? Giờ kéo cả file slide PDF bài giảng vào sổ tay, gặp công thức khó chỉ việc lấy chuột khoanh một phát là AI giải chi tiết ngay trên màn hình!"*
+- **Hook 2 (Học thông minh không chuyển tab)**: *"Sinh viên Bách Khoa học thế này: Vừa đọc slide PDF bên trong app, vừa khoanh hỏi AI giải bài tập, vừa bấm 1 nút là AI tự tạo 5 câu trắc nghiệm để test kiến thức trước khi đi ngủ!"*
+
 ## 💎 ENTRY 26: [2026-09-19] - "Biến Một Chương Dài Thành Bộ Câu Hỏi Trúng Đích": AI Tự Phân Rã Kiến Thức, Tặng Mẹo Né Bẫy & Luyện 5 Câu Trắc Nghiệm Tức Thì 🎯📋🧠✨
 
 ### 📌 Phân Loại & Tags:
