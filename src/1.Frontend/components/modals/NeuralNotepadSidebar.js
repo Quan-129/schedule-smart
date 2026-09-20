@@ -1105,6 +1105,9 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
               textarea.value += textToInsert;
               updateLivePreview();
               saveAllNotes();
+            },
+            onOpenAiPopup: (boundingBox, focalText, focalImages, existingPin, mode, autoSendPrompt) => {
+              openInSituAiPopup(boundingBox, focalText, focalImages, existingPin, mode, autoSendPrompt);
             }
           });
         });
@@ -1396,6 +1399,9 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
               updateLivePreview();
               saveAllNotes();
             }
+          },
+          onOpenAiPopup: (boundingBox, focalText, focalImages, existingPin, mode, autoSendPrompt) => {
+            openInSituAiPopup(boundingBox, focalText, focalImages, existingPin, mode, autoSendPrompt);
           }
         });
       });
@@ -3310,7 +3316,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   };
 
   // Mở Popup Chat AI nổi tại đúng vị trí khung chữ nhật vừa khoanh (hoặc mở lại từ icon ghim pin, hoặc mở chế độ AI Copilot toàn bài)
-  const openInSituAiPopup = (boundingBox, focalText = '', focalImages = [], existingPin = null, mode = 'snipe') => {
+  const openInSituAiPopup = (boundingBox, focalText = '', focalImages = [], existingPin = null, mode = 'snipe', autoSendPrompt = '') => {
     closeFloatingPopup();
     if (existingPin) {
       mode = existingPin.mode || (existingPin.focalImages && existingPin.focalImages.length > 0 ? 'snipe' : 'copilot');
@@ -4060,7 +4066,13 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       }
     });
 
-    setTimeout(() => input.focus(), 150);
+    if (autoSendPrompt) {
+      setTimeout(() => {
+        sendFloatingQuestion(autoSendPrompt);
+      }, 100);
+    } else {
+      setTimeout(() => input.focus(), 150);
+    }
   };
 
   /**

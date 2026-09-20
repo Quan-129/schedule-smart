@@ -3,6 +3,25 @@
 > **Dự án**: Lịch Học Thông Minh & Chiếc Cặp Google Drive  
 > **Mục tiêu**: Lưu trữ tự động các góc nhìn tiếp thị, điểm độc đáo (USP), viral hooks và kịch bản truyền thông từ các tính năng kỹ thuật.
 
+## 💎 ENTRY 28: [2026-09-20] - "Khoanh Chỗ Nào Trên PDF, Ghim Ngay Vào Sổ Tay": Trải Nghiệm Học Đồng Bộ Liền Mạch Với Floating AI Drawer Thừa Hưởng 100% Sức Mạnh Ghi Chú 📌🤖📜✨
+
+### 📌 Phân Loại & Tags:
+`#InSituFloatingAI` `#PDFtoNotePinning` `#DraggableChat` `#GeminiVisionPDF` `#SeamlessStudyWorkflow`
+
+### 1. 🌟 Giá Trị Độc Đáo (Unique Selling Proposition - USP):
+- **Khoanh Hỏi AI Trực Tiếp Trên PDF Và Ghim Thẳng Vào Sổ Tay (In-Situ Note Pinning)**:
+  * Không còn cảnh đọc file PDF ở một nơi rồi phải copy paste câu trả lời AI sang chỗ khác. Bạn chỉ cần khoanh công thức hay hình vẽ trên trang tài liệu, AI giải đáp xong, bạn bấm biểu tượng **Ghim (Pin)** $\rightarrow$ toàn bộ câu hỏi và lời giải được đính kèm trực tiếp vào bài học tương ứng!
+- **Cửa Sổ AI Linh Hoạt Tuyệt Đối - Không Che Tài Liệu**:
+  * Cửa sổ AI hỗ trợ kéo rê đi mọi góc màn hình (Draggable) và co giãn tự do (Resizable) 4 góc. Bạn có thể vừa nhìn tài liệu vừa thảo luận với AI, phóng to toàn màn hình hoặc phóng to font chữ để đọc các công thức toán dài ngoằng.
+- **Hỏi Sâu Đa Lượt Với Quick Chips Tinh Chỉnh**:
+  * Các nút gợi ý như `💡 Ý nghĩa từng phần tử`, `📊 Phân tích tương quan`, `⚡ Nhận xét cốt lõi` giúp bóc tách từng thông số trong đồ thị hay bài tập mà không cần gõ phím.
+
+### 2. 🎣 Viral Hooks Cho TikTok / Reels / Shorts:
+- **Hook 1 (Học đỉnh cao không lãng phí 1 giây)**: *"Tính năng đọc PDF xịn nhất từng thấy: Gặp bài khó trong đề cương, lấy chuột khoanh một cái là AI giải ra, bấm nút 'Ghim' một cái là lưu thẳng vào sổ tay ghi chú của bài đó luôn!"*
+- **Hook 2 (Góc học tập tối giản)**: *"Đọc slide PDF trên trình duyệt thông thường: mở cả chục tab ChatGPT, Word, PDF Reader. Trên app này: Đọc slide cuộn chuột mượt mà, khoanh hỏi AI cửa sổ nổi kéo thả co giãn tùy ý, ghim bài ngay tại chỗ!"*
+
+---
+
 ## 💎 ENTRY 27: [2026-09-20] - "Sổ Tay AI Đa Năng": Thả Trực Tiếp PDF Slide Vào Note, Khoanh Công Thức Hỏi AI & Tự Động Tạo Bộ Đề Ôn Thi 📄🤖✂️🎯
 
 ### 📌 Phân Loại & Tags:

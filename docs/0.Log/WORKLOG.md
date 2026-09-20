@@ -4,6 +4,34 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-20 16:55] - Tái Cấu Trúc Kế Thừa 100% In-Situ AI Floating Drawer Cho PDF: Xóa Bỏ Popup Phân Mảnh, Thừa Hưởng Toàn Bộ Tính Năng Ghim Note, Di Chuyển & Đa Lượt (Cache v184) 🤖📌✨
+
+- **🎯 Yêu cầu & Phản hồi từ người dùng**:
+  - Người dùng gửi ảnh chụp popup AI nhỏ trong PDF Reader và đặt câu hỏi rất xác đáng: *"sao không kế thừa cái đã có mà tạo thêm cái mới này chi vậy"*.
+  - **Phân tích vấn đề**:
+    - Trước đó, Trình đọc PDF đã vô tình tự dựng một popup AI riêng (`#pdf-ai-popup`) đơn sơ, thiếu các tính năng cốt lõi đã có của hệ thống Neural Notepad: thiếu nút Ghim phiên chat (Pin Note), thiếu kéo rê di chuyển (Draggable), thiếu co giãn kích thước (Resizable), thiếu nút phóng to toàn màn hình, thiếu quick chips gợi ý câu hỏi và phân mảnh mã nguồn.
+    - Người dùng mong muốn khi khoanh hỏi AI trên tài liệu PDF phải thừa hưởng trọn vẹn sức mạnh của **Floating AI Drawer (`.neural-ai-floating-popup`)** sẵn có.
+
+- **✅ Công việc đã hoàn thành**:
+  - **[Xóa bỏ hoàn toàn Popup trùng lặp & Dọn dẹp mã nguồn]**:
+    - Gỡ bỏ khối DOM `#pdf-ai-popup` và toàn bộ các hàm hỗ trợ riêng lẻ trong [`src/1.Frontend/components/modals/PdfReaderModal.js`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/src/1.Frontend/components/modals/PdfReaderModal.js) (giảm 200 dòng code thừa).
+    - Xóa bỏ toàn bộ CSS cục bộ `.pdf-ai-popup*` trong [`src/1.Frontend/styles/15.pdf-viewer.css`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/src/1.Frontend/styles/15.pdf-viewer.css).
+  - **[Kế thừa hệ thống `openInSituAiPopup` đa năng] ([`src/1.Frontend/components/modals/NeuralNotepadSidebar.js`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/src/1.Frontend/components/modals/NeuralNotepadSidebar.js))**:
+    - Bổ sung tham số `autoSendPrompt = ''` vào `openInSituAiPopup` để hỗ trợ tự động gửi câu hỏi phân tích ngay khi vừa khoanh xong trên PDF mà người dùng không cần gõ lại.
+    - Truyền callback `onOpenAiPopup` từ `NeuralNotepadSidebar` sang `PdfReaderModal` ở cả 2 điểm kích hoạt (khay đính kèm bài viết & danh sách tệp PDF).
+  - **[Thừa hưởng trọn vẹn 100% tính năng AI cao cấp trên PDF]**:
+    1. **Nút Ghim (Pin Note)**: Nhấp một chạm để lưu giữ toàn bộ câu hỏi, lời giải AI và ảnh cắt từ PDF vào danh sách Ghim bài học (`node.aiChatPins`).
+    2. **Kéo rê di chuyển (Draggable Header)**: Di chuyển cửa sổ AI đi bất cứ đâu trên màn hình để không che nội dung tài liệu đang đọc.
+    3. **Co giãn kích thước tự do (Resizable)**: Cầm kéo 4 góc để mở rộng hoặc thu hẹp kích thước popup theo ý muốn.
+    4. **Nút Phóng to toàn màn hình (Maximize / Restore)**: Mở rộng cực đại để đọc lời giải công thức toán học hoặc bảng biểu phức tạp.
+    5. **Quick Chips gợi ý thông minh**: `💡 Ý nghĩa từng phần tử`, `📊 Phân tích tương quan`, `⚡ Nhận xét cốt lõi`, `3 ý cốt lõi`...
+    6. **Hỏi đáp đa lượt (Multi-turn Chat)**: Tiếp tục đặt câu hỏi chuyên sâu trên vùng hình ảnh đã khoanh với Gemini Vision.
+    7. **Điều chỉnh cỡ chữ linh hoạt**: Hỗ trợ tăng giảm zoom font chữ (`Ctrl +`, `Ctrl -`, `Ctrl 0`).
+  - **[Nâng cấp Service Worker Cache v184] ([`sw.js`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/sw.js))**:
+    - Chuyển `CACHE_NAME = 'smart-schedule-modular-v184'` đảm bảo PWA cập nhật tức thì.
+
+---
+
 ## 📅 [2026-09-20 16:45] - Triển Khai Chế Độ Cuộn Chuột Đọc Tài Liệu Nhiều Trang Liên Tục (Continuous Multi-Page Scroll) & Lazy-Rendering Chuẩn Quốc Tế (Cache v183) 📜🖱️⚡
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:

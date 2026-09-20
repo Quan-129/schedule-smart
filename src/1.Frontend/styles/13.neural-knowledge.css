@@ -2927,7 +2927,7 @@ body.neural-resizing-active {
 .neural-ai-floating-popup {
   --ai-chat-zoom: 1;
   position: fixed;
-  z-index: 1250;
+  z-index: 100005;
   width: 420px;
   height: 480px;
   min-width: 320px;

@@ -15,8 +15,7 @@
 import { escapeHtml } from '../../../4.Security/sanitizer.js';
 import { getPdfAttachment, createPdfBlobUrl, revokePdfBlobUrl } from '../../../3.Database/storage/IndexedDBEngine.js';
 import { loadPdfDocument, extractPdfText, renderPdfPageToCanvas, cropCanvasAreaToBase64 } from '../../../2.Backend/services/PdfExtractionService.js';
-import { askContextualNoteQuestion, generate5TopicPracticeQuizzes } from '../../../2.Backend/services/GeminiAIService.js';
-import { renderMarkdownToHtml } from '../../../2.Backend/utils/markdownRenderer.js';
+import { generate5TopicPracticeQuizzes } from '../../../2.Backend/services/GeminiAIService.js';
 import { showToast } from '../Toast.js';
 
 // 2. STATE VARIABLES
@@ -30,6 +29,7 @@ let currentPageNum = 1;
 let totalPageCount = 1;
 let currentScale = 1.35;
 let insertToNoteCallback = null;
+let openAiPopupCallback = null;
 
 let isSnippingActive = false;
 let renderedPages = new Set();
@@ -46,6 +46,7 @@ let isMouseDownOnSnipe = false;
  * @param {Object} [options.targetNode] - Node nơ-ron đang mở
  * @param {Array<Object>} [options.allNodes] - Danh sách node môn học
  * @param {Function} [options.onInsertToNote] - Callback chèn văn bản/lời giải vào Notepad
+ * @param {Function} [options.onOpenAiPopup] - Callback kích hoạt Floating AI Popup kế thừa từ Notepad
  */
 export async function openPdfReaderModal({
   pdfId,
@@ -53,7 +54,8 @@ export async function openPdfReaderModal({
   subjectCode = '',
   targetNode = null,
   allNodes = [],
-  onInsertToNote = null
+  onInsertToNote = null,
+  onOpenAiPopup = null
 }) {
   currentPdfId = pdfId;
   currentPdfName = pdfName;
@@ -61,6 +63,7 @@ export async function openPdfReaderModal({
   currentTargetNode = targetNode;
   currentAllNodes = allNodes;
   insertToNoteCallback = onInsertToNote;
+  openAiPopupCallback = onOpenAiPopup;
   currentPageNum = 1;
   currentScale = 1.35;
 
@@ -146,24 +149,6 @@ export async function openPdfReaderModal({
           <span>Đang nạp dữ liệu PDF...</span>
         </div>
         <div class="pdf-pages-container" id="pdf-pages-container" style="display: none;"></div>
-      </div>
-
-      <!-- 3. Khung Chat AI Nổi Tại Chỗ (In-situ AI Popup) -->
-      <div class="pdf-ai-popup" id="pdf-ai-popup" style="display: none;">
-        <div class="pdf-ai-popup-header">
-          <div class="pdf-ai-popup-title" id="pdf-ai-popup-title">
-            <i class="fa-solid fa-brain"></i>
-            <span>Trợ lý AI Phân Tích PDF</span>
-          </div>
-          <button type="button" class="pdf-reader-close-btn" id="btn-close-pdf-ai-popup" style="width: 26px; height: 26px; font-size: 0.85rem;">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-        <div class="pdf-ai-popup-body" id="pdf-ai-popup-body"></div>
-        <div class="pdf-ai-popup-footer">
-          <input type="text" id="pdf-ai-input" placeholder="Hỏi thêm chi tiết về vùng này..." spellcheck="false" />
-          <button type="button" id="btn-send-pdf-ai">Gửi</button>
-        </div>
       </div>
     </div>
   `;
@@ -490,7 +475,25 @@ function attachSnippingEventsToAllPages(overlay) {
         height
       });
 
-      await openPdfAiPopupWithCrop(cropRes, targetPage);
+      if (typeof openAiPopupCallback === 'function') {
+        const screenBoundingBox = {
+          left: rect.left + left,
+          top: rect.top + top,
+          right: rect.left + left + width,
+          bottom: rect.top + top + height,
+          width,
+          height
+        };
+        const prompt = 'Hãy phân tích chi tiết công thức, bảng biểu hoặc bài tập trong hình ảnh đính kèm này, chỉ ra các bẫy thường gặp và cách vận dụng chuẩn xác.';
+        openAiPopupCallback(
+          screenBoundingBox,
+          `Tài liệu: ${currentPdfName} (Trang ${targetPage})`,
+          [{ dataUrl: cropRes.dataUrl, mimeType: cropRes.mimeType, base64: cropRes.base64 }],
+          null,
+          'snipe',
+          prompt
+        );
+      }
     } catch (err) {
       console.error('Lỗi cắt ảnh vùng khoanh:', err);
       showToast('Không thể cắt vùng ảnh đã chọn!', 'error');
@@ -615,7 +618,17 @@ function attachPdfModalEvents(overlay) {
       showToast(`🤖 Đang đọc nội dung trang ${currentPageNum} để hỏi AI...`, 'info');
       const textRes = await extractPdfText(currentPdfDoc, currentPageNum, currentPageNum);
       const pageText = textRes.fullText || '';
-      await openPdfAiPopupWithText(pageText, `Trang ${currentPageNum}`);
+      if (typeof openAiPopupCallback === 'function') {
+        const prompt = `Tóm tắt bản chất cốt lõi, công thức quan trọng và các điểm lưu ý của trang ${currentPageNum} trong tài liệu ${currentPdfName}.`;
+        openAiPopupCallback(
+          null,
+          `Nội dung từ ${currentPdfName} (Trang ${currentPageNum}):\n${pageText.slice(0, 3000)}`,
+          [],
+          null,
+          'copilot',
+          prompt
+        );
+      }
     } catch (e) {
       showToast('Lỗi đọc nội dung trang!', 'error');
     }
@@ -681,12 +694,7 @@ function attachPdfModalEvents(overlay) {
   // Phím tắt bàn phím
   const onKeyDown = (e) => {
     if (e.key === 'Escape') {
-      const popup = overlay.querySelector('#pdf-ai-popup');
-      if (popup && popup.style.display !== 'none') {
-        popup.style.display = 'none';
-      } else {
-        closePdfReaderModal();
-      }
+      closePdfReaderModal();
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
       if (document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
         e.preventDefault();
@@ -716,202 +724,4 @@ function attachPdfModalEvents(overlay) {
     }
   };
   document.addEventListener('keydown', onKeyDown);
-}
-
-// 6. IN-SITU AI POPUP CONTROLLERS
-let currentCropData = null;
-let currentTextContext = '';
-let currentAiChatHistory = [];
-
-async function openPdfAiPopupWithCrop(cropRes, targetPageNum = currentPageNum) {
-  currentCropData = cropRes;
-  currentTextContext = '';
-  currentAiChatHistory = [];
-
-  const overlay = document.getElementById('pdf-reader-modal-overlay');
-  const popup = overlay?.querySelector('#pdf-ai-popup');
-  const body = overlay?.querySelector('#pdf-ai-popup-body');
-  const title = overlay?.querySelector('#pdf-ai-popup-title');
-  if (!popup || !body) return;
-
-  if (title) title.innerHTML = `<i class="fa-solid fa-crop-simple"></i> Phân Tích Vùng Khoanh (Trang ${targetPageNum})`;
-
-  body.innerHTML = `
-    <img src="${cropRes.dataUrl}" alt="Vùng khoanh chọn" class="focal-preview-img" />
-    <div class="pdf-ai-loading">
-      <i class="fa-solid fa-circle-notch fa-spin"></i> Đang gửi hình ảnh sang Gemini Vision phân tích...
-    </div>
-  `;
-  popup.style.display = 'flex';
-
-  attachPopupSendEvent();
-
-  try {
-    const aiAnswer = await askContextualNoteQuestion({
-      subjectCode: currentSubjectCode,
-      targetNode: currentTargetNode,
-      allNodes: currentAllNodes,
-      fullContext: `Tài liệu PDF: ${currentPdfName} (Trang ${targetPageNum})`,
-      focalText: `Phân tích chi tiết công thức, bảng biểu hoặc bài tập trong hình ảnh đính kèm từ trang ${targetPageNum} của tài liệu ${currentPdfName}.`,
-      focalImages: [{ mimeType: cropRes.mimeType, base64: cropRes.base64 }],
-      userQuestion: 'Hãy giải thích cặn kẽ bản chất công thức/sơ đồ/bài tập được chụp trong ảnh này, chỉ ra các bẫy thường gặp và cách vận dụng chuẩn xác.',
-      chatHistory: currentAiChatHistory
-    });
-
-    currentAiChatHistory.push(
-      { role: 'user', text: 'Giải thích vùng khoanh chọn' },
-      { role: 'model', text: aiAnswer.text }
-    );
-
-    renderPopupAnswer(aiAnswer.text);
-  } catch (err) {
-    body.innerHTML = `<div style="color: #f87171;">❌ Lỗi phân tích: ${escapeHtml(err.message)}</div>`;
-  }
-}
-
-async function openPdfAiPopupWithText(pageText, label) {
-  currentCropData = null;
-  currentTextContext = pageText;
-  currentAiChatHistory = [];
-
-  const overlay = document.getElementById('pdf-reader-modal-overlay');
-  const popup = overlay?.querySelector('#pdf-ai-popup');
-  const body = overlay?.querySelector('#pdf-ai-popup-body');
-  const title = overlay?.querySelector('#pdf-ai-popup-title');
-  if (!popup || !body) return;
-
-  if (title) title.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> AI Copilot: ${escapeHtml(label)}`;
-
-  body.innerHTML = `
-    <div class="pdf-ai-loading">
-      <i class="fa-solid fa-circle-notch fa-spin"></i> Đang đọc hiểu toàn bộ ${escapeHtml(label)}...
-    </div>
-  `;
-  popup.style.display = 'flex';
-
-  attachPopupSendEvent();
-
-  try {
-    const aiAnswer = await askContextualNoteQuestion({
-      subjectCode: currentSubjectCode,
-      targetNode: currentTargetNode,
-      allNodes: currentAllNodes,
-      fullContext: `Tài liệu PDF: ${currentPdfName} (Trang ${currentPageNum})`,
-      focalText: pageText.slice(0, 3500),
-      focalImages: [],
-      userQuestion: 'Tóm tắt các ý chính cốt lõi, công thức quan trọng và mẹo học tập của trang tài liệu này.',
-      chatHistory: currentAiChatHistory
-    });
-
-    currentAiChatHistory.push(
-      { role: 'user', text: 'Tóm tắt trang' },
-      { role: 'model', text: aiAnswer.text }
-    );
-
-    renderPopupAnswer(aiAnswer.text);
-  } catch (err) {
-    body.innerHTML = `<div style="color: #f87171;">❌ Lỗi phân tích: ${escapeHtml(err.message)}</div>`;
-  }
-}
-
-function renderPopupAnswer(answerText) {
-  const overlay = document.getElementById('pdf-reader-modal-overlay');
-  const body = overlay?.querySelector('#pdf-ai-popup-body');
-  if (!body) return;
-
-  const previewImgHtml = currentCropData ? `<img src="${currentCropData.dataUrl}" alt="Vùng khoanh chọn" class="focal-preview-img" />` : '';
-
-  body.innerHTML = `
-    ${previewImgHtml}
-    <div class="pdf-ai-markdown-response">
-      ${renderMarkdownToHtml(answerText)}
-    </div>
-    <div style="margin-top: 12px; display: flex; gap: 8px;">
-      <button type="button" class="pdf-tool-btn" id="btn-insert-ai-answer" style="font-size: 0.75rem; padding: 4px 8px;">
-        <i class="fa-solid fa-file-circle-plus"></i> Chèn vào Note
-      </button>
-      <button type="button" class="pdf-tool-btn" id="btn-copy-ai-answer" style="font-size: 0.75rem; padding: 4px 8px;">
-        <i class="fa-regular fa-copy"></i> Sao chép
-      </button>
-    </div>
-  `;
-
-  body.querySelector('#btn-insert-ai-answer')?.addEventListener('click', () => {
-    if (typeof insertToNoteCallback === 'function') {
-      const block = `\n\n### 🤖 Lời giải AI từ tài liệu ${escapeHtml(currentPdfName)} (Trang ${currentPageNum}):\n${answerText}\n`;
-      insertToNoteCallback(block);
-      showToast('Đã chèn câu trả lời của AI vào ghi chú! ✨', 'success');
-    }
-  });
-
-  body.querySelector('#btn-copy-ai-answer')?.addEventListener('click', () => {
-    navigator.clipboard.writeText(answerText).then(() => {
-      showToast('Đã sao chép câu trả lời!');
-    });
-  });
-}
-
-function attachPopupSendEvent() {
-  const overlay = document.getElementById('pdf-reader-modal-overlay');
-  const popup = overlay?.querySelector('#pdf-ai-popup');
-  const btnClose = overlay?.querySelector('#btn-close-pdf-ai-popup');
-  const btnSend = overlay?.querySelector('#btn-send-pdf-ai');
-  const input = overlay?.querySelector('#pdf-ai-input');
-
-  if (btnClose && popup) {
-    btnClose.onclick = () => {
-      popup.style.display = 'none';
-    };
-  }
-
-  const handleSend = async () => {
-    const q = input?.value?.trim();
-    if (!q) return;
-    input.value = '';
-
-    const body = overlay?.querySelector('#pdf-ai-popup-body');
-    if (body) {
-      const userBubble = document.createElement('div');
-      userBubble.style.cssText = 'background: rgba(99, 102, 241, 0.2); padding: 8px; border-radius: 8px; margin: 8px 0; font-weight: 600; color: #c7d2fe;';
-      userBubble.textContent = `Bạn: ${q}`;
-      body.appendChild(userBubble);
-
-      const loading = document.createElement('div');
-      loading.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> AI đang suy nghĩ...';
-      body.appendChild(loading);
-      body.scrollTop = body.scrollHeight;
-
-      try {
-        const focalImgs = currentCropData ? [{ mimeType: currentCropData.mimeType, base64: currentCropData.base64 }] : [];
-        const res = await askContextualNoteQuestion({
-          subjectCode: currentSubjectCode,
-          targetNode: currentTargetNode,
-          allNodes: currentAllNodes,
-          fullContext: `Tài liệu PDF: ${currentPdfName} (Trang ${currentPageNum})`,
-          focalText: currentTextContext || 'Vùng khoanh chọn',
-          focalImages: focalImgs,
-          userQuestion: q,
-          chatHistory: currentAiChatHistory
-        });
-
-        loading.remove();
-        currentAiChatHistory.push({ role: 'user', text: q }, { role: 'model', text: res.text });
-
-        const modelBubble = document.createElement('div');
-        modelBubble.style.cssText = 'background: rgba(30, 41, 59, 0.6); padding: 10px; border-radius: 8px; margin: 8px 0; border: 1px solid rgba(255, 255, 255, 0.08);';
-        modelBubble.innerHTML = renderMarkdownToHtml(res.text);
-        body.appendChild(modelBubble);
-        body.scrollTop = body.scrollHeight;
-      } catch (err) {
-        loading.innerHTML = `<span style="color: #f87171;">Lỗi: ${escapeHtml(err.message)}</span>`;
-      }
-    }
-  };
-
-  if (btnSend) btnSend.onclick = handleSend;
-  if (input) {
-    input.onkeydown = (e) => {
-      if (e.key === 'Enter') handleSend();
-    };
-  }
 }
