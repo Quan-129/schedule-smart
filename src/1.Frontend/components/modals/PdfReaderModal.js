@@ -15,7 +15,7 @@
 import { escapeHtml } from '../../../4.Security/sanitizer.js';
 import { getPdfAttachment, createPdfBlobUrl, revokePdfBlobUrl } from '../../../3.Database/storage/IndexedDBEngine.js';
 import { loadPdfDocument, extractPdfText, renderPdfPageToCanvas, cropCanvasAreaToBase64 } from '../../../2.Backend/services/PdfExtractionService.js';
-import { askContextualNoteQuestion, generateQuizzesForTopic } from '../../../2.Backend/services/GeminiAIService.js';
+import { askContextualNoteQuestion, generate5TopicPracticeQuizzes } from '../../../2.Backend/services/GeminiAIService.js';
 import { renderMarkdownToHtml } from '../../../2.Backend/utils/markdownRenderer.js';
 import { showToast } from '../Toast.js';
 
@@ -396,12 +396,15 @@ function attachPdfModalEvents(overlay) {
       const text = textRes.fullText || '';
 
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> AI Gen 5 câu...';
-      const quizzes = await generateQuizzesForTopic(
-        `Tài liệu: ${currentPdfName}`,
+      const quizzes = await generate5TopicPracticeQuizzes(
+        `Tài liệu: ${currentPdfName} (Trang ${currentPageNum})`,
         `Nội dung trích xuất từ trang ${currentPageNum} của tệp ${currentPdfName}`,
-        currentTargetNode?.label || 'Chuyên đề học tập',
-        text.slice(0, 4500),
-        []
+        {
+          label: currentTargetNode?.label || currentPdfName,
+          notes: text.slice(0, 3000),
+          visualNotes: { html: '' }
+        },
+        currentAllNodes
       );
 
       if (Array.isArray(quizzes) && quizzes.length > 0 && currentTargetNode) {

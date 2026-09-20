@@ -4,6 +4,24 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-20 16:10] - Khắc Phục Lỗi Mismatched Named Export `generate5TopicPracticeQuizzes` & Quét Sạch 100% Import Toàn Hệ Thống (Cache v181) 🛠️🎯
+
+- **🎯 Vấn đề & Triệu chứng**:
+  - Trình duyệt ném lỗi cú pháp runtime: `PdfReaderModal.js:18 Uncaught SyntaxError: The requested module '../../../2.Backend/services/GeminiAIService.js' does not provide an export named 'generateQuizzesForTopic' (at PdfReaderModal.js:18:37)`.
+  - Nguyên nhân: File [`PdfReaderModal.js`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/src/1.Frontend/components/modals/PdfReaderModal.js) khai báo import tên hàm chưa chuẩn `generateQuizzesForTopic` thay vì hàm chuẩn `generate5TopicPracticeQuizzes` đã được định nghĩa trong [`GeminiAIService.js`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/src/2.Backend/services/GeminiAIService.js).
+
+- **✅ Công việc đã hoàn thành**:
+  - **[Sửa lỗi Export/Import] ([`src/1.Frontend/components/modals/PdfReaderModal.js`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/src/1.Frontend/components/modals/PdfReaderModal.js))**:
+    - Chuẩn hóa tên hàm import thành `generate5TopicPracticeQuizzes`.
+    - Cập nhật đúng chữ ký truyền tham số `{ label, notes, visualNotes }` và `currentAllNodes` khi người dùng bấm nút tạo trắc nghiệm từ trang PDF.
+  - **[Kiểm tra tĩnh nâng cao toàn bộ codebase]**:
+    - Viết công cụ phân tích AST/Regex kiểm tra toàn bộ 46 tệp JS trong thư mục `src/`, đối chiếu 100% các câu lệnh `import { ... }` và `export { ... } / export * from ...`.
+    - Kết quả: Đạt chuẩn 100% không còn bất kỳ lỗi mismatch hay thiếu hàm nào.
+  - **[Cập nhật Service Worker Cache v181] ([`sw.js`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/sw.js))**:
+    - Nâng cấp `CACHE_NAME = 'smart-schedule-modular-v181'` kích hoạt cơ chế xóa bộ nhớ đệm cũ ngay lập tức.
+
+---
+
 ## 📅 [2026-09-20 16:05] - Khắc Phục Lỗi Import Module 404 MarkdownRenderer & Đồng Bộ PWA Cache v180 🛠️⚡
 
 - **🎯 Vấn đề & Triệu chứng**:
