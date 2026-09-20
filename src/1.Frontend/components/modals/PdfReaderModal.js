@@ -16,7 +16,7 @@ import { escapeHtml } from '../../../4.Security/sanitizer.js';
 import { getPdfAttachment, createPdfBlobUrl, revokePdfBlobUrl } from '../../../3.Database/storage/IndexedDBEngine.js';
 import { loadPdfDocument, extractPdfText, renderPdfPageToCanvas, cropCanvasAreaToBase64 } from '../../../2.Backend/services/PdfExtractionService.js';
 import { askContextualNoteQuestion, generateQuizzesForTopic } from '../../../2.Backend/services/GeminiAIService.js';
-import { renderMarkdownToHtml } from '../../views/neural/MarkdownRenderer.js';
+import { renderMarkdownToHtml } from '../../../2.Backend/utils/markdownRenderer.js';
 import { showToast } from '../Toast.js';
 
 // 2. STATE VARIABLES

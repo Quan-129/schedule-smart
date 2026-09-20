@@ -4,6 +4,23 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-20 16:05] - Khắc Phục Lỗi Import Module 404 MarkdownRenderer & Đồng Bộ PWA Cache v180 🛠️⚡
+
+- **🎯 Vấn đề & Triệu chứng**:
+  - Khi người dùng tải lại trang trên GitHub Pages, console ném lỗi: `MarkdownRenderer.js:1 Failed to load resource: the server responded with a status of 404 ()` và chặn toàn bộ quá trình nạp ES Modules của trang web, dẫn tới không hiển thị được màn hình đăng nhập.
+  - Nguyên nhân: File [`PdfReaderModal.js`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/src/1.Frontend/components/modals/PdfReaderModal.js) khai báo sai đường dẫn tương đối `import { renderMarkdownToHtml } from '../../views/neural/MarkdownRenderer.js'` (đúng ra phải là `../../../2.Backend/utils/markdownRenderer.js`).
+
+- **✅ Công việc đã hoàn thành**:
+  - **[Sửa lỗi Import Module] ([`src/1.Frontend/components/modals/PdfReaderModal.js`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/src/1.Frontend/components/modals/PdfReaderModal.js))**:
+    - Sửa chính xác đường dẫn import `renderMarkdownToHtml` về `../../../2.Backend/utils/markdownRenderer.js`.
+  - **[Kiểm tra tính toàn vẹn hệ thống]**:
+    - Chạy script kiểm tra tự động toàn bộ 46 module JavaScript trong thư mục `src/`, xác nhận 100% đường dẫn import tương đối đều hợp lệ và trỏ đúng file tồn tại.
+  - **[Nâng cấp Service Worker] ([`sw.js`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/sw.js))**:
+    - Nâng cấp phiên bản cache `CACHE_NAME = 'smart-schedule-modular-v180'`.
+    - Bổ sung `./src/2.Backend/utils/markdownRenderer.js` vào mảng `STATIC_ASSETS` để hỗ trợ nạp offline hoàn hảo.
+
+---
+
 ## 📅 [2026-09-20 15:45] - Triển Khai Tính Năng Upload PDF Vào Ghi Chú & Tích Hợp Bộ Công Cụ AI Đa Phương Thức (Snipping, Copilot & Quiz Generator) 📄🤖🚀
 
 - **🎯 Yêu cầu & Trải nghiệm người dùng**:
