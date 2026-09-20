@@ -99,8 +99,8 @@ export async function openPdfReaderModal({
           <button type="button" class="pdf-nav-btn" id="btn-pdf-zoom-out" title="Thu nhỏ (Ctrl -)">
             <i class="fa-solid fa-magnifying-glass-minus"></i>
           </button>
-          <button type="button" class="pdf-nav-btn" id="btn-pdf-zoom-reset" title="Đặt lại 100%">
-            <i class="fa-solid fa-expand"></i>
+          <button type="button" class="pdf-nav-btn pdf-zoom-reset-btn" id="btn-pdf-zoom-reset" title="Đặt lại 100%">
+            <span id="pdf-zoom-level">100%</span>
           </button>
           <button type="button" class="pdf-nav-btn" id="btn-pdf-zoom-in" title="Phóng to (Ctrl +)">
             <i class="fa-solid fa-magnifying-glass-plus"></i>
@@ -130,10 +130,15 @@ export async function openPdfReaderModal({
           </button>
         </div>
 
-        <!-- Nút đóng -->
-        <button type="button" class="pdf-reader-close-btn" id="btn-pdf-modal-close" title="Đóng (ESC)">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+        <!-- Nhóm Cửa Sổ: Toàn Màn Hình & Nút Đóng -->
+        <div class="pdf-window-actions">
+          <button type="button" class="pdf-nav-btn pdf-fullscreen-btn" id="btn-pdf-fullscreen" title="Toàn màn hình (Phím F)">
+            <i class="fa-solid fa-expand"></i>
+          </button>
+          <button type="button" class="pdf-reader-close-btn" id="btn-pdf-modal-close" title="Đóng (ESC)">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
       </div>
 
       <!-- 2. Body Viewport Canvas -->
@@ -201,6 +206,9 @@ export async function openPdfReaderModal({
  * Đóng Modal đọc PDF
  */
 export function closePdfReaderModal() {
+  if (document.fullscreenElement && document.exitFullscreen) {
+    document.exitFullscreen().catch(() => {});
+  }
   const overlay = document.getElementById('pdf-reader-modal-overlay');
   if (overlay) {
     overlay.classList.remove('active');
@@ -223,12 +231,18 @@ async function renderCurrentPdfPage() {
   const indicator = overlay.querySelector('#pdf-page-indicator');
   const btnPrev = overlay.querySelector('#btn-pdf-prev');
   const btnNext = overlay.querySelector('#btn-pdf-next');
+  const zoomLevel = overlay.querySelector('#pdf-zoom-level');
 
   if (indicator) {
     indicator.textContent = `Trang ${currentPageNum} / ${totalPageCount}`;
   }
   if (btnPrev) btnPrev.disabled = currentPageNum <= 1;
   if (btnNext) btnNext.disabled = currentPageNum >= totalPageCount;
+
+  if (zoomLevel) {
+    const percent = Math.round((currentScale / 1.35) * 100);
+    zoomLevel.textContent = `${percent}%`;
+  }
 
   if (canvas) {
     await renderPdfPageToCanvas(currentPdfDoc, currentPageNum, canvas, currentScale);
@@ -257,7 +271,7 @@ function attachPdfModalEvents(overlay) {
     }
   });
 
-  // 3. Phóng to / Thu nhỏ
+  // 3. Phóng to / Thu nhỏ / Đặt lại 100%
   overlay.querySelector('#btn-pdf-zoom-in')?.addEventListener('click', async () => {
     currentScale = Math.min(3.0, currentScale + 0.25);
     await renderCurrentPdfPage();
@@ -269,6 +283,56 @@ function attachPdfModalEvents(overlay) {
   overlay.querySelector('#btn-pdf-zoom-reset')?.addEventListener('click', async () => {
     currentScale = 1.35;
     await renderCurrentPdfPage();
+  });
+
+  // 3.1. Chế độ Toàn màn hình (Fullscreen Toggle)
+  const btnFullscreen = overlay.querySelector('#btn-pdf-fullscreen');
+  const container = overlay.querySelector('.pdf-reader-container');
+
+  const updateFullscreenIcon = () => {
+    const isFs = container?.classList.contains('is-fullscreen') || !!document.fullscreenElement;
+    if (btnFullscreen) {
+      btnFullscreen.innerHTML = isFs ? '<i class="fa-solid fa-compress"></i>' : '<i class="fa-solid fa-expand"></i>';
+      btnFullscreen.title = isFs ? 'Thu nhỏ cửa sổ (Phím F hoặc ESC)' : 'Toàn màn hình (Phím F)';
+      btnFullscreen.classList.toggle('active', isFs);
+    }
+  };
+
+  const toggleFullscreen = async () => {
+    if (!container) return;
+    const isCurrentlyFs = container.classList.contains('is-fullscreen') || !!document.fullscreenElement;
+
+    if (!isCurrentlyFs) {
+      container.classList.add('is-fullscreen');
+      try {
+        if (container.requestFullscreen && !document.fullscreenElement) {
+          await container.requestFullscreen();
+        }
+      } catch (fsErr) {
+        console.warn('Browser Fullscreen fallback sang CSS fullscreen:', fsErr);
+      }
+    } else {
+      container.classList.remove('is-fullscreen');
+      try {
+        if (document.fullscreenElement && document.exitFullscreen) {
+          await document.exitFullscreen();
+        }
+      } catch (exitErr) {
+        console.warn('Exit fullscreen error:', exitErr);
+      }
+    }
+    updateFullscreenIcon();
+    // Render lại trang với scale hiện tại sau khi đổi viewport
+    await renderCurrentPdfPage();
+  };
+
+  btnFullscreen?.addEventListener('click', toggleFullscreen);
+
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && container?.classList.contains('is-fullscreen')) {
+      container.classList.remove('is-fullscreen');
+      updateFullscreenIcon();
+    }
   });
 
   // 4. Nút Tải file gốc
@@ -456,6 +520,12 @@ function attachPdfModalEvents(overlay) {
       overlay.querySelector('#btn-pdf-prev')?.click();
     } else if (e.key === 'ArrowRight') {
       overlay.querySelector('#btn-pdf-next')?.click();
+    } else if ((e.key === 'f' || e.key === 'F') && !e.ctrlKey && !e.altKey && !e.metaKey) {
+      const activeEl = document.activeElement;
+      if (activeEl?.tagName !== 'INPUT' && activeEl?.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        toggleFullscreen();
+      }
     }
   };
   document.addEventListener('keydown', onKeyDown);

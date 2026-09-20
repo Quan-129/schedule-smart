@@ -4,6 +4,25 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-20 16:20] - Bổ Sung Tính Năng Toàn Màn Hình (Fullscreen Mode) & Chuẩn Hóa Bộ Điều Khiển Phóng To PDF Reader (Cache v182) 🖥️📄✨
+
+- **🎯 Yêu cầu & Bối cảnh người dùng**:
+  - Người dùng gửi ảnh chụp màn hình góc trên Trình đọc PDF và phản ánh: *"chức năng xem ở chế độ toàn màn hình nay vẫn chưa dùng được"*.
+  - Nguyên nhân: Trước đó, icon `fa-expand` (khung 4 góc) bị gán nhầm cho nút `#btn-pdf-zoom-reset` (chỉ có chức năng đặt lại zoom 100%), khiến người dùng bấm vào tưởng là chế độ toàn màn hình nhưng không thấy giao diện bung tràn viền.
+
+- **✅ Công việc đã hoàn thành**:
+  - **[Bổ sung tính năng Toàn màn hình thực sự] ([`src/1.Frontend/components/modals/PdfReaderModal.js`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/src/1.Frontend/components/modals/PdfReaderModal.js))**:
+    - Tách riêng nút chuyên biệt `#btn-pdf-fullscreen` với icon `fa-solid fa-expand` đặt tại cụm điều khiển cửa sổ cạnh nút Đóng.
+    - Tích hợp chuẩn **HTML5 Fullscreen API** (`container.requestFullscreen()` / `document.exitFullscreen()`) kết hợp lớp CSS `.is-fullscreen` (bung tràn 100vw x 100vh, border-radius 0px, che toàn bộ viền xung quanh).
+    - Tự động đồng bộ icon `fa-compress` / `fa-expand` khi người dùng bấm phím ESC hoặc phím F11 của trình duyệt thông qua sự kiện `fullscreenchange`.
+    - Hỗ trợ phím tắt **`F`** trên bàn phím để bật/tắt toàn màn hình tức thì khi đang đọc tài liệu.
+  - **[Chuẩn hóa thanh Zoom & Tỉ lệ] ([`src/1.Frontend/styles/15.pdf-viewer.css`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/src/1.Frontend/styles/15.pdf-viewer.css))**:
+    - Chuyển nút đặt lại zoom thành nhãn hiển thị số phần trăm thực tế `#pdf-zoom-level` (`100%`, `125%`, `75%`), click vào nhãn để reset tỉ lệ về chuẩn 100%.
+  - **[Nâng cấp Service Worker Cache v182] ([`sw.js`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/sw.js))**:
+    - Nâng cấp `CACHE_NAME = 'smart-schedule-modular-v182'`.
+
+---
+
 ## 📅 [2026-09-20 16:10] - Khắc Phục Lỗi Mismatched Named Export `generate5TopicPracticeQuizzes` & Quét Sạch 100% Import Toàn Hệ Thống (Cache v181) 🛠️🎯
 
 - **🎯 Vấn đề & Triệu chứng**:
