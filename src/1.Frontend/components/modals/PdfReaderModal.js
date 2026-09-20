@@ -484,14 +484,12 @@ function attachSnippingEventsToAllPages(overlay) {
           width,
           height
         };
-        const prompt = 'Hãy phân tích chi tiết công thức, bảng biểu hoặc bài tập trong hình ảnh đính kèm này, chỉ ra các bẫy thường gặp và cách vận dụng chuẩn xác.';
         openAiPopupCallback(
           screenBoundingBox,
           `Tài liệu: ${currentPdfName} (Trang ${targetPage})`,
           [{ dataUrl: cropRes.dataUrl, mimeType: cropRes.mimeType, base64: cropRes.base64 }],
           null,
-          'snipe',
-          prompt
+          'snipe'
         );
       }
     } catch (err) {
@@ -619,14 +617,12 @@ function attachPdfModalEvents(overlay) {
       const textRes = await extractPdfText(currentPdfDoc, currentPageNum, currentPageNum);
       const pageText = textRes.fullText || '';
       if (typeof openAiPopupCallback === 'function') {
-        const prompt = `Tóm tắt bản chất cốt lõi, công thức quan trọng và các điểm lưu ý của trang ${currentPageNum} trong tài liệu ${currentPdfName}.`;
         openAiPopupCallback(
           null,
           `Nội dung từ ${currentPdfName} (Trang ${currentPageNum}):\n${pageText.slice(0, 3000)}`,
           [],
           null,
-          'copilot',
-          prompt
+          'copilot'
         );
       }
     } catch (e) {
@@ -694,6 +690,9 @@ function attachPdfModalEvents(overlay) {
   // Phím tắt bàn phím
   const onKeyDown = (e) => {
     if (e.key === 'Escape') {
+      if (document.fullscreenElement) {
+        return; // Trình duyệt tự thoát toàn màn hình, không đóng modal
+      }
       closePdfReaderModal();
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
       if (document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {

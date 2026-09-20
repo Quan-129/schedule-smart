@@ -1106,8 +1106,8 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
               updateLivePreview();
               saveAllNotes();
             },
-            onOpenAiPopup: (boundingBox, focalText, focalImages, existingPin, mode, autoSendPrompt) => {
-              openInSituAiPopup(boundingBox, focalText, focalImages, existingPin, mode, autoSendPrompt);
+            onOpenAiPopup: (boundingBox, focalText, focalImages, existingPin, mode) => {
+              openInSituAiPopup(boundingBox, focalText, focalImages, existingPin, mode);
             }
           });
         });
@@ -1400,8 +1400,8 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
               saveAllNotes();
             }
           },
-          onOpenAiPopup: (boundingBox, focalText, focalImages, existingPin, mode, autoSendPrompt) => {
-            openInSituAiPopup(boundingBox, focalText, focalImages, existingPin, mode, autoSendPrompt);
+          onOpenAiPopup: (boundingBox, focalText, focalImages, existingPin, mode) => {
+            openInSituAiPopup(boundingBox, focalText, focalImages, existingPin, mode);
           }
         });
       });
@@ -3316,7 +3316,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
   };
 
   // Mở Popup Chat AI nổi tại đúng vị trí khung chữ nhật vừa khoanh (hoặc mở lại từ icon ghim pin, hoặc mở chế độ AI Copilot toàn bài)
-  const openInSituAiPopup = (boundingBox, focalText = '', focalImages = [], existingPin = null, mode = 'snipe', autoSendPrompt = '') => {
+  const openInSituAiPopup = (boundingBox, focalText = '', focalImages = [], existingPin = null, mode = 'snipe') => {
     closeFloatingPopup();
     if (existingPin) {
       mode = existingPin.mode || (existingPin.focalImages && existingPin.focalImages.length > 0 ? 'snipe' : 'copilot');
@@ -3527,8 +3527,25 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       <div class="neural-ai-popup-resizer" title="Kéo góc để thay đổi kích thước"></div>
     `;
 
-    document.body.appendChild(popup);
+    const targetMount = document.fullscreenElement || document.body;
+    targetMount.appendChild(popup);
     activeFloatingPopup = popup;
+
+    const handleFullscreenSync = () => {
+      if (activeFloatingPopup && activeFloatingPopup.parentNode) {
+        const currentMount = document.fullscreenElement || document.body;
+        if (activeFloatingPopup.parentNode !== currentMount) {
+          currentMount.appendChild(activeFloatingPopup);
+        }
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenSync);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenSync);
+
+    popup._cleanupHandlers = () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenSync);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenSync);
+    };
 
     const closeBtn = popup.querySelector('#btn-close-floating-popup');
     closeBtn.addEventListener('click', closeFloatingPopup);
@@ -4066,13 +4083,7 @@ export function openNeuralNotepadSidebar(parentContainer, subjectCode, node, onS
       }
     });
 
-    if (autoSendPrompt) {
-      setTimeout(() => {
-        sendFloatingQuestion(autoSendPrompt);
-      }, 100);
-    } else {
-      setTimeout(() => input.focus(), 150);
-    }
+    setTimeout(() => input.focus(), 150);
   };
 
   /**

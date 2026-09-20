@@ -567,3 +567,9 @@
   font-size: 2rem;
   color: #ef4444;
 }
+
+/* Đảm bảo Floating AI Popup luôn hiển thị đè lên trên khi container ở chế độ Toàn màn hình */
+.pdf-reader-container .neural-ai-floating-popup {
+  z-index: 100005 !important;
+}
+

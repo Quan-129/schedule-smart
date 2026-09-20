@@ -4,6 +4,29 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-20 17:05] - Khắc Phục Lỗi Hiển Thị Fullscreen Top-Layer & Tắt Tự Động Gửi Chat Khi Khoanh Vùng PDF (Cache v185) 🖥️🎯⚡
+
+- **🎯 Yêu cầu & Phản ánh từ người dùng**:
+  - Người dùng phản ánh 2 vấn đề:
+    1. *"tôi không cần tự động chat"*: Hệ thống đang tự động gửi câu hỏi dài ngoằng mặc định ngay khi vừa khoanh xong, gây khó chịu và tốn API khi người dùng chỉ muốn tự hỏi hoặc bấm Quick Chip.
+    2. *"với lại ở chế độ full màn nó phải đè lên trên chứ hiện tại out ra mới thấy được"*: Khi đang xem PDF ở chế độ toàn màn hình (`requestFullscreen`), popup AI bị ẩn bên dưới, người dùng phải thoát fullscreen ra ngoài thì mới thấy popup AI xuất hiện.
+
+- **🔍 Nguyên nhân kỹ thuật & Giải pháp**:
+  - **Lỗi Fullscreen Top-Layer**: Khi phần tử `.pdf-reader-container` gọi `requestFullscreen()`, trình duyệt đưa nó vào Top-Layer riêng biệt. Mọi phần tử nằm ngoài container này (kể cả append vào `document.body` với `z-index` cao đến đâu) đều bị trình duyệt ẩn bên dưới.
+  - **Giải pháp**:
+    - Trong [`src/1.Frontend/components/modals/NeuralNotepadSidebar.js`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/src/1.Frontend/components/modals/NeuralNotepadSidebar.js), thay vì cố định `document.body.appendChild(popup)`, mount thông minh vào `document.fullscreenElement || document.body`.
+    - Lắng nghe sự kiện `fullscreenchange`: Nếu người dùng bật/tắt toàn màn hình khi popup đang mở, tự động di chuyển cha (re-parent) của popup để luôn hiển thị đè lên trên cùng trong mọi chế độ!
+    - Thêm rule CSS `.pdf-reader-container .neural-ai-floating-popup { z-index: 100005 !important; }` trong [`src/1.Frontend/styles/15.pdf-viewer.css`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/src/1.Frontend/styles/15.pdf-viewer.css).
+  - **Tắt Tự Động Gửi Chat**:
+    - Trong [`src/1.Frontend/components/modals/PdfReaderModal.js`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/src/1.Frontend/components/modals/PdfReaderModal.js), loại bỏ hoàn toàn việc truyền prompt tự động khi kết thúc khoanh vùng (`onSnipeFinish`) và khi bấm "Hỏi AI trang này" (`#btn-pdf-ask-page`).
+    - Trong `openInSituAiPopup`, chỉ nạp ảnh khoanh vào thanh `focalBar`, mở sẵn Quick Chips và tự động focus con trỏ chuột vào ô input để người dùng hoàn toàn chủ động gõ câu hỏi hoặc bấm chip.
+  - **Phím Escape thông minh**:
+    - Không đóng modal PDF khi người dùng nhấn Escape để thoát chế độ Toàn màn hình.
+
+- **✅ Nâng cấp Service Worker Cache v185** ([`sw.js`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/sw.js)).
+
+---
+
 ## 📅 [2026-09-20 16:55] - Tái Cấu Trúc Kế Thừa 100% In-Situ AI Floating Drawer Cho PDF: Xóa Bỏ Popup Phân Mảnh, Thừa Hưởng Toàn Bộ Tính Năng Ghim Note, Di Chuyển & Đa Lượt (Cache v184) 🤖📌✨
 
 - **🎯 Yêu cầu & Phản hồi từ người dùng**:
