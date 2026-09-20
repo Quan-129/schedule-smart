@@ -4,6 +4,30 @@
 > **Repository**: `Quan-129/schedule-smart`  
 > **Nguyên tắc quản lý**: Cập nhật tự động sau mỗi phiên làm việc hoặc thay đổi tính năng. Phiên mới nhất luôn nằm ở trên cùng.
 
+## 📅 [2026-09-20 16:45] - Triển Khai Chế Độ Cuộn Chuột Đọc Tài Liệu Nhiều Trang Liên Tục (Continuous Multi-Page Scroll) & Lazy-Rendering Chuẩn Quốc Tế (Cache v183) 📜🖱️⚡
+
+- **🎯 Yêu cầu & Trải nghiệm người dùng**:
+  - Người dùng phản ánh: *"hiện tại chưa có cuộn chuột xuống các trang kìa"*.
+  - Phân tích nhu cầu: Trước đó trình xem PDF chỉ render 1 trang đơn lẻ và bắt buộc người dùng phải click nút lật trang hoặc bấm phím mũi tên. Người dùng cần trải nghiệm cuộn chuột tự nhiên (Continuous Vertical Scrolling) từ trang này qua trang khác mượt mà như Google Docs, Acrobat Reader hay Chrome PDF Viewer.
+
+- **✅ Công việc đã hoàn thành**:
+  - **[Kiến trúc Cuộn Chuột Liên Tục (Continuous Multi-Page Scroll)] ([`src/1.Frontend/components/modals/PdfReaderModal.js`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/src/1.Frontend/components/modals/PdfReaderModal.js))**:
+    - Xây dựng `#pdf-pages-container` xếp nối tiếp $N$ thẻ `.pdf-page-card` từ trang 1 đến trang cuối.
+    - Người dùng chỉ việc lăn con lăn chuột hoặc vuốt touchpad là tài liệu tự động trôi mượt mà từ đầu đến cuối trang.
+  - **[Công nghệ Lazy-Rendering với `IntersectionObserver`]**:
+    - Nạp trang tức thì khi cuộn tới gần (rootMargin: 600px), không render tràn lan 50-100 trang cùng lúc, đảm bảo app nhẹ như bay, không giật lag và không tràn RAM.
+  - **[Tự động đồng bộ số trang thông minh]**:
+    - Lắng nghe sự kiện cuộn `scroll` của viewport, tự động phát hiện trang đang nằm ở trung tâm tầm nhìn của mắt để cập nhật chỉ số `Trang X / N` trên thanh Header và viền sáng trang hiện tại `.is-current-page`.
+    - Bấm nút "Trang trước" / "Trang kế" hoặc phím `ArrowUp` / `ArrowDown` / `PageUp` / `PageDown` / `Space` / `Home` / `End` sẽ tự động cuộn mượt (`scrollIntoView`) đến trang đích.
+  - **[Khoanh hỏi AI đa trang (Snipping Tool Everywhere)]**:
+    - Cho phép kéo chuột khoanh bài tập hoặc công thức toán học trên bất kỳ trang nào đang hiển thị, truyền đúng ngữ cảnh trang đó cho Gemini Vision giải bài.
+  - **[Nâng cấp giao diện thẩm mỹ] ([`src/1.Frontend/styles/15.pdf-viewer.css`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/src/1.Frontend/styles/15.pdf-viewer.css))**:
+    - Thiết kế thẻ trang `.pdf-page-card` với bóng đổ đổ sâu, nhãn số trang Glassmorphism nổi ở góc trên, căn chỉnh tỷ lệ mượt mà theo Zoom.
+  - **[Nâng cấp Service Worker Cache v183] ([`sw.js`](file:///g:/My%20Drive/D%E1%BB%B1%20%C3%A1n%20c%C3%A1%20nh%C3%A2n/schedule-smart/sw.js))**:
+    - Nâng cấp `CACHE_NAME = 'smart-schedule-modular-v183'`.
+
+---
+
 ## 📅 [2026-09-20 16:20] - Bổ Sung Tính Năng Toàn Màn Hình (Fullscreen Mode) & Chuẩn Hóa Bộ Điều Khiển Phóng To PDF Reader (Cache v182) 🖥️📄✨
 
 - **🎯 Yêu cầu & Bối cảnh người dùng**:

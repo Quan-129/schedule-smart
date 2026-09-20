@@ -32,10 +32,8 @@ let currentScale = 1.35;
 let insertToNoteCallback = null;
 
 let isSnippingActive = false;
-let snipeStartX = 0;
-let snipeStartY = 0;
-let snipeEndX = 0;
-let snipeEndY = 0;
+let renderedPages = new Set();
+let pageObserver = null;
 let isMouseDownOnSnipe = false;
 
 // 3. MAIN OPEN / CLOSE CONTROLLERS
@@ -141,19 +139,13 @@ export async function openPdfReaderModal({
         </div>
       </div>
 
-      <!-- 2. Body Viewport Canvas -->
+      <!-- 2. Body Viewport Cuộn Chuột Nhiều Trang Liên Tục -->
       <div class="pdf-reader-body" id="pdf-reader-body">
         <div class="pdf-loading-spinner" id="pdf-loading-spinner">
           <i class="fa-solid fa-circle-notch fa-spin"></i>
           <span>Đang nạp dữ liệu PDF...</span>
         </div>
-        <div class="pdf-canvas-wrapper" id="pdf-canvas-wrapper" style="display: none;">
-          <canvas id="pdf-render-canvas"></canvas>
-          <!-- Lớp phủ Snipping Marquee -->
-          <div class="pdf-snipping-layer" id="pdf-snipping-layer">
-            <div class="pdf-snipe-marquee" id="pdf-snipe-marquee" style="display: none;"></div>
-          </div>
-        </div>
+        <div class="pdf-pages-container" id="pdf-pages-container" style="display: none;"></div>
       </div>
 
       <!-- 3. Khung Chat AI Nổi Tại Chỗ (In-situ AI Popup) -->
@@ -188,13 +180,14 @@ export async function openPdfReaderModal({
 
     currentPdfDoc = await loadPdfDocument(record.blob);
     totalPageCount = currentPdfDoc.numPages;
+    currentPageNum = 1;
 
     const spinner = overlay.querySelector('#pdf-loading-spinner');
-    const wrapper = overlay.querySelector('#pdf-canvas-wrapper');
     if (spinner) spinner.style.display = 'none';
-    if (wrapper) wrapper.style.display = 'block';
 
-    await renderCurrentPdfPage();
+    await buildMultiPageContainer(overlay);
+    setupScrollPageTracker(overlay);
+    updateHeaderPageIndicator(overlay);
   } catch (err) {
     console.error('Lỗi nạp file PDF:', err);
     showToast(`Lỗi khi mở PDF: ${err.message}`, 'error');
@@ -209,6 +202,10 @@ export function closePdfReaderModal() {
   if (document.fullscreenElement && document.exitFullscreen) {
     document.exitFullscreen().catch(() => {});
   }
+  if (pageObserver) {
+    pageObserver.disconnect();
+    pageObserver = null;
+  }
   const overlay = document.getElementById('pdf-reader-modal-overlay');
   if (overlay) {
     overlay.classList.remove('active');
@@ -218,35 +215,289 @@ export function closePdfReaderModal() {
   }
   currentPdfDoc = null;
   currentPdfId = null;
+  renderedPages.clear();
   isSnippingActive = false;
 }
 
-// 4. RENDERING CURRENT PAGE
-async function renderCurrentPdfPage() {
-  if (!currentPdfDoc) return;
-  const overlay = document.getElementById('pdf-reader-modal-overlay');
-  if (!overlay) return;
+// 4. MULTI-PAGE CONTINUOUS RENDERING ENGINE
+async function buildMultiPageContainer(overlay) {
+  const container = overlay.querySelector('#pdf-pages-container');
+  if (!container || !currentPdfDoc) return;
+  container.innerHTML = '';
+  renderedPages.clear();
 
-  const canvas = overlay.querySelector('#pdf-render-canvas');
-  const indicator = overlay.querySelector('#pdf-page-indicator');
-  const btnPrev = overlay.querySelector('#btn-pdf-prev');
-  const btnNext = overlay.querySelector('#btn-pdf-next');
-  const zoomLevel = overlay.querySelector('#pdf-zoom-level');
+  if (pageObserver) {
+    pageObserver.disconnect();
+    pageObserver = null;
+  }
+
+  // Đo tỉ lệ khung hình của trang 1 làm placeholder ban đầu (chuẩn A4 ~ 1.414)
+  let defaultAspect = 1.414;
+  try {
+    const firstPage = await currentPdfDoc.getPage(1);
+    const vp = firstPage.getViewport({ scale: 1.0 });
+    if (vp.width > 0 && vp.height > 0) {
+      defaultAspect = vp.height / vp.width;
+    }
+  } catch (e) {}
+
+  const cardWidth = Math.round(780 * (currentScale / 1.35));
+
+  for (let p = 1; p <= totalPageCount; p++) {
+    const card = document.createElement('div');
+    card.className = `pdf-page-card ${p === currentPageNum ? 'is-current-page' : ''}`;
+    card.id = `pdf-page-card-${p}`;
+    card.dataset.page = p;
+    card.style.width = `${cardWidth}px`;
+    card.style.minHeight = `${Math.round(cardWidth * defaultAspect)}px`;
+
+    card.innerHTML = `
+      <div class="pdf-page-badge">Trang ${p} / ${totalPageCount}</div>
+      <div class="pdf-canvas-wrapper" id="pdf-canvas-wrapper-${p}">
+        <canvas id="pdf-canvas-${p}" class="pdf-page-canvas"></canvas>
+        <div class="pdf-snipping-layer ${isSnippingActive ? 'active' : ''}" id="pdf-snipping-layer-${p}" data-page="${p}">
+          <div class="pdf-snipe-marquee" id="pdf-snipe-marquee-${p}" style="display: none;"></div>
+        </div>
+      </div>
+    `;
+
+    container.appendChild(card);
+  }
+
+  container.style.display = 'flex';
+
+  // IntersectionObserver nạp trang khi cuộn tới gần (Lazy Rendering)
+  const bodyEl = overlay.querySelector('#pdf-reader-body');
+  pageObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const pNum = parseInt(entry.target.dataset.page, 10);
+        renderPageCanvas(pNum);
+      }
+    });
+  }, {
+    root: bodyEl,
+    rootMargin: '600px 0px 600px 0px',
+    threshold: 0.01
+  });
+
+  container.querySelectorAll('.pdf-page-card').forEach(card => pageObserver.observe(card));
+
+  // Render ngay lập tức trang 1 & 2
+  await renderPageCanvas(currentPageNum);
+  if (totalPageCount > 1) {
+    renderPageCanvas(2);
+  }
+
+  // Gắn sự kiện Khoanh hỏi AI đa trang
+  attachSnippingEventsToAllPages(overlay);
+}
+
+async function renderPageCanvas(pageNum) {
+  if (!currentPdfDoc || pageNum < 1 || pageNum > totalPageCount) return;
+  if (renderedPages.has(pageNum)) return;
+  renderedPages.add(pageNum);
+
+  const canvas = document.getElementById(`pdf-canvas-${pageNum}`);
+  const card = document.getElementById(`pdf-page-card-${pageNum}`);
+  if (!canvas) return;
+
+  try {
+    await renderPdfPageToCanvas(currentPdfDoc, pageNum, canvas, currentScale);
+    if (card) card.style.minHeight = 'auto';
+  } catch (err) {
+    console.warn(`Lỗi render trang ${pageNum}:`, err);
+  }
+}
+
+function updateHeaderPageIndicator(overlay) {
+  const indicator = overlay?.querySelector('#pdf-page-indicator');
+  const btnPrev = overlay?.querySelector('#btn-pdf-prev');
+  const btnNext = overlay?.querySelector('#btn-pdf-next');
 
   if (indicator) {
     indicator.textContent = `Trang ${currentPageNum} / ${totalPageCount}`;
   }
   if (btnPrev) btnPrev.disabled = currentPageNum <= 1;
   if (btnNext) btnNext.disabled = currentPageNum >= totalPageCount;
+}
 
+function scrollToPage(pageNum, smooth = true) {
+  if (!currentPdfDoc) return;
+  pageNum = Math.max(1, Math.min(totalPageCount, pageNum));
+  currentPageNum = pageNum;
+
+  const overlay = document.getElementById('pdf-reader-modal-overlay');
+  const targetCard = document.getElementById(`pdf-page-card-${pageNum}`);
+  if (targetCard) {
+    targetCard.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'start' });
+  }
+
+  if (overlay) {
+    updateHeaderPageIndicator(overlay);
+    overlay.querySelectorAll('.pdf-page-card').forEach(c => {
+      c.classList.toggle('is-current-page', parseInt(c.dataset.page, 10) === currentPageNum);
+    });
+  }
+
+  renderPageCanvas(pageNum);
+}
+
+function setupScrollPageTracker(overlay) {
+  const bodyEl = overlay.querySelector('#pdf-reader-body');
+  const container = overlay.querySelector('#pdf-pages-container');
+  if (!bodyEl || !container) return;
+
+  let ticking = false;
+  bodyEl.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        const bodyRect = bodyEl.getBoundingClientRect();
+        const triggerY = bodyRect.top + 180;
+
+        let bestPage = currentPageNum;
+        let minDistance = Infinity;
+
+        const cards = container.querySelectorAll('.pdf-page-card');
+        for (let card of cards) {
+          const rect = card.getBoundingClientRect();
+          const dist = Math.abs(rect.top - triggerY);
+          if (dist < minDistance) {
+            minDistance = dist;
+            bestPage = parseInt(card.dataset.page, 10);
+          }
+        }
+
+        if (bestPage !== currentPageNum) {
+          currentPageNum = bestPage;
+          updateHeaderPageIndicator(overlay);
+          cards.forEach(c => c.classList.toggle('is-current-page', parseInt(c.dataset.page, 10) === currentPageNum));
+        }
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+}
+
+async function applyZoom(newScale) {
+  currentScale = Math.max(0.6, Math.min(3.0, newScale));
+  const overlay = document.getElementById('pdf-reader-modal-overlay');
+  if (!overlay) return;
+
+  const zoomLevel = overlay.querySelector('#pdf-zoom-level');
   if (zoomLevel) {
     const percent = Math.round((currentScale / 1.35) * 100);
     zoomLevel.textContent = `${percent}%`;
   }
 
-  if (canvas) {
-    await renderPdfPageToCanvas(currentPdfDoc, currentPageNum, canvas, currentScale);
-  }
+  const cardWidth = Math.round(780 * (currentScale / 1.35));
+  overlay.querySelectorAll('.pdf-page-card').forEach(c => {
+    c.style.width = `${cardWidth}px`;
+  });
+
+  // Xóa cache rendered và nạp lại trang hiện tại cùng lân cận
+  renderedPages.clear();
+  await renderPageCanvas(currentPageNum);
+  if (currentPageNum > 1) renderPageCanvas(currentPageNum - 1);
+  if (currentPageNum < totalPageCount) renderPageCanvas(currentPageNum + 1);
+}
+
+function attachSnippingEventsToAllPages(overlay) {
+  const container = overlay.querySelector('#pdf-pages-container');
+  if (!container) return;
+
+  let isMouseDown = false;
+  let startX = 0, startY = 0;
+  let activeLayer = null;
+  let activeMarquee = null;
+  let activeCanvas = null;
+  let targetPage = 1;
+
+  container.addEventListener('mousedown', (e) => {
+    if (!isSnippingActive) return;
+    const layer = e.target.closest('.pdf-snipping-layer');
+    if (!layer) return;
+
+    isMouseDown = true;
+    activeLayer = layer;
+    targetPage = parseInt(layer.dataset.page, 10) || currentPageNum;
+    activeMarquee = layer.querySelector('.pdf-snipe-marquee');
+    activeCanvas = document.getElementById(`pdf-canvas-${targetPage}`);
+
+    const rect = layer.getBoundingClientRect();
+    startX = e.clientX - rect.left;
+    startY = e.clientY - rect.top;
+
+    if (activeMarquee) {
+      activeMarquee.style.left = `${startX}px`;
+      activeMarquee.style.top = `${startY}px`;
+      activeMarquee.style.width = '0px';
+      activeMarquee.style.height = '0px';
+      activeMarquee.style.display = 'block';
+    }
+  });
+
+  window.addEventListener('mousemove', (e) => {
+    if (!isMouseDown || !activeLayer || !activeMarquee) return;
+    const rect = activeLayer.getBoundingClientRect();
+    const curX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+    const curY = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
+
+    const left = Math.min(startX, curX);
+    const top = Math.min(startY, curY);
+    const width = Math.abs(curX - startX);
+    const height = Math.abs(curY - startY);
+
+    activeMarquee.style.left = `${left}px`;
+    activeMarquee.style.top = `${top}px`;
+    activeMarquee.style.width = `${width}px`;
+    activeMarquee.style.height = `${height}px`;
+  });
+
+  const onSnipeFinish = async (e) => {
+    if (!isMouseDown || !activeLayer || !activeMarquee || !activeCanvas) {
+      isMouseDown = false;
+      return;
+    }
+    isMouseDown = false;
+    activeMarquee.style.display = 'none';
+
+    const rect = activeLayer.getBoundingClientRect();
+    const endX = Math.max(0, Math.min(rect.width, e.clientX - rect.left));
+    const endY = Math.max(0, Math.min(rect.height, e.clientY - rect.top));
+
+    const left = Math.min(startX, endX);
+    const top = Math.min(startY, endY);
+    const width = Math.abs(endX - startX);
+    const height = Math.abs(endY - startY);
+
+    // Tắt chế độ Snipping
+    isSnippingActive = false;
+    const btnSnipe = overlay.querySelector('#btn-pdf-snipe');
+    btnSnipe?.classList.remove('active');
+    overlay.querySelectorAll('.pdf-snipping-layer').forEach(l => l.classList.remove('active'));
+
+    if (width < 25 || height < 25) {
+      return; // Vùng khoanh quá bé, coi như click nhầm
+    }
+
+    try {
+      const cropRes = cropCanvasAreaToBase64(activeCanvas, {
+        x: left,
+        y: top,
+        width,
+        height
+      });
+
+      await openPdfAiPopupWithCrop(cropRes, targetPage);
+    } catch (err) {
+      console.error('Lỗi cắt ảnh vùng khoanh:', err);
+      showToast('Không thể cắt vùng ảnh đã chọn!', 'error');
+    }
+  };
+
+  window.addEventListener('mouseup', onSnipeFinish);
 }
 
 // 5. EVENT BINDINGS
@@ -257,32 +508,27 @@ function attachPdfModalEvents(overlay) {
     if (e.target === overlay) closePdfReaderModal();
   });
 
-  // 2. Chuyển trang
-  overlay.querySelector('#btn-pdf-prev')?.addEventListener('click', async () => {
+  // 2. Chuyển trang (Cuộn mượt)
+  overlay.querySelector('#btn-pdf-prev')?.addEventListener('click', () => {
     if (currentPageNum > 1) {
-      currentPageNum--;
-      await renderCurrentPdfPage();
+      scrollToPage(currentPageNum - 1);
     }
   });
-  overlay.querySelector('#btn-pdf-next')?.addEventListener('click', async () => {
+  overlay.querySelector('#btn-pdf-next')?.addEventListener('click', () => {
     if (currentPageNum < totalPageCount) {
-      currentPageNum++;
-      await renderCurrentPdfPage();
+      scrollToPage(currentPageNum + 1);
     }
   });
 
   // 3. Phóng to / Thu nhỏ / Đặt lại 100%
-  overlay.querySelector('#btn-pdf-zoom-in')?.addEventListener('click', async () => {
-    currentScale = Math.min(3.0, currentScale + 0.25);
-    await renderCurrentPdfPage();
+  overlay.querySelector('#btn-pdf-zoom-in')?.addEventListener('click', () => {
+    applyZoom(currentScale + 0.25);
   });
-  overlay.querySelector('#btn-pdf-zoom-out')?.addEventListener('click', async () => {
-    currentScale = Math.max(0.6, currentScale - 0.25);
-    await renderCurrentPdfPage();
+  overlay.querySelector('#btn-pdf-zoom-out')?.addEventListener('click', () => {
+    applyZoom(currentScale - 0.25);
   });
-  overlay.querySelector('#btn-pdf-zoom-reset')?.addEventListener('click', async () => {
-    currentScale = 1.35;
-    await renderCurrentPdfPage();
+  overlay.querySelector('#btn-pdf-zoom-reset')?.addEventListener('click', () => {
+    applyZoom(1.35);
   });
 
   // 3.1. Chế độ Toàn màn hình (Fullscreen Toggle)
@@ -322,8 +568,6 @@ function attachPdfModalEvents(overlay) {
       }
     }
     updateFullscreenIcon();
-    // Render lại trang với scale hiện tại sau khi đổi viewport
-    await renderCurrentPdfPage();
   };
 
   btnFullscreen?.addEventListener('click', toggleFullscreen);
@@ -356,92 +600,19 @@ function attachPdfModalEvents(overlay) {
 
   // 5. Nút Khoanh hỏi AI (Snipping Tool)
   const btnSnipe = overlay.querySelector('#btn-pdf-snipe');
-  const snippingLayer = overlay.querySelector('#pdf-snipping-layer');
-  const marquee = overlay.querySelector('#pdf-snipe-marquee');
-  const canvas = overlay.querySelector('#pdf-render-canvas');
-
   btnSnipe?.addEventListener('click', () => {
     isSnippingActive = !isSnippingActive;
     btnSnipe.classList.toggle('active', isSnippingActive);
-    snippingLayer?.classList.toggle('active', isSnippingActive);
+    overlay.querySelectorAll('.pdf-snipping-layer').forEach(l => l.classList.toggle('active', isSnippingActive));
     if (isSnippingActive) {
-      showToast('✂️ Kéo chuột khoanh vùng công thức hoặc bài tập trên trang PDF để hỏi AI!', 'info');
+      showToast('✂️ Kéo chuột khoanh vùng công thức hoặc bài tập trên bất kỳ trang PDF nào để hỏi AI!', 'info');
     }
   });
-
-  if (snippingLayer && marquee && canvas) {
-    snippingLayer.addEventListener('mousedown', (e) => {
-      isMouseDownOnSnipe = true;
-      const rect = snippingLayer.getBoundingClientRect();
-      snipeStartX = e.clientX - rect.left;
-      snipeStartY = e.clientY - rect.top;
-      marquee.style.left = `${snipeStartX}px`;
-      marquee.style.top = `${snipeStartY}px`;
-      marquee.style.width = '0px';
-      marquee.style.height = '0px';
-      marquee.style.display = 'block';
-    });
-
-    snippingLayer.addEventListener('mousemove', (e) => {
-      if (!isMouseDownOnSnipe) return;
-      const rect = snippingLayer.getBoundingClientRect();
-      snipeEndX = e.clientX - rect.left;
-      snipeEndY = e.clientY - rect.top;
-
-      const left = Math.min(snipeStartX, snipeEndX);
-      const top = Math.min(snipeStartY, snipeEndY);
-      const width = Math.abs(snipeEndX - snipeStartX);
-      const height = Math.abs(snipeEndY - snipeStartY);
-
-      marquee.style.left = `${left}px`;
-      marquee.style.top = `${top}px`;
-      marquee.style.width = `${width}px`;
-      marquee.style.height = `${height}px`;
-    });
-
-    const onSnipeFinish = async (e) => {
-      if (!isMouseDownOnSnipe) return;
-      isMouseDownOnSnipe = false;
-      marquee.style.display = 'none';
-
-      const width = Math.abs(snipeEndX - snipeStartX);
-      const height = Math.abs(snipeEndY - snipeStartY);
-
-      if (width < 25 || height < 25) {
-        return; // Vùng khoanh quá bé, coi như click nhầm
-      }
-
-      const left = Math.min(snipeStartX, snipeEndX);
-      const top = Math.min(snipeStartY, snipeEndY);
-
-      // Tắt chế độ Snipping
-      isSnippingActive = false;
-      btnSnipe?.classList.remove('active');
-      snippingLayer.classList.remove('active');
-
-      try {
-        const cropRes = cropCanvasAreaToBase64(canvas, {
-          x: left,
-          y: top,
-          width,
-          height
-        });
-
-        await openPdfAiPopupWithCrop(cropRes);
-      } catch (err) {
-        console.error('Lỗi cắt ảnh vùng khoanh:', err);
-        showToast('Không thể cắt vùng ảnh đã chọn!', 'error');
-      }
-    };
-
-    snippingLayer.addEventListener('mouseup', onSnipeFinish);
-    snippingLayer.addEventListener('mouseleave', onSnipeFinish);
-  }
 
   // 6. Nút Hỏi AI Toàn Trang
   overlay.querySelector('#btn-pdf-ask-page')?.addEventListener('click', async () => {
     try {
-      showToast('🤖 Đang đọc nội dung trang để hỏi AI...', 'info');
+      showToast(`🤖 Đang đọc nội dung trang ${currentPageNum} để hỏi AI...`, 'info');
       const textRes = await extractPdfText(currentPdfDoc, currentPageNum, currentPageNum);
       const pageText = textRes.fullText || '';
       await openPdfAiPopupWithText(pageText, `Trang ${currentPageNum}`);
@@ -516,10 +687,26 @@ function attachPdfModalEvents(overlay) {
       } else {
         closePdfReaderModal();
       }
-    } else if (e.key === 'ArrowLeft') {
-      overlay.querySelector('#btn-pdf-prev')?.click();
-    } else if (e.key === 'ArrowRight') {
-      overlay.querySelector('#btn-pdf-next')?.click();
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+      if (document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        scrollToPage(currentPageNum - 1);
+      }
+    } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey)) {
+      if (document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        scrollToPage(currentPageNum + 1);
+      }
+    } else if (e.key === 'Home') {
+      if (document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        scrollToPage(1);
+      }
+    } else if (e.key === 'End') {
+      if (document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        scrollToPage(totalPageCount);
+      }
     } else if ((e.key === 'f' || e.key === 'F') && !e.ctrlKey && !e.altKey && !e.metaKey) {
       const activeEl = document.activeElement;
       if (activeEl?.tagName !== 'INPUT' && activeEl?.tagName !== 'TEXTAREA') {
@@ -536,7 +723,7 @@ let currentCropData = null;
 let currentTextContext = '';
 let currentAiChatHistory = [];
 
-async function openPdfAiPopupWithCrop(cropRes) {
+async function openPdfAiPopupWithCrop(cropRes, targetPageNum = currentPageNum) {
   currentCropData = cropRes;
   currentTextContext = '';
   currentAiChatHistory = [];
@@ -547,7 +734,7 @@ async function openPdfAiPopupWithCrop(cropRes) {
   const title = overlay?.querySelector('#pdf-ai-popup-title');
   if (!popup || !body) return;
 
-  if (title) title.innerHTML = '<i class="fa-solid fa-crop-simple"></i> Phân Tích Vùng Khoanh (Gemini Vision)';
+  if (title) title.innerHTML = `<i class="fa-solid fa-crop-simple"></i> Phân Tích Vùng Khoanh (Trang ${targetPageNum})`;
 
   body.innerHTML = `
     <img src="${cropRes.dataUrl}" alt="Vùng khoanh chọn" class="focal-preview-img" />
@@ -564,8 +751,8 @@ async function openPdfAiPopupWithCrop(cropRes) {
       subjectCode: currentSubjectCode,
       targetNode: currentTargetNode,
       allNodes: currentAllNodes,
-      fullContext: `Tài liệu PDF: ${currentPdfName} (Trang ${currentPageNum})`,
-      focalText: `Phân tích chi tiết công thức, bảng biểu hoặc bài tập trong hình ảnh đính kèm từ trang ${currentPageNum} của tài liệu ${currentPdfName}.`,
+      fullContext: `Tài liệu PDF: ${currentPdfName} (Trang ${targetPageNum})`,
+      focalText: `Phân tích chi tiết công thức, bảng biểu hoặc bài tập trong hình ảnh đính kèm từ trang ${targetPageNum} của tài liệu ${currentPdfName}.`,
       focalImages: [{ mimeType: cropRes.mimeType, base64: cropRes.base64 }],
       userQuestion: 'Hãy giải thích cặn kẽ bản chất công thức/sơ đồ/bài tập được chụp trong ảnh này, chỉ ra các bẫy thường gặp và cách vận dụng chuẩn xác.',
       chatHistory: currentAiChatHistory
